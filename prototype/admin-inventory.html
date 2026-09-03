@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>资源包管理 - 活动运营</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .switcher-tab {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+    .switcher-tab.active { background: #6e29f6; color: white; }
+
+    .admin-sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      color: #374151;
+      font-size: 0.8125rem;
+      transition: all 0.15s;
+    }
+    .admin-sidebar-link:hover { background: #F3F4F6; color: #7C3AED; }
+    .admin-sidebar-link.active { background: #F5F3FF; color: #7C3AED; font-weight: 500; }
+
+    .admin-card {
+      background: #fff;
+      border: 1px solid #E5E7EB;
+      border-radius: 0.5rem;
+    }
+    .admin-tab {
+      padding: 0.5rem 1rem;
+      border-bottom: 2px solid transparent;
+      color: #6B7280;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .admin-tab:hover { color: #374151; }
+    .admin-tab.active { color: #7C3AED; border-bottom-color: #7C3AED; }
+    .admin-btn-primary {
+      background: #7C3AED;
+      color: white;
+      border: 1px solid #7C3AED;
+    }
+    .admin-btn-primary:hover { background: #6D28D9; }
+    .admin-btn-disabled {
+      background: #F3F4F6;
+      color: #9CA3AF;
+      border: 1px solid #E5E7EB;
+      cursor: not-allowed;
+    }
+    .admin-btn-default {
+      background: #fff;
+      color: #374151;
+      border: 1px solid #D1D5DB;
+    }
+    .admin-btn-default:hover { background: #F9FAFB; }
+  </style>
+</head>
+<body class="bg-[#F3F4F6] text-slate-800">
+  <!-- 原型切换栏 -->
+  <div class="sticky top-0 z-[100] bg-slate-900 text-white text-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-10 gap-1 overflow-x-auto">
+        <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
+        <a href="index.html" class="switcher-tab">官网首页</a>
+        <a href="purchase.html" class="switcher-tab">购买意向</a>
+        <a href="terms.html" class="switcher-tab">购买须知</a>
+        <a href="dashboard.html" class="switcher-tab">资源包</a>
+        <a href="admin-inventory.html" class="switcher-tab active">后台管理</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 顶部 Header -->
+  <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-10 z-50">
+    <div class="flex items-center gap-4">
+      <button class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md">
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">SF</div>
+        <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
+      </div>
+      <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">活动运营 - 资源包管理</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+        <i class="fa-regular fa-moon"></i>
+      </button>
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+        <i class="fa-regular fa-bell"></i>
+      </button>
+      <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-medium">吕</div>
+    </div>
+  </header>
+
+  <div class="flex">
+    <!-- 左侧 Sidebar -->
+    <aside class="w-56 bg-white border-r border-slate-200 flex-shrink-0 hidden md:flex flex-col h-[calc(100vh-3.5rem-2.5rem)] sticky top-[6rem]">
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto text-sm">
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>管理后台</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>账户中心</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>活动运营</span>
+        </div>
+
+        <div class="pl-6 space-y-0.5">
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
+          <a href="admin-inventory.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
+          <i class="fa-solid fa-chevron-right text-xs transition-transform"></i>
+          <span>MaaS 运营管理</span>
+        </div>
+
+        <div id="maas-menu" class="pl-6 space-y-0.5 hidden">
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-server w-4 text-center"></i>客户任务/数据</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-layer-group w-4 text-center"></i>Serverless 管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-link w-4 text-center"></i>MaaS 专属端点</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-brain w-4 text-center"></i>推理服务</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-flask w-4 text-center"></i>Playground</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>弹性 GPU 运营管理</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>商品定价中心</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>平台管理</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 p-4 min-w-0">
+      <!-- 面包屑 -->
+      <nav class="text-xs text-slate-500 mb-4">
+        <span class="text-slate-700">活动运营</span>
+        <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
+        <span class="text-slate-700">资源包管理</span>
+      </nav>
+
+      <!-- 标题 -->
+      <div class="mb-4">
+        <h2 class="text-lg font-semibold text-slate-900">资源包管理</h2>
+        <p class="text-xs text-slate-500 mt-0.5">管理预留 vTPM 库存、已售出资源包及后台操作记录。</p>
+      </div>
+
+      <!-- 操作按钮行 -->
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <button onclick="openModal('grant')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
+          <i class="fa-solid fa-gift text-[10px]"></i>手动发放资源包
+        </button>
+        <button disabled title="一期暂不支持" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-disabled text-xs font-medium">
+          <i class="fa-solid fa-plus text-[10px]"></i>新增 SKU
+        </button>
+      </div>
+
+      <!-- Tab 切换 -->
+      <div class="admin-card">
+        <div class="flex border-b border-slate-200 px-2">
+          <button type="button" class="admin-tab active" data-tab="inventory" onclick="switchTab('inventory')">库存管理</button>
+          <button type="button" class="admin-tab" data-tab="sold" onclick="switchTab('sold')">已发放资源包</button>
+          <button type="button" class="admin-tab" data-tab="logs" onclick="switchTab('logs')">操作记录</button>
+        </div>
+
+        <!-- 库存管理 -->
+        <div id="tab-inventory" class="p-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-semibold text-slate-900">SKU 库存</h3>
+            <div class="flex gap-2">
+              <input type="text" placeholder="搜索模型名称" class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
+              <select class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
+                <option>全部状态</option>
+                <option>售卖中</option>
+                <option>已停售</option>
+              </select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU ID</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU 名称</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">类型</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">配置总量</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">已发放</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">可售卖</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">状态</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">售卖窗口</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <tr>
+                  <td class="px-3 py-3 font-mono text-[11px]">vtpm-dsv4f-001</td>
+                  <td class="px-3 py-3 font-medium">Deepseek V4 Flash 0731 预留 vTPM</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 text-[10px]">预留 vTPM</span></td>
+                  <td class="px-3 py-3">30,000 vTPM</td>
+                  <td class="px-3 py-3">8,500 vTPM</td>
+                  <td class="px-3 py-3">21,500 vTPM</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">售卖中</span></td>
+                  <td class="px-3 py-3">2026-08-01 ~ 2026-12-31</td>
+                  <td class="px-3 py-3">
+                    <button class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">调整库存</button>
+                    <button class="text-slate-500 hover:text-slate-700 text-[11px]">停售</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-3 font-mono text-[11px]">vtpm-glm52-001</td>
+                  <td class="px-3 py-3 font-medium">GLM 5.2 预留 vTPM</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 text-[10px]">预留 vTPM</span></td>
+                  <td class="px-3 py-3">20,000 vTPM</td>
+                  <td class="px-3 py-3">3,800 vTPM</td>
+                  <td class="px-3 py-3">16,200 vTPM</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">售卖中</span></td>
+                  <td class="px-3 py-3">2026-09-01 ~ 2026-12-31</td>
+                  <td class="px-3 py-3">
+                    <button class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">调整库存</button>
+                    <button class="text-slate-500 hover:text-slate-700 text-[11px]">停售</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 已发放资源包 -->
+        <div id="tab-sold" class="p-4 hidden">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-semibold text-slate-900">已发放资源包</h3>
+            <div class="flex gap-2">
+              <input type="text" placeholder="搜索用户 / 企业" class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
+              <select class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
+                <option>全部状态</option>
+                <option>生效中</option>
+                <option>已过期</option>
+                <option>已作废</option>
+              </select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">资源包 ID</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">subject_id</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU ID</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU 名称</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">数量</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">有效期</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">绑定 model_name</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">状态</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <tr>
+                  <td class="px-3 py-3 font-mono text-[11px]">P001</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">sub_3x9a2b1c</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">vtpm-dsv4f-001</td>
+                  <td class="px-3 py-3">Deepseek V4 Flash 0731 预留 vTPM</td>
+                  <td class="px-3 py-3">300 vTPM</td>
+                  <td class="px-3 py-3">2026-08-01 ~ 2026-08-30</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">deepseek-v4-flash-0731-prod</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
+                  <td class="px-3 py-3">
+                    <a href="admin-usage.html?pkg=P001" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
+                    <button class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">延期</button>
+                    <button class="text-orange-600 hover:text-orange-700 text-[11px]">作废</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-3 font-mono text-[11px]">P002</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">sub_7k2m5n8p</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">vtpm-glm52-001</td>
+                  <td class="px-3 py-3">GLM 5.2 预留 vTPM</td>
+                  <td class="px-3 py-3">200 vTPM</td>
+                  <td class="px-3 py-3">2026-09-01 ~ 2026-09-30</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">glm-5.2-prod</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
+                  <td class="px-3 py-3">
+                    <a href="admin-usage.html?pkg=P002" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
+                    <button class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">延期</button>
+                    <button class="text-orange-600 hover:text-orange-700 text-[11px]">作废</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-3 font-mono text-[11px]">P004</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">sub_2q4r6s7t</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">tokens-common-001</td>
+                  <td class="px-3 py-3">通用 Tokens 包</td>
+                  <td class="px-3 py-3">1,000 万 tokens</td>
+                  <td class="px-3 py-3">2026-05-01 ~ 2026-07-31</td>
+                  <td class="px-3 py-3 text-slate-400">-</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-medium">已用完</span></td>
+                  <td class="px-3 py-3">
+                    <button class="text-slate-400 cursor-not-allowed text-[11px]">监控</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 操作记录 -->
+        <div id="tab-logs" class="p-4 hidden">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-semibold text-slate-900">操作记录</h3>
+            <div class="flex gap-2">
+              <input type="text" placeholder="搜索操作人 / 用户" class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
+              <select class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
+                <option>全部操作</option>
+                <option>手动发放</option>
+                <option>延期</option>
+                <option>作废</option>
+                <option>调整库存</option>
+              </select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">时间</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作类型</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作对象 ID</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">影响</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作人</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">备注</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <tr>
+                  <td class="px-3 py-3 text-slate-500">2026-08-20 16:42</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 text-[10px]">手动发放</span></td>
+                  <td class="px-3 py-3 font-mono text-[11px]">P001</td>
+                  <td class="px-3 py-3">+300 vTPM</td>
+                  <td class="px-3 py-3">销售张三</td>
+                  <td class="px-3 py-3 text-[11px] text-slate-500">大客户季度采购</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-3 text-slate-500">2026-08-20 15:18</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px]">延期</span></td>
+                  <td class="px-3 py-3 font-mono text-[11px]">P002</td>
+                  <td class="px-3 py-3">+200 vTPM，延期 30 天</td>
+                  <td class="px-3 py-3">销售李四</td>
+                  <td class="px-3 py-3 text-[11px] text-slate-500">续签年度合同赠送</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-3 text-slate-500">2026-08-20 11:05</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 text-[10px]">作废</span></td>
+                  <td class="px-3 py-3 font-mono text-[11px]">P004</td>
+                  <td class="px-3 py-3">-100 vTPM</td>
+                  <td class="px-3 py-3">运营王五</td>
+                  <td class="px-3 py-3 text-[11px] text-slate-500">客服工单 #1024，误发回退</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-3 text-slate-500">2026-08-19 10:22</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px]">调整库存</span></td>
+                  <td class="px-3 py-3 font-mono text-[11px]">vtpm-glm52-001</td>
+                  <td class="px-3 py-3">总量 15,000 → 20,000</td>
+                  <td class="px-3 py-3">运营王五</td>
+                  <td class="px-3 py-3 text-[11px] text-slate-500">补容：Q3 需求上涨</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="flex justify-between items-center mt-3 text-xs text-slate-500">
+            <span>共 128 条记录</span>
+            <div class="flex gap-2">
+              <button class="px-2 py-1 border border-slate-300 rounded admin-btn-default">上一页</button>
+              <button class="px-2 py-1 border border-slate-300 rounded admin-btn-default">下一页</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: 手动发放资源包 -->
+  <div id="modal-grant" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-lg mx-4 p-5 border border-slate-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">手动发放资源包</h3>
+        <button onclick="closeModal('grant')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">subject_id <span class="text-slate-400 font-normal">（每行一个，支持多个）</span></label>
+          <textarea class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="3" placeholder="sub_3x9a2b1c&#10;sub_7k2m5n8p"></textarea>
+        </div>
+        <div><label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU</label><select class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"><option>Deepseek V4 Flash 0731</option><option>GLM 5.2</option></select></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium text-slate-700 mb-1">份数</label><input type="number" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
+          <div><label class="block text-xs font-medium text-slate-700 mb-1">周期 (30天×n)</label><input type="number" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">绑定 model_name <span class="text-slate-400 font-normal">（每行一个，与 subject_id 一一对应）</span></label>
+          <textarea class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="3" placeholder="deepseek-v4-flash-0731-prod&#10;glm-5.2-prod"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="block text-xs font-medium text-slate-700 mb-1">开始日期</label><input type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
+          <div><label class="block text-xs font-medium text-slate-700 mb-1">结束日期</label><input type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
+          <textarea class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="2" placeholder="填写发放原因或其他说明"></textarea>
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeModal('grant')" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
+        <button onclick="closeModal('grant')" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">确认发放</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); document.getElementById('modal-' + id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
+      ['inventory', 'sold', 'logs'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
+      document.getElementById('tab-' + tab).classList.remove('hidden');
+    }
+
+    function toggleMenu(id, el) {
+      const menu = document.getElementById(id);
+      const icon = el.querySelector('i');
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-down');
+      } else {
+        menu.classList.add('hidden');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-right');
+      }
+    }
+
+  </script>
+</body>
+</html>

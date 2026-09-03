@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>预留 vTPM 购买须知 - 产品手册</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --sf-purple: #6e29f6;
+      --sf-purple-dark: #4f19cf;
+      --sf-purple-light: #F5F3FF;
+    }
+    .text-primary { color: var(--sf-purple); }
+    .bg-primary { background-color: var(--sf-purple); }
+    .border-primary { border-color: var(--sf-purple); }
+    .switcher-tab {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+    .switcher-tab.active { background: var(--sf-purple); color: white; }
+    .doc-nav-link {
+      display: block;
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.375rem;
+      color: #475569;
+      font-size: 0.875rem;
+      transition: all 0.15s;
+    }
+    .doc-nav-link:hover { color: var(--sf-purple); background: #F8FAFC; }
+    .doc-nav-link.active {
+      color: var(--sf-purple);
+      background: var(--sf-purple-light);
+      font-weight: 500;
+    }
+    .doc-content h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0F172A;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #E2E8F0;
+    }
+    .doc-content h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1E293B;
+      margin-top: 1.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .doc-content p {
+      color: #475569;
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+    .doc-content ul {
+      list-style: disc;
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+      color: #475569;
+      line-height: 1.75;
+    }
+    .doc-content li {
+      margin-bottom: 0.375rem;
+    }
+    .doc-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.875rem;
+    }
+    .doc-content th,
+    .doc-content td {
+      border: 1px solid #E2E8F0;
+      padding: 0.625rem 0.875rem;
+      text-align: left;
+    }
+    .doc-content th {
+      background: #F8FAFC;
+      font-weight: 600;
+      color: #334155;
+    }
+    .doc-content td {
+      color: #475569;
+    }
+    .doc-callout {
+      background: #F8FAFC;
+      border-left: 4px solid var(--sf-purple);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.25rem 0;
+    }
+    .doc-callout p { margin-bottom: 0; }
+    .doc-formula {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.875rem;
+      color: #334155;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body class="bg-white text-slate-800">
+  <!-- 原型切换栏 -->
+  <div class="sticky top-0 z-[100] bg-slate-900 text-white text-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-10 gap-1 overflow-x-auto">
+        <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
+        <a href="index.html" class="switcher-tab">官网首页</a>
+        <a href="purchase.html" class="switcher-tab">购买意向</a>
+        <a href="terms.html" class="switcher-tab active">购买须知</a>
+        <a href="dashboard.html" class="switcher-tab">资源包</a>
+        <a href="admin-inventory.html" class="switcher-tab">后台管理</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 文档顶部栏 -->
+  <header class="sticky top-10 z-40 bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">SF</div>
+        <div>
+          <span class="font-semibold text-slate-900">预留 vTPM 购买须知</span>
+          <span class="hidden sm:inline text-slate-400 text-sm ml-2">| 产品手册</span>
+        </div>
+      </div>
+      <a href="index.html" class="text-sm text-slate-500 hover:text-primary"><i class="fa-solid fa-arrow-left mr-1"></i>返回官网首页</a>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid lg:grid-cols-5 gap-10">
+      <!-- 左侧目录 -->
+      <aside class="hidden lg:block lg:col-span-1">
+        <div class="sticky top-[7.5rem] overflow-y-auto h-[calc(100vh-8rem)] pr-2">
+          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-3">目录</h3>
+          <nav class="space-y-0.5 border-l border-slate-200 ml-3">
+            <a href="#overview" class="doc-nav-link ml-[-1px] border-l-2 border-transparent">概述</a>
+            <a href="#rules" class="doc-nav-link ml-[-1px] border-l-2 border-transparent">购买规则</a>
+            <a href="#sla" class="doc-nav-link ml-[-1px] border-l-2 border-transparent">SLA 保障与赔付</a>
+            <a href="#model-change" class="doc-nav-link ml-[-1px] border-l-2 border-transparent">模型更换规则</a>
+            <a href="#refund" class="doc-nav-link ml-[-1px] border-l-2 border-transparent">退款规则</a>
+            <a href="#binding" class="doc-nav-link ml-[-1px] border-l-2 border-transparent">端点绑定说明</a>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- 正文 -->
+      <article class="lg:col-span-4 doc-content max-w-3xl">
+        <div id="overview" class="mb-10">
+          <h1 class="text-3xl font-bold text-slate-900 mb-4">预留 vTPM 购买须知</h1>
+          <p class="text-slate-500 text-lg">请您在购买前仔细阅读以下规则。提交购买意向即视为您已理解并同意相关内容。</p>
+          <div class="doc-callout">
+            <p><strong>适用范围：</strong>本须知适用于通过官网直销渠道购买的预留 vTPM 资源包，包括售卖规则、SLA 承诺、模型更换及退款等事项。</p>
+          </div>
+        </div>
+
+        <section id="rules">
+          <h2>购买规则</h2>
+          <h3>1. 售卖规格</h3>
+          <ul>
+            <li>售卖时长：可选 30 天、60 天、90 天、120 天、150 天、180 天，暂不提供小时/天档或超过 180 天的长周期售卖。</li>
+            <li>起购数量：1 vTPM；单用户单次最多可购买 10 份（每份 100 vTPM）。</li>
+            <li>模型绑定：购买时必须选择具体 model name，资源按模型强隔离。</li>
+          </ul>
+
+          <h3>2. 订单与库存</h3>
+          <ul>
+            <li>当前一期走官网飞书表单申请 + 销售跟进 + 线下合同流程，后台通过飞书表格配置购买记录。</li>
+            <li>订单成立前需完成资源锁定校验，库存不足时订单不成立，可选择候补或替代模型。</li>
+            <li>资源按先到先得原则分配；销售可为企业客户锁库存，锁库存额度由后台配置。</li>
+          </ul>
+
+          <h3>3. 续约规则</h3>
+          <ul>
+            <li>在有效预留 vTPM 存续期且 SKU 售卖窗口期内，用户可任意续约。</li>
+            <li>下单时可勾选自动续约；续约通知节奏为到期前 T-7、T-3、T-1。</li>
+            <li>到期日超过停售日期的续约不被接受。</li>
+          </ul>
+
+          <h3>4. 试用与退订</h3>
+          <ul>
+            <li>vTPM 库存稀缺，暂不开放普遍免费试用。</li>
+            <li>销售可针对企业客户申请必要代金券抵扣，但不设计普遍机制。</li>
+          </ul>
+        </section>
+
+        <section id="sla">
+          <h2>SLA 保障与赔付规则</h2>
+          <h3>1. SLO 承诺</h3>
+          <ul>
+            <li>TPM：每分钟可消耗 N vTPM（N = 购买量），时间粒度为分钟级，不承诺瞬时峰值。</li>
+            <li>延迟：P95 TTFT、P95 TPOT 分钟级承诺，具体阈值待性能测试矩阵确定后公示。</li>
+            <li>系数公开透明、可实时试算；已售 vTPM 的系数冻结，调整仅对后续生效。</li>
+          </ul>
+
+          <h3>2. 违约事件分类</h3>
+          <table>
+            <thead>
+              <tr><th>类别</th><th>事件</th><th>判定</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>A 类</td><td>vTPM 速率违约</td><td>固定分钟窗口内，实际需求 ≤ 购买量但被限流/拒新</td></tr>
+              <tr><td>B 类</td><td>延迟违约</td><td>固定分钟窗口内 P95 TTFT 或 TPOT 超阈值</td></tr>
+              <tr><td>C 类</td><td>可用性违约</td><td>固定分钟窗口内请求全部失败（5xx/超时）</td></tr>
+            </tbody>
+          </table>
+
+          <h3>3. 赔付阶梯</h3>
+          <ul>
+            <li>赔付基数：当月已付预留费（不含按量消费）。</li>
+            <li>累计违约 ≤ 3 分钟/月：容忍窗口，赔付 0%。</li>
+            <li>累计违约 4–30 分钟/月：赔付 10%。</li>
+            <li>累计违约 31–120 分钟/月：赔付 30%。</li>
+            <li>累计违约 > 120 分钟/月：赔付 100%，并触发退出协商权。</li>
+          </ul>
+
+          <h3>4. 维护与申诉</h3>
+          <ul>
+            <li>维护窗口提前 7 天通告，窗口内不计违约。</li>
+            <li>上游故障（GPU 宕机等）仍算违约，可用不可抗力条款封顶赔付。</li>
+            <li>用户可在违约事件推送后 30 天内申诉；平台日志缺失时默认采信用户申诉。</li>
+          </ul>
+        </section>
+
+        <section id="model-change">
+          <h2>模型更换规则</h2>
+          <h3>1. 合约期内原则禁止更换 model name</h3>
+          <ul>
+            <li>预留 vTPM 购买时已绑定具体 model name，合约期内不支持直接切换模型。</li>
+            <li>平滑升级的模型若复用已有 model name，对用户无感知，不视为更换。</li>
+          </ul>
+
+          <h3>2. 确需更换的处理方式</h3>
+          <ul>
+            <li>用户需走客服工单申请“残值退回 + 自行换购”流程，系统不提供功能性换购入口。</li>
+            <li>残值 = 购买金额 − max(已过时长折算值, 实际使用 tokens 按 Serverless 计价的价值)。</li>
+            <li>暂不收取手续费；退款通过线下渠道处理。</li>
+          </ul>
+
+          <h3>3. 模型停售与停服</h3>
+          <ul>
+            <li>停售：不再售卖新订单，已存续合约不中断；不再接受到期日在停售日期之后的续约。</li>
+            <li>停服：确需提前停止服务时，平台承担迁移成本并按“平台缺失需强行转换”规则补偿（vTPM 量或时长）。</li>
+          </ul>
+        </section>
+
+        <section id="refund">
+          <h2>退款规则</h2>
+          <h3>1. 退款触发条件</h3>
+          <ul>
+            <li>用户主动退订或换购另一个模型的 vTPM。</li>
+            <li>发生 SLA 严重违约（> 120 分钟/月）触发退出协商后，确需退费。</li>
+          </ul>
+
+          <h3>2. 残值计算</h3>
+          <div class="doc-formula">
+            残值 = 购买金额 − max(已过时长折算值, 实际使用 tokens 按 Serverless 计价的价值)
+          </div>
+          <ul>
+            <li>取 max 是为了避免“用得多反而退得少”的悖论。</li>
+            <li>赔付场景下按损失填平原则，最大不超过订单金额。</li>
+          </ul>
+
+          <h3>3. 退款路径</h3>
+          <ul>
+            <li>一期通过客服工单线下处理，退款以抵扣券或服务费返还形式发放。</li>
+            <li>退款到账时间以财务流程为准，通常为 7–15 个工作日。</li>
+          </ul>
+        </section>
+
+        <section id="binding">
+          <h2>端点绑定说明</h2>
+          <p>购买时需选择 model_name 的绑定方式，不同模式决定了超量请求的处理逻辑。</p>
+          <table>
+            <thead>
+              <tr><th>模式</th><th>行为</th><th>超量请求处理</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>公共 model name</strong><br><span class="text-xs text-slate-400">默认</span></td>
+                <td>超限请求自动降级到该模型的 Serverless 流量</td>
+                <td>按 Serverless tokens 计量计费</td>
+              </tr>
+              <tr>
+                <td><strong>专属 model name</strong></td>
+                <td>用户自行控制是否启用 vTPM，资源独占性更强</td>
+                <td>超量请求拒绝（429），用户自行处理降级</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <div class="mt-12 pt-6 border-t border-slate-200 text-sm text-slate-400">
+          <p>© 2026 硅基流动 SiliconFlow. 本页面为产品原型，具体规则以最终合同与控制台公示为准。</p>
+          <p class="mt-1">Beijing-GuiJiLiuDongAIYunFuWu-20251201S0112</p>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <script>
+    // 目录高亮当前章节
+    const sections = document.querySelectorAll('.doc-content section[id], .doc-content div[id]');
+    const navLinks = document.querySelectorAll('.doc-nav-link');
+    function onScroll() {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.getBoundingClientRect().top;
+        if (sectionTop <= 140) {
+          current = section.getAttribute('id');
+        }
+      });
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        link.classList.remove('border-primary');
+        link.classList.add('border-transparent');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+          link.classList.remove('border-transparent');
+          link.classList.add('border-primary');
+        }
+      });
+    }
+    window.addEventListener('scroll', onScroll);
+    onScroll();
+  </script>
+</body>
+</html>

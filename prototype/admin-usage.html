@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>资源包监控 - 活动运营</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .switcher-tab {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+    .switcher-tab.active { background: #6e29f6; color: white; }
+
+    .admin-sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      color: #374151;
+      font-size: 0.8125rem;
+      transition: all 0.15s;
+    }
+    .admin-sidebar-link:hover { background: #F3F4F6; color: #7C3AED; }
+    .admin-sidebar-link.active { background: #F5F3FF; color: #7C3AED; font-weight: 500; }
+
+    .admin-card {
+      background: #fff;
+      border: 1px solid #E5E7EB;
+      border-radius: 0.5rem;
+    }
+    .admin-btn-primary {
+      background: #7C3AED;
+      color: white;
+      border: 1px solid #7C3AED;
+    }
+    .admin-btn-primary:hover { background: #6D28D9; }
+    .admin-btn-default {
+      background: #fff;
+      color: #374151;
+      border: 1px solid #D1D5DB;
+    }
+    .admin-btn-default:hover { background: #F9FAFB; }
+  </style>
+</head>
+<body class="bg-[#F3F4F6] text-slate-800">
+  <!-- 原型切换栏 -->
+  <div class="sticky top-0 z-[100] bg-slate-900 text-white text-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-10 gap-1 overflow-x-auto">
+        <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
+        <a href="index.html" class="switcher-tab">官网首页</a>
+        <a href="purchase.html" class="switcher-tab">购买意向</a>
+        <a href="terms.html" class="switcher-tab">购买须知</a>
+        <a href="dashboard.html" class="switcher-tab">资源包</a>
+        <a href="admin-inventory.html" class="switcher-tab active">后台管理</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 顶部 Header -->
+  <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-10 z-50">
+    <div class="flex items-center gap-4">
+      <button class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md">
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">SF</div>
+        <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
+      </div>
+      <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">活动运营 - 资源包监控</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+        <i class="fa-regular fa-moon"></i>
+      </button>
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+        <i class="fa-regular fa-bell"></i>
+      </button>
+      <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-medium">吕</div>
+    </div>
+  </header>
+
+  <div class="flex">
+    <!-- 左侧 Sidebar -->
+    <aside class="w-56 bg-white border-r border-slate-200 flex-shrink-0 hidden md:flex flex-col h-[calc(100vh-3.5rem-2.5rem)] sticky top-[6rem]">
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto text-sm">
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>管理后台</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>账户中心</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>活动运营</span>
+        </div>
+
+        <div class="pl-6 space-y-0.5">
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
+          <a href="admin-inventory.html" class="admin-sidebar-link"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
+          <a href="admin-usage.html" class="admin-sidebar-link active"><i class="fa-solid fa-chart-line w-4 text-center"></i>资源包监控</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
+          <i class="fa-solid fa-chevron-right text-xs transition-transform"></i>
+          <span>MaaS 运营管理</span>
+        </div>
+
+        <div id="maas-menu" class="pl-6 space-y-0.5 hidden">
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-server w-4 text-center"></i>客户任务/数据</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-layer-group w-4 text-center"></i>Serverless 管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-link w-4 text-center"></i>MaaS 专属端点</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-brain w-4 text-center"></i>推理服务</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-flask w-4 text-center"></i>Playground</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>弹性 GPU 运营管理</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>商品定价中心</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>平台管理</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 p-4 min-w-0">
+      <!-- 面包屑 -->
+      <nav class="text-xs text-slate-500 mb-4">
+        <span class="text-slate-700">活动运营</span>
+        <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
+        <a href="admin-inventory.html" class="hover:text-violet-600">资源包管理</a>
+        <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
+        <span class="text-slate-700">资源包监控</span>
+      </nav>
+
+      <!-- 标题行 -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded bg-violet-100 text-violet-600 flex items-center justify-center">
+            <i class="fa-solid fa-chart-line text-sm"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-semibold text-slate-900">资源包监控详情</h2>
+            <p class="text-[11px] text-slate-500">资源包 <span id="pkg-id" class="font-mono">P001</span> · 绑定 <span id="pkg-bind" class="font-mono">-</span> · 有效期 <span id="pkg-period">-</span></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="admin-inventory.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-default text-xs font-medium">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i>返回资源包管理
+          </a>
+        </div>
+      </div>
+
+      <!-- 资源包信息卡 -->
+      <div class="admin-card p-3 mb-4">
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs">
+          <div><span class="text-slate-500">SKU 名称</span><p class="font-medium text-slate-900 mt-0.5" id="pkg-sku">Deepseek V4 Flash 0731 预留 vTPM</p></div>
+          <div><span class="text-slate-500">购买量</span><p class="font-medium text-slate-900 mt-0.5"><span id="pkg-capacity">300</span> vTPM</p></div>
+          <div><span class="text-slate-500">当前分钟消耗</span><p class="font-medium text-violet-600 mt-0.5">186 vTPM</p></div>
+          <div><span class="text-slate-500">今日限流事件</span><p class="font-medium text-green-600 mt-0.5">0</p></div>
+          <div><span class="text-slate-500">SLO 命中率</span><p class="font-medium text-blue-600 mt-0.5">99.97%</p></div>
+        </div>
+      </div>
+
+      <!-- vTPM 消耗趋势 -->
+      <div class="admin-card p-4 mb-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
+          <h4 class="text-sm font-semibold text-slate-900">vTPM 消耗趋势</h4>
+          <div class="flex items-center gap-3">
+            <div class="relative" id="monitor-time-picker">
+              <button type="button" onclick="toggleMonitorTimePicker()" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border border-slate-200 bg-white text-xs text-slate-700 hover:bg-slate-50">
+                <i class="fa-regular fa-clock text-[10px] text-slate-400"></i>
+                <span id="monitor-time-label">最近 1 小时</span>
+                <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+              </button>
+              <div id="monitor-time-panel" class="hidden absolute right-0 mt-1 w-72 bg-white border border-slate-200 rounded-lg shadow-lg p-3 z-50">
+                <p class="text-xs text-slate-500 mb-2">快捷选项</p>
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                  <button type="button" onclick="selectMonitorTime('1h')" class="monitor-time-opt px-2 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="1h">最近 1 小时</button>
+                  <button type="button" onclick="selectMonitorTime('24h')" class="monitor-time-opt px-2 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="24h">最近 24 小时</button>
+                  <button type="button" onclick="selectMonitorTime('7d')" class="monitor-time-opt px-2 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="7d">最近 7 天</button>
+                  <button type="button" onclick="selectMonitorTime('30d')" class="monitor-time-opt px-2 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="30d">最近 30 天</button>
+                </div>
+                <div class="border-t border-slate-100 pt-2">
+                  <p class="text-xs text-slate-500 mb-2">自定义范围</p>
+                  <div class="flex items-center gap-2">
+                    <input type="date" id="monitor-custom-start" class="flex-1 text-xs border border-slate-200 rounded px-1.5 py-1 outline-none focus:border-violet-500">
+                    <span class="text-xs text-slate-400">至</span>
+                    <input type="date" id="monitor-custom-end" class="flex-1 text-xs border border-slate-200 rounded px-1.5 py-1 outline-none focus:border-violet-500">
+                  </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-3 pt-2 border-t border-slate-100">
+                  <button type="button" onclick="closeMonitorTimePicker()" class="px-2 py-0.5 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-50">取消</button>
+                  <button type="button" onclick="applyMonitorCustomTime()" class="px-2 py-0.5 text-xs rounded bg-violet-600 text-white hover:bg-violet-700">应用</button>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-slate-500">
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-violet-600"></span>实际消耗</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-300"></span>购买量</span>
+            </div>
+          </div>
+        </div>
+        <div class="h-44 flex items-end gap-1" id="monitor-chart"></div>
+        <div class="flex justify-between text-xs text-slate-400 mt-2">
+          <span>00:00</span><span>04:00</span><span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>23:59</span>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4 mb-4">
+        <!-- P95 延迟 -->
+        <div class="admin-card p-4">
+          <h4 class="text-sm font-semibold text-slate-900 mb-3">P95 延迟</h4>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">TTFT</span><span class="font-medium text-slate-900">120 ms</span></div>
+              <div class="w-full bg-slate-100 rounded h-1.5"><div class="bg-violet-600 h-1.5 rounded" style="width: 40%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">TPOT</span><span class="font-medium text-slate-900">18 ms</span></div>
+              <div class="w-full bg-slate-100 rounded h-1.5"><div class="bg-green-500 h-1.5 rounded" style="width: 30%"></div></div>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 mt-3">阈值待性能测试矩阵确定后公示。</p>
+        </div>
+
+        <!-- 限流与违约事件 -->
+        <div class="admin-card p-4">
+          <h4 class="text-sm font-semibold text-slate-900 mb-3">限流与违约事件</h4>
+          <div class="space-y-2">
+            <div class="flex items-start gap-2.5 p-2.5 bg-slate-50 rounded border border-slate-100">
+              <div class="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-[10px] flex-shrink-0"><i class="fa-solid fa-info"></i></div>
+              <div>
+                <p class="text-xs font-medium text-slate-900">用户超限限流</p>
+                <p class="text-[11px] text-slate-500">08-20 14:32 · 占用 312 vTPM，超出 300 vTPM</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-2.5 p-2.5 bg-green-50 rounded border border-slate-100">
+              <div class="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-[10px] flex-shrink-0"><i class="fa-solid fa-check"></i></div>
+              <div>
+                <p class="text-xs font-medium text-slate-900">SLO 命中</p>
+                <p class="text-[11px] text-slate-500">今日无系统侧违约事件</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 明细表 -->
+      <div class="admin-card p-4">
+        <h4 class="text-sm font-semibold text-slate-900 mb-3">按分钟聚合数据（最近 1 小时）</h4>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="px-3 py-2 text-left font-medium border-b border-slate-200">时间</th>
+                <th class="px-3 py-2 text-left font-medium border-b border-slate-200">实际消耗 vTPM</th>
+                <th class="px-3 py-2 text-left font-medium border-b border-slate-200">输入命中 Cache</th>
+                <th class="px-3 py-2 text-left font-medium border-b border-slate-200">输入未命中 Cache</th>
+                <th class="px-3 py-2 text-left font-medium border-b border-slate-200">输出 tokens</th>
+                <th class="px-3 py-2 text-left font-medium border-b border-slate-200">限流次数</th>
+                <th class="px-3 py-2 text-left font-medium border-b border-slate-200">P95 TTFT</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200" id="monitor-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function toggleMenu(id, el) {
+      const menu = document.getElementById(id);
+      const icon = el.querySelector('i');
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-down');
+      } else {
+        menu.classList.add('hidden');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-right');
+      }
+    }
+
+    const pkgMap = {
+      'P001': { sku: 'Deepseek V4 Flash 0731 预留 vTPM', bind: 'deepseek-v4-flash-0731-prod', capacity: 300, period: '2026-08-01 ~ 2026-08-30' },
+      'P002': { sku: 'GLM 5.2 预留 vTPM', bind: 'glm-5.2-prod', capacity: 200, period: '2026-09-01 ~ 2026-09-30' }
+    };
+
+    function loadPkgInfo() {
+      const params = new URLSearchParams(window.location.search);
+      const pkgId = params.get('pkg') || 'P001';
+      const pkg = pkgMap[pkgId] || pkgMap['P001'];
+      document.getElementById('pkg-id').textContent = pkgId;
+      document.getElementById('pkg-bind').textContent = pkg.bind;
+      document.getElementById('pkg-period').textContent = pkg.period;
+      document.getElementById('pkg-sku').textContent = pkg.sku;
+      document.getElementById('pkg-capacity').textContent = pkg.capacity;
+    }
+
+    function toggleMonitorTimePicker() {
+      const panel = document.getElementById('monitor-time-panel');
+      panel.classList.toggle('hidden');
+    }
+    function closeMonitorTimePicker() {
+      document.getElementById('monitor-time-panel').classList.add('hidden');
+    }
+    function selectMonitorTime(value) {
+      const labels = { '1h': '最近 1 小时', '24h': '最近 24 小时', '7d': '最近 7 天', '30d': '最近 30 天' };
+      document.getElementById('monitor-time-label').textContent = labels[value];
+      document.querySelectorAll('.monitor-time-opt').forEach(btn => {
+        if (btn.dataset.value === value) {
+          btn.classList.add('border-violet-500', 'text-violet-600', 'bg-violet-50');
+        } else {
+          btn.classList.remove('border-violet-500', 'text-violet-600', 'bg-violet-50');
+        }
+      });
+      closeMonitorTimePicker();
+      renderMonitorChart();
+      renderMonitorTable();
+    }
+    function applyMonitorCustomTime() {
+      const start = document.getElementById('monitor-custom-start').value;
+      const end = document.getElementById('monitor-custom-end').value;
+      if (start && end) {
+        document.getElementById('monitor-time-label').textContent = `${start} 至 ${end}`;
+        document.querySelectorAll('.monitor-time-opt').forEach(btn => btn.classList.remove('border-violet-500', 'text-violet-600', 'bg-violet-50'));
+        closeMonitorTimePicker();
+        renderMonitorChart();
+        renderMonitorTable();
+      }
+    }
+    document.addEventListener('click', (e) => {
+      const picker = document.getElementById('monitor-time-picker');
+      if (picker && !picker.contains(e.target)) closeMonitorTimePicker();
+    });
+
+    function renderMonitorChart() {
+      const chartEl = document.getElementById('monitor-chart');
+      chartEl.innerHTML = '';
+      chartEl.style.position = 'relative';
+      for (let i = 0; i < 24; i++) {
+        const h = Math.floor(40 + Math.random() * 90);
+        const bar = document.createElement('div');
+        bar.className = 'flex-1 bg-violet-600 rounded-t hover:bg-violet-500 relative group';
+        bar.style.height = h + 'px';
+        bar.innerHTML = `<div class="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-slate-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">${Math.floor(h/1.5)} vTPM</div>`;
+        chartEl.appendChild(bar);
+      }
+    }
+
+    function renderMonitorTable() {
+      const tableEl = document.getElementById('monitor-table');
+      tableEl.innerHTML = '';
+      for (let i = 0; i < 6; i++) {
+        const t = new Date();
+        t.setMinutes(t.getMinutes() - i);
+        const time = t.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        const used = Math.floor(120 + Math.random() * 180);
+        const hit = Math.floor(Math.random() * 50000);
+        const miss = Math.floor(Math.random() * 20000);
+        const out = Math.floor(Math.random() * 5000);
+        const rl = used > 300 ? Math.floor(Math.random() * 5) : 0;
+        const ttft = Math.floor(80 + Math.random() * 60);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="px-3 py-2">${time}</td>
+          <td class="px-3 py-2 font-medium ${used > 300 ? 'text-orange-600' : 'text-slate-900'}">${used}</td>
+          <td class="px-3 py-2">${hit.toLocaleString()}</td>
+          <td class="px-3 py-2">${miss.toLocaleString()}</td>
+          <td class="px-3 py-2">${out.toLocaleString()}</td>
+          <td class="px-3 py-2">${rl}</td>
+          <td class="px-3 py-2">${ttft} ms</td>
+        `;
+        tableEl.appendChild(row);
+      }
+    }
+
+    loadPkgInfo();
+    selectMonitorTime('1h');
+    renderMonitorChart();
+    renderMonitorTable();
+  </script>
+</body>
+</html>

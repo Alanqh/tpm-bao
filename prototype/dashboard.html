@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>资源包 - 硅基流动</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root { --sf-purple: #7C3AED; --sf-purple-light: #F5F3FF; }
+    .sf-sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 1rem; border-radius: 0.5rem; color: #475569; font-size: 0.875rem; transition: all 0.15s; }
+    .sf-sidebar-link:hover { background: #F5F3FF; color: #7C3AED; }
+    .sf-sidebar-link.active { background: #F5F3FF; color: #7C3AED; font-weight: 500; }
+    .sf-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; }
+    .sf-btn-primary { background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%); color: white; }
+    .sf-btn-primary:hover { opacity: 0.95; }
+    .switcher-tab {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+    .switcher-tab.active { background: #6e29f6; color: white; }
+
+    .resource-tab {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 0.875rem 1.25rem;
+      color: #64748B;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .resource-tab:hover { color: #7C3AED; }
+    .resource-tab.active { color: #7C3AED; }
+    .resource-tab.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: #7C3AED;
+      border-radius: 2px 2px 0 0;
+    }
+
+    .filter-btn {
+      padding: 0.375rem 0.875rem;
+      border: 1px solid #E2E8F0;
+      border-radius: 9999px;
+      font-size: 0.8125rem;
+      color: #475569;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover { border-color: #C4B5FD; color: #7C3AED; }
+    .filter-btn.active { background: #F5F3FF; border-color: #7C3AED; color: #7C3AED; font-weight: 500; }
+
+    .package-type-badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+    .usage-bar { width: 100%; background: #F1F5F9; border-radius: 9999px; height: 6px; overflow: hidden; }
+    .usage-bar-fill { height: 100%; border-radius: 9999px; transition: width 0.3s ease; }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-800">
+  <!-- 原型切换栏 -->
+  <div class="sticky top-0 z-[100] bg-slate-900 text-white text-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-10 gap-1 overflow-x-auto">
+        <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
+        <a href="index.html" class="switcher-tab">官网首页</a>
+        <a href="purchase.html" class="switcher-tab">购买意向</a>
+        <a href="terms.html" class="switcher-tab">购买须知</a>
+        <a href="dashboard.html" class="switcher-tab active">资源包</a>
+        <a href="admin-inventory.html" class="switcher-tab">后台管理</a>
+      </div>
+    </div>
+  </div>
+
+  <header class="h-16 bg-gradient-to-r from-violet-600 to-indigo-600 flex items-center justify-between px-6 sticky top-10 z-50">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 text-white">
+        <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-sm font-bold">SF</div>
+        <span class="font-semibold">硅基流动</span>
+      </div>
+      <h1 class="text-white text-lg font-medium hidden sm:block">资源包</h1>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="hidden md:flex items-center gap-2 bg-white/10 hover:bg-white/20 transition px-3 py-1.5 rounded-full text-white text-xs cursor-pointer">
+        <i class="fa-solid fa-circle-check text-emerald-300"></i>
+        <span>推荐官福利：每邀一人注册认证即得 ¥10 全平台通用代金券！</span>
+      </div>
+      <button class="text-white/80 hover:text-white"><i class="fa-regular fa-bell text-lg"></i></button>
+      <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm">U</div>
+    </div>
+  </header>
+
+  <div class="flex">
+    <aside class="w-60 bg-white border-r border-slate-200 flex-shrink-0 hidden md:flex flex-col h-[calc(100vh-4rem)] sticky top-[6.5rem]">
+      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+        <div class="text-xs text-slate-400 px-3 py-2">模型</div>
+        <a href="index.html" class="sf-sidebar-link"><i class="fa-solid fa-cube w-4"></i>模型广场</a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-layer-group w-4"></i>批量推理</a>
+
+        <div class="text-xs text-slate-400 px-3 py-2 mt-4">模型中心</div>
+        <a href="#" class="sf-sidebar-link"><i class="fa-regular fa-comment w-4"></i>文本对话</a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-regular fa-image w-4"></i>图像生成</a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-video w-4"></i>视频生成</a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-microphone w-4"></i>语音合成</a>
+
+        <div class="flex items-center gap-2 text-xs text-slate-400 px-3 py-2 mt-4">
+          <span>弹性 GPU</span>
+          <span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-600 text-[10px]">Beta</span>
+        </div>
+
+        <div class="text-xs text-slate-400 px-3 py-2 mt-4">账户管理</div>
+        <a href="#" class="sf-sidebar-link"><i class="fa-regular fa-user w-4"></i>实名认证</a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-key w-4"></i>API 密钥</a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-wallet w-4"></i>余额充值</a>
+        <a href="dashboard.html" class="sf-sidebar-link active"><i class="fa-solid fa-box-open w-4"></i>资源包</a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-file-invoice-dollar w-4"></i>费用明细</a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-file-invoice w-4"></i>发票开具</a>
+
+        <div class="text-xs text-slate-400 px-3 py-2 mt-4">活动中心</div>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-book w-4"></i>文档中心 <i class="fa-solid fa-chevron-right text-xs ml-auto text-slate-300"></i></a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-gift w-4"></i>推荐官计划</a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-headset w-4"></i>工单反馈 <i class="fa-solid fa-chevron-right text-xs ml-auto text-slate-300"></i></a>
+        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-handshake w-4"></i>商务合作 <i class="fa-solid fa-chevron-right text-xs ml-auto text-slate-300"></i></a>
+      </nav>
+      <div class="p-4 text-xs text-slate-400 border-t border-slate-100">
+        Beijing-GuiJiLiuDongAIYun<br>FuWu-20251201S0112
+      </div>
+    </aside>
+
+    <main class="flex-1 p-6 min-w-0">
+      <!-- 资源包 Tab -->
+      <div class="sf-card overflow-hidden">
+        <div class="flex border-b border-slate-200 px-2">
+          <button type="button" class="resource-tab active" data-tab="shop">
+            资源包商城
+            <span class="ml-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px]">一期不做</span>
+          </button>
+          <button type="button" class="resource-tab" data-tab="my">我的资源包</button>
+        </div>
+
+        <!-- 资源包商城 -->
+        <div id="tab-shop" class="p-6">
+          <div class="bg-violet-50 border border-violet-100 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <i class="fa-solid fa-circle-info text-violet-600 mt-0.5"></i>
+            <p class="text-sm text-slate-600">商城购买资源包功能即将上线。当前如需购买，请前往官网首页提交购买意向，销售团队将在 1 个工作日内与您联系。</p>
+          </div>
+          <div id="shop-package-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <!-- JS 渲染 -->
+          </div>
+        </div>
+
+        <!-- 我的资源包 -->
+        <div id="tab-my" class="p-6 hidden">
+          <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+            <div class="flex flex-wrap items-center gap-y-2 gap-x-1">
+              <span class="text-xs text-slate-400 mr-1">状态</span>
+              <button type="button" class="filter-btn active" data-filter-status="all">全部</button>
+              <button type="button" class="filter-btn" data-filter-status="active">可用</button>
+              <button type="button" class="filter-btn" data-filter-status="used">已用完</button>
+              <button type="button" class="filter-btn" data-filter-status="expired">已过期</button>
+              <span class="text-xs text-slate-400 mx-2 hidden sm:inline">|</span>
+              <span class="text-xs text-slate-400 mr-1">类型</span>
+              <button type="button" class="filter-btn active" data-filter-type="all">全部</button>
+              <button type="button" class="filter-btn" data-filter-type="tokens">Tokens 包</button>
+              <button type="button" class="filter-btn" data-filter-type="vtpm">预留 vTPM 包</button>
+            </div>
+            <a href="index.html" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg sf-btn-primary text-sm font-medium whitespace-nowrap"><i class="fa-solid fa-plus"></i>兑换中心</a>
+          </div>
+
+          <div id="my-package-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <!-- JS 渲染 -->
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- 详情弹窗 -->
+  <div id="detail-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 id="modal-title" class="text-xl font-bold text-slate-900"></h3>
+            <span id="modal-type" class="inline-block px-2 py-0.5 rounded text-xs font-medium mt-1.5"></span>
+          </div>
+          <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+
+        <div class="space-y-4">
+          <div class="bg-slate-50 rounded-xl p-4">
+            <p id="modal-amount-label" class="text-xs text-slate-500 mb-1"></p>
+            <p id="modal-amount" class="text-2xl font-bold text-slate-900"></p>
+          </div>
+
+          <div id="modal-progress-wrap" class="hidden">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600">已使用</span>
+              <span id="modal-progress-text" class="font-medium"></span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2">
+              <div id="modal-progress-bar" class="bg-violet-600 h-2 rounded-full" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="space-y-2 text-sm text-slate-600">
+            <p class="flex justify-between"><span class="text-slate-400">状态</span><span id="modal-status"></span></p>
+            <p class="flex justify-between"><span class="text-slate-400">有效期</span><span id="modal-period"></span></p>
+            <p class="flex justify-between"><span class="text-slate-400">可用范围</span><span id="modal-scope" class="text-right max-w-[60%]"></span></p>
+            <p class="flex justify-between" id="modal-bind-row"><span class="text-slate-400">绑定 model_name</span><span id="modal-bind" class="font-mono"></span></p>
+            <p class="flex justify-between" id="modal-id-row"><span class="text-slate-400">资源包 ID</span><span id="modal-id" class="font-mono text-xs"></span></p>
+          </div>
+
+          <div class="bg-slate-50 rounded-xl p-4 text-xs text-slate-500 space-y-1">
+            <p>· 适用于符合条件的资源抵扣；</p>
+            <p>· 请在有效期内使用，逾期未使用部分不予退还；</p>
+            <p>· 不可出售、转让或折抵现金。</p>
+          </div>
+        </div>
+
+        <div class="mt-6 flex gap-3 justify-end">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
+          <a id="modal-action" href="usage.html" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium hidden">查看监控</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const packages = [
+      { id: 'P001', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 300, unit: 'vTPM', used: 0, status: 'active', period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理', bind: 'deepseek-v4-flash-0731-prod' },
+      { id: 'P002', type: 'vtpm', name: '预留 vTPM', model: 'GLM 5.2', amount: 200, unit: 'vTPM', used: 0, status: 'active', period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理', bind: 'glm-5.2-prod' },
+      { id: 'P003', type: 'tokens', name: 'Tokens 包', model: '通用 Tokens', amount: 1200, unit: '万 tokens', remain: 850, status: 'active', period: '2026-06-15 ~ 2026-12-15', scope: '平台按 tokens 计量计费的模型服务', bind: null },
+      { id: 'P004', type: 'tokens', name: 'Tokens 包', model: '通用 Tokens', amount: 1000, unit: '万 tokens', remain: 0, status: 'used', period: '2026-05-01 ~ 2026-07-31', scope: '平台按 tokens 计量计费的模型服务', bind: null },
+      { id: 'P005', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 100, unit: 'vTPM', used: 0, status: 'expired', period: '2026-07-01 ~ 2026-07-31', scope: 'Deepseek V4 Flash 0731 推理', bind: 'deepseek-v4-flash-0731-demo' }
+    ];
+
+    const shopItems = [
+      { type: 'tokens', title: '通用 Tokens 包', desc: '适用于平台按 tokens 计量计费的模型服务，优先抵扣 token 用量。', price: '按需定价', icon: 'fa-coins', color: 'green' },
+      { type: 'vtpm', title: 'Deepseek V4 Flash 0731 预留 vTPM', desc: '锁定算力，获得分钟级 SLO 承诺与确定性推理吞吐。', price: '¥3,300/份/30天', icon: 'fa-microchip', color: 'blue' },
+      { type: 'vtpm', title: 'GLM 5.2 预留 vTPM', desc: '中文场景优化，资源独占，超量请求可降级或自行控制。', price: '¥2,900/份/30天', icon: 'fa-microchip', color: 'purple' }
+    ];
+
+    let currentStatus = 'all';
+    let currentType = 'all';
+
+    const statusMap = {
+      active: { label: '生效中', cls: 'bg-green-100 text-green-700' },
+      used: { label: '已用完', cls: 'bg-slate-100 text-slate-500' },
+      expired: { label: '已过期', cls: 'bg-slate-100 text-slate-500' }
+    };
+
+    function getUsedPercent(p) {
+      if (p.type === 'tokens') {
+        return Math.min(100, Math.round(((p.amount - (p.remain || 0)) / p.amount) * 100));
+      }
+      return Math.min(100, Math.round((p.used || 0) / p.amount * 100));
+    }
+
+    function renderMyPackages() {
+      const grid = document.getElementById('my-package-grid');
+      const filtered = packages.filter(p => {
+        const statusMatch = currentStatus === 'all' || p.status === currentStatus;
+        const typeMatch = currentType === 'all' || p.type === currentType;
+        return statusMatch && typeMatch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 text-sm">暂无符合条件的资源包</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        const s = statusMap[p.status];
+        const isGray = p.status !== 'active';
+        const usedPct = getUsedPercent(p);
+        const isVtpm = p.type === 'vtpm';
+        const icon = isVtpm ? 'fa-microchip' : 'fa-coins';
+        const iconBg = isVtpm ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600';
+        const grayIconBg = isGray ? 'bg-slate-100 text-slate-400' : iconBg;
+        const textColor = isGray ? 'text-slate-500' : 'text-slate-900';
+        const amountColor = isGray ? 'text-slate-400' : 'text-slate-900';
+        const typeLabel = isVtpm ? '预留 vTPM' : 'Tokens 包';
+        const typeBadgeCls = isVtpm ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700';
+        const grayBadgeCls = isGray ? 'bg-slate-100 text-slate-400' : typeBadgeCls;
+
+        return `
+          <div class="sf-card p-5 relative package-item ${p.status} cursor-pointer hover:shadow-md transition-shadow" data-type="${p.type}" onclick="openDetail('${p.id}')">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg ${grayIconBg} flex items-center justify-center"><i class="fa-solid ${icon}"></i></div>
+                <div>
+                  <h3 class="font-semibold ${textColor}">${p.model}</h3>
+                  <span class="inline-block px-2 py-0.5 rounded text-[10px] font-medium ${grayBadgeCls}">${typeLabel}</span>
+                </div>
+              </div>
+              <span class="px-2 py-1 rounded-full text-xs font-medium ${s.cls}">${s.label}</span>
+            </div>
+            <div class="mb-4">
+              <p class="text-3xl font-bold ${amountColor}">
+                ${isVtpm ? p.amount : (p.remain ?? p.amount).toLocaleString()}
+                <span class="text-base font-normal ${isGray ? 'text-slate-400' : 'text-slate-500'}">${p.unit}</span>
+              </p>
+              ${!isVtpm && p.status === 'active' ? `<p class="text-xs text-slate-400 mt-1">剩余 ${p.remain} 万 / 共 ${p.amount} 万 tokens</p>` : ''}
+            </div>
+            <div class="border-t border-slate-100 pt-3 space-y-1 text-xs ${isGray ? 'text-slate-400' : 'text-slate-500'} mb-4">
+              <p>可用范围：${p.scope}</p>
+              <p>有效期：${p.period}</p>
+              ${p.bind ? `<p>绑定：${p.bind}</p>` : `<p>ID：${p.id}</p>`}
+            </div>
+            <div class="flex items-center gap-3 text-sm">
+              ${isVtpm && p.status === 'active' ? `<a href="usage.html?pkg=${p.id}" class="text-violet-600 hover:text-violet-700 font-medium" onclick="event.stopPropagation()">监控</a>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderShopItems() {
+      const grid = document.getElementById('shop-package-grid');
+      grid.innerHTML = shopItems.map(item => {
+        const iconBg = item.color === 'green' ? 'bg-green-100 text-green-600' : item.color === 'blue' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600';
+        const typeLabel = item.type === 'vtpm' ? '预留 vTPM' : 'Tokens 包';
+        return `
+          <div class="sf-card p-5">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg ${iconBg} flex items-center justify-center"><i class="fa-solid ${item.icon}"></i></div>
+                <div>
+                  <h3 class="font-semibold text-slate-900">${item.title}</h3>
+                  <span class="inline-block px-2 py-0.5 rounded text-[10px] font-medium ${item.type === 'vtpm' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}">${typeLabel}</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-slate-500 mb-4">${item.desc}</p>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-violet-600">${item.price}</span>
+              <a href="index.html" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium">提交意向</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openDetail(id) {
+      const p = packages.find(x => x.id === id);
+      if (!p) return;
+      const s = statusMap[p.status];
+      const isVtpm = p.type === 'vtpm';
+
+      document.getElementById('modal-type').textContent = isVtpm ? '预留 vTPM' : 'Tokens 包';
+      document.getElementById('modal-type').className = `inline-block px-2 py-0.5 rounded text-xs font-medium mt-1.5 ${isVtpm ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`;
+      document.getElementById('modal-title').textContent = p.model;
+      document.getElementById('modal-amount-label').textContent = isVtpm ? '预留算力' : '剩余资源';
+      document.getElementById('modal-amount').textContent = `${isVtpm ? p.amount : (p.remain ?? p.amount).toLocaleString()} ${p.unit}`;
+      document.getElementById('modal-status').innerHTML = `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${s.cls}">${s.label}</span>`;
+      document.getElementById('modal-period').textContent = p.period;
+      document.getElementById('modal-scope').textContent = p.scope;
+
+      const bindRow = document.getElementById('modal-bind-row');
+      if (p.bind) {
+        bindRow.classList.remove('hidden');
+        document.getElementById('modal-bind').textContent = p.bind;
+      } else {
+        bindRow.classList.add('hidden');
+      }
+      document.getElementById('modal-id').textContent = p.id;
+
+      const progressWrap = document.getElementById('modal-progress-wrap');
+      if (!isVtpm) {
+        progressWrap.classList.remove('hidden');
+        const pct = getUsedPercent(p);
+        document.getElementById('modal-progress-text').textContent = `${pct}%`;
+        document.getElementById('modal-progress-bar').style.width = `${pct}%`;
+      } else {
+        progressWrap.classList.add('hidden');
+      }
+
+      const actionBtn = document.getElementById('modal-action');
+      if (isVtpm && p.status === 'active') {
+        actionBtn.href = `usage.html?pkg=${p.id}`;
+        actionBtn.classList.remove('hidden');
+      } else {
+        actionBtn.classList.add('hidden');
+      }
+
+      document.getElementById('detail-modal').classList.remove('hidden');
+      document.getElementById('detail-modal').classList.add('flex');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('detail-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Tab 切换
+    document.querySelectorAll('.resource-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.resource-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.getElementById('tab-my').classList.toggle('hidden', tab !== 'my');
+        document.getElementById('tab-shop').classList.toggle('hidden', tab !== 'shop');
+      });
+    });
+
+    // 状态筛选
+    document.querySelectorAll('[data-filter-status]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-filter-status]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentStatus = btn.dataset.filterStatus;
+        renderMyPackages();
+      });
+    });
+
+    // 类型筛选
+    document.querySelectorAll('[data-filter-type]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-filter-type]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentType = btn.dataset.filterType;
+        renderMyPackages();
+      });
+    });
+
+    renderMyPackages();
+    renderShopItems();
+  </script>
+</body>
+</html>

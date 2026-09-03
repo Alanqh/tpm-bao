@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>预留 vTPM 购买意向</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --sf-purple: #6e29f6;
+      --sf-purple-dark: #4f19cf;
+      --sf-purple-light: #b17dff;
+    }
+    .text-primary { color: var(--sf-purple); }
+    .bg-primary { background-color: var(--sf-purple); }
+    .border-primary { border-color: var(--sf-purple); }
+    .ring-primary { --tw-ring-color: var(--sf-purple); }
+    .switcher-tab {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+    .switcher-tab.active { background: var(--sf-purple); color: white; }
+    .survey-card {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .survey-input {
+      width: 100%;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 0.625rem 0.875rem;
+      font-size: 0.9375rem;
+      transition: all 0.15s;
+      outline: none;
+    }
+    .survey-input:focus {
+      border-color: var(--sf-purple);
+      box-shadow: 0 0 0 3px rgba(110,41,246,0.1);
+    }
+    .survey-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.75rem center;
+      background-repeat: no-repeat;
+      background-size: 1.25rem;
+    }
+    .survey-radio:checked + div {
+      border-color: var(--sf-purple);
+      background-color: #F5F3FF;
+      color: var(--sf-purple);
+    }
+    .survey-radio:checked + div .radio-dot {
+      border-color: var(--sf-purple);
+      background-color: var(--sf-purple);
+    }
+    .survey-btn {
+      background-color: var(--sf-purple);
+      color: white;
+      transition: all 0.2s;
+    }
+    .survey-btn:hover {
+      background-color: var(--sf-purple-dark);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <!-- 原型切换栏 -->
+  <div class="sticky top-0 z-[100] bg-slate-900 text-white text-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-10 gap-1 overflow-x-auto">
+        <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
+        <a href="index.html" class="switcher-tab">官网首页</a>
+        <a href="purchase.html" class="switcher-tab active">购买意向</a>
+        <a href="terms.html" class="switcher-tab">购买须知</a>
+        <a href="dashboard.html" class="switcher-tab">资源包</a>
+        <a href="admin-inventory.html" class="switcher-tab">后台管理</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 问卷头部 -->
+  <div class="bg-primary py-8 md:py-10">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6">
+      <div class="flex items-center gap-2 text-white/80 text-sm mb-3">
+        <i class="fa-solid fa-file-signature"></i>
+        <span>预留 vTPM · 官网直销</span>
+      </div>
+      <h1 class="text-2xl md:text-3xl font-bold text-white">购买意向登记</h1>
+      <p class="text-white/85 mt-2 text-sm md:text-base">当前为官网直销阶段，提交后销售团队将在 1 个工作日内与您联系确认需求、签订合同并完成开通。</p>
+    </div>
+  </div>
+
+  <main class="py-8 pb-16">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6">
+      <!-- 进度提示 -->
+      <div class="flex items-center gap-2 text-xs text-slate-500 mb-4">
+        <span class="px-2 py-1 rounded bg-violet-100 text-primary font-medium">飞书问卷</span>
+        <span>预计填写时间 2 分钟</span>
+      </div>
+
+      <form id="intent-form" class="survey-card overflow-hidden" onsubmit="return handleSubmit(event)">
+        <!-- 产品配置 -->
+        <div class="p-6 md:p-8 border-b border-slate-100">
+          <h2 class="text-lg font-bold text-slate-900 mb-1">产品配置</h2>
+          <p class="text-slate-500 text-sm mb-6">请选择您需要预留的模型与资源配置。</p>
+
+          <div class="space-y-5">
+            <div>
+              <label class="block text-sm font-medium text-slate-900 mb-2">选择模型 <span class="text-red-500">*</span></label>
+              <select name="model" id="model" class="survey-input survey-select" required>
+                <option value="deepseek-v4-flash-0731">Deepseek V4 Flash 0731</option>
+                <option value="glm-5.2">GLM 5.2</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-900 mb-2">预留 vTPM 份数 <span class="text-red-500">*</span></label>
+              <select name="units" id="units" class="survey-input survey-select" required>
+                <option value="1">1 份（100 vTPM）</option>
+                <option value="2">2 份（200 vTPM）</option>
+                <option value="3" selected>3 份（300 vTPM）</option>
+                <option value="4">4 份（400 vTPM）</option>
+                <option value="5">5 份（500 vTPM）</option>
+                <option value="6">6 份（600 vTPM）</option>
+                <option value="7">7 份（700 vTPM）</option>
+                <option value="8">8 份（800 vTPM）</option>
+                <option value="9">9 份（900 vTPM）</option>
+                <option value="10">10 份（1,000 vTPM）</option>
+              </select>
+              <p class="text-xs text-slate-400 mt-1.5">1 份 = 100 vTPM，单次最多可购买 10 份。</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-900 mb-2">购买周期 <span class="text-red-500">*</span></label>
+              <select name="cycle" id="cycle" class="survey-input survey-select" required>
+                <option value="1">30 天</option>
+                <option value="2">60 天</option>
+                <option value="3">90 天</option>
+                <option value="4">120 天</option>
+                <option value="5">150 天</option>
+                <option value="6">180 天</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-900 mb-3">绑定 model_name 方式 <span class="text-red-500">*</span></label>
+              <div class="space-y-2">
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="radio" name="bind_mode" value="public" class="survey-radio hidden" checked>
+                  <div class="flex-1 border border-slate-200 rounded-lg p-3 transition-all">
+                    <div class="flex items-center gap-2 font-medium text-slate-900">
+                      <span class="radio-dot w-4 h-4 rounded-full border-2 border-slate-300 flex-shrink-0"></span>
+                      公共 model name
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1 ml-6">使用平台固定公网 model_name，超量时自动降级到 Serverless 计费。</p>
+                  </div>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="radio" name="bind_mode" value="custom" class="survey-radio hidden">
+                  <div class="flex-1 border border-slate-200 rounded-lg p-3 transition-all">
+                    <div class="flex items-center gap-2 font-medium text-slate-900">
+                      <span class="radio-dot w-4 h-4 rounded-full border-2 border-slate-300 flex-shrink-0"></span>
+                      自定义 model name
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1 ml-6">资源独占性更强，超量请求将返回 429，由用户自行处理降级。</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div id="custom-model-names" class="hidden">
+              <label class="block text-sm font-medium text-slate-900 mb-2">自定义 model_name 列表</label>
+              <input type="text" name="model_names" id="model_names" placeholder="例如：deepseek-v4-flash-0731-prod, glm-5.2-prod" class="survey-input">
+              <p class="text-xs text-slate-400 mt-1.5">多个以逗号分隔。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 联系信息 -->
+        <div class="p-6 md:p-8 border-b border-slate-100">
+          <h2 class="text-lg font-bold text-slate-900 mb-1">联系信息</h2>
+          <p class="text-slate-500 text-sm mb-6">请填写企业负责人信息，便于销售团队与您联系。</p>
+
+          <div class="space-y-5">
+            <div class="grid md:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-sm font-medium text-slate-900 mb-2">联系人姓名 <span class="text-red-500">*</span></label>
+                <input type="text" name="contact_name" required placeholder="请输入姓名" class="survey-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-900 mb-2">联系电话 <span class="text-red-500">*</span></label>
+                <input type="tel" name="contact_phone" required placeholder="请输入手机号" class="survey-input">
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-sm font-medium text-slate-900 mb-2">企业邮箱 <span class="text-red-500">*</span></label>
+                <input type="email" name="contact_email" required placeholder="name@company.com" class="survey-input">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-900 mb-2">企业名称</label>
+                <input type="text" name="company" placeholder="请输入企业全称" class="survey-input">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-900 mb-2">补充说明</label>
+              <textarea name="remark" rows="3" placeholder="可填写预期调用量、上线时间、特殊 SLA 要求等" class="survey-input resize-none"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 协议与提交 -->
+        <div class="p-6 md:p-8 bg-slate-50">
+          <label class="flex items-start gap-3 cursor-pointer mb-6">
+            <input type="checkbox" id="agree" required class="mt-1 w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
+            <span class="text-sm text-slate-600">我已阅读并同意 <a href="terms.html" target="_blank" class="text-primary hover:underline">《预留 vTPM 购买须知》</a>，包括购买规则、SLA 保障与赔付、模型更换及退款规则。</span>
+          </label>
+
+          <div class="flex flex-col sm:flex-row items-center gap-4">
+            <button type="submit" class="survey-btn w-full sm:w-auto px-8 py-3 rounded-lg font-medium">提交购买意向</button>
+            <span class="text-sm text-slate-400">提交后销售团队将在 1 个工作日内联系您</span>
+          </div>
+        </div>
+      </form>
+
+      <!-- 提交成功提示 -->
+      <div id="success-msg" class="hidden survey-card p-6 md:p-8 mt-6 border-l-4 border-green-500 bg-green-50">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-check"></i></div>
+          <div>
+            <h3 class="font-semibold text-slate-900 text-lg">意向已提交</h3>
+            <p class="text-sm text-slate-600 mt-1">销售团队将在 1 个工作日内与您联系。如需加急，请拨打客服热线 400-XXX-XXXX。</p>
+            <div class="mt-4 flex gap-4">
+              <a href="index.html" class="text-sm text-primary hover:underline">返回官网首页</a>
+              <a href="dashboard.html" class="text-sm text-slate-500 hover:underline">查看我的资源包</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-white border-t border-slate-200 py-6">
+    <div class="max-w-2xl mx-auto px-4 text-center text-xs text-slate-400">
+      <p>© 2026 硅基流动 SiliconFlow. 本页面为产品原型，具体规则以最终合同与控制台公示为准。</p>
+    </div>
+  </footer>
+
+  <script>
+    const priceTable = { 'deepseek-v4-flash-0731': 3300, 'glm-5.2': 2900 };
+    const bindModeEls = document.querySelectorAll('input[name="bind_mode"]');
+    const customNamesBox = document.getElementById('custom-model-names');
+    const modelNamesInput = document.getElementById('model_names');
+
+    bindModeEls.forEach(el => {
+      el.addEventListener('change', () => {
+        if (el.value === 'custom' && el.checked) {
+          customNamesBox.classList.remove('hidden');
+          modelNamesInput.setAttribute('required', 'required');
+        } else if (el.value === 'public' && el.checked) {
+          customNamesBox.classList.add('hidden');
+          modelNamesInput.removeAttribute('required');
+          modelNamesInput.value = '';
+        }
+      });
+    });
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      document.getElementById('intent-form').classList.add('hidden');
+      document.getElementById('success-msg').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
+    }
+  </script>
+</body>
+</html>
