@@ -119,6 +119,19 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- 路由与自然分钟提示 -->
+      <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-5 text-xs text-slate-600 flex items-start gap-2">
+        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+        <div>
+          <p>API 请求中填写该资源包绑定的 model_name 时，将路由到预留算力资源的模型服务上。</p>
+          <p class="text-slate-400 mt-0.5">所有监控与事件数据均按自然分钟统计。</p>
+        </div>
+      </div>
+
+      <!-- 时间筛选 + 返回 -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-3">
         <div class="flex items-center gap-2">
           <div class="relative" id="time-picker">
             <button type="button" onclick="toggleTimePicker()" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 shadow-sm">
@@ -154,75 +167,150 @@
         </div>
       </div>
 
-      <!-- vTPM 消耗趋势 -->
-      <div class="sf-card p-5 mb-5">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="text-base font-bold text-slate-900">vTPM 消耗趋势</h2>
-          <div class="flex items-center gap-3 text-xs">
-            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-600"></span>实际消耗</div>
-            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>购买量</div>
-          </div>
+      <!-- 关键指标卡 -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+        <div class="sf-card p-4">
+          <p class="text-xs text-slate-500 mb-1">购买量</p>
+          <p class="text-2xl font-bold text-slate-900" id="metric-capacity">300 <span class="text-sm font-normal text-slate-500">vTPM</span></p>
         </div>
-        <div class="h-56 flex items-end gap-1.5" id="vtpm-chart"></div>
-        <div class="flex justify-between text-xs text-slate-400 mt-2">
-          <span>00:00</span><span>04:00</span><span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>23:59</span>
+        <div class="sf-card p-4">
+          <p class="text-xs text-slate-500 mb-1">本月违约分钟</p>
+          <p class="text-2xl font-bold text-slate-900">2 <span class="text-sm font-normal text-slate-500">min</span></p>
+        </div>
+        <div class="sf-card p-4">
+          <p class="text-xs text-slate-500 mb-1">P95 TTFT</p>
+          <p class="text-2xl font-bold text-slate-900">120 <span class="text-sm font-normal text-slate-500">ms</span></p>
+        </div>
+        <div class="sf-card p-4">
+          <p class="text-xs text-slate-500 mb-1">P95 TPOT</p>
+          <p class="text-2xl font-bold text-slate-900">18 <span class="text-sm font-normal text-slate-500">ms</span></p>
         </div>
       </div>
 
+      <!-- 监控趋势 -->
       <div class="grid lg:grid-cols-2 gap-4 mb-5">
-        <!-- P95 延迟 -->
         <div class="sf-card p-5">
-          <h2 class="text-base font-bold text-slate-900 mb-3">P95 延迟</h2>
-          <div class="space-y-3">
-            <div>
-              <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">TTFT</span><span class="font-semibold">120 ms</span></div>
-              <div class="w-full bg-slate-100 rounded-full h-1.5"><div class="bg-violet-600 h-1.5 rounded-full" style="width: 40%"></div></div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">TPOT</span><span class="font-semibold">18 ms</span></div>
-              <div class="w-full bg-slate-100 rounded-full h-1.5"><div class="bg-green-500 h-1.5 rounded-full" style="width: 30%"></div></div>
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-base font-bold text-slate-900">vTPM 消耗趋势</h2>
+            <div class="flex items-center gap-3 text-xs">
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-600"></span>实际消耗</div>
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>购买量</div>
             </div>
           </div>
-          <p class="text-xs text-slate-400 mt-3">阈值待性能测试矩阵确定后公示。</p>
+          <div class="h-48 flex items-end gap-1" id="vtpm-chart"></div>
+          <div class="flex justify-between text-xs text-slate-400 mt-2">
+            <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span>
+          </div>
         </div>
 
-        <!-- 限流与违约事件 -->
         <div class="sf-card p-5">
-          <h2 class="text-base font-bold text-slate-900 mb-3">限流与违约事件</h2>
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-base font-bold text-slate-900">5xx 请求数趋势</h2>
+            <div class="flex items-center gap-3 text-xs">
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>5xx / 超时</div>
+            </div>
+          </div>
+          <div class="h-48 flex items-end gap-1" id="error-chart"></div>
+          <div class="flex justify-between text-xs text-slate-400 mt-2">
+            <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span>
+          </div>
+        </div>
+
+        <div class="sf-card p-5">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-base font-bold text-slate-900">P95 TTFT 趋势</h2>
+            <div class="flex items-center gap-3 text-xs">
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>P95 TTFT</div>
+            </div>
+          </div>
+          <div class="h-48 flex items-end gap-1" id="ttft-chart"></div>
+          <div class="flex justify-between text-xs text-slate-400 mt-2">
+            <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span>
+          </div>
+        </div>
+
+        <div class="sf-card p-5">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-base font-bold text-slate-900">P95 TPOT 趋势</h2>
+            <div class="flex items-center gap-3 text-xs">
+              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>P95 TPOT</div>
+            </div>
+          </div>
+          <div class="h-48 flex items-end gap-1" id="tpot-chart"></div>
+          <div class="flex justify-between text-xs text-slate-400 mt-2">
+            <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 事件与赔付 -->
+      <div class="grid lg:grid-cols-2 gap-4 mb-5">
+        <!-- 事件 -->
+        <div class="sf-card p-5">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-base font-bold text-slate-900">事件</h2>
+            <button type="button" onclick="openEventModal()" class="text-xs text-violet-600 hover:text-violet-700 font-medium">查看全部事件</button>
+          </div>
+          <div class="text-xs text-slate-500 mb-3 space-y-1">
+            <p><strong>违约事件：</strong>某个自然分钟被标记为违约分钟，写明违约类别与判定详情。</p>
+            <p><strong>正常限流事件：</strong>某个请求发生时 vTPM 已超过已购买量，被 429 限流。</p>
+          </div>
           <div class="space-y-2">
-            <div class="flex items-start gap-3 p-2.5 bg-slate-50 rounded-lg">
-              <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-[10px]"><i class="fa-solid fa-info"></i></div>
+            <div class="flex items-start gap-3 p-2.5 bg-orange-50 rounded-lg">
+              <div class="w-7 h-7 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-[10px]"><i class="fa-solid fa-triangle-exclamation"></i></div>
               <div>
-                <p class="text-sm font-medium">用户超限限流</p>
-                <p class="text-xs text-slate-500">08-20 14:32 · 占用 312 vTPM，超出 300 vTPM</p>
+                <p class="text-sm font-medium">违约事件</p>
+                <p class="text-xs text-slate-500">08-20 14:32 · A 类 vTPM 速率违约：该分钟请求 120 个，实际消耗 280 vTPM ≤ 购买量 300，A 类违约请求 15 个（占比 12.5%）</p>
               </div>
             </div>
-            <div class="flex items-start gap-3 p-2.5 bg-green-50 rounded-lg">
-              <div class="w-7 h-7 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></div>
+            <div class="flex items-start gap-3 p-2.5 bg-violet-50 rounded-lg">
+              <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-[10px]"><i class="fa-solid fa-info"></i></div>
               <div>
-                <p class="text-sm font-medium">SLO 命中</p>
-                <p class="text-xs text-slate-500">今日无系统侧违约事件</p>
+                <p class="text-sm font-medium">正常限流事件</p>
+                <p class="text-xs text-slate-500">08-20 14:35 · 该请求发生时实际折算 312 vTPM，超出购买量 300，触发 429 限流</p>
               </div>
             </div>
           </div>
-          <button type="button" onclick="openEventModal()" class="text-xs text-violet-600 hover:text-violet-700 mt-3 inline-block font-medium">查看全部事件</button>
+        </div>
+
+        <!-- SLA 赔付规则 -->
+        <div class="sf-card p-5">
+          <h2 class="text-base font-bold text-slate-900 mb-3">SLA 赔付规则</h2>
+          <p class="text-xs text-slate-500 mb-3">某个自然分钟，不论是哪类违约，都算违约。</p>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium">累计违约分钟/月</th>
+                  <th class="px-3 py-2 text-left font-medium">赔付比例</th>
+                  <th class="px-3 py-2 text-left font-medium">附加权</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">
+                <tr><td class="px-3 py-2">≤ 3 分钟</td><td class="px-3 py-2">0%</td><td class="px-3 py-2">容忍窗口</td></tr>
+                <tr><td class="px-3 py-2">4–30 分钟</td><td class="px-3 py-2">10%</td><td class="px-3 py-2">—</td></tr>
+                <tr><td class="px-3 py-2">31–120 分钟</td><td class="px-3 py-2">30%</td><td class="px-3 py-2">—</td></tr>
+                <tr><td class="px-3 py-2">> 120 分钟</td><td class="px-3 py-2">100%</td><td class="px-3 py-2">触发退出权，进入协商流程</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <!-- 明细表 -->
       <div class="sf-card p-5">
-        <h2 class="text-base font-bold text-slate-900 mb-3">按分钟聚合数据（最近 1 小时）</h2>
+        <h2 class="text-base font-bold text-slate-900 mb-3">按自然分钟聚合数据（最近 1 小时）</h2>
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead class="bg-slate-50 text-slate-600">
               <tr>
                 <th class="px-4 py-3 text-left font-medium">时间</th>
                 <th class="px-4 py-3 text-left font-medium">实际消耗 vTPM</th>
-                <th class="px-4 py-3 text-left font-medium">输入命中 Cache</th>
-                <th class="px-4 py-3 text-left font-medium">输入未命中 Cache</th>
-                <th class="px-4 py-3 text-left font-medium">输出 tokens</th>
-                <th class="px-4 py-3 text-left font-medium">限流次数</th>
                 <th class="px-4 py-3 text-left font-medium">P95 TTFT</th>
+                <th class="px-4 py-3 text-left font-medium">P95 TPOT</th>
+                <th class="px-4 py-3 text-left font-medium">5xx 请求数</th>
+                <th class="px-4 py-3 text-left font-medium">正常限流次数</th>
+                <th class="px-4 py-3 text-left font-medium">违约类型</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200" id="usage-table"></tbody>
@@ -247,8 +335,8 @@
       <div class="p-3 border-b border-slate-100 bg-slate-50">
         <div class="flex flex-wrap gap-2" id="event-filters">
           <button type="button" data-filter="all" class="px-2.5 py-1 rounded-full text-xs font-medium bg-violet-600 text-white">全部</button>
-          <button type="button" data-filter="throttle" class="px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600">超限限流</button>
-          <button type="button" data-filter="sla" class="px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600">SLA 违约</button>
+          <button type="button" data-filter="breach" class="px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600">违约事件</button>
+          <button type="button" data-filter="throttle" class="px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600">正常限流事件</button>
           <button type="button" data-filter="system" class="px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-600">系统事件</button>
         </div>
       </div>
@@ -265,9 +353,10 @@
 
   <script>
     const pkgMap = {
-      'P001': { model: 'Deepseek V4 Flash 0731', amount: 300, bind: 'deepseek-v4-flash-0731-prod', period: '2026-08-01 ~ 2026-08-30' },
-      'P002': { model: 'GLM 5.2', amount: 200, bind: 'glm-5.2-prod', period: '2026-09-01 ~ 2026-09-30' },
-      'P005': { model: 'Deepseek V4 Flash 0731', amount: 100, bind: 'deepseek-v4-flash-0731-demo', period: '2026-07-01 ~ 2026-07-31' }
+      'P001': { model: 'Deepseek V4 Flash 0731', amount: 300, bind: ['deepseek-v4-flash-0731', 'deepseek-v4-flash-0731-prod'], period: '2026-08-01 ~ 2026-08-30' },
+      'P002': { model: 'GLM 5.2', amount: 200, bind: ['glm-5.2', 'glm-5.2-prod'], period: '2026-09-01 ~ 2026-09-30' },
+      'P005': { model: 'Deepseek V4 Flash 0731', amount: 100, bind: ['deepseek-v4-flash-0731-demo'], period: '2026-07-01 ~ 2026-07-31' },
+      'P006': { model: 'Deepseek V4 Flash 0731', amount: 100, bind: ['deepseek-v4-flash-0731-cancelled'], period: '2026-06-01 ~ 2026-06-30' }
     };
 
     function loadPkgInfo() {
@@ -275,11 +364,11 @@
       const pkgId = params.get('pkg') || 'P001';
       const pkg = pkgMap[pkgId] || pkgMap['P001'];
       document.getElementById('pkg-id').textContent = pkgId;
-      document.getElementById('pkg-bind').textContent = pkg.bind;
+      document.getElementById('pkg-bind').textContent = Array.isArray(pkg.bind) ? pkg.bind.join('、') : pkg.bind;
       document.getElementById('pkg-period').textContent = pkg.period;
       document.getElementById('page-title').textContent = pkg.model;
       const cap = document.getElementById('metric-capacity');
-      if (cap) cap.textContent = pkg.amount;
+      if (cap) cap.innerHTML = `${pkg.amount} <span class="text-sm font-normal text-slate-500">vTPM</span>`;
     }
     loadPkgInfo();
 
@@ -287,14 +376,14 @@
     const tableEl = document.getElementById('usage-table');
 
     const events = [
-      { type: 'throttle', title: '用户超限限流', desc: '实际折算占用 312 vTPM，超出购买量 300 vTPM', time: '08-20 14:32', icon: 'fa-info', cls: 'bg-violet-100 text-violet-600' },
-      { type: 'sla', title: 'SLA 违约赔付', desc: 'TTFT P95 超过承诺阈值 20 ms，触发赔付 5% 月费', time: '08-19 09:15', icon: 'fa-triangle-exclamation', cls: 'bg-orange-100 text-orange-600' },
+      { type: 'breach', title: 'A 类 vTPM 速率违约', desc: '14:32 实际消耗 280 vTPM ≤ 购买量 300，A 类违约请求 15 个（占比 12.5%），该分钟被标记为违约分钟', time: '08-20 14:32', icon: 'fa-triangle-exclamation', cls: 'bg-orange-100 text-orange-600' },
+      { type: 'throttle', title: '正常限流事件', desc: '请求发生时实际折算 312 vTPM，超出购买量 300，触发 429 限流', time: '08-20 14:35', icon: 'fa-info', cls: 'bg-violet-100 text-violet-600' },
+      { type: 'breach', title: 'B 类 延迟违约', desc: '14:33 P95 TTFT 152 ms 超过承诺阈值 120 ms，该分钟被标记为违约分钟', time: '08-19 09:15', icon: 'fa-triangle-exclamation', cls: 'bg-orange-100 text-orange-600' },
       { type: 'system', title: '系统维护', desc: '平台计划维护，预留 vTPM 服务不受影响', time: '08-18 02:00', icon: 'fa-screwdriver-wrench', cls: 'bg-blue-100 text-blue-600' },
-      { type: 'throttle', title: '用户超限限流', desc: '实际折算占用 305 vTPM，超出购买量 300 vTPM', time: '08-17 11:42', icon: 'fa-info', cls: 'bg-violet-100 text-violet-600' },
       { type: 'sla', title: 'SLO 命中', desc: '今日无系统侧违约事件', time: '08-16 23:59', icon: 'fa-check', cls: 'bg-green-100 text-green-600' },
       { type: 'system', title: '资源包续费成功', desc: '购买量已重置为 300 vTPM，有效期延长 30 天', time: '08-15 10:08', icon: 'fa-rotate', cls: 'bg-blue-100 text-blue-600' },
-      { type: 'throttle', title: '用户超限限流', desc: '实际折算占用 320 vTPM，超出购买量 300 vTPM', time: '08-14 16:20', icon: 'fa-info', cls: 'bg-violet-100 text-violet-600' },
-      { type: 'sla', title: 'SLA 违约赔付', desc: 'TPOT P95 超过承诺阈值 5 ms，触发赔付 2% 月费', time: '08-13 08:50', icon: 'fa-triangle-exclamation', cls: 'bg-orange-100 text-orange-600' }
+      { type: 'throttle', title: '正常限流事件', desc: '请求发生时实际折算 320 vTPM，超出购买量 300，触发 429 限流', time: '08-14 16:20', icon: 'fa-info', cls: 'bg-violet-100 text-violet-600' },
+      { type: 'breach', title: 'C 类 可用性违约', desc: '08:50 该分钟内请求全部失败（5xx/超时），被标记为违约分钟', time: '08-13 08:50', icon: 'fa-triangle-exclamation', cls: 'bg-orange-100 text-orange-600' }
     ];
     let currentEventFilter = 'all';
 
@@ -379,21 +468,30 @@
       });
     });
 
-    function renderChart() {
-      chartEl.innerHTML = '';
+    function makeBarChart(containerId, colorClass, tooltipFn, maxHeight = 130) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      container.style.position = 'relative';
       for (let i = 0; i < 24; i++) {
-        const h = Math.floor(40 + Math.random() * 110);
+        const h = Math.floor(10 + Math.random() * maxHeight);
         const bar = document.createElement('div');
-        bar.className = 'flex-1 bg-violet-600 rounded-t hover:bg-violet-500 relative group';
+        bar.className = `flex-1 ${colorClass} rounded-t hover:opacity-80 relative group`;
         bar.style.height = h + 'px';
-        bar.innerHTML = `<div class="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-slate-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">${Math.floor(h/1.5)} vTPM</div>`;
-        chartEl.appendChild(bar);
+        bar.innerHTML = `<div class="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-slate-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">${tooltipFn(h)}</div>`;
+        container.appendChild(bar);
       }
+    }
+    function renderChart() {
+      makeBarChart('vtpm-chart', 'bg-violet-600', h => `${Math.floor(h/0.5)} vTPM`, 130);
+      // 购买量参考线
       const line = document.createElement('div');
       line.className = 'absolute left-0 right-0 border-t-2 border-dashed border-slate-300 pointer-events-none';
       line.style.bottom = '100px';
-      chartEl.style.position = 'relative';
-      chartEl.appendChild(line);
+      document.getElementById('vtpm-chart').appendChild(line);
+
+      makeBarChart('error-chart', 'bg-red-500', h => `${Math.floor(h/5)} 次`, 60);
+      makeBarChart('ttft-chart', 'bg-blue-500', h => `${Math.floor(60 + h/2)} ms`, 120);
+      makeBarChart('tpot-chart', 'bg-emerald-500', h => `${Math.floor(5 + h/10)} ms`, 80);
     }
     function renderTable() {
       tableEl.innerHTML = '';
@@ -402,20 +500,23 @@
         t.setMinutes(t.getMinutes() - i);
         const time = t.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
         const used = Math.floor(120 + Math.random() * 180);
-        const hit = Math.floor(Math.random() * 50000);
-        const miss = Math.floor(Math.random() * 20000);
-        const out = Math.floor(Math.random() * 5000);
-        const rl = used > 300 ? Math.floor(Math.random() * 5) : 0;
         const ttft = Math.floor(80 + Math.random() * 60);
+        const tpot = Math.floor(10 + Math.random() * 20);
+        const err = Math.floor(Math.random() * 3);
+        const throttle = used > 300 ? Math.floor(Math.random() * 5) + 1 : 0;
+        let breach = '';
+        if (used <= 300 && throttle > 0) breach = 'A 类';
+        else if (ttft > 120 || tpot > 25) breach = 'B 类';
+        else if (err > 0 && Math.random() > 0.7) breach = 'C 类';
         const row = document.createElement('tr');
         row.innerHTML = `
           <td class="px-4 py-3">${time}</td>
           <td class="px-4 py-3 font-medium ${used > 300 ? 'text-orange-600' : 'text-slate-900'}">${used}</td>
-          <td class="px-4 py-3">${hit.toLocaleString()}</td>
-          <td class="px-4 py-3">${miss.toLocaleString()}</td>
-          <td class="px-4 py-3">${out.toLocaleString()}</td>
-          <td class="px-4 py-3">${rl}</td>
           <td class="px-4 py-3">${ttft} ms</td>
+          <td class="px-4 py-3">${tpot} ms</td>
+          <td class="px-4 py-3 ${err > 0 ? 'text-red-600' : ''}">${err}</td>
+          <td class="px-4 py-3 ${throttle > 0 ? 'text-violet-600' : ''}">${throttle}</td>
+          <td class="px-4 py-3"><span class="${breach ? 'px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700' : ''}">${breach || '—'}</span></td>
         `;
         tableEl.appendChild(row);
       }

@@ -162,9 +162,10 @@
             <div class="flex flex-wrap items-center gap-y-2 gap-x-1">
               <span class="text-xs text-slate-400 mr-1">状态</span>
               <button type="button" class="filter-btn active" data-filter-status="all">全部</button>
-              <button type="button" class="filter-btn" data-filter-status="active">可用</button>
+              <button type="button" class="filter-btn" data-filter-status="active">生效中</button>
               <button type="button" class="filter-btn" data-filter-status="used">已用完</button>
               <button type="button" class="filter-btn" data-filter-status="expired">已过期</button>
+              <button type="button" class="filter-btn" data-filter-status="cancelled">已作废</button>
               <span class="text-xs text-slate-400 mx-2 hidden sm:inline">|</span>
               <span class="text-xs text-slate-400 mr-1">类型</span>
               <button type="button" class="filter-btn active" data-filter-type="all">全部</button>
@@ -186,7 +187,7 @@
   <!-- 详情弹窗 -->
   <div id="detail-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
       <div class="p-6">
         <div class="flex items-start justify-between mb-4">
           <div>
@@ -216,8 +217,36 @@
             <p class="flex justify-between"><span class="text-slate-400">状态</span><span id="modal-status"></span></p>
             <p class="flex justify-between"><span class="text-slate-400">有效期</span><span id="modal-period"></span></p>
             <p class="flex justify-between"><span class="text-slate-400">可用范围</span><span id="modal-scope" class="text-right max-w-[60%]"></span></p>
-            <p class="flex justify-between" id="modal-bind-row"><span class="text-slate-400">绑定 model_name</span><span id="modal-bind" class="font-mono"></span></p>
+            <div class="flex justify-between items-start" id="modal-bind-row">
+              <span class="text-slate-400">绑定 model_name</span>
+              <div class="text-right max-w-[60%]">
+                <div id="modal-bind" class="font-mono"></div>
+                <p class="text-xs text-slate-400 mt-1">API 请求填写上述 model_name 将路由到预留算力资源的模型服务上</p>
+              </div>
+            </div>
             <p class="flex justify-between" id="modal-id-row"><span class="text-slate-400">资源包 ID</span><span id="modal-id" class="font-mono text-xs"></span></p>
+            <p class="flex justify-between" id="modal-status-flow-row"><span class="text-slate-400">可操作</span><span id="modal-status-flow" class="text-slate-700 text-xs"></span></p>
+          </div>
+
+          <!-- 折算系数 -->
+          <div id="modal-factor-row" class="hidden">
+            <p class="text-sm font-medium text-slate-900 mb-2">折算系数</p>
+            <p class="text-xs text-slate-500 mb-2">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+                <thead class="bg-slate-50 text-slate-600">
+                  <tr>
+                    <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
+                    <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
+                    <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
+                    <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
+                    <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
+                    <th class="px-3 py-2 text-left font-medium">输出系数</th>
+                  </tr>
+                </thead>
+                <tbody id="modal-factor-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+              </table>
+            </div>
           </div>
 
           <div class="bg-slate-50 rounded-xl p-4 text-xs text-slate-500 space-y-1">
@@ -227,7 +256,7 @@
           </div>
         </div>
 
-        <div class="mt-6 flex gap-3 justify-end">
+        <div class="mt-6 flex gap-3 justify-end" id="modal-actions">
           <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
           <a id="modal-action" href="usage.html" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium hidden">查看监控</a>
         </div>
@@ -237,17 +266,34 @@
 
   <script>
     const packages = [
-      { id: 'P001', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 300, unit: 'vTPM', used: 0, status: 'active', period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理', bind: 'deepseek-v4-flash-0731-prod' },
-      { id: 'P002', type: 'vtpm', name: '预留 vTPM', model: 'GLM 5.2', amount: 200, unit: 'vTPM', used: 0, status: 'active', period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理', bind: 'glm-5.2-prod' },
+      { id: 'P001', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 30, unit: '万 vTPM', used: 0, status: 'active', period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理', bind: ['deepseek-v4-flash-0731', 'deepseek-v4-flash-0731-prod'], factors: [
+        { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
+        { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
+        { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
+        { input: '0 ~ 128K', cache: '50% ~ 100%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.05, outputF: 2.00 },
+        { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
+        { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
+      ]},
+      { id: 'P002', type: 'vtpm', name: '预留 vTPM', model: 'GLM 5.2', amount: 20, unit: '万 vTPM', used: 0, status: 'active', period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理', bind: ['glm-5.2', 'glm-5.2-prod'], factors: [
+        { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
+        { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
+      ]},
       { id: 'P003', type: 'tokens', name: 'Tokens 包', model: '通用 Tokens', amount: 1200, unit: '万 tokens', remain: 850, status: 'active', period: '2026-06-15 ~ 2026-12-15', scope: '平台按 tokens 计量计费的模型服务', bind: null },
       { id: 'P004', type: 'tokens', name: 'Tokens 包', model: '通用 Tokens', amount: 1000, unit: '万 tokens', remain: 0, status: 'used', period: '2026-05-01 ~ 2026-07-31', scope: '平台按 tokens 计量计费的模型服务', bind: null },
-      { id: 'P005', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 100, unit: 'vTPM', used: 0, status: 'expired', period: '2026-07-01 ~ 2026-07-31', scope: 'Deepseek V4 Flash 0731 推理', bind: 'deepseek-v4-flash-0731-demo' }
+      { id: 'P005', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'expired', period: '2026-07-01 ~ 2026-07-31', scope: 'Deepseek V4 Flash 0731 推理', bind: ['deepseek-v4-flash-0731-demo'], factors: [
+        { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
+        { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 }
+      ]},
+      { id: 'P006', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'cancelled', period: '2026-06-01 ~ 2026-06-30', scope: 'Deepseek V4 Flash 0731 推理', bind: ['deepseek-v4-flash-0731-cancelled'], factors: [
+        { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
+        { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 }
+      ]}
     ];
 
     const shopItems = [
       { type: 'tokens', title: '通用 Tokens 包', desc: '适用于平台按 tokens 计量计费的模型服务，优先抵扣 token 用量。', price: '按需定价', icon: 'fa-coins', color: 'green' },
-      { type: 'vtpm', title: 'Deepseek V4 Flash 0731 预留 vTPM', desc: '锁定算力，获得分钟级 SLO 承诺与确定性推理吞吐。', price: '¥3,300/份/30天', icon: 'fa-microchip', color: 'blue' },
-      { type: 'vtpm', title: 'GLM 5.2 预留 vTPM', desc: '中文场景优化，资源独占，超量请求可降级或自行控制。', price: '¥2,900/份/30天', icon: 'fa-microchip', color: 'purple' }
+      { type: 'vtpm', title: 'Deepseek V4 Flash 0731 预留 vTPM', desc: '锁定算力，获得分钟级 SLO 承诺与确定性推理吞吐。', price: '¥3,300/10万 vTPM/30天', icon: 'fa-microchip', color: 'blue' },
+      { type: 'vtpm', title: 'GLM 5.2 预留 vTPM', desc: '中文场景优化，资源独占，超量请求将返回 429，需用户自行处理。', price: '¥2,900/10万 vTPM/30天', icon: 'fa-microchip', color: 'purple' },
     ];
 
     let currentStatus = 'all';
@@ -256,7 +302,8 @@
     const statusMap = {
       active: { label: '生效中', cls: 'bg-green-100 text-green-700' },
       used: { label: '已用完', cls: 'bg-slate-100 text-slate-500' },
-      expired: { label: '已过期', cls: 'bg-slate-100 text-slate-500' }
+      expired: { label: '已过期', cls: 'bg-slate-100 text-slate-500' },
+      cancelled: { label: '已作废', cls: 'bg-red-50 text-red-600' }
     };
 
     function getUsedPercent(p) {
@@ -315,10 +362,10 @@
             <div class="border-t border-slate-100 pt-3 space-y-1 text-xs ${isGray ? 'text-slate-400' : 'text-slate-500'} mb-4">
               <p>可用范围：${p.scope}</p>
               <p>有效期：${p.period}</p>
-              ${p.bind ? `<p>绑定：${p.bind}</p>` : `<p>ID：${p.id}</p>`}
+              ${p.bind ? `<p>绑定：${Array.isArray(p.bind) ? p.bind.join('、') : p.bind}</p>` : `<p>ID：${p.id}</p>`}
             </div>
             <div class="flex items-center gap-3 text-sm">
-              ${isVtpm && p.status === 'active' ? `<a href="usage.html?pkg=${p.id}" class="text-violet-600 hover:text-violet-700 font-medium" onclick="event.stopPropagation()">监控</a>` : ''}
+              ${isVtpm ? `<a href="usage.html?pkg=${p.id}" class="text-violet-600 hover:text-violet-700 font-medium" onclick="event.stopPropagation()">查看监控</a>` : ''}
             </div>
           </div>
         `;
@@ -369,11 +416,21 @@
       const bindRow = document.getElementById('modal-bind-row');
       if (p.bind) {
         bindRow.classList.remove('hidden');
-        document.getElementById('modal-bind').textContent = p.bind;
+        const binds = Array.isArray(p.bind) ? p.bind : [p.bind];
+        document.getElementById('modal-bind').innerHTML = binds.map(b => `<span class="inline-block bg-slate-100 px-1.5 py-0.5 rounded text-xs mr-1 mb-1 max-w-[160px] truncate align-top" title="${b.replace(/"/g, '&quot;')}">${b}</span>`).join(' ');
       } else {
         bindRow.classList.add('hidden');
       }
       document.getElementById('modal-id').textContent = p.id;
+
+      // 状态流转提示：前台预留 vTPM 包暂不支持主动延期/作废
+      const statusFlowRow = document.getElementById('modal-status-flow-row');
+      if (isVtpm) {
+        statusFlowRow.classList.remove('hidden');
+        document.getElementById('modal-status-flow').textContent = '查看监控';
+      } else {
+        statusFlowRow.classList.add('hidden');
+      }
 
       const progressWrap = document.getElementById('modal-progress-wrap');
       if (!isVtpm) {
@@ -385,12 +442,35 @@
         progressWrap.classList.add('hidden');
       }
 
-      const actionBtn = document.getElementById('modal-action');
-      if (isVtpm && p.status === 'active') {
-        actionBtn.href = `usage.html?pkg=${p.id}`;
-        actionBtn.classList.remove('hidden');
+      // 折算系数
+      const factorRow = document.getElementById('modal-factor-row');
+      if (isVtpm && p.factors) {
+        factorRow.classList.remove('hidden');
+        document.getElementById('modal-factor-body').innerHTML = p.factors.map(f => `
+          <tr>
+            <td class="px-3 py-2">${f.input}</td>
+            <td class="px-3 py-2">${f.cache}</td>
+            <td class="px-3 py-2">${f.output}</td>
+            <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
+            <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
+            <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
+          </tr>
+        `).join('');
       } else {
-        actionBtn.classList.add('hidden');
+        factorRow.classList.add('hidden');
+      }
+
+      // 操作按钮：前台预留 vTPM 包暂不支持延期/作废
+      const actionsBox = document.getElementById('modal-actions');
+      if (isVtpm) {
+        actionsBox.innerHTML = `
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
+          <a href="usage.html?pkg=${p.id}" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium">查看监控</a>
+        `;
+      } else {
+        actionsBox.innerHTML = `
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
+        `;
       }
 
       document.getElementById('detail-modal').classList.remove('hidden');
