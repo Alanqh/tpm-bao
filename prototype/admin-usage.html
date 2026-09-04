@@ -174,12 +174,21 @@
         </div>
       </div>
 
+      <!-- 路由与自然分钟提示 -->
+      <div class="admin-card p-3 mb-4 text-xs text-slate-600 flex items-start gap-2">
+        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+        <div>
+          <p>API 请求中填写该资源包绑定的 model_name 时，将路由到预留算力资源的模型服务上。</p>
+          <p class="text-slate-400 mt-0.5">所有监控与事件数据均按自然分钟统计。</p>
+        </div>
+      </div>
+
       <!-- 资源包信息卡 -->
       <div class="admin-card p-3 mb-4">
         <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs">
           <div><span class="text-slate-500">SKU 名称</span><p class="font-medium text-slate-900 mt-0.5" id="pkg-sku">Deepseek V4 Flash 0731 预留 vTPM</p></div>
-          <div><span class="text-slate-500">购买量</span><p class="font-medium text-slate-900 mt-0.5"><span id="pkg-capacity">300</span> vTPM</p></div>
-          <div><span class="text-slate-500">当前分钟消耗</span><p class="font-medium text-violet-600 mt-0.5">186 vTPM</p></div>
+          <div><span class="text-slate-500">购买量</span><p class="font-medium text-slate-900 mt-0.5"><span id="pkg-capacity">300</span> 万 vTPM</p></div>
+          <div><span class="text-slate-500">当前分钟消耗</span><p class="font-medium text-violet-600 mt-0.5">186 万 vTPM</p></div>
           <div><span class="text-slate-500">今日限流事件</span><p class="font-medium text-green-600 mt-0.5">0</p></div>
           <div><span class="text-slate-500">SLO 命中率</span><p class="font-medium text-blue-600 mt-0.5">99.97%</p></div>
         </div>
@@ -250,12 +259,23 @@
         <!-- 限流与违约事件 -->
         <div class="admin-card p-4">
           <h4 class="text-sm font-semibold text-slate-900 mb-3">限流与违约事件</h4>
+          <div class="text-[11px] text-slate-500 mb-3 space-y-1">
+            <p><strong>违约事件：</strong>某个自然分钟被标记为违约分钟，写明违约类别与判定详情。</p>
+            <p><strong>正常限流事件：</strong>某个请求发生时 vTPM 已超过已购买量，被 429 限流。</p>
+          </div>
           <div class="space-y-2">
-            <div class="flex items-start gap-2.5 p-2.5 bg-slate-50 rounded border border-slate-100">
+            <div class="flex items-start gap-2.5 p-2.5 bg-orange-50 rounded border border-slate-100">
+              <div class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-[10px] flex-shrink-0"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div>
+                <p class="text-xs font-medium text-slate-900">违约事件</p>
+                <p class="text-[11px] text-slate-500">08-20 14:32 · A 类 vTPM 速率违约：该分钟请求 120 个，实际消耗 280 万 vTPM ≤ 购买量 300 万，A 类违约请求 15 个（占比 12.5%）</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-2.5 p-2.5 bg-violet-50 rounded border border-slate-100">
               <div class="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-[10px] flex-shrink-0"><i class="fa-solid fa-info"></i></div>
               <div>
-                <p class="text-xs font-medium text-slate-900">用户超限限流</p>
-                <p class="text-[11px] text-slate-500">08-20 14:32 · 占用 312 vTPM，超出 300 vTPM</p>
+                <p class="text-xs font-medium text-slate-900">正常限流事件</p>
+                <p class="text-[11px] text-slate-500">08-20 14:35 · 该请求发生时实际折算 312 万 vTPM，超出购买量 300 万，触发 429 限流</p>
               </div>
             </div>
             <div class="flex items-start gap-2.5 p-2.5 bg-green-50 rounded border border-slate-100">
@@ -271,13 +291,13 @@
 
       <!-- 明细表 -->
       <div class="admin-card p-4">
-        <h4 class="text-sm font-semibold text-slate-900 mb-3">按分钟聚合数据（最近 1 小时）</h4>
+        <h4 class="text-sm font-semibold text-slate-900 mb-3">按自然分钟聚合数据（最近 1 小时）</h4>
         <div class="overflow-x-auto">
           <table class="min-w-full text-xs">
             <thead class="bg-slate-50 text-slate-600">
               <tr>
                 <th class="px-3 py-2 text-left font-medium border-b border-slate-200">时间</th>
-                <th class="px-3 py-2 text-left font-medium border-b border-slate-200">实际消耗 vTPM</th>
+                <th class="px-3 py-2 text-left font-medium border-b border-slate-200">实际消耗（万 vTPM）</th>
                 <th class="px-3 py-2 text-left font-medium border-b border-slate-200">输入命中 Cache</th>
                 <th class="px-3 py-2 text-left font-medium border-b border-slate-200">输入未命中 Cache</th>
                 <th class="px-3 py-2 text-left font-medium border-b border-slate-200">输出 tokens</th>
@@ -369,7 +389,7 @@
         const bar = document.createElement('div');
         bar.className = 'flex-1 bg-violet-600 rounded-t hover:bg-violet-500 relative group';
         bar.style.height = h + 'px';
-        bar.innerHTML = `<div class="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-slate-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">${Math.floor(h/1.5)} vTPM</div>`;
+        bar.innerHTML = `<div class="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-slate-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap">${Math.floor(h/1.5)} 万 vTPM</div>`;
         chartEl.appendChild(bar);
       }
     }

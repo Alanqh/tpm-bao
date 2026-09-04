@@ -122,20 +122,12 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-900 mb-2">预留 vTPM 份数 <span class="text-red-500">*</span></label>
-              <select name="units" id="units" class="survey-input survey-select" required>
-                <option value="1">1 份（100 vTPM）</option>
-                <option value="2">2 份（200 vTPM）</option>
-                <option value="3" selected>3 份（300 vTPM）</option>
-                <option value="4">4 份（400 vTPM）</option>
-                <option value="5">5 份（500 vTPM）</option>
-                <option value="6">6 份（600 vTPM）</option>
-                <option value="7">7 份（700 vTPM）</option>
-                <option value="8">8 份（800 vTPM）</option>
-                <option value="9">9 份（900 vTPM）</option>
-                <option value="10">10 份（1,000 vTPM）</option>
-              </select>
-              <p class="text-xs text-slate-400 mt-1.5">1 份 = 100 vTPM，单次最多可购买 10 份。</p>
+              <label class="block text-sm font-medium text-slate-900 mb-2">预留 vTPM 数量 <span class="text-red-500">*</span></label>
+              <div class="flex items-center gap-4">
+                <input type="range" name="units" id="units" min="10" max="100" step="10" value="30" class="flex-1 accent-violet-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                <span class="text-sm font-medium whitespace-nowrap"><span id="units-display">30</span> 万 vTPM</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-1.5">可选 10 万 ~ 100 万 vTPM，步长 10 万。</p>
             </div>
 
             <div>
@@ -151,35 +143,21 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-900 mb-3">绑定 model_name 方式 <span class="text-red-500">*</span></label>
-              <div class="space-y-2">
-                <label class="flex items-start gap-3 cursor-pointer">
-                  <input type="radio" name="bind_mode" value="public" class="survey-radio hidden" checked>
-                  <div class="flex-1 border border-slate-200 rounded-lg p-3 transition-all">
-                    <div class="flex items-center gap-2 font-medium text-slate-900">
-                      <span class="radio-dot w-4 h-4 rounded-full border-2 border-slate-300 flex-shrink-0"></span>
-                      公共 model name
-                    </div>
-                    <p class="text-xs text-slate-500 mt-1 ml-6">使用平台固定公网 model_name，超量时自动降级到 Serverless 计费。</p>
-                  </div>
-                </label>
-                <label class="flex items-start gap-3 cursor-pointer">
-                  <input type="radio" name="bind_mode" value="custom" class="survey-radio hidden">
-                  <div class="flex-1 border border-slate-200 rounded-lg p-3 transition-all">
-                    <div class="flex items-center gap-2 font-medium text-slate-900">
-                      <span class="radio-dot w-4 h-4 rounded-full border-2 border-slate-300 flex-shrink-0"></span>
-                      自定义 model name
-                    </div>
-                    <p class="text-xs text-slate-500 mt-1 ml-6">资源独占性更强，超量请求将返回 429，由用户自行处理降级。</p>
-                  </div>
-                </label>
+              <label class="block text-sm font-medium text-slate-900 mb-3">绑定 model_name <span class="text-red-500">*</span></label>
+              <div class="border border-slate-200 rounded-lg p-4 bg-slate-50/50">
+                <p class="text-xs text-slate-600 mb-3">默认已填入所选模型的平台公网 model_name，您可删除或继续添加多个。API 请求中填写下列任意 model_name 时，将路由到本预留 vTPM 对应的模型服务上。</p>
+                <div id="model-name-tags" class="flex flex-wrap gap-2 mb-3">
+                  <!-- JS 渲染 tag -->
+                </div>
+                <div class="flex gap-2">
+                  <input type="text" id="model_name_input" placeholder="例如：deepseek-v4-flash-0731-prod" class="survey-input flex-1">
+                  <button type="button" id="add-model-name" class="px-3 py-2 rounded-lg bg-violet-600 text-white text-sm hover:bg-violet-700 transition">添加</button>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">默认已填入所选模型的公网 model_name；点击“×”可移除，最多绑定 3 个。</p>
+                <p id="model-name-error" class="hidden text-xs text-red-500 mt-2">请至少绑定一个 model_name</p>
+                <p id="model-name-max" class="hidden text-xs text-orange-500 mt-2">最多可绑定 3 个 model_name</p>
+                <input type="hidden" name="model_names" id="model_names_hidden">
               </div>
-            </div>
-
-            <div id="custom-model-names" class="hidden">
-              <label class="block text-sm font-medium text-slate-900 mb-2">自定义 model_name 列表</label>
-              <input type="text" name="model_names" id="model_names" placeholder="例如：deepseek-v4-flash-0731-prod, glm-5.2-prod" class="survey-input">
-              <p class="text-xs text-slate-400 mt-1.5">多个以逗号分隔。</p>
             </div>
           </div>
         </div>
@@ -257,31 +235,91 @@
   </footer>
 
   <script>
-    const priceTable = { 'deepseek-v4-flash-0731': 3300, 'glm-5.2': 2900 };
-    const bindModeEls = document.querySelectorAll('input[name="bind_mode"]');
-    const customNamesBox = document.getElementById('custom-model-names');
-    const modelNamesInput = document.getElementById('model_names');
+    const priceTable = { 'deepseek-v4-flash-0731': 3300, 'glm-5.2': 2900 }; // 每 10万 vTPM/30天
+    const publicModelNameMap = { 'deepseek-v4-flash-0731': 'deepseek-v4-flash-0731', 'glm-5.2': 'glm-5.2' };
+    const modelSelect = document.getElementById('model');
+    const unitsEl = document.getElementById('units');
+    const unitsDisplay = document.getElementById('units-display');
 
-    bindModeEls.forEach(el => {
-      el.addEventListener('change', () => {
-        if (el.value === 'custom' && el.checked) {
-          customNamesBox.classList.remove('hidden');
-          modelNamesInput.setAttribute('required', 'required');
-        } else if (el.value === 'public' && el.checked) {
-          customNamesBox.classList.add('hidden');
-          modelNamesInput.removeAttribute('required');
-          modelNamesInput.value = '';
-        }
+    unitsEl.addEventListener('input', () => {
+      unitsDisplay.textContent = unitsEl.value;
+    });
+    const modelNameInput = document.getElementById('model_name_input');
+    const addModelNameBtn = document.getElementById('add-model-name');
+    const tagsContainer = document.getElementById('model-name-tags');
+    const hiddenInput = document.getElementById('model_names_hidden');
+    const errorMsg = document.getElementById('model-name-error');
+    const maxMsg = document.getElementById('model-name-max');
+    let modelNames = [publicModelNameMap[modelSelect.value]];
+
+    function renderTags() {
+      maxMsg.classList.add('hidden');
+      if (modelNames.length === 0) {
+        tagsContainer.innerHTML = `<span class="text-xs text-slate-400 italic">暂无 model_name，请添加或切换模型以恢复默认</span>`;
+      } else {
+        tagsContainer.innerHTML = modelNames.map((name, idx) => `
+          <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-violet-100 text-violet-700 text-xs max-w-[160px] min-w-0" title="${name.replace(/"/g, '&quot;')}">
+            <span class="truncate">${name}</span>
+            <button type="button" data-idx="${idx}" class="remove-tag w-4 h-4 rounded-full hover:bg-violet-200 flex items-center justify-center leading-none text-violet-500 flex-shrink-0">×</button>
+          </span>
+        `).join('');
+      }
+      hiddenInput.value = modelNames.join(',');
+      document.querySelectorAll('.remove-tag').forEach(btn => {
+        btn.addEventListener('click', () => {
+          modelNames.splice(parseInt(btn.dataset.idx), 1);
+          renderTags();
+        });
       });
+    }
+
+    function addModelName() {
+      const val = modelNameInput.value.trim();
+      if (!val) return;
+      if (modelNames.length >= 3) {
+        maxMsg.classList.remove('hidden');
+        modelNameInput.value = '';
+        return;
+      }
+      if (modelNames.includes(val)) {
+        modelNameInput.value = '';
+        return;
+      }
+      modelNames.push(val);
+      modelNameInput.value = '';
+      renderTags();
+    }
+
+    addModelNameBtn.addEventListener('click', addModelName);
+    modelNameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addModelName();
+      }
+    });
+
+    modelSelect.addEventListener('change', () => {
+      const newDefault = publicModelNameMap[modelSelect.value];
+      const oldDefault = modelNames[0];
+      // 保留用户自定义项，移除旧默认，将新默认放在首位
+      modelNames = [newDefault, ...modelNames.filter(n => n !== newDefault && n !== oldDefault)];
+      renderTags();
     });
 
     function handleSubmit(e) {
       e.preventDefault();
+      if (modelNames.length === 0) {
+        errorMsg.classList.remove('hidden');
+        return false;
+      }
+      errorMsg.classList.add('hidden');
       document.getElementById('intent-form').classList.add('hidden');
       document.getElementById('success-msg').classList.remove('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return false;
     }
+
+    renderTags();
   </script>
 </body>
 </html>

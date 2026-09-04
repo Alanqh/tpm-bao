@@ -196,61 +196,31 @@
 
         <!-- 库存管理 -->
         <div id="tab-inventory" class="p-4">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-sm font-semibold text-slate-900">SKU 库存</h3>
-            <div class="flex gap-2">
-              <input type="text" placeholder="搜索模型名称" class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
-              <select class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
-                <option>全部状态</option>
-                <option>售卖中</option>
-                <option>已停售</option>
-              </select>
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="text-sm font-semibold text-slate-900">SKU 库存看板</h3>
+              <p class="text-[11px] text-slate-500 mt-0.5">选择日期范围，查看每个 SKU 在对应日期当天剩余可售出的 vTPM。</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <input id="range-start" type="date" value="2026-09-01" class="border border-slate-300 rounded px-2 py-1.5 text-xs outline-none focus:border-violet-500">
+              <span class="text-xs text-slate-400">至</span>
+              <input id="range-end" type="date" value="2026-09-07" class="border border-slate-300 rounded px-2 py-1.5 text-xs outline-none focus:border-violet-500">
+              <button onclick="renderInventoryBoard()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded admin-btn-default text-xs font-medium">刷新</button>
+              <button onclick="openAdjustModal()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">调整库存</button>
             </div>
           </div>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-xs">
-              <thead class="bg-slate-50 text-slate-600">
-                <tr>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU ID</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU 名称</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">类型</th>
+
+          <div class="overflow-x-auto border border-slate-200 rounded-lg">
+            <table class="min-w-full text-[11px]">
+              <thead class="bg-slate-50 text-slate-600 sticky top-0">
+                <tr id="inventory-head">
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200 min-w-[180px]">SKU</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">配置总量</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">已发放</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">可售卖</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">状态</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">售卖窗口</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作</th>
+                  <!-- 日期列由 JS 填充 -->
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-200">
-                <tr>
-                  <td class="px-3 py-3 font-mono text-[11px]">vtpm-dsv4f-001</td>
-                  <td class="px-3 py-3 font-medium">Deepseek V4 Flash 0731 预留 vTPM</td>
-                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 text-[10px]">预留 vTPM</span></td>
-                  <td class="px-3 py-3">30,000 vTPM</td>
-                  <td class="px-3 py-3">8,500 vTPM</td>
-                  <td class="px-3 py-3">21,500 vTPM</td>
-                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">售卖中</span></td>
-                  <td class="px-3 py-3">2026-08-01 ~ 2026-12-31</td>
-                  <td class="px-3 py-3">
-                    <button class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">调整库存</button>
-                    <button class="text-slate-500 hover:text-slate-700 text-[11px]">停售</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-3 font-mono text-[11px]">vtpm-glm52-001</td>
-                  <td class="px-3 py-3 font-medium">GLM 5.2 预留 vTPM</td>
-                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 text-[10px]">预留 vTPM</span></td>
-                  <td class="px-3 py-3">20,000 vTPM</td>
-                  <td class="px-3 py-3">3,800 vTPM</td>
-                  <td class="px-3 py-3">16,200 vTPM</td>
-                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">售卖中</span></td>
-                  <td class="px-3 py-3">2026-09-01 ~ 2026-12-31</td>
-                  <td class="px-3 py-3">
-                    <button class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">调整库存</button>
-                    <button class="text-slate-500 hover:text-slate-700 text-[11px]">停售</button>
-                  </td>
-                </tr>
+              <tbody id="inventory-body" class="divide-y divide-slate-200">
+                <!-- 数据行由 JS 填充 -->
               </tbody>
             </table>
           </div>
@@ -291,12 +261,13 @@
                   <td class="px-3 py-3 font-mono text-[11px]">sub_3x9a2b1c</td>
                   <td class="px-3 py-3 font-mono text-[11px]">vtpm-dsv4f-001</td>
                   <td class="px-3 py-3">Deepseek V4 Flash 0731 预留 vTPM</td>
-                  <td class="px-3 py-3">300 vTPM</td>
+                  <td class="px-3 py-3">300 万 vTPM</td>
                   <td class="px-3 py-3">2026-08-01 ~ 2026-08-30</td>
                   <td class="px-3 py-3 font-mono text-[11px]">deepseek-v4-flash-0731-prod</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
                   <td class="px-3 py-3">
                     <a href="admin-usage.html?pkg=P001" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
+                    <button onclick="showDetail('P001')" class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">详情</button>
                     <button class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">延期</button>
                     <button class="text-orange-600 hover:text-orange-700 text-[11px]">作废</button>
                   </td>
@@ -306,12 +277,13 @@
                   <td class="px-3 py-3 font-mono text-[11px]">sub_7k2m5n8p</td>
                   <td class="px-3 py-3 font-mono text-[11px]">vtpm-glm52-001</td>
                   <td class="px-3 py-3">GLM 5.2 预留 vTPM</td>
-                  <td class="px-3 py-3">200 vTPM</td>
+                  <td class="px-3 py-3">200 万 vTPM</td>
                   <td class="px-3 py-3">2026-09-01 ~ 2026-09-30</td>
                   <td class="px-3 py-3 font-mono text-[11px]">glm-5.2-prod</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
                   <td class="px-3 py-3">
                     <a href="admin-usage.html?pkg=P002" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
+                    <button onclick="showDetail('P002')" class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">详情</button>
                     <button class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">延期</button>
                     <button class="text-orange-600 hover:text-orange-700 text-[11px]">作废</button>
                   </td>
@@ -366,7 +338,7 @@
                   <td class="px-3 py-3 text-slate-500">2026-08-20 16:42</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 text-[10px]">手动发放</span></td>
                   <td class="px-3 py-3 font-mono text-[11px]">P001</td>
-                  <td class="px-3 py-3">+300 vTPM</td>
+                  <td class="px-3 py-3">+300 万 vTPM</td>
                   <td class="px-3 py-3">销售张三</td>
                   <td class="px-3 py-3 text-[11px] text-slate-500">大客户季度采购</td>
                 </tr>
@@ -374,7 +346,7 @@
                   <td class="px-3 py-3 text-slate-500">2026-08-20 15:18</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px]">延期</span></td>
                   <td class="px-3 py-3 font-mono text-[11px]">P002</td>
-                  <td class="px-3 py-3">+200 vTPM，延期 30 天</td>
+                  <td class="px-3 py-3">+200 万 vTPM，延期 30 天</td>
                   <td class="px-3 py-3">销售李四</td>
                   <td class="px-3 py-3 text-[11px] text-slate-500">续签年度合同赠送</td>
                 </tr>
@@ -382,7 +354,7 @@
                   <td class="px-3 py-3 text-slate-500">2026-08-20 11:05</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 text-[10px]">作废</span></td>
                   <td class="px-3 py-3 font-mono text-[11px]">P004</td>
-                  <td class="px-3 py-3">-100 vTPM</td>
+                  <td class="px-3 py-3">-100 万 vTPM</td>
                   <td class="px-3 py-3">运营王五</td>
                   <td class="px-3 py-3 text-[11px] text-slate-500">客服工单 #1024，误发回退</td>
                 </tr>
@@ -390,7 +362,7 @@
                   <td class="px-3 py-3 text-slate-500">2026-08-19 10:22</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px]">调整库存</span></td>
                   <td class="px-3 py-3 font-mono text-[11px]">vtpm-glm52-001</td>
-                  <td class="px-3 py-3">总量 15,000 → 20,000</td>
+                  <td class="px-3 py-3">总量 15,000 万 vTPM → 20,000 万 vTPM</td>
                   <td class="px-3 py-3">运营王五</td>
                   <td class="px-3 py-3 text-[11px] text-slate-500">补容：Q3 需求上涨</td>
                 </tr>
@@ -409,6 +381,53 @@
     </main>
   </div>
 
+  <!-- Modal: 资源包详情 -->
+  <div id="modal-detail" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-4xl mx-4 p-5 border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900" id="detail-title">资源包详情</h3>
+        <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="detail-body" class="space-y-4 text-xs">
+        <!-- JS 填充 -->
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeDetailModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 调整库存 -->
+  <div id="modal-adjust" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5 border border-slate-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">调整库存</h3>
+        <button onclick="closeAdjustModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-600 mb-1">SKU</label>
+          <select id="adjust-sku" onchange="updateAdjustCurrentTotal()" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+            <option value="vtpm-dsv4f-001">vtpm-dsv4f-001 · Deepseek V4 Flash 0731 预留 vTPM</option>
+            <option value="vtpm-glm52-001">vtpm-glm52-001 · GLM 5.2 预留 vTPM</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">当前配置总量</label>
+          <input id="adjust-current" type="text" disabled class="w-full border border-slate-200 rounded px-2 py-1.5 bg-slate-50 text-slate-500" value="30,000 万 vTPM">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">调整后总量（万 vTPM）</label>
+          <input id="adjust-new" type="number" step="10" min="10" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500" placeholder="例如 30000">
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeAdjustModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
+        <button onclick="closeAdjustModal(); alert('库存调整已记录')" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">确认</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: 手动发放资源包 -->
   <div id="modal-grant" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
     <div class="bg-white rounded-lg w-full max-w-lg mx-4 p-5 border border-slate-200">
@@ -423,12 +442,12 @@
         </div>
         <div><label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU</label><select class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"><option>Deepseek V4 Flash 0731</option><option>GLM 5.2</option></select></div>
         <div class="grid grid-cols-2 gap-3">
-          <div><label class="block text-xs font-medium text-slate-700 mb-1">份数</label><input type="number" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
-          <div><label class="block text-xs font-medium text-slate-700 mb-1">周期 (30天×n)</label><input type="number" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
+          <div><label class="block text-xs font-medium text-slate-700 mb-1">数量（万 vTPM）</label><input type="number" step="10" min="10" max="100" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
+          <div><label class="block text-xs font-medium text-slate-700 mb-1">周期（天）</label><input type="number" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none" placeholder="30 / 60 / 90"></div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">绑定 model_name <span class="text-slate-400 font-normal">（每行一个，与 subject_id 一一对应）</span></label>
-          <textarea class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="3" placeholder="deepseek-v4-flash-0731-prod&#10;glm-5.2-prod"></textarea>
+          <label class="block text-xs font-medium text-slate-700 mb-1">绑定 model_name <span class="text-slate-400 font-normal">（每个资源包统一绑定这些 model_name，最多 3 个；API 请求填写任意一个将路由到预留算力资源）</span></label>
+          <textarea class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="3" placeholder="deepseek-v4-flash-0731-prod&#10;deepseek-v4-flash-0731-custom"></textarea>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div><label class="block text-xs font-medium text-slate-700 mb-1">开始日期</label><input type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
@@ -450,6 +469,21 @@
     function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); document.getElementById('modal-' + id).classList.add('flex'); }
     function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); }
 
+    function openAdjustModal(sku) {
+      if (sku) {
+        document.getElementById('adjust-sku').value = sku;
+      }
+      const modal = document.getElementById('modal-adjust');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeAdjustModal() {
+      const modal = document.getElementById('modal-adjust');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
     function switchTab(tab) {
       document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
       document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
@@ -469,6 +503,169 @@
         icon.classList.remove('fa-chevron-down');
         icon.classList.add('fa-chevron-right');
       }
+    }
+
+    // SKU 库存看板数据
+    const inventorySkus = [
+      { id: 'vtpm-dsv4f-001', name: 'Deepseek V4 Flash 0731 预留 vTPM', total: 30000, issued: 8500 },
+      { id: 'vtpm-glm52-001', name: 'GLM 5.2 预留 vTPM', total: 20000, issued: 3800 }
+    ];
+    const inventoryDaily = {
+      'vtpm-dsv4f-001': {
+        '2026-09-01': 8500, '2026-09-02': 8200, '2026-09-03': 7900, '2026-09-04': 7600,
+        '2026-09-05': 7300, '2026-09-06': 7000, '2026-09-07': 6700
+      },
+      'vtpm-glm52-001': {
+        '2026-09-01': 7200, '2026-09-02': 6900, '2026-09-03': 6600, '2026-09-04': 6300,
+        '2026-09-05': 6000, '2026-09-06': 5700, '2026-09-07': 5400
+      }
+    };
+
+    function getDateRange(start, end) {
+      const dates = [];
+      const s = new Date(start + 'T00:00:00');
+      const e = new Date(end + 'T00:00:00');
+      if (s > e) return dates;
+      for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        dates.push(`${yyyy}-${mm}-${dd}`);
+      }
+      return dates;
+    }
+
+    function renderInventoryBoard() {
+      const start = document.getElementById('range-start').value;
+      const end = document.getElementById('range-end').value;
+      const dates = getDateRange(start, end);
+      const headRow = document.getElementById('inventory-head');
+      const tbody = document.getElementById('inventory-body');
+
+      // 渲染表头
+      headRow.innerHTML = `
+        <th class="px-3 py-2 text-left font-medium border-b border-slate-200 min-w-[180px]">SKU</th>
+        <th class="px-3 py-2 text-left font-medium border-b border-slate-200">配置总量</th>
+        ${dates.map(date => {
+          const label = date.slice(5);
+          return `<th class="px-3 py-2 text-left font-medium border-b border-slate-200 min-w-[80px]">${label}</th>`;
+        }).join('')}
+      `;
+
+      // 渲染行
+      tbody.innerHTML = inventorySkus.map(sku => {
+        const totalText = sku.total.toLocaleString() + ' 万 vTPM';
+        const cells = dates.map(date => {
+          const val = inventoryDaily[sku.id]?.[date];
+          const text = val !== undefined ? val.toLocaleString() + ' 万' : '-';
+          return `<td class="px-3 py-3 align-top">${text}</td>`;
+        }).join('');
+        return `
+          <tr>
+            <td class="px-3 py-3 align-top">
+              <p class="font-medium text-slate-900">${sku.name}</p>
+              <p class="font-mono text-[10px] text-slate-400 mt-0.5">${sku.id}</p>
+            </td>
+            <td class="px-3 py-3 align-top">${totalText}</td>
+            ${cells}
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateAdjustCurrentTotal() {
+      const skuId = document.getElementById('adjust-sku').value;
+      const sku = inventorySkus.find(s => s.id === skuId);
+      document.getElementById('adjust-current').value = sku ? sku.total.toLocaleString() + ' 万 vTPM' : '-';
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      renderInventoryBoard();
+      updateAdjustCurrentTotal();
+    });
+
+    // 后台预留 vTPM 详情数据
+    const detailData = {
+      'P001': {
+        model: 'Deepseek V4 Flash 0731', sku: 'vtpm-dsv4f-001', amount: 300, unit: '万 vTPM',
+        status: '生效中', statusCls: 'bg-green-100 text-green-700',
+        period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理',
+        bind: 'deepseek-v4-flash-0731-prod',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.05, outputF: 2.00 },
+          { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
+          { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
+        ]
+      },
+      'P002': {
+        model: 'GLM 5.2', sku: 'vtpm-glm52-001', amount: 200, unit: '万 vTPM',
+        status: '生效中', statusCls: 'bg-green-100 text-green-700',
+        period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理',
+        bind: 'glm-5.2-prod',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
+        ]
+      }
+    };
+
+    function showDetail(id) {
+      const d = detailData[id];
+      if (!d) return;
+      document.getElementById('detail-title').textContent = `${d.model} 资源包详情`;
+      const factorsRows = d.factors.map(f => `
+        <tr>
+          <td class="px-3 py-2">${f.input}</td>
+          <td class="px-3 py-2">${f.cache}</td>
+          <td class="px-3 py-2">${f.output}</td>
+          <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
+          <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
+          <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
+        </tr>
+      `).join('');
+      document.getElementById('detail-body').innerHTML = `
+        <div class="grid grid-cols-2 gap-3">
+          <div><span class="text-slate-500">资源包 ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${id}</p></div>
+          <div><span class="text-slate-500">SKU ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.sku}</p></div>
+          <div><span class="text-slate-500">购买量</span><p class="font-medium text-slate-900 mt-0.5">${d.amount} ${d.unit}</p></div>
+          <div><span class="text-slate-500">状态</span><p class="mt-0.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${d.statusCls}">${d.status}</span></p></div>
+          <div><span class="text-slate-500">有效期</span><p class="font-medium text-slate-900 mt-0.5">${d.period}</p></div>
+          <div><span class="text-slate-500">可用范围</span><p class="font-medium text-slate-900 mt-0.5">${d.scope}</p></div>
+          <div class="col-span-2"><span class="text-slate-500">绑定 model_name</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.bind}</p></div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-slate-900 mb-2">折算系数</p>
+          <p class="text-xs text-slate-500 mb-2">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
+                  <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
+                  <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
+                  <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
+                  <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
+                  <th class="px-3 py-2 text-left font-medium">输出系数</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">${factorsRows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+      const modal = document.getElementById('modal-detail');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeDetailModal() {
+      const modal = document.getElementById('modal-detail');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
     }
 
   </script>

@@ -121,7 +121,7 @@
 
         <div class="pl-6 space-y-0.5">
           <a href="dashboard.html" class="admin-sidebar-link"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包</a>
-          <a href="usage.html" class="admin-sidebar-link"><i class="fa-solid fa-chart-line w-4 text-center"></i>资源包监控</a>
+          <a href="admin-usage.html" class="admin-sidebar-link"><i class="fa-solid fa-chart-line w-4 text-center"></i>资源包监控</a>
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-server w-4 text-center"></i>客户任务/数据</a>
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-layer-group w-4 text-center"></i>Serverless 管理</a>
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-link w-4 text-center"></i>MaaS 专属端点</a>
@@ -231,7 +231,7 @@
                 <td class="px-3 py-2"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px]">新增</span></td>
                 <td class="px-3 py-2">某科技有限公司</td>
                 <td class="px-3 py-2">Deepseek V4 Flash 0731</td>
-                <td class="px-3 py-2">+300 vTPM</td>
+                <td class="px-3 py-2">+300 万 vTPM</td>
                 <td class="px-3 py-2">销售张三</td>
                 <td class="px-3 py-2">飞书表格配置</td>
               </tr>
@@ -240,7 +240,7 @@
                 <td class="px-3 py-2"><span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 text-[10px]">续购</span></td>
                 <td class="px-3 py-2">某金融科技</td>
                 <td class="px-3 py-2">GLM 5.2</td>
-                <td class="px-3 py-2">+200 vTPM，延期 30 天</td>
+                <td class="px-3 py-2">+200 万 vTPM，延期 30 天</td>
                 <td class="px-3 py-2">销售李四</td>
                 <td class="px-3 py-2">控制台</td>
               </tr>
@@ -249,7 +249,7 @@
                 <td class="px-3 py-2"><span class="px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 text-[10px]">废弃</span></td>
                 <td class="px-3 py-2">某电商平台</td>
                 <td class="px-3 py-2">Deepseek V4 Flash 0731</td>
-                <td class="px-3 py-2">-100 vTPM</td>
+                <td class="px-3 py-2">-100 万 vTPM</td>
                 <td class="px-3 py-2">运营王五</td>
                 <td class="px-3 py-2">客服工单</td>
               </tr>
@@ -258,7 +258,7 @@
                 <td class="px-3 py-2"><span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px]">锁库存</span></td>
                 <td class="px-3 py-2">-</td>
                 <td class="px-3 py-2">Deepseek V4 Flash 0731</td>
-                <td class="px-3 py-2">+500 vTPM 锁定</td>
+                <td class="px-3 py-2">+500 万 vTPM 锁定</td>
                 <td class="px-3 py-2">销售张三</td>
                 <td class="px-3 py-2">企业客户预留</td>
               </tr>
@@ -267,7 +267,7 @@
                 <td class="px-3 py-2"><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px]">调整库存</span></td>
                 <td class="px-3 py-2">-</td>
                 <td class="px-3 py-2">GLM 5.2</td>
-                <td class="px-3 py-2">总量 15,000 → 20,000</td>
+                <td class="px-3 py-2">总量 15,000 万 vTPM → 20,000 万 vTPM</td>
                 <td class="px-3 py-2">运营王五</td>
                 <td class="px-3 py-2">补容</td>
               </tr>
@@ -292,12 +292,12 @@
             <p class="text-lg font-semibold text-slate-900 mt-0.5">62%</p>
           </div>
           <div class="p-3 bg-slate-50 rounded border border-slate-100">
-            <p class="text-xs text-slate-500">Serverless 借用层</p>
-            <p class="text-lg font-semibold text-slate-900 mt-0.5">28%</p>
+            <p class="text-xs text-slate-500">预留层平均利用率</p>
+            <p class="text-lg font-semibold text-slate-900 mt-0.5">58%</p>
           </div>
           <div class="p-3 bg-slate-50 rounded border border-slate-100">
-            <p class="text-xs text-slate-500">今日救急链路触发</p>
-            <p class="text-lg font-semibold text-orange-600 mt-0.5">0 次</p>
+            <p class="text-xs text-slate-500">今日超量限流次数</p>
+            <p class="text-lg font-semibold text-orange-600 mt-0.5">12 次</p>
           </div>
         </div>
         <div class="h-40 flex items-end gap-2">
@@ -307,7 +307,6 @@
           <div class="flex-1 bg-violet-500 rounded-t" style="height: 48%"></div>
           <div class="flex-1 bg-violet-600 rounded-t" style="height: 75%"></div>
           <div class="flex-1 bg-violet-400 rounded-t" style="height: 60%"></div>
-          <div class="flex-1 bg-slate-300 rounded-t" style="height: 28%"></div>
         </div>
         <div class="flex justify-between text-xs text-slate-400 mt-2">
           <span>00:00</span><span>04:00</span><span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>23:59</span>
