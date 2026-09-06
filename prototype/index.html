@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>预留 vTPM - 硅基流动 MaaS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --sf-purple: #6e29f6;
+      --sf-purple-light: #b17dff;
+      --sf-purple-dark: #4f19cf;
+      --sf-bg: #F8FAFC;
+    }
+    .text-primary { color: var(--sf-purple); }
+    .bg-primary { background-color: var(--sf-purple); }
+    .hover\:text-primary:hover { color: var(--sf-purple); }
+    .hover\:bg-primary:hover { background-color: var(--sf-purple); }
+    .border-primary { border-color: var(--sf-purple); }
+    .ring-primary { --tw-ring-color: var(--sf-purple); }
+    .accent-primary { accent-color: var(--sf-purple); }
+    .sf-hero-gradient {
+      background: linear-gradient(135deg, #7c3aed 0%, #6e29f6 50%, #4f19cf 100%);
+    }
+    .sf-hero-glow {
+      background: radial-gradient(circle at 70% 30%, rgba(177,125,255,0.35) 0%, transparent 50%);
+    }
+    .sf-card {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+    }
+    .sf-btn-primary {
+      background-color: var(--sf-purple);
+      color: white;
+      transition: all 0.2s;
+    }
+    .sf-btn-primary:hover {
+      background-color: var(--sf-purple-dark);
+      box-shadow: 0 8px 24px rgba(110,41,246,0.25);
+    }
+    .sf-btn-outline {
+      border: 1px solid rgba(255,255,255,0.5);
+      color: white;
+      transition: all 0.2s;
+    }
+    .sf-btn-outline:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: white;
+    }
+    .sf-section-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0F172A;
+      text-align: center;
+    }
+    .sf-section-subtitle {
+      color: #64748B;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+    .switcher-tab {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+    .switcher-tab.active { background: var(--sf-purple); color: white; }
+    .sf-feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(15,23,42,0.08);
+    }
+    .cycle-btn {
+      border-color: #E2E8F0;
+      color: #475569;
+      transition: all 0.15s;
+    }
+    .cycle-btn:hover { border-color: #A78BFA; color: #7C3AED; }
+    .cycle-btn.active {
+      background-color: var(--sf-purple);
+      border-color: var(--sf-purple);
+      color: white;
+    }
+  </style>
+</head>
+<body class="bg-white text-slate-800">
+  <!-- 原型切换栏 -->
+  <div class="sticky top-0 z-[100] bg-slate-900 text-white text-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-10 gap-1 overflow-x-auto">
+        <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
+        <a href="index.html" class="switcher-tab active">官网首页</a>
+        <a href="purchase.html" class="switcher-tab">购买意向</a>
+        <a href="terms.html" class="switcher-tab">购买须知</a>
+        <a href="dashboard.html" class="switcher-tab">资源包</a>
+        <a href="admin-inventory.html" class="switcher-tab">后台管理</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 顶部导航 -->
+  <nav class="sticky top-10 z-50 bg-white/95 backdrop-blur border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">SF</div>
+          <span class="font-semibold text-lg text-slate-900">硅基流动 MaaS</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="purchase.html" class="hidden sm:inline-flex px-4 py-2 rounded-lg sf-btn-primary text-sm font-medium">立即咨询</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden sf-hero-gradient text-white">
+    <div class="absolute inset-0 sf-hero-glow pointer-events-none"></div>
+    <div class="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
+      <svg viewBox="0 0 400 400" class="w-full h-full">
+        <defs>
+          <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <circle cx="280" cy="120" r="160" fill="url(#g1)"/>
+        <circle cx="340" cy="260" r="120" fill="url(#g1)" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-sm font-medium mb-6">
+          <span class="w-2 h-2 rounded-full bg-emerald-300"></span> MaaS 层算力资源切片租约
+        </div>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+          预留 vTPM
+        </h1>
+        <p class="text-lg md:text-xl text-white/85 mb-8 max-w-2xl leading-relaxed">
+          以更灵活的资源粒度，为大模型推理业务预留稳定算力。按需购买、分钟级保障，让吞吐、延迟与成本更可预期。
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="purchase.html" class="px-6 py-3 rounded-lg bg-white text-primary font-semibold hover:shadow-lg transition">立即咨询</a>
+          <a href="terms.html" class="px-6 py-3 rounded-lg sf-btn-outline font-medium">查看购买须知</a>
+        </div>
+        <div class="mt-10 flex items-center gap-6 text-sm text-white/70">
+          <span class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-300"></i> 分钟级吞吐承诺</span>
+          <span class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-300"></i> 硬资源预留不超售</span>
+          <span class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-300"></i> SLA 违约按协议判定与赔付</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 什么是预留 vTPM -->
+  <section id="whatis" class="py-20 bg-white border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center mb-12">
+        <h2 class="sf-section-title">什么是预留 vTPM</h2>
+        <p class="sf-section-subtitle">面向大模型推理场景的算力资源切片服务</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="sf-card p-6 sf-feature-card transition-all duration-300">
+          <div class="w-12 h-12 rounded-xl bg-violet-100 text-primary flex items-center justify-center text-xl mb-5"><i class="fa-solid fa-microchip"></i></div>
+          <h3 class="font-semibold text-lg text-slate-900 mb-3">资源切片预留</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">以 vTPM 为单位购买模型算力，无需独占完整实例，也能获得明确的资源保障。</p>
+        </div>
+        <div class="sf-card p-6 sf-feature-card transition-all duration-300">
+          <div class="w-12 h-12 rounded-xl bg-violet-100 text-primary flex items-center justify-center text-xl mb-5"><i class="fa-solid fa-shield-halved"></i></div>
+          <h3 class="font-semibold text-lg text-slate-900 mb-3">分钟级 SLO 保障</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">在购买容量范围内，提供分钟级 vTPM 吞吐及 P95 延迟保障。具体指标以对应模型的服务等级协议为准。</p>
+        </div>
+        <div class="sf-card p-6 sf-feature-card transition-all duration-300">
+          <div class="w-12 h-12 rounded-xl bg-violet-100 text-primary flex items-center justify-center text-xl mb-5"><i class="fa-solid fa-calculator"></i></div>
+          <h3 class="font-semibold text-lg text-slate-900 mb-3">多维用量折算</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">根据输入长度、输出长度、缓存命中情况等因素，将实际 tokens 统一折算为 vTPM 用量，准确反映不同请求的资源消耗。</p>
+        </div>
+        <div class="sf-card p-6 sf-feature-card transition-all duration-300">
+          <div class="w-12 h-12 rounded-xl bg-violet-100 text-primary flex items-center justify-center text-xl mb-5"><i class="fa-solid fa-eye"></i></div>
+          <h3 class="font-semibold text-lg text-slate-900 mb-3">透明、可试算</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">购买前可查看对应模型的折算系数，并试算不同业务场景下的预计容量与成本。订单生效后，适用于该订单的折算系数保持稳定。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 为什么选择预留 vTPM -->
+  <section class="py-20 bg-white border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center mb-12">
+        <h2 class="sf-section-title">为什么选择预留 vTPM</h2>
+        <p class="sf-section-subtitle">更灵活、更稳定、更可预期的模型服务方式</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="sf-card p-6 sf-feature-card transition-all duration-300">
+          <div class="w-10 h-10 rounded-lg bg-violet-100 text-primary flex items-center justify-center text-lg mb-4"><i class="fa-solid fa-chart-line"></i></div>
+          <h3 class="font-semibold text-slate-900 mb-2">服务能力更可预期</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">已购买的 vTPM 对应明确的预留资源。在容量范围内，可获得比 Serverless API 更稳定的吞吐与延迟表现。</p>
+        </div>
+        <div class="sf-card p-6 sf-feature-card transition-all duration-300">
+          <div class="w-10 h-10 rounded-lg bg-violet-100 text-primary flex items-center justify-center text-lg mb-4"><i class="fa-solid fa-puzzle-piece"></i></div>
+          <h3 class="font-semibold text-slate-900 mb-2">购买粒度更灵活</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">无需承担完整预留实例的资源成本，可从 1 vTPM 起购，并根据业务规模组合购买。</p>
+        </div>
+        <div class="sf-card p-6 sf-feature-card transition-all duration-300">
+          <div class="w-10 h-10 rounded-lg bg-violet-100 text-primary flex items-center justify-center text-lg mb-4"><i class="fa-solid fa-wallet"></i></div>
+          <h3 class="font-semibold text-slate-900 mb-2">容量与成本更易规划</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">采用固定周期、预付费的资源租约模式，帮助企业提前规划推理容量与预算。</p>
+        </div>
+        <div class="sf-card p-6 sf-feature-card transition-all duration-300">
+          <div class="w-10 h-10 rounded-lg bg-violet-100 text-primary flex items-center justify-center text-lg mb-4"><i class="fa-solid fa-wave-square"></i></div>
+          <h3 class="font-semibold text-slate-900 mb-2">适合生产业务的自然波动</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">相比 Serverless API，预留 vTPM 支持更快的请求爬坡，适合负载有自然波动的生产业务。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 产品选购与性能保障 -->
+  <section class="py-20 bg-[#F8FAFC]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="sf-section-title">产品规格与价格</h2>
+        <p class="sf-section-subtitle">选择模型、vTPM 数量与购买周期，实时查看对应的价格与性能保障。</p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <!-- 顶部栏 -->
+        <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-3 text-white">
+            <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center"><i class="fa-solid fa-sliders"></i></div>
+            <span class="font-semibold">实时配置器</span>
+          </div>
+          <span class="text-white/80 text-sm">价格与性能随配置实时更新</span>
+        </div>
+
+        <div class="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+          <!-- 左侧配置 -->
+          <div class="p-6 lg:p-8">
+            <h3 class="font-semibold text-lg text-slate-900 mb-6 flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-sm"><i class="fa-solid fa-cart-shopping"></i></span>
+              购买配置
+            </h3>
+
+            <div class="space-y-6">
+              <!-- 模型选择 -->
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">选择模型</label>
+                <select id="model-select" class="w-full rounded-lg border-slate-300 px-4 py-2.5 border focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                  <!-- 由 JS 根据 modelList 动态渲染，新增模型只需在配置数组中添加 -->
+                </select>
+                <p id="model-desc" class="text-xs text-slate-500 mt-1.5"></p>
+              </div>
+
+              <!-- vTPM 数量 slider -->
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <label class="text-sm font-medium text-slate-700">预留 vTPM 数量</label>
+                  <span class="text-sm"><span id="units-display" class="font-bold text-primary">30</span> 万 vTPM</span>
+                </div>
+                <input id="units" type="range" min="10" max="100" step="10" value="30" class="w-full accent-primary h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                <div class="flex justify-between text-xs text-slate-400 mt-2">
+                  <span>10 万</span>
+                  <span>100 万</span>
+                </div>
+                <input type="hidden" id="vtpm-total" value="30">
+              </div>
+
+              <!-- 周期 -->
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-3">购买周期</label>
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" class="cycle-btn active px-4 py-2 rounded-full border text-sm font-medium" data-cycle="1">30 天</button>
+                  <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium" data-cycle="2">60 天</button>
+                  <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium" data-cycle="3">90 天</button>
+                  <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium" data-cycle="4">120 天</button>
+                  <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium" data-cycle="5">150 天</button>
+                  <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium" data-cycle="6">180 天</button>
+                </div>
+              </div>
+
+              <!-- 价格估算 -->
+              <div class="bg-gradient-to-br from-violet-50 to-indigo-50 rounded-xl p-5 border border-violet-100">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-sm text-slate-600">预估总价</span>
+                  <span class="text-xs text-slate-400">不含税</span>
+                </div>
+                <div class="text-3xl font-bold text-primary">¥<span id="price-total">9,900</span></div>
+                <p class="text-xs text-slate-500 mt-2">基于 <span id="price-model">Deepseek V4 Flash 0731</span> × <span id="price-units">30</span> 万 vTPM × <span id="price-cycle">30</span> 天</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧性能 -->
+          <div class="p-6 lg:p-8 bg-slate-50/50">
+            <h3 class="font-semibold text-lg text-slate-900 mb-6 flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm"><i class="fa-solid fa-gauge-high"></i></span>
+              性能试算
+            </h3>
+
+            <div class="space-y-5">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">输入长度区间</label>
+                  <select id="input-range" class="w-full rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                    <option value="short">0 ~ 128K</option>
+                    <option value="medium">128K ~ 256K</option>
+                    <option value="long">256K+</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Cache 命中率区间</label>
+                  <select id="cache-range" class="w-full rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                    <option value="low">0% ~ 50%</option>
+                    <option value="mid">50% ~ 90%</option>
+                    <option value="high">90% ~ 100%</option>
+                  </select>
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-medium text-slate-600 mb-1">输出长度区间</label>
+                  <select id="output-range" class="w-full rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                    <option value="short">0 ~ 512</option>
+                    <option value="medium">512 ~ 4K</option>
+                    <option value="long">4K+</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-slate-600 mb-1">vTPM 数量（与左侧联动，单位：万）</label>
+                <div class="flex items-center gap-3">
+                  <input id="calc-vtpm" type="number" min="10" max="100" step="10" value="30" class="flex-1 rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                  <span class="text-sm text-slate-500">万 vTPM</span>
+                </div>
+              </div>
+
+              <div class="grid gap-3">
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-memory"></i></div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-xs text-slate-500">输入未命中 Cache / 分钟</p>
+                      <p id="calc-miss" class="text-lg font-bold text-slate-900 truncate">300,000 tokens</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-green-50 text-green-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-xs text-slate-500">输入命中 Cache / 分钟</p>
+                      <p id="calc-hit" class="text-lg font-bold text-slate-900 truncate">12,000,000 tokens</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-xs text-slate-500">输出可承载 / 分钟</p>
+                      <p id="calc-output" class="text-lg font-bold text-slate-900 truncate">100,000 tokens</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部 CTA -->
+        <div class="bg-slate-50 px-6 py-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p class="text-sm text-slate-500">说明：不同模型对应不同的 vTPM 容量、折算系数与价格。实际可购买数量以提交订单时的库存校验结果为准。预留 vTPM 本身不超售；库存不足时，可选择候补或咨询其他可用模型。长周期及小时、天级短期规格暂不提供。</p>
+          <a href="purchase.html" class="px-8 py-3 rounded-lg sf-btn-primary text-white font-medium whitespace-nowrap">立即咨询</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 如何选择 -->
+  <section class="py-20 bg-white border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center mb-12">
+        <h2 class="sf-section-title">如何选择</h2>
+        <p class="sf-section-subtitle">根据业务规模、稳定性要求、流量特征和预算情况，选择适合的模型服务方式</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm bg-white rounded-xl border border-slate-200 shadow-sm">
+          <thead class="bg-slate-50 text-slate-600">
+            <tr>
+              <th class="px-6 py-4 text-left font-medium rounded-tl-xl">维度</th>
+              <th class="px-6 py-4 text-left font-medium text-primary">预留 vTPM</th>
+              <th class="px-6 py-4 text-left font-medium">Serverless API</th>
+              <th class="px-6 py-4 text-left font-medium rounded-tr-xl">预留实例</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr><td class="px-6 py-4 font-medium text-slate-700">资源模式</td><td class="px-6 py-4 text-slate-700">算力资源切片租约（硬预留）</td><td class="px-6 py-4 text-slate-700">共享资源池</td><td class="px-6 py-4 text-slate-700">完整实例独享</td></tr>
+            <tr><td class="px-6 py-4 font-medium text-slate-700">容量保障</td><td class="px-6 py-4 text-slate-700">已售资源刚性预留</td><td class="px-6 py-4 text-slate-700">无保障</td><td class="px-6 py-4 text-slate-700">完整资源保障</td></tr>
+            <tr><td class="px-6 py-4 font-medium text-slate-700">计费模式</td><td class="px-6 py-4 text-slate-700">预付费资源租约</td><td class="px-6 py-4 text-slate-700">后付费按 tokens</td><td class="px-6 py-4 text-slate-700">预付费实例</td></tr>
+            <tr><td class="px-6 py-4 font-medium text-slate-700">SLO</td><td class="px-6 py-4 text-slate-700">分钟级 vTPM + P95 延迟承诺</td><td class="px-6 py-4 text-slate-700">无 SLA，仅指标参考</td><td class="px-6 py-4 text-slate-700">可定制 SLA</td></tr>
+            <tr><td class="px-6 py-4 font-medium text-slate-700 rounded-bl-xl">适用场景</td><td class="px-6 py-4 text-slate-700">需要稳定吞吐、成本可预期的生产业务</td><td class="px-6 py-4 text-slate-700">测试验证、轻量业务</td><td class="px-6 py-4 text-slate-700 rounded-br-xl">大规模、核心系统、需独占资源</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 sf-hero-gradient text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">为生产级模型推理预留确定性算力</h2>
+      <p class="text-white/80 mb-8">根据您的模型、请求规模和业务流量特征，为您提供 vTPM 容量试算、成本评估及购买支持。</p>
+      <a href="purchase.html" class="inline-flex px-8 py-3.5 rounded-lg bg-white text-primary font-semibold hover:shadow-lg transition">立即咨询</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-[#F2F5FA] pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row justify-between gap-12 mb-12">
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">SF</div>
+            <span class="font-semibold text-lg text-slate-900">硅基流动 MaaS</span>
+          </div>
+          <p class="text-slate-500 text-sm mb-6">加速 AGI 普惠人类</p>
+          <div class="flex gap-4 text-slate-500 text-xl">
+            <a href="#" class="hover:text-primary"><i class="fa-brands fa-github"></i></a>
+            <a href="#" class="hover:text-primary"><i class="fa-brands fa-bilibili"></i></a>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-8 lg:gap-16">
+          <div>
+            <h4 class="text-sm font-medium text-slate-500 mb-4">页面</h4>
+            <ul class="space-y-3 text-sm text-slate-700">
+              <li><a href="index.html" class="hover:text-primary">产品首页</a></li>
+              <li><a href="purchase.html" class="hover:text-primary">购买意向</a></li>
+              <li><a href="terms.html" class="hover:text-primary">购买须知</a></li>
+              <li><a href="dashboard.html" class="hover:text-primary">资源包</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-sm font-medium text-slate-500 mb-4">产品</h4>
+            <ul class="space-y-3 text-sm text-slate-700">
+              <li><a href="#" class="hover:text-primary">大模型云服务</a></li>
+              <li><a href="index.html" class="hover:text-primary">预留 vTPM</a></li>
+              <li><a href="dashboard.html" class="hover:text-primary">资源包</a></li>
+              <li><a href="dashboard.html" class="hover:text-primary">资源包监控</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-sm font-medium text-slate-500 mb-4">联系我们</h4>
+            <ul class="space-y-3 text-sm text-slate-700">
+              <li>业务咨询：<a href="purchase.html" class="text-primary hover:underline">提交意向</a></li>
+              <li>市场合作：<a href="mailto:contact@siliconflow.cn" class="text-primary hover:underline">contact@siliconflow.cn</a></li>
+              <li>客服热线：400-XXX-XXXX</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-slate-200 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+        <p>© 2026 硅基流动 SiliconFlow. 本页面为产品原型，具体规则以最终合同与控制台公示为准。</p>
+        <p>Beijing-GuiJiLiuDongAIYunFuWu-20251201S0112</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 模型配置：新增模型只需在此数组追加即可自动渲染到选购区
+    const modelList = [
+      { id: 'deepseek-v4-flash-0731', name: 'Deepseek V4 Flash 0731', price: 3300, desc: '高性价比通用模型' },
+      { id: 'glm-5.2', name: 'GLM 5.2', price: 2900, desc: '中文场景优化' }
+    ];
+    const priceTable = {};
+    modelList.forEach(m => priceTable[m.id] = m.price);
+    const cycleDays = { 1: 30, 2: 60, 3: 90, 4: 120, 5: 150, 6: 180 };
+    let selectedCycle = 1;
+    let modelEls = [];
+    const unitsEl = document.getElementById('units');
+    const unitsDisplay = document.getElementById('units-display');
+    const vtpmTotalEl = document.getElementById('vtpm-total');
+    const cycleBtns = document.querySelectorAll('.cycle-btn');
+    const calcVtpmEl = document.getElementById('calc-vtpm');
+    const priceTotalEl = document.getElementById('price-total');
+    const priceModelEl = document.getElementById('price-model');
+    const priceUnitsEl = document.getElementById('price-units');
+    const priceCycleEl = document.getElementById('price-cycle');
+    const factorTable = {
+      input: { short: 1, medium: 1.5, long: 2.5 },
+      cache: { low: 0.7, mid: 0.85, high: 0.95 },
+      output: { short: 1, medium: 2, long: 4 }
+    };
+    function formatTokens(n) {
+      return Math.floor(n).toLocaleString() + ' tokens';
+    }
+    function formatPrice(n) {
+      return n.toLocaleString();
+    }
+    function getSelectedModel() {
+      return document.getElementById('model-select').value;
+    }
+    function renderModels() {
+      const select = document.getElementById('model-select');
+      select.innerHTML = modelList.map((m, i) => `
+        <option value="${m.id}" data-price="${m.price}" data-desc="${m.desc}">${m.name} · ¥${formatPrice(m.price)}/10万 vTPM/30天</option>
+      `).join('');
+      updateModelDesc();
+      select.addEventListener('change', () => { updateModelDesc(); updatePrice(); });
+    }
+    function updateModelDesc() {
+      const modelId = getSelectedModel();
+      const model = modelList.find(m => m.id === modelId);
+      document.getElementById('model-desc').textContent = model ? model.desc : '';
+    }
+    function updatePrice() {
+      const modelId = getSelectedModel();
+      const model = modelList.find(m => m.id === modelId);
+      const units = parseInt(unitsEl.value); // 单位：万 vTPM
+      const days = cycleDays[selectedCycle];
+      // price 为每 10万 vTPM/30天 的价格
+      const total = (model ? model.price : 0) * (units / 10) * (days / 30);
+      priceTotalEl.textContent = formatPrice(total);
+      priceModelEl.textContent = model ? model.name : modelId;
+      priceUnitsEl.textContent = units;
+      priceCycleEl.textContent = days;
+    }
+    function updateSummary() {
+      const units = parseInt(unitsEl.value);
+      unitsDisplay.textContent = units;
+      vtpmTotalEl.value = units;
+      calcVtpmEl.value = units;
+      updatePrice();
+      updateCalc();
+    }
+    function updateCalc() {
+      let units = parseInt(calcVtpmEl.value) || 0;
+      units = Math.max(10, Math.min(100, Math.round(units / 10) * 10));
+      calcVtpmEl.value = units;
+      if (unitsEl.value != units) {
+        unitsEl.value = units;
+        unitsDisplay.textContent = units;
+        vtpmTotalEl.value = units;
+        updatePrice();
+      }
+      const base = units * 10000; // 试算内部按实际 vTPM 数量计算
+      const inputF = factorTable.input[document.getElementById('input-range').value];
+      const cacheF = factorTable.cache[document.getElementById('cache-range').value];
+      const outputF = factorTable.output[document.getElementById('output-range').value];
+      document.getElementById('calc-miss').textContent = formatTokens(base * 1000 / inputF);
+      document.getElementById('calc-hit').textContent = formatTokens(base * 1000 / inputF / (1 - cacheF + 0.025) / 0.025);
+      document.getElementById('calc-output').textContent = formatTokens(base * 1000 / 3 / outputF);
+    }
+    cycleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        cycleBtns.forEach(b => { b.classList.remove('active'); b.classList.add('text-slate-600', 'border-slate-300'); b.classList.remove('bg-primary', 'text-white', 'border-primary'); });
+        btn.classList.remove('text-slate-600', 'border-slate-300');
+        btn.classList.add('active');
+        selectedCycle = parseInt(btn.dataset.cycle);
+        updatePrice();
+      });
+    });
+    unitsEl.addEventListener('input', updateSummary);
+    ['input-range','cache-range','output-range'].forEach(id => document.getElementById(id).addEventListener('change', updateCalc));
+    calcVtpmEl.addEventListener('input', updateCalc);
+    renderModels();
+    updateSummary();
+  </script>
+</body>
+</html>
