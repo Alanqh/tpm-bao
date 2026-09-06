@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>资源包 - 硅基流动</title>
+  <title>余额充值 - 硅基流动</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -25,7 +25,7 @@
     .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
     .switcher-tab.active { background: #6e29f6; color: white; }
 
-    .resource-tab {
+    .balance-tab {
       position: relative;
       display: inline-flex;
       align-items: center;
@@ -34,19 +34,11 @@
       font-size: 0.9375rem;
       font-weight: 500;
       transition: all 0.15s;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
     }
-    .resource-tab:hover { color: #7C3AED; }
-    .resource-tab.active { color: #7C3AED; }
-    .resource-tab.active::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 2px;
-      background: #7C3AED;
-      border-radius: 2px 2px 0 0;
-    }
+    .balance-tab:hover { color: #7C3AED; }
+    .balance-tab.active { color: #7C3AED; border-bottom-color: #7C3AED; }
 
     .filter-btn {
       padding: 0.375rem 0.875rem;
@@ -85,7 +77,7 @@
         <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-sm font-bold">SF</div>
         <span class="font-semibold">硅基流动</span>
       </div>
-      <h1 class="text-white text-lg font-medium hidden sm:block">资源包</h1>
+      <h1 class="text-white text-lg font-medium hidden sm:block">余额充值</h1>
     </div>
     <div class="flex items-center gap-4">
       <div class="hidden md:flex items-center gap-2 bg-white/10 hover:bg-white/20 transition px-3 py-1.5 rounded-full text-white text-xs cursor-pointer">
@@ -134,12 +126,49 @@
     </aside>
 
     <main class="flex-1 p-6 min-w-0">
-      <div class="mb-4">
-        <h2 class="text-lg font-semibold text-slate-900">我的资源包</h2>
-        <p class="text-xs text-slate-400 mt-1">当前入口已合并至「余额充值 &gt; 资源包」Tab。</p>
-      </div>
+      <!-- 余额充值 Tab -->
       <div class="sf-card overflow-hidden">
-        <div class="p-6">
+        <div class="flex border-b border-slate-200 px-2">
+          <button type="button" class="balance-tab" data-tab="balance">余额</button>
+          <button type="button" class="balance-tab" data-tab="voucher">代金券</button>
+          <button type="button" class="balance-tab active" data-tab="package">资源包</button>
+        </div>
+
+        <!-- 余额 Tab（占位，与真实平台保持一致布局） -->
+        <div id="tab-balance" class="p-6 hidden">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="sf-card p-5">
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center"><i class="fa-solid fa-yen-sign"></i></div>
+                <span class="text-sm font-medium text-slate-700">余额</span>
+              </div>
+              <p class="text-2xl font-bold text-slate-900">¥0.00</p>
+              <p class="text-xs text-slate-400 mt-1">剩余可透支额度 ¥0</p>
+            </div>
+          </div>
+          <div class="bg-slate-50 border border-slate-100 rounded-xl p-8 text-center text-slate-400 text-sm">
+            余额充值功能原型占位，实际请使用平台收银台完成充值。
+          </div>
+        </div>
+
+        <!-- 代金券 Tab（占位） -->
+        <div id="tab-voucher" class="p-6 hidden">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="sf-card p-5">
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-8 h-8 rounded-full bg-violet-50 text-violet-500 flex items-center justify-center"><i class="fa-solid fa-ticket"></i></div>
+                <span class="text-sm font-medium text-slate-700">代金券</span>
+              </div>
+              <p class="text-2xl font-bold text-slate-900">0 <span class="text-base font-normal text-slate-500">张可用</span></p>
+            </div>
+          </div>
+          <div class="bg-slate-50 border border-slate-100 rounded-xl p-8 text-center text-slate-400 text-sm">
+            代金券功能原型占位。
+          </div>
+        </div>
+
+        <!-- 资源包 Tab -->
+        <div id="tab-package" class="p-6">
           <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
             <div class="flex flex-wrap items-center gap-y-2 gap-x-1">
               <span class="text-xs text-slate-400 mr-1">状态</span>
@@ -154,7 +183,7 @@
               <button type="button" class="filter-btn" data-filter-type="tokens">Tokens 包</button>
               <button type="button" class="filter-btn" data-filter-type="vtpm">预留 vTPM 包</button>
             </div>
-            <a href="index.html" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg sf-btn-primary text-sm font-medium whitespace-nowrap"><i class="fa-solid fa-plus"></i>兑换中心</a>
+            <a href="purchase.html" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg sf-btn-primary text-sm font-medium whitespace-nowrap"><i class="fa-solid fa-plus"></i>兑换中心</a>
           </div>
 
           <div id="my-package-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -448,7 +477,6 @@
       }
       document.getElementById('modal-id').textContent = p.id;
 
-      // 状态流转提示：前台预留 vTPM 包暂不支持主动延期/作废
       const statusFlowRow = document.getElementById('modal-status-flow-row');
       if (isVtpm) {
         statusFlowRow.classList.remove('hidden');
@@ -467,7 +495,6 @@
         progressWrap.classList.add('hidden');
       }
 
-      // 折算系数
       const factorRow = document.getElementById('modal-factor-row');
       if (isVtpm && p.factors) {
         factorRow.classList.remove('hidden');
@@ -485,7 +512,6 @@
         factorRow.classList.add('hidden');
       }
 
-      // 操作按钮：前台预留 vTPM 包暂不支持延期/作废
       const actionsBox = document.getElementById('modal-actions');
       if (isVtpm) {
         actionsBox.innerHTML = `
@@ -508,7 +534,6 @@
       modal.classList.remove('flex');
     }
 
-    // ===== 交付详情 =====
     function openDelivery(id) {
       const p = packages.find(x => x.id === id);
       if (!p || p.type !== 'vtpm' || !p.bind) return;
@@ -570,6 +595,19 @@
       setTimeout(() => { btn.innerHTML = original; }, 1500);
     }
 
+    // Tab 切换
+    function switchBalanceTab(tab) {
+      document.querySelectorAll('.balance-tab').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.balance-tab[data-tab="${tab}"]`).classList.add('active');
+      document.getElementById('tab-balance').classList.toggle('hidden', tab !== 'balance');
+      document.getElementById('tab-voucher').classList.toggle('hidden', tab !== 'voucher');
+      document.getElementById('tab-package').classList.toggle('hidden', tab !== 'package');
+    }
+
+    document.querySelectorAll('.balance-tab').forEach(btn => {
+      btn.addEventListener('click', () => switchBalanceTab(btn.dataset.tab));
+    });
+
     // 状态筛选
     document.querySelectorAll('[data-filter-status]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -590,7 +628,12 @@
       });
     });
 
-    renderMyPackages();
+    // URL ?tab=xxx 支持
+    const params = new URLSearchParams(location.search);
+    const initialTab = params.get('tab') === 'voucher' ? 'voucher' : params.get('tab') === 'package' ? 'package' : 'balance';
+    switchBalanceTab(initialTab);
+    if (initialTab === 'package') renderMyPackages();
+    else renderMyPackages(); // 默认也渲染资源包，避免切换时白屏
   </script>
 </body>
 </html>

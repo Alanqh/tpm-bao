@@ -73,7 +73,7 @@
         <a href="index.html" class="switcher-tab">官网首页</a>
         <a href="purchase.html" class="switcher-tab">购买意向</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
-        <a href="dashboard.html" class="switcher-tab active">资源包</a>
+        <a href="balance.html?tab=package" class="switcher-tab active">余额充值</a>
         <a href="admin-inventory.html" class="switcher-tab">后台管理</a>
       </div>
     </div>
@@ -118,8 +118,7 @@
         <div class="text-xs text-slate-400 px-3 py-2 mt-4">账户管理</div>
         <a href="#" class="sf-sidebar-link"><i class="fa-regular fa-user w-4"></i>实名认证</a>
         <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-key w-4"></i>API 密钥</a>
-        <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-wallet w-4"></i>余额充值</a>
-        <a href="dashboard.html" class="sf-sidebar-link active"><i class="fa-solid fa-box-open w-4"></i>资源包</a>
+        <a href="balance.html" class="sf-sidebar-link active"><i class="fa-solid fa-wallet w-4"></i>余额充值</a>
         <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-file-invoice-dollar w-4"></i>费用明细</a>
         <a href="#" class="sf-sidebar-link"><i class="fa-solid fa-file-invoice w-4"></i>发票开具</a>
 
@@ -135,29 +134,12 @@
     </aside>
 
     <main class="flex-1 p-6 min-w-0">
-      <!-- 资源包 Tab -->
+      <div class="mb-4">
+        <h2 class="text-lg font-semibold text-slate-900">我的资源包</h2>
+        <p class="text-xs text-slate-400 mt-1">当前入口已合并至「余额充值 &gt; 资源包」Tab。</p>
+      </div>
       <div class="sf-card overflow-hidden">
-        <div class="flex border-b border-slate-200 px-2">
-          <button type="button" class="resource-tab active" data-tab="shop">
-            资源包商城
-            <span class="ml-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px]">一期不做</span>
-          </button>
-          <button type="button" class="resource-tab" data-tab="my">我的资源包</button>
-        </div>
-
-        <!-- 资源包商城 -->
-        <div id="tab-shop" class="p-6">
-          <div class="bg-violet-50 border border-violet-100 rounded-xl p-4 mb-6 flex items-start gap-3">
-            <i class="fa-solid fa-circle-info text-violet-600 mt-0.5"></i>
-            <p class="text-sm text-slate-600">商城购买资源包功能即将上线。当前如需购买，请前往官网首页提交购买意向，销售团队将在 1 个工作日内与您联系。</p>
-          </div>
-          <div id="shop-package-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <!-- JS 渲染 -->
-          </div>
-        </div>
-
-        <!-- 我的资源包 -->
-        <div id="tab-my" class="p-6 hidden">
+        <div class="p-6">
           <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
             <div class="flex flex-wrap items-center gap-y-2 gap-x-1">
               <span class="text-xs text-slate-400 mr-1">状态</span>
@@ -179,7 +161,6 @@
             <!-- JS 渲染 -->
           </div>
         </div>
-
       </div>
     </main>
   </div>
@@ -356,12 +337,6 @@
       ]}
     ];
 
-    const shopItems = [
-      { type: 'tokens', title: '通用 Tokens 包', desc: '适用于平台按 tokens 计量计费的模型服务，优先抵扣 token 用量。', price: '按需定价', icon: 'fa-coins', color: 'green' },
-      { type: 'vtpm', title: 'Deepseek V4 Flash 0731 预留 vTPM', desc: '锁定算力，获得分钟级 SLO 承诺与确定性推理吞吐。', price: '¥3,300/10万 vTPM/30天', icon: 'fa-microchip', color: 'blue' },
-      { type: 'vtpm', title: 'GLM 5.2 预留 vTPM', desc: '中文场景优化，资源独占，超量请求将返回 429，需用户自行处理。', price: '¥2,900/10万 vTPM/30天', icon: 'fa-microchip', color: 'purple' },
-    ];
-
     let currentStatus = 'all';
     let currentType = 'all';
 
@@ -432,32 +407,6 @@
             </div>
             <div class="flex items-center gap-3 text-sm">
               ${isVtpm ? `<a href="usage.html?pkg=${p.id}" class="text-violet-600 hover:text-violet-700 font-medium" onclick="event.stopPropagation()">查看监控</a><button type="button" class="text-blue-600 hover:text-blue-700 font-medium" onclick="event.stopPropagation(); openDelivery('${p.id}')">交付详情</button>` : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderShopItems() {
-      const grid = document.getElementById('shop-package-grid');
-      grid.innerHTML = shopItems.map(item => {
-        const iconBg = item.color === 'green' ? 'bg-green-100 text-green-600' : item.color === 'blue' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600';
-        const typeLabel = item.type === 'vtpm' ? '预留 vTPM' : 'Tokens 包';
-        return `
-          <div class="sf-card p-5">
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg ${iconBg} flex items-center justify-center"><i class="fa-solid ${item.icon}"></i></div>
-                <div>
-                  <h3 class="font-semibold text-slate-900">${item.title}</h3>
-                  <span class="inline-block px-2 py-0.5 rounded text-[10px] font-medium ${item.type === 'vtpm' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}">${typeLabel}</span>
-                </div>
-              </div>
-            </div>
-            <p class="text-sm text-slate-500 mb-4">${item.desc}</p>
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold text-violet-600">${item.price}</span>
-              <a href="index.html" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium">提交意向</a>
             </div>
           </div>
         `;
@@ -621,17 +570,6 @@
       setTimeout(() => { btn.innerHTML = original; }, 1500);
     }
 
-    // Tab 切换
-    document.querySelectorAll('.resource-tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.resource-tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.dataset.tab;
-        document.getElementById('tab-my').classList.toggle('hidden', tab !== 'my');
-        document.getElementById('tab-shop').classList.toggle('hidden', tab !== 'shop');
-      });
-    });
-
     // 状态筛选
     document.querySelectorAll('[data-filter-status]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -653,7 +591,6 @@
     });
 
     renderMyPackages();
-    renderShopItems();
   </script>
 </body>
 </html>
