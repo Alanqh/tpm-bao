@@ -25,20 +25,18 @@
     .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
     .switcher-tab.active { background: #6e29f6; color: white; }
 
-    .balance-tab {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      padding: 0.875rem 1.25rem;
-      color: #64748B;
-      font-size: 0.9375rem;
-      font-weight: 500;
+    .package-card-tab {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
       transition: all 0.15s;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
+      text-align: left;
     }
-    .balance-tab:hover { color: #7C3AED; }
-    .balance-tab.active { color: #7C3AED; border-bottom-color: #7C3AED; }
+    .package-card-tab:hover { border-color: #C4B5FD; }
+    .package-card-tab.active { border-color: #7C3AED; box-shadow: 0 0 0 1px #7C3AED; }
+    .package-card-tab.active .pct-number { color: #7C3AED; }
 
     .filter-btn {
       padding: 0.375rem 0.875rem;
@@ -65,7 +63,7 @@
         <a href="index.html" class="switcher-tab">官网首页</a>
         <a href="purchase.html" class="switcher-tab">购买意向</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
-        <a href="balance.html?tab=package" class="switcher-tab active">余额充值</a>
+        <a href="balance.html?tab=package" class="switcher-tab active">资源</a>
         <a href="admin-inventory.html" class="switcher-tab">后台管理</a>
       </div>
     </div>
@@ -126,49 +124,51 @@
     </aside>
 
     <main class="flex-1 p-6 min-w-0">
-      <!-- 余额充值 Tab -->
-      <div class="sf-card overflow-hidden">
-        <div class="flex border-b border-slate-200 px-2">
-          <button type="button" class="balance-tab" data-tab="balance">余额</button>
-          <button type="button" class="balance-tab" data-tab="voucher">代金券</button>
-          <button type="button" class="balance-tab active" data-tab="package">资源包</button>
-        </div>
+      <!-- 顶部卡片式 Tab -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <button type="button" class="package-card-tab" data-tab="balance" onclick="switchBalanceTab('balance')">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center"><i class="fa-solid fa-yen-sign"></i></div>
+            <span class="text-sm font-medium text-slate-700">余额</span>
+          </div>
+          <p class="text-2xl font-bold text-slate-900 pct-number">¥0.00</p>
+          <p class="text-xs text-slate-400 mt-1">剩余可透支额度 ¥0</p>
+        </button>
 
-        <!-- 余额 Tab（占位，与真实平台保持一致布局） -->
-        <div id="tab-balance" class="p-6 hidden">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="sf-card p-5">
-              <div class="flex items-center gap-2 mb-3">
-                <div class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center"><i class="fa-solid fa-yen-sign"></i></div>
-                <span class="text-sm font-medium text-slate-700">余额</span>
-              </div>
-              <p class="text-2xl font-bold text-slate-900">¥0.00</p>
-              <p class="text-xs text-slate-400 mt-1">剩余可透支额度 ¥0</p>
-            </div>
+        <button type="button" class="package-card-tab" data-tab="voucher" onclick="switchBalanceTab('voucher')">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 rounded-full bg-violet-50 text-violet-500 flex items-center justify-center"><i class="fa-solid fa-ticket"></i></div>
+            <span class="text-sm font-medium text-slate-700">代金券</span>
           </div>
-          <div class="bg-slate-50 border border-slate-100 rounded-xl p-8 text-center text-slate-400 text-sm">
-            余额充值功能原型占位，实际请使用平台收银台完成充值。
-          </div>
-        </div>
+          <p class="text-2xl font-bold text-slate-900 pct-number">0 <span class="text-base font-normal text-slate-500">张可用</span></p>
+        </button>
 
-        <!-- 代金券 Tab（占位） -->
-        <div id="tab-voucher" class="p-6 hidden">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="sf-card p-5">
-              <div class="flex items-center gap-2 mb-3">
-                <div class="w-8 h-8 rounded-full bg-violet-50 text-violet-500 flex items-center justify-center"><i class="fa-solid fa-ticket"></i></div>
-                <span class="text-sm font-medium text-slate-700">代金券</span>
-              </div>
-              <p class="text-2xl font-bold text-slate-900">0 <span class="text-base font-normal text-slate-500">张可用</span></p>
-            </div>
+        <button type="button" class="package-card-tab active" data-tab="package" onclick="switchBalanceTab('package')">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center"><i class="fa-solid fa-box-open"></i></div>
+            <span class="text-sm font-medium text-slate-700">资源包</span>
           </div>
-          <div class="bg-slate-50 border border-slate-100 rounded-xl p-8 text-center text-slate-400 text-sm">
-            代金券功能原型占位。
-          </div>
-        </div>
+          <p class="text-2xl font-bold text-slate-900 pct-number"><span id="package-active-count">0</span> <span class="text-base font-normal text-slate-500">个生效中</span></p>
+        </button>
+      </div>
 
-        <!-- 资源包 Tab -->
-        <div id="tab-package" class="p-6">
+      <!-- 余额 Tab（占位） -->
+      <div id="tab-balance" class="hidden">
+        <div class="sf-card p-8 text-center text-slate-400 text-sm">
+          余额充值功能原型占位，实际请使用平台收银台完成充值。
+        </div>
+      </div>
+
+      <!-- 代金券 Tab（占位） -->
+      <div id="tab-voucher" class="hidden">
+        <div class="sf-card p-8 text-center text-slate-400 text-sm">
+          代金券功能原型占位。
+        </div>
+      </div>
+
+      <!-- 资源包 Tab -->
+      <div id="tab-package">
+        <div class="sf-card overflow-hidden p-6">
           <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
             <div class="flex flex-wrap items-center gap-y-2 gap-x-1">
               <span class="text-xs text-slate-400 mr-1">状态</span>
@@ -381,6 +381,11 @@
         return Math.min(100, Math.round(((p.amount - (p.remain || 0)) / p.amount) * 100));
       }
       return Math.min(100, Math.round((p.used || 0) / p.amount * 100));
+    }
+
+    function updatePackageCardCount() {
+      const activeCount = packages.filter(p => p.status === 'active').length;
+      document.getElementById('package-active-count').textContent = activeCount;
     }
 
     function renderMyPackages() {
@@ -597,16 +602,12 @@
 
     // Tab 切换
     function switchBalanceTab(tab) {
-      document.querySelectorAll('.balance-tab').forEach(b => b.classList.remove('active'));
-      document.querySelector(`.balance-tab[data-tab="${tab}"]`).classList.add('active');
+      document.querySelectorAll('.package-card-tab').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.package-card-tab[data-tab="${tab}"]`).classList.add('active');
       document.getElementById('tab-balance').classList.toggle('hidden', tab !== 'balance');
       document.getElementById('tab-voucher').classList.toggle('hidden', tab !== 'voucher');
       document.getElementById('tab-package').classList.toggle('hidden', tab !== 'package');
     }
-
-    document.querySelectorAll('.balance-tab').forEach(btn => {
-      btn.addEventListener('click', () => switchBalanceTab(btn.dataset.tab));
-    });
 
     // 状态筛选
     document.querySelectorAll('[data-filter-status]').forEach(btn => {
@@ -632,8 +633,8 @@
     const params = new URLSearchParams(location.search);
     const initialTab = params.get('tab') === 'voucher' ? 'voucher' : params.get('tab') === 'package' ? 'package' : 'balance';
     switchBalanceTab(initialTab);
-    if (initialTab === 'package') renderMyPackages();
-    else renderMyPackages(); // 默认也渲染资源包，避免切换时白屏
+    renderMyPackages();
+    updatePackageCardCount();
   </script>
 </body>
 </html>
