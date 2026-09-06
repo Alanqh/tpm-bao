@@ -327,7 +327,8 @@
 
         <section id="binding">
           <h2>端点绑定说明</h2>
-          <p>购买时需绑定一个或多个 model_name。API 请求中填写绑定的 model_name 时，将路由到预留算力资源；实际消耗 vTPM 超过已购买量时，超量请求将返回 429，需用户自行进行限流、重试或降级处理。一期暂不支持超量请求自动路由到 Serverless 或其他共享资源池。</p>
+          <p>购买时提交的 model_name 仅作为需求意向记录，交付时平台会将资源包绑定到您 Pool（project/group）下的对象。交付完成后，请以 <code class="text-slate-800 bg-slate-100 rounded px-1.5 py-0.5 text-xs">/Pool 对象名/model</code> 格式的最终 model_name 发起 API 请求（如 <code class="text-slate-800 bg-slate-100 rounded px-1.5 py-0.5 text-xs">/proj-alpha/deepseek-v4-flash-0731</code>），可在资源包「交付详情」中查看和复制；请求将优先路由至您预留的专属算力资源。</p>
+          <p class="mt-2">实际消耗 vTPM 超过已购买量时，按购买时选择的超量配置处理：默认<strong>超量限流</strong>，超量请求返回 429，不产生额外费用，需自行限流、重试或降级；也可选择开启<strong>超量路由 Serverless</strong>，超量请求将自动路由至相同模型的 Serverless 端点并按量计费。</p>
         </section>
 
         <div class="mt-12 pt-6 border-t border-slate-200 text-sm text-slate-400">

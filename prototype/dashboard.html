@@ -218,12 +218,14 @@
             <p class="flex justify-between"><span class="text-slate-400">有效期</span><span id="modal-period"></span></p>
             <p class="flex justify-between"><span class="text-slate-400">可用范围</span><span id="modal-scope" class="text-right max-w-[60%]"></span></p>
             <div class="flex justify-between items-start" id="modal-bind-row">
-              <span class="text-slate-400">绑定 model_name</span>
+              <span class="text-slate-400">最终 model_name</span>
               <div class="text-right max-w-[60%]">
                 <div id="modal-bind" class="font-mono"></div>
-                <p class="text-xs text-slate-400 mt-1">API 请求填写上述 model_name 将路由到预留算力资源的模型服务上</p>
+                <p class="text-xs text-slate-400 mt-1">由 Pool 对象与模型组合生成（/Pool 对象名/model），API 请求填写该 model_name 将路由到您的预留算力资源</p>
               </div>
             </div>
+            <div class="flex justify-between" id="modal-pool-row"><span class="text-slate-400">Pool 对象</span><span id="modal-pool" class="font-mono text-xs text-slate-700"></span></div>
+            <div class="flex justify-between" id="modal-serverless-row"><span class="text-slate-400">超量路由</span><span id="modal-serverless" class="text-xs text-slate-700"></span></div>
             <p class="flex justify-between" id="modal-id-row"><span class="text-slate-400">资源包 ID</span><span id="modal-id" class="font-mono text-xs"></span></p>
             <p class="flex justify-between" id="modal-status-flow-row"><span class="text-slate-400">可操作</span><span id="modal-status-flow" class="text-slate-700 text-xs"></span></p>
           </div>
@@ -264,9 +266,73 @@
     </div>
   </div>
 
+  <!-- 交付详情弹窗 -->
+  <div id="delivery-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDelivery()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">交付详情 · 使用指南</h3>
+            <p id="delivery-model" class="text-sm text-slate-500 mt-1"></p>
+          </div>
+          <button type="button" onclick="closeDelivery()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- 最终 model_name -->
+          <div class="bg-gradient-to-br from-violet-600 to-violet-800 rounded-xl p-5 text-white">
+            <p class="text-xs opacity-80 mb-2">您的专属 API 请求 model_name（请以该名称发起请求）</p>
+            <div class="flex items-center justify-between gap-3">
+              <p id="delivery-final" class="text-xl sm:text-2xl font-mono font-bold break-all"></p>
+              <button type="button" onclick="copyFinalModel()" class="shrink-0 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-medium"><i class="fa-regular fa-copy mr-1"></i>复制</button>
+            </div>
+            <p class="text-xs opacity-75 mt-3">格式：/Pool 对象名/model —— 由您账号（subject_id）下 Pool 对象与模型名称组合生成，路由至您预留的专属算力资源。</p>
+          </div>
+
+          <!-- 交付关键信息 -->
+          <div id="delivery-grid" class="grid sm:grid-cols-2 gap-3 text-sm"></div>
+
+          <!-- 使用步骤 -->
+          <div>
+            <p class="text-sm font-medium text-slate-900 mb-2">如何使用</p>
+            <div class="space-y-2">
+              <div class="flex gap-3 items-start bg-slate-50 rounded-lg p-3">
+                <span class="shrink-0 w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center">1</span>
+                <p class="text-xs text-slate-600 leading-relaxed">使用本资源包所属账号（subject_id）对应的 API Key 发起请求，Base URL 与平台公开接口保持一致。</p>
+              </div>
+              <div class="flex gap-3 items-start bg-slate-50 rounded-lg p-3">
+                <span class="shrink-0 w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center">2</span>
+                <p class="text-xs text-slate-600 leading-relaxed">请求 body 中的 <code class="px-1 bg-slate-200 rounded font-mono">model</code> 字段请填写上方最终 model_name（<b>请勿</b>直接填写购买时提交的原始模型名称，那样不会路由到您的预留算力）。</p>
+              </div>
+              <div class="flex gap-3 items-start bg-slate-50 rounded-lg p-3">
+                <span class="shrink-0 w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center">3</span>
+                <p class="text-xs text-slate-600 leading-relaxed">请求将按该资源包绑定的折算系数计量 vTPM 用量；请结合监控页合理评估业务负载。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 示例调用 -->
+          <div>
+            <p class="text-sm font-medium text-slate-900 mb-2">示例调用</p>
+            <pre id="delivery-curl" class="bg-slate-900 text-slate-100 rounded-lg p-4 text-xs font-mono overflow-x-auto leading-relaxed"></pre>
+          </div>
+
+          <!-- 注意事项 -->
+          <div id="delivery-overflow-tip" class="rounded-xl p-4 text-xs leading-relaxed"></div>
+        </div>
+
+        <div class="mt-6 flex gap-3 justify-end">
+          <button type="button" onclick="closeDelivery()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
+          <a id="delivery-usage-link" href="usage.html" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium">查看监控</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const packages = [
-      { id: 'P001', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 30, unit: '万 vTPM', used: 0, status: 'active', period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理', bind: ['deepseek-v4-flash-0731', 'deepseek-v4-flash-0731-prod'], factors: [
+      { id: 'P001', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 30, unit: '万 vTPM', used: 0, status: 'active', period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理', pool: 'proj-alpha', serverless: true, requested: ['deepseek-v4-flash-0731', 'deepseek-v4-flash-0731-prod'], bind: ['/proj-alpha/deepseek-v4-flash-0731'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
@@ -274,17 +340,17 @@
         { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
         { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
       ]},
-      { id: 'P002', type: 'vtpm', name: '预留 vTPM', model: 'GLM 5.2', amount: 20, unit: '万 vTPM', used: 0, status: 'active', period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理', bind: ['glm-5.2', 'glm-5.2-prod'], factors: [
+      { id: 'P002', type: 'vtpm', name: '预留 vTPM', model: 'GLM 5.2', amount: 20, unit: '万 vTPM', used: 0, status: 'active', period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理', pool: 'proj-gamma', serverless: false, requested: ['glm-5.2', 'glm-5.2-prod'], bind: ['/proj-gamma/glm-5.2'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
       ]},
       { id: 'P003', type: 'tokens', name: 'Tokens 包', model: '通用 Tokens', amount: 1200, unit: '万 tokens', remain: 850, status: 'active', period: '2026-06-15 ~ 2026-12-15', scope: '平台按 tokens 计量计费的模型服务', bind: null },
       { id: 'P004', type: 'tokens', name: 'Tokens 包', model: '通用 Tokens', amount: 1000, unit: '万 tokens', remain: 0, status: 'used', period: '2026-05-01 ~ 2026-07-31', scope: '平台按 tokens 计量计费的模型服务', bind: null },
-      { id: 'P005', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'expired', period: '2026-07-01 ~ 2026-07-31', scope: 'Deepseek V4 Flash 0731 推理', bind: ['deepseek-v4-flash-0731-demo'], factors: [
+      { id: 'P005', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'expired', period: '2026-07-01 ~ 2026-07-31', scope: 'Deepseek V4 Flash 0731 推理', pool: 'proj-beta', serverless: false, requested: ['deepseek-v4-flash-0731-demo'], bind: ['/proj-beta/deepseek-v4-flash-0731'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 }
       ]},
-      { id: 'P006', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'cancelled', period: '2026-06-01 ~ 2026-06-30', scope: 'Deepseek V4 Flash 0731 推理', bind: ['deepseek-v4-flash-0731-cancelled'], factors: [
+      { id: 'P006', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'cancelled', period: '2026-06-01 ~ 2026-06-30', scope: 'Deepseek V4 Flash 0731 推理', pool: 'proj-beta', serverless: false, requested: ['deepseek-v4-flash-0731-cancelled'], bind: ['/proj-beta/deepseek-v4-flash-0731'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 }
       ]}
@@ -365,7 +431,7 @@
               ${p.bind ? `<p>绑定：${Array.isArray(p.bind) ? p.bind.join('、') : p.bind}</p>` : `<p>ID：${p.id}</p>`}
             </div>
             <div class="flex items-center gap-3 text-sm">
-              ${isVtpm ? `<a href="usage.html?pkg=${p.id}" class="text-violet-600 hover:text-violet-700 font-medium" onclick="event.stopPropagation()">查看监控</a>` : ''}
+              ${isVtpm ? `<a href="usage.html?pkg=${p.id}" class="text-violet-600 hover:text-violet-700 font-medium" onclick="event.stopPropagation()">查看监控</a><button type="button" class="text-blue-600 hover:text-blue-700 font-medium" onclick="event.stopPropagation(); openDelivery('${p.id}')">交付详情</button>` : ''}
             </div>
           </div>
         `;
@@ -414,12 +480,22 @@
       document.getElementById('modal-scope').textContent = p.scope;
 
       const bindRow = document.getElementById('modal-bind-row');
+      const poolRow = document.getElementById('modal-pool-row');
+      const serverlessRow = document.getElementById('modal-serverless-row');
       if (p.bind) {
         bindRow.classList.remove('hidden');
+        poolRow.classList.remove('hidden');
+        serverlessRow.classList.remove('hidden');
         const binds = Array.isArray(p.bind) ? p.bind : [p.bind];
         document.getElementById('modal-bind').innerHTML = binds.map(b => `<span class="inline-block bg-slate-100 px-1.5 py-0.5 rounded text-xs mr-1 mb-1 max-w-[160px] truncate align-top" title="${b.replace(/"/g, '&quot;')}">${b}</span>`).join(' ');
+        document.getElementById('modal-pool').textContent = p.pool;
+        document.getElementById('modal-serverless').innerHTML = p.serverless
+          ? `<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">已开启：超量路由 Serverless，按量计费</span>`
+          : `<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500">未开启：超量请求返回 429</span>`;
       } else {
         bindRow.classList.add('hidden');
+        poolRow.classList.add('hidden');
+        serverlessRow.classList.add('hidden');
       }
       document.getElementById('modal-id').textContent = p.id;
 
@@ -481,6 +557,68 @@
       const modal = document.getElementById('detail-modal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+    }
+
+    // ===== 交付详情 =====
+    function openDelivery(id) {
+      const p = packages.find(x => x.id === id);
+      if (!p || p.type !== 'vtpm' || !p.bind) return;
+      const finalModel = (Array.isArray(p.bind) ? p.bind[0] : p.bind);
+      const requested = (p.requested || []).join('、');
+
+      document.getElementById('delivery-model').innerHTML = `${p.model} · <span class="text-slate-400 font-mono">${p.id}</span>`;
+      document.getElementById('delivery-final').textContent = finalModel;
+      document.getElementById('delivery-usage-link').href = `usage.html?pkg=${p.id}`;
+
+      document.getElementById('delivery-grid').innerHTML = `
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">Pool 对象</p><p class="font-mono text-sm text-slate-800">${p.pool}</p></div>
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">预留算力</p><p class="text-sm text-slate-800">${p.amount} ${p.unit}</p></div>
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">有效期</p><p class="text-sm text-slate-800">${p.period}</p></div>
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">超量路由</p><p class="text-sm">${p.serverless ? '<span class="text-blue-700">超量路由 Serverless，按量计费</span>' : '<span class="text-slate-500">超量限流，返回 429</span>'}</p></div>
+        <div class="sf-card p-3 sm:col-span-2"><p class="text-xs text-slate-400 mb-1">购买时提交的原始 model_name（仅需求记录，请勿在 API 请求中使用）</p><p class="font-mono text-sm text-slate-500">${requested || '—'}</p></div>
+      `;
+
+      document.getElementById('delivery-curl').textContent =
+`curl https://api.siliconflow.cn/v1/chat/completions \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "${finalModel}",
+    "messages": [
+      {"role": "user", "content": "你好"}
+    ],
+    "stream": true
+  }'`;
+
+      const tip = document.getElementById('delivery-overflow-tip');
+      if (p.serverless) {
+        tip.className = 'rounded-xl p-4 text-xs leading-relaxed bg-blue-50 text-blue-900 border border-blue-100';
+        tip.innerHTML = '<i class="fa-solid fa-circle-info mr-1"></i><b>超量路由：</b>当实时用量超过本资源包预留的 vTPM 上限时，超量请求将自动路由至相同模型的 Serverless 服务并按量计费，不影响请求成功率。该配置已随资源包交付生效，可在资源包详情中查看。';
+      } else {
+        tip.className = 'rounded-xl p-4 text-xs leading-relaxed bg-amber-50 text-amber-900 border border-amber-100';
+        tip.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i><b>超量限流：</b>当实时用量达到本资源包预留的 vTPM 上限时，后续请求将返回 429，请您在客户端实现重试与降级策略。该配置已随资源包交付生效，可在资源包详情中查看。';
+      }
+
+      const modal = document.getElementById('delivery-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeDelivery() {
+      const modal = document.getElementById('delivery-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function copyFinalModel() {
+      const text = document.getElementById('delivery-final').textContent.trim();
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+      }
+      const btn = event.currentTarget;
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>已复制';
+      setTimeout(() => { btn.innerHTML = original; }, 1500);
     }
 
     // Tab 切换

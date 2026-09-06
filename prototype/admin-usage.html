@@ -113,6 +113,7 @@
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
           <a href="admin-inventory.html" class="admin-sidebar-link"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
           <a href="admin-usage.html" class="admin-sidebar-link active"><i class="fa-solid fa-chart-line w-4 text-center"></i>资源包监控</a>
+          <a href="admin-sku.html" class="admin-sidebar-link"><i class="fa-solid fa-sliders w-4 text-center"></i>SKU 配置</a>
         </div>
 
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
@@ -178,7 +179,7 @@
       <div class="admin-card p-3 mb-4 text-xs text-slate-600 flex items-start gap-2">
         <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
         <div>
-          <p>API 请求中填写该资源包绑定的 model_name 时，将路由到预留算力资源的模型服务上。</p>
+          <p>API 请求中填写资源包的最终 model_name（格式：<span class="font-mono text-xs text-slate-800 bg-slate-100 rounded px-1.5 py-0.5">/Pool 对象名/model</span>，客户可在资源包「交付详情」中查看）时，将优先路由到预留算力资源的模型服务上；超量部分按购买时选择的超量配置处理：默认超量限流（返回 429），开启「超量路由 Serverless」时将转发至相同模型的 Serverless 端点并按量计费。</p>
           <p class="text-slate-400 mt-0.5">所有监控与事件数据均按自然分钟统计。</p>
         </div>
       </div>

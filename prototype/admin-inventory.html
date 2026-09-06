@@ -129,6 +129,7 @@
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
           <a href="admin-inventory.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
+          <a href="admin-sku.html" class="admin-sidebar-link"><i class="fa-solid fa-sliders w-4 text-center"></i>SKU 配置</a>
         </div>
 
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
@@ -178,12 +179,12 @@
 
       <!-- 操作按钮行 -->
       <div class="flex flex-wrap items-center gap-3 mb-4">
-        <button onclick="openModal('grant')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
-          <i class="fa-solid fa-gift text-[10px]"></i>手动发放资源包
+        <button onclick="openGrantModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
+          <i class="fa-solid fa-gift text-[10px]"></i>手动交付资源包
         </button>
-        <button disabled title="一期暂不支持" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-disabled text-xs font-medium">
-          <i class="fa-solid fa-plus text-[10px]"></i>新增 SKU
-        </button>
+        <a href="admin-sku.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-default text-xs font-medium">
+          <i class="fa-solid fa-sliders text-[10px]"></i>SKU 配置
+        </a>
       </div>
 
       <!-- Tab 切换 -->
@@ -250,7 +251,7 @@
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU 名称</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">数量</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">有效期</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">绑定 model_name</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最终 model_name</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">状态</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作</th>
                 </tr>
@@ -263,7 +264,7 @@
                   <td class="px-3 py-3">Deepseek V4 Flash 0731 预留 vTPM</td>
                   <td class="px-3 py-3">300 万 vTPM</td>
                   <td class="px-3 py-3">2026-08-01 ~ 2026-08-30</td>
-                  <td class="px-3 py-3 font-mono text-[11px]">deepseek-v4-flash-0731-prod</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">/proj-alpha/deepseek-v4-flash-0731</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
                   <td class="px-3 py-3">
                     <a href="admin-usage.html?pkg=P001" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
@@ -279,7 +280,7 @@
                   <td class="px-3 py-3">GLM 5.2 预留 vTPM</td>
                   <td class="px-3 py-3">200 万 vTPM</td>
                   <td class="px-3 py-3">2026-09-01 ~ 2026-09-30</td>
-                  <td class="px-3 py-3 font-mono text-[11px]">glm-5.2-prod</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">/proj-gamma/glm-5.2</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
                   <td class="px-3 py-3">
                     <a href="admin-usage.html?pkg=P002" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
@@ -428,39 +429,110 @@
     </div>
   </div>
 
-  <!-- Modal: 手动发放资源包 -->
+  <!-- Modal: 手动交付预留 vTPM 资源包 -->
   <div id="modal-grant" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg w-full max-w-lg mx-4 p-5 border border-slate-200">
+    <div class="bg-white rounded-lg w-full max-w-2xl mx-4 p-5 border border-slate-200 max-h-[92vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-sm font-semibold text-slate-900">手动发放资源包</h3>
+        <h3 class="text-sm font-semibold text-slate-900">手动交付预留 vTPM 资源包</h3>
         <button onclick="closeModal('grant')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">subject_id <span class="text-slate-400 font-normal">（每行一个，支持多个）</span></label>
-          <textarea class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="3" placeholder="sub_3x9a2b1c&#10;sub_7k2m5n8p"></textarea>
+
+      <!-- Step 1: 确定 subject_id -->
+      <div class="border border-slate-200 rounded-lg p-3 mb-3">
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">1</span>确定客户 subject_id（仅支持填写一个）</p>
+        <div class="flex gap-2">
+          <input id="grant-subject" type="text" list="grant-subject-list" placeholder="输入 subject_id，如 sub_3x9a2b1c" class="flex-1 rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          <datalist id="grant-subject-list">
+            <option value="sub_3x9a2b1c">智象科技</option>
+            <option value="sub_7k2m5n8p">星河互娱</option>
+          </datalist>
+          <button type="button" onclick="loadPools()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium whitespace-nowrap">查询 Pool</button>
         </div>
-        <div><label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU</label><select class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"><option>Deepseek V4 Flash 0731</option><option>GLM 5.2</option></select></div>
-        <div class="grid grid-cols-2 gap-3">
-          <div><label class="block text-xs font-medium text-slate-700 mb-1">数量（万 vTPM）</label><input type="number" step="10" min="10" max="100" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
-          <div><label class="block text-xs font-medium text-slate-700 mb-1">周期（天）</label><input type="number" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none" placeholder="30 / 60 / 90"></div>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">绑定 model_name <span class="text-slate-400 font-normal">（每个资源包统一绑定这些 model_name，最多 3 个；API 请求填写任意一个将路由到预留算力资源）</span></label>
-          <textarea class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="3" placeholder="deepseek-v4-flash-0731-prod&#10;deepseek-v4-flash-0731-custom"></textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div><label class="block text-xs font-medium text-slate-700 mb-1">开始日期</label><input type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
-          <div><label class="block text-xs font-medium text-slate-700 mb-1">结束日期</label><input type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none"></div>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
-          <textarea class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="2" placeholder="填写发放原因或其他说明"></textarea>
+        <p id="grant-pool-hint" class="text-[11px] text-slate-400 mt-1.5">确定 subject_id 后，将加载该客户 Pool（project/group）下的对象作为下拉选项。</p>
+        <div class="mt-3 hidden" id="grant-pool-block">
+          <label class="block text-xs font-medium text-slate-700 mb-1">选择 Pool 对象（payload）</label>
+          <select id="grant-pool" onchange="onPoolChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
         </div>
       </div>
+
+      <!-- Step 2: SKU 信息 -->
+      <div class="border border-slate-200 rounded-lg p-3 mb-3">
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择 Payload 关联的 SKU</p>
+        <div id="grant-sku-block" class="hidden">
+          <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500 mb-2"></select>
+          <div id="grant-sku-info" class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600 grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <!-- JS 填充 -->
+          </div>
+        </div>
+        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择 Pool 对象后，将加载该 Payload 关联的 SKU 及其售卖规则。</p>
+      </div>
+
+      <!-- Step 3: 交付配置 -->
+      <div class="border border-slate-200 rounded-lg p-3 mb-3">
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">3</span>交付配置</p>
+        <div id="grant-config" class="hidden space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">交付份数 <span class="text-slate-400 font-normal">（每份 = 最小购买 vTPM 量）</span></label>
+              <input id="grant-multiplier" type="number" min="1" max="20" step="1" value="1" onchange="renderGrantSummary()" oninput="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+              <p id="grant-total-preview" class="text-[11px] text-violet-600 font-medium mt-1"></p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">购买周期 <span class="text-slate-400 font-normal">（受截止售卖时间约束）</span></label>
+              <select id="grant-cycle" onchange="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+              <p class="text-[11px] text-slate-400 mt-1">周期为最小购买周期的整数倍，可选范围由 SKU 截止售卖时间动态计算。</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">开始时间（固定）</label>
+              <input id="grant-start" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">结束时间（自动计算，不可编辑）</label>
+              <input id="grant-end" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">超量路由配置 <span class="text-slate-400 font-normal">（沿用客户购买意向中的选择）</span></label>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+                <input type="radio" name="grant-serverless" value="off" checked onchange="renderGrantSummary()" class="mt-0.5">
+                <span>
+                  <span class="block text-xs font-medium text-slate-800">超量限流</span>
+                  <span class="block text-[11px] text-slate-400">超出预留 vTPM 时返回 429</span>
+                </span>
+              </label>
+              <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+                <input type="radio" name="grant-serverless" value="on" onchange="renderGrantSummary()" class="mt-0.5">
+                <span>
+                  <span class="block text-xs font-medium text-slate-800">超量路由 Serverless</span>
+                  <span class="block text-[11px] text-slate-400">路由至相同模型，按量计费</span>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">最终 model_name 预览</label>
+            <div class="bg-slate-900 rounded-lg px-3 py-2.5">
+              <p id="grant-model-preview" class="font-mono text-xs text-violet-300 break-all">-</p>
+              <p class="text-[11px] text-slate-400 mt-1">格式 /Pool 对象名/model，交付后以资源包「交付详情」展示给客户。</p>
+            </div>
+            <p id="grant-requested-note" class="text-[11px] text-slate-400 mt-1"></p>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
+            <textarea id="grant-note" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="2" placeholder="填写交付原因或其他说明"></textarea>
+          </div>
+          <!-- 交付汇总 -->
+          <div id="grant-summary" class="bg-violet-50 border border-violet-100 rounded-lg p-3 text-[11px] text-slate-700 leading-relaxed"></div>
+        </div>
+        <p id="grant-config-hint" class="text-[11px] text-slate-400">选择 SKU 后进行交付配置；开始时间固定为操作当天 0 点，结束时间自动计算。</p>
+      </div>
+
       <div class="mt-5 flex justify-end gap-2">
         <button onclick="closeModal('grant')" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
-        <button onclick="closeModal('grant')" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">确认发放</button>
+        <button onclick="confirmGrant()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">确认交付</button>
       </div>
     </div>
   </div>
@@ -503,6 +575,188 @@
         icon.classList.remove('fa-chevron-down');
         icon.classList.add('fa-chevron-right');
       }
+    }
+
+    // ===== 手动交付：数据与联动 =====
+    // subject_id → 客户 Pool 对象关系表
+    const subjectPools = {
+      'sub_3x9a2b1c': {
+        name: '智象科技',
+        pools: [
+          { id: 'pool_3x9_alpha', name: 'proj-alpha', skuIds: ['vtpm-dsv4f-001'], requested: 'deepseek-v4-flash-0731-prod', serverless: true },
+          { id: 'pool_3x9_beta', name: 'proj-beta', skuIds: ['vtpm-dsv4f-001', 'vtpm-glm52-001'], requested: 'deepseek-v4-flash-0731-custom', serverless: false }
+        ]
+      },
+      'sub_7k2m5n8p': {
+        name: '星河互娱',
+        pools: [
+          { id: 'pool_7k2_gamma', name: 'proj-gamma', skuIds: ['vtpm-glm52-001'], requested: 'glm-5.2-prod', serverless: false }
+        ]
+      }
+    };
+
+    // SKU 配置（与 admin-sku.html 保持一致）
+    const grantSkus = [
+      { id: 'vtpm-dsv4f-001', name: 'Deepseek V4 Flash 0731 预留 vTPM', model: 'deepseek-v4-flash-0731', minVtpm: 10, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31' },
+      { id: 'vtpm-glm52-001', name: 'GLM 5.2 预留 vTPM', model: 'glm-5.2', minVtpm: 20, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30' },
+      { id: 'vtpm-kimik2-001', name: 'Kimi K2 预留 vTPM', model: 'kimi-k2-instruct', minVtpm: 15, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31' }
+    ];
+
+    function grantSkuById(id) { return grantSkus.find(s => s.id === id); }
+
+    function openGrantModal() {
+      // 重置三步状态
+      document.getElementById('grant-subject').value = '';
+      document.getElementById('grant-pool-block').classList.add('hidden');
+      document.getElementById('grant-pool').innerHTML = '';
+      document.getElementById('grant-sku-block').classList.add('hidden');
+      document.getElementById('grant-config').classList.add('hidden');
+      document.getElementById('grant-config-hint').classList.remove('hidden');
+      document.getElementById('grant-sku-hint').classList.remove('hidden');
+      openModal('grant');
+    }
+
+    // Step 1: 确定 subject_id → 加载 Pool 对象
+    function loadPools() {
+      const sid = document.getElementById('grant-subject').value.trim();
+      const poolBlock = document.getElementById('grant-pool-block');
+      const skuBlock = document.getElementById('grant-sku-block');
+      const config = document.getElementById('grant-config');
+      const customer = subjectPools[sid];
+      // 联动清理后两步
+      skuBlock.classList.add('hidden');
+      config.classList.add('hidden');
+      document.getElementById('grant-config-hint').classList.remove('hidden');
+      if (!customer) {
+        poolBlock.classList.add('hidden');
+        document.getElementById('grant-pool').innerHTML = '';
+        document.getElementById('grant-pool-hint').innerHTML = `<span class="text-red-500">未找到该 subject_id 对应的客户 Pool，请确认后重试。</span>`;
+        return;
+      }
+      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，该 subject_id 下共有 ${customer.pools.length} 个 Pool 对象，请选择交付目标：`;
+      document.getElementById('grant-pool').innerHTML = customer.pools.map(p =>
+        `<option value="${p.id}">${p.name}（payload：关联 ${p.skuIds.length} 个 SKU）</option>`
+      ).join('');
+      poolBlock.classList.remove('hidden');
+      onPoolChange();
+    }
+
+    // Step 2: 选中 Pool 对象（payload）→ 加载关联 SKU
+    function onPoolChange() {
+      const sid = document.getElementById('grant-subject').value.trim();
+      const poolId = document.getElementById('grant-pool').value;
+      const customer = subjectPools[sid];
+      if (!customer) return;
+      const pool = customer.pools.find(p => p.id === poolId);
+      if (!pool) return;
+
+      const config = document.getElementById('grant-config');
+      config.classList.add('hidden');
+      document.getElementById('grant-config-hint').classList.remove('hidden');
+
+      const skus = pool.skuIds.map(grantSkuById).filter(Boolean);
+      document.getElementById('grant-sku').innerHTML = skus.map(s =>
+        `<option value="${s.id}">${s.name}（${s.id}）</option>`
+      ).join('');
+      document.getElementById('grant-sku-block').classList.remove('hidden');
+      document.getElementById('grant-sku-hint').classList.add('hidden');
+
+      // 沿用客户购买意向中的超量路由选择
+      const wanted = pool.serverless ? 'on' : 'off';
+      document.querySelector(`input[name="grant-serverless"][value="${wanted}"]`).checked = true;
+
+      onSkuChange();
+    }
+
+    // Step 3a: 选中 SKU → 显示售卖规则 + 动态周期
+    function onSkuChange() {
+      const sku = grantSkuById(document.getElementById('grant-sku').value);
+      const config = document.getElementById('grant-config');
+      if (!sku) { config.classList.add('hidden'); return; }
+
+      document.getElementById('grant-sku-info').innerHTML = `
+        <div><p class="text-slate-400 mb-0.5">最小购买 vTPM 量</p><p class="font-semibold text-slate-800">${sku.minVtpm} 万 vTPM</p></div>
+        <div><p class="text-slate-400 mb-0.5">最小购买周期</p><p class="font-semibold text-slate-800">${sku.minCycle} 天（约 1 个月）</p></div>
+        <div><p class="text-slate-400 mb-0.5">开始售卖时间</p><p class="font-semibold text-slate-800">${sku.sellStart} 00:00</p></div>
+        <div><p class="text-slate-400 mb-0.5">截止售卖时间</p><p class="font-semibold text-slate-800">${sku.sellEnd} 24:00</p></div>
+      `;
+
+      // 开始时间固定为操作当天 0 点
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      document.getElementById('grant-start').value = fmtDateTime(start) + '（操作当天 0 点，固定）';
+
+      // 动态周期选项：结束时间（开始 + k×最小周期 + 1 天）不能晚于截止售卖时间
+      const sellEnd = new Date(sku.sellEnd + 'T00:00:00');
+      const options = [];
+      for (let k = 1; k <= 24; k++) {
+        const probe = new Date(start);
+        probe.setDate(probe.getDate() + k * sku.minCycle);
+        if (probe > sellEnd) break;
+        const endDate = new Date(probe);
+        endDate.setDate(endDate.getDate() + 1);
+        options.push({ k, days: k * sku.minCycle, end: endDate });
+      }
+      document.getElementById('grant-cycle').innerHTML = options.map(o => {
+        const months = o.k;
+        const endLabel = fmtDate(o.end);
+        return `<option value="${o.k}">${months} × 最小购买周期（${o.days} 天，结束至 ${endLabel} 00:00）</option>`;
+      }).join('') || '<option value="" disabled>无可选周期（已超出截止售卖时间）</option>';
+
+      config.classList.remove('hidden');
+      document.getElementById('grant-config-hint').classList.add('hidden');
+      renderGrantSummary();
+    }
+
+    // Step 3b: 汇总联动
+    function renderGrantSummary() {
+      const sid = document.getElementById('grant-subject').value.trim();
+      const customer = subjectPools[sid];
+      const poolId = document.getElementById('grant-pool').value;
+      const pool = customer && customer.pools.find(p => p.id === poolId);
+      const sku = grantSkuById(document.getElementById('grant-sku').value);
+      if (!pool || !sku) return;
+
+      const multi = Math.max(1, Math.min(20, parseInt(document.getElementById('grant-multiplier').value || '1', 10) || 1));
+      document.getElementById('grant-multiplier').value = multi;
+      const totalVtpm = multi * sku.minVtpm;
+      document.getElementById('grant-total-preview').textContent = `合计交付：${multi} × ${sku.minVtpm} 万 vTPM = ${totalVtpm.toLocaleString()} 万 vTPM`;
+
+      // 结束时间 = 开始 + 周期 + 1 天
+      const k = parseInt(document.getElementById('grant-cycle').value || '1', 10) || 1;
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setDate(end.getDate() + k * sku.minCycle + 1);
+      document.getElementById('grant-end').value = fmtDateTime(end) + '（开始时间 + ' + (k * sku.minCycle) + ' 天 + 1 天，自动计算）';
+
+      const finalModel = `/${pool.name}/${sku.model}`;
+      document.getElementById('grant-model-preview').textContent = finalModel;
+      document.getElementById('grant-requested-note').textContent = `客户购买意向提交的原始 model_name：${pool.requested}（仅作为需求记录，不用于路由）。`;
+
+      const serverless = document.querySelector('input[name="grant-serverless"]:checked').value === 'on';
+      document.getElementById('grant-summary').innerHTML = `
+        <p class="font-semibold text-slate-900 mb-1.5">交付汇总</p>
+        <p>· 客户：${customer.name}（subject_id：${sid}）｜ Pool 对象：<span class="font-mono">${pool.name}</span>｜ SKU：${sku.name}</p>
+        <p>· 交付量：${multi} 份 × ${sku.minVtpm} 万 vTPM = <b class="text-violet-700">${totalVtpm.toLocaleString()} 万 vTPM</b>｜ 周期：${k} × ${sku.minCycle} 天</p>
+        <p>· 有效期：${fmtDateTime(start)} ~ ${fmtDateTime(end)}<span class="text-slate-400">（开始固定为当天 0 点；结束 = 开始 + 周期 + 1 天）</span></p>
+        <p>· 超量路由：${serverless ? '超量路由 Serverless，按量计费' : '超量限流，返回 429'}</p>
+        <p>· 最终 model_name：<span class="font-mono text-violet-700">${finalModel}</span></p>
+      `;
+    }
+
+    function confirmGrant() {
+      closeModal('grant');
+      alert('已确认交付：资源包将发放至客户 subject_id，交付完成后前台资源包将展示「交付详情」。');
+    }
+
+    function fmtDate(d) {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function fmtDateTime(d) {
+      return fmtDate(d) + ' 00:00';
     }
 
     // SKU 库存看板数据
@@ -591,7 +845,7 @@
         model: 'Deepseek V4 Flash 0731', sku: 'vtpm-dsv4f-001', amount: 300, unit: '万 vTPM',
         status: '生效中', statusCls: 'bg-green-100 text-green-700',
         period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理',
-        bind: 'deepseek-v4-flash-0731-prod',
+        bind: '/proj-alpha/deepseek-v4-flash-0731', pool: 'proj-alpha', requested: 'deepseek-v4-flash-0731-prod', serverless: true,
         factors: [
           { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
           { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
@@ -605,7 +859,7 @@
         model: 'GLM 5.2', sku: 'vtpm-glm52-001', amount: 200, unit: '万 vTPM',
         status: '生效中', statusCls: 'bg-green-100 text-green-700',
         period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理',
-        bind: 'glm-5.2-prod',
+        bind: '/proj-gamma/glm-5.2', pool: 'proj-gamma', requested: 'glm-5.2-prod', serverless: false,
         factors: [
           { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
           { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
@@ -635,7 +889,10 @@
           <div><span class="text-slate-500">状态</span><p class="mt-0.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${d.statusCls}">${d.status}</span></p></div>
           <div><span class="text-slate-500">有效期</span><p class="font-medium text-slate-900 mt-0.5">${d.period}</p></div>
           <div><span class="text-slate-500">可用范围</span><p class="font-medium text-slate-900 mt-0.5">${d.scope}</p></div>
-          <div class="col-span-2"><span class="text-slate-500">绑定 model_name</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.bind}</p></div>
+          <div><span class="text-slate-500">Pool 对象（payload）</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.pool}</p></div>
+          <div><span class="text-slate-500">最终 model_name</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.bind}</p></div>
+          <div class="col-span-2"><span class="text-slate-500">客户意向原始 model_name（仅需求记录）</span><p class="font-mono text-slate-500 mt-0.5">${d.requested}</p></div>
+          <div class="col-span-2"><span class="text-slate-500">超量路由</span><p class="mt-0.5">${d.serverless ? '<span class="text-blue-700">超量路由 Serverless，按量计费</span>' : '<span class="text-slate-500">超量限流，返回 429</span>'}</p></div>
         </div>
         <div>
           <p class="text-sm font-medium text-slate-900 mb-2">折算系数</p>

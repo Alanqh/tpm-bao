@@ -143,9 +143,30 @@
             </div>
 
             <div>
+              <label class="block text-sm font-medium text-slate-900 mb-2">超量路由配置 <span class="text-red-500">*</span></label>
+              <div class="grid sm:grid-cols-2 gap-3">
+                <label class="block">
+                  <input type="radio" name="serverless_route" value="off" class="survey-radio hidden" checked>
+                  <div class="border border-slate-200 rounded-lg p-4 h-full cursor-pointer bg-white">
+                    <p class="text-sm font-medium text-slate-900 mb-1">超量限流</p>
+                    <p class="text-xs text-slate-500">超出预留 vTPM 时返回 429，不产生额外费用。</p>
+                  </div>
+                </label>
+                <label class="block">
+                  <input type="radio" name="serverless_route" value="on" class="survey-radio hidden">
+                  <div class="border border-slate-200 rounded-lg p-4 h-full cursor-pointer bg-white">
+                    <p class="text-sm font-medium text-slate-900 mb-1">超量路由 Serverless（按量计费）</p>
+                    <p class="text-xs text-slate-500">超量请求自动路由至相同模型的 Serverless 服务，超出部分按量计费。</p>
+                  </div>
+                </label>
+              </div>
+              <p class="text-xs text-slate-400 mt-2">该配置将作为预留 vTPM 资源包的配置项，交付后可在资源包「交付详情」中查看。</p>
+            </div>
+
+            <div>
               <label class="block text-sm font-medium text-slate-900 mb-3">绑定 model_name <span class="text-red-500">*</span></label>
               <div class="border border-slate-200 rounded-lg p-4 bg-slate-50/50">
-                <p class="text-xs text-slate-600 mb-3">默认已填入所选模型的平台公网 model_name，您可删除或继续添加多个。API 请求中填写下列任意 model_name 时，将路由到本预留 vTPM 对应的模型服务上。</p>
+                <p class="text-xs text-slate-600 mb-3">默认已填入所选模型的平台公网 model_name，您可删除或继续添加多个。此处填写的 model_name 仅作为您的需求记录；交付后，平台将生成您专属的最终 model_name（格式：/Pool 对象名/model），并以资源包「交付详情」中的为准。</p>
                 <div id="model-name-tags" class="flex flex-wrap gap-2 mb-3">
                   <!-- JS 渲染 tag -->
                 </div>
