@@ -176,7 +176,6 @@
               <button type="button" class="filter-btn" data-filter-status="active">生效中</button>
               <button type="button" class="filter-btn" data-filter-status="used">已用完</button>
               <button type="button" class="filter-btn" data-filter-status="expired">已过期</button>
-              <button type="button" class="filter-btn" data-filter-status="cancelled">已作废</button>
               <span class="text-xs text-slate-400 mx-2 hidden sm:inline">|</span>
               <span class="text-xs text-slate-400 mr-1">类型</span>
               <button type="button" class="filter-btn active" data-filter-type="all">全部</button>
@@ -391,6 +390,7 @@
     function renderMyPackages() {
       const grid = document.getElementById('my-package-grid');
       const filtered = packages.filter(p => {
+        if (p.status === 'cancelled') return false;
         const statusMatch = currentStatus === 'all' || p.status === currentStatus;
         const typeMatch = currentType === 'all' || p.type === currentType;
         return statusMatch && typeMatch;
