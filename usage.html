@@ -108,55 +108,21 @@
             <div class="flex items-center gap-2">
               <h2 class="text-xl font-bold text-slate-900" id="page-title">Deepseek V4 Flash 0731</h2>
               <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-violet-100 text-violet-700">预留 vTPM</span>
-              <span id="pkg-status"></span>
             </div>
-            <p class="text-xs text-slate-500 mt-0.5">ID <span class="font-mono text-slate-700" id="pkg-id">P001</span></p>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 mt-0.5">
+              <span>ID <span class="font-mono text-slate-700" id="pkg-id">P001</span></span>
+              <span>model_name <span class="font-mono text-slate-700" id="pkg-bind">/proj-alpha/deepseek-v4-flash-0731</span></span>
+              <span>购买量 <span class="text-slate-700" id="pkg-capacity">30 万 vTPM</span></span>
+              <span>有效期 <span class="text-slate-700" id="pkg-period">2026-08-01 ~ 2026-08-30</span></span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 资源包详情 -->
-      <div class="sf-card p-5 mb-4">
-        <div class="grid lg:grid-cols-2 gap-5">
-          <div class="bg-gradient-to-br from-violet-600 to-violet-800 rounded-xl p-5 text-white">
-            <div class="flex items-center justify-between mb-2">
-              <p class="text-xs opacity-80">最终 model_name</p>
-              <button type="button" onclick="copyModels()" class="px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white text-[11px]"><i class="fa-regular fa-copy mr-1"></i>复制</button>
-            </div>
-            <div id="pkg-bind" class="font-mono text-lg font-bold break-all"></div>
-            <p class="text-[11px] opacity-75 mt-2">任一 model_name 均可路由到预留算力</p>
-          </div>
-          <div class="grid grid-cols-2 gap-3 text-sm">
-            <div class="bg-slate-50 rounded-lg p-3"><p class="text-xs text-slate-400 mb-1">Pool 对象</p><p class="text-slate-800" id="pkg-pools"></p></div>
-            <div class="bg-slate-50 rounded-lg p-3"><p class="text-xs text-slate-400 mb-1">购买量</p><p class="text-slate-800" id="pkg-capacity"></p></div>
-            <div class="bg-slate-50 rounded-lg p-3"><p class="text-xs text-slate-400 mb-1">有效期</p><p class="text-slate-800" id="pkg-period"></p></div>
-            <div class="bg-slate-50 rounded-lg p-3"><p class="text-xs text-slate-400 mb-1">超量路由</p><p class="text-slate-800" id="pkg-overflow"></p></div>
-          </div>
-        </div>
-        <div id="factor-row" class="mt-5">
-          <p class="text-sm font-semibold text-slate-900 mb-2">折算系数</p>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-xs border border-slate-200 rounded-lg">
-              <thead class="bg-slate-50 text-slate-600">
-                <tr>
-                  <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
-                  <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
-                  <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
-                  <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
-                  <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
-                  <th class="px-3 py-2 text-left font-medium">输出系数</th>
-                </tr>
-              </thead>
-              <tbody id="factor-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- 监控说明 -->
+      <!-- 路由与统计说明 -->
       <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-5 text-xs text-slate-600 flex items-start gap-2">
         <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
-        <p>红点为 429 限流事件（秒级）。</p>
+        <p>任一 model_name 均可路由到预留算力。红点为 429 限流事件（秒级）。</p>
       </div>
 
       <!-- 时间筛选 + 返回 -->
@@ -367,70 +333,20 @@
   <script>
     /* ===== 资源包元数据（与 balance.html 一致） ===== */
     const pkgMap = {
-      'P001': {
-        model: 'Deepseek V4 Flash 0731', amount: 30, unit: '万 vTPM',
-        pools: ['proj-alpha', 'proj-beta'], bind: ['/proj-alpha/deepseek-v4-flash-0731', '/proj-beta/deepseek-v4-flash-0731'],
-        period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理',
-        status: 'active', serverless: true,
-        factors: [
-          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
-          { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
-          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
-          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.05, outputF: 2.00 },
-          { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
-          { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
-        ]
-      },
-      'P002': {
-        model: 'GLM 5.2', amount: 20, unit: '万 vTPM',
-        pools: ['proj-gamma'], bind: ['/proj-gamma/glm-5.2'],
-        period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理',
-        status: 'active', serverless: false,
-        factors: [
-          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
-          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
-        ]
-      }
-    };
-    const statusMap = {
-      active: { label: '生效中', cls: 'bg-green-100 text-green-700' },
-      used: { label: '已用完', cls: 'bg-slate-100 text-slate-500' },
-      expired: { label: '已过期', cls: 'bg-slate-100 text-slate-500' },
-      cancelled: { label: '已回收', cls: 'bg-red-50 text-red-600' }
+      'P001': { model: 'Deepseek V4 Flash 0731', amount: 30, pools: ['proj-alpha', 'proj-beta'], bind: ['/proj-alpha/deepseek-v4-flash-0731', '/proj-beta/deepseek-v4-flash-0731'], period: '2026-08-01 ~ 2026-08-30' },
+      'P002': { model: 'GLM 5.2', amount: 20, pools: ['proj-gamma'], bind: ['/proj-gamma/glm-5.2'], period: '2026-09-01 ~ 2026-09-30' }
     };
     const params = new URLSearchParams(window.location.search);
     const pkgId = params.get('pkg') || 'P001';
     const pkg = pkgMap[pkgId] || pkgMap['P001'];
     const CAPACITY = pkg.amount; // 万 vTPM
     const binds = Array.isArray(pkg.bind) ? pkg.bind : [pkg.bind];
-    const st = statusMap[pkg.status] || statusMap.active;
 
     document.getElementById('pkg-id').textContent = pkgId;
     document.getElementById('pkg-bind').innerHTML = binds.map(m => `<span class="font-mono text-slate-700">${m}</span>`).join('<span class="mx-1 text-slate-300">|</span>');
     document.getElementById('pkg-period').textContent = pkg.period;
     document.getElementById('page-title').textContent = pkg.model;
-    document.getElementById('pkg-status').innerHTML = `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${st.cls}">${st.label}</span>`;
-    document.getElementById('pkg-capacity').textContent = `${CAPACITY} ${pkg.unit}`;
-    document.getElementById('pkg-scope').textContent = pkg.scope || '—';
-    document.getElementById('pkg-pools').textContent = (pkg.pools || []).join('、') || '—';
-    document.getElementById('pkg-overflow').innerHTML = pkg.serverless
-      ? '<span class="text-blue-700">Serverless 按量计费</span>'
-      : '<span class="text-slate-500">限流 429</span>';
-
-    // 折算系数
-    const factorBody = document.getElementById('factor-body');
-    if (factorBody && pkg.factors) {
-      factorBody.innerHTML = pkg.factors.map(f => `
-        <tr>
-          <td class="px-3 py-2">${f.input}</td>
-          <td class="px-3 py-2">${f.cache}</td>
-          <td class="px-3 py-2">${f.output}</td>
-          <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
-          <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
-          <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
-        </tr>
-      `).join('');
-    }
+    document.getElementById('pkg-capacity').textContent = `${CAPACITY} 万 vTPM`;
 
     /* ===== 生成 60 分钟 Mock 数据 ===== */
     const minuteData = [];
@@ -554,15 +470,6 @@
       tip.style.top = (elRect.top - wrapRect.top - tip.offsetHeight - 8) + 'px';
     }
     function hide429Tip() { document.getElementById('vtpm-tooltip').style.display = 'none'; }
-
-    function copyModels() {
-      const text = binds.join('\n');
-      if (navigator.clipboard) navigator.clipboard.writeText(text);
-      const btn = event.currentTarget;
-      const original = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>已复制';
-      setTimeout(() => { btn.innerHTML = original; }, 1500);
-    }
 
     /* ===== 折线图（TTFT / TPOT） ===== */
     function renderLineChart(svgId, key, color, threshold, unit) {
