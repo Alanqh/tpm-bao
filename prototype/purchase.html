@@ -174,7 +174,7 @@
                   </div>
                 </label>
               </div>
-              <p class="text-xs text-slate-400 mt-2">该配置将作为预留 vTPM 资源包的配置项，交付后可在资源包「交付详情」中查看。</p>
+              <p class="text-xs text-slate-400 mt-2">交付后在资源包「交付详情」中查看。</p>
             </div>
 
             <!-- 4. Pool 名称 -->
@@ -189,7 +189,7 @@
                   <input type="text" id="pool_input" placeholder="例如：ztech-llm-prod" class="survey-input flex-1">
                   <button type="button" id="add-pool" class="px-3 py-2 rounded-lg bg-violet-600 text-white text-sm hover:bg-violet-700 transition">添加</button>
                 </div>
-                <p class="text-xs text-slate-400 mt-2">点击“×”可移除，最多填写 3 个 Pool 名称。</p>
+                <p class="text-xs text-slate-400 mt-2">最多 3 个 Pool。</p>
                 <p id="pool-error" class="hidden text-xs text-red-500 mt-2">请至少填写一个 Pool 名称</p>
                 <p id="pool-max" class="hidden text-xs text-orange-500 mt-2">最多可填写 3 个 Pool 名称</p>
                 <input type="hidden" name="pool_names" id="pool_names_hidden">
@@ -444,9 +444,9 @@
         <p class="font-semibold text-slate-900 mb-1.5">购买意向摘要</p>
         <p>· SKU 名称：<span class="font-medium text-slate-800">${sku.name}</span></p>
         <p>· 购买量：${multi} 份 × ${sku.minVtpm} 万 vTPM = <span class="font-medium text-primary">${totalVtpm.toLocaleString()} 万 vTPM</span>｜ 周期：${k} × ${sku.minCycle} 天</p>
-        <p>· 有效期：${fmtDateTime(start)} ~ ${fmtDateTime(end)}<span class="text-slate-400">（开始固定为提交当天 0 点；结束 = 开始 + 周期 + 1 天）</span></p>
-        <p>· 超量路由：${serverless ? '超量路由 Serverless，按量计费' : '超量限流，返回 429'}</p>
-        ${poolNames.map(n => `<p>· Pool 名称：<span class="font-mono">${n}</span> ｜ 预览最终 model_name：<span class="font-mono text-primary">/${n}/${sku.model}</span><span class="text-slate-400">（仅需求记录，最终以资源包「交付详情」为准）</span></p>`).join('')}
+        <p>· 有效期：${fmtDateTime(start)} ~ ${fmtDateTime(end)}</p>
+        <p>· 超量路由：${serverless ? 'Serverless 按量计费' : '限流 429'}</p>
+        ${poolNames.map(n => `<p>· Pool 名称：<span class="font-mono">${n}</span> ｜ 预览 model_name：<span class="font-mono text-primary">/${n}/${sku.model}</span></p>`).join('')}
       `;
       document.getElementById('intent-form').classList.add('hidden');
       document.getElementById('success-msg').classList.remove('hidden');

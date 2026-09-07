@@ -198,10 +198,7 @@
       <!-- 路由与统计说明 -->
       <div class="admin-card p-3 mb-4 text-xs text-slate-600 flex items-start gap-2">
         <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
-        <div>
-          <p>API 请求填写资源包任一 model_name（格式 <span class="font-mono text-xs text-slate-800 bg-slate-100 rounded px-1.5 py-0.5">/Pool 对象名/model</span>）均可路由到预留算力。限流按 60s 滑动窗口计算，图表按自然分钟聚合呈现；超量默认 429 限流，开启「超量路由 Serverless」时转发至同模型 Serverless 端点按量计费。</p>
-          <p class="text-slate-400 mt-0.5">图中红点为 429 限流事件，触发时刻精确到秒（与分钟级 vTPM 柱不同源）；同一分钟内发生多次 429 时，仅展示该分钟内 60s 滑动窗口值最高的 1 次，鼠标悬停可查看该次触发前 60s 窗口的 vTPM 值。</p>
-        </div>
+        <p>任一 model_name 均可路由到预留算力。红点为 429 限流事件（秒级）。</p>
       </div>
 
       <!-- 时间筛选器 -->
