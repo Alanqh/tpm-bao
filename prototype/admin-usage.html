@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>资源包监控 - 活动运营</title>
+  <title>资源包监控 - 资源包管理</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -69,7 +69,6 @@
         <a href="purchase.html" class="switcher-tab">购买意向</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
         <a href="balance.html?tab=package" class="switcher-tab">资源包</a>
-        <a href="usage.html" class="switcher-tab">资源包监控</a>
         <a href="pipeline.html" class="switcher-tab">监控数据链路</a>
         <a href="admin-inventory.html" class="switcher-tab active">后台管理</a>
       </div>
@@ -87,7 +86,7 @@
         <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
       </div>
       <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
-      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">活动运营 - 资源包监控</h1>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">资源包管理 - 资源包监控</h1>
     </div>
     <div class="flex items-center gap-3">
       <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
@@ -122,9 +121,17 @@
         <div class="pl-6 space-y-0.5">
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>资源包管理</span>
+        </div>
+
+        <div class="pl-6 space-y-0.5">
           <a href="admin-inventory.html" class="admin-sidebar-link"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
           <a href="admin-usage.html" class="admin-sidebar-link active"><i class="fa-solid fa-chart-line w-4 text-center"></i>资源包监控</a>
-          <a href="admin-sku.html" class="admin-sidebar-link"><i class="fa-solid fa-sliders w-4 text-center"></i>SKU 配置</a>
+          <a href="admin-records.html" class="admin-sidebar-link"><i class="fa-solid fa-clock-rotate-left w-4 text-center"></i>操作记录</a>
         </div>
 
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
@@ -161,9 +168,7 @@
     <main class="flex-1 p-4 min-w-0">
       <!-- 面包屑 -->
       <nav class="text-xs text-slate-500 mb-4">
-        <span class="text-slate-700">活动运营</span>
-        <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
-        <a href="admin-inventory.html" class="hover:text-violet-600">资源包管理</a>
+        <span class="text-slate-700">资源包管理</span>
         <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
         <span class="text-slate-700">资源包监控</span>
       </nav>
