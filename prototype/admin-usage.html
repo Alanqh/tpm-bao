@@ -199,7 +199,7 @@
         <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
         <div>
           <p>API 请求填写资源包的 model_name（格式 <span class="font-mono text-xs text-slate-800 bg-slate-100 rounded px-1.5 py-0.5">/Pool 对象名/model</span>）将路由到预留算力。限流按 60s 滑动窗口计算，图表按自然分钟聚合呈现；超量默认 429 限流，开启「超量路由 Serverless」时转发至同模型 Serverless 端点按量计费。</p>
-          <p class="text-slate-400 mt-0.5">图中红点为 429 限流事件，鼠标悬停查看该点前 60s 滑动窗口的 vTPM 值。</p>
+          <p class="text-slate-400 mt-0.5">图中红点为 429 限流事件，触发时刻精确到秒（与分钟级 vTPM 柱不同源）；同一分钟内发生多次 429 时，仅展示该分钟内 60s 滑动窗口值最高的 1 次，鼠标悬停可查看该次触发前 60s 窗口的 vTPM 值。</p>
         </div>
       </div>
 
@@ -240,12 +240,12 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <div>
             <h4 class="text-sm font-semibold text-slate-900">vTPM 分钟级消耗趋势</h4>
-            <p class="text-xs text-slate-500 mt-0.5">按自然分钟聚合 · 紫色柱为实际消耗，灰色虚线为购买量，红色圆点为 429 限流事件</p>
+            <p class="text-xs text-slate-500 mt-0.5">分钟柱按自然分钟聚合 · 紫色柱为分钟消耗总量；红点为 429 限流事件（秒级），纵高对应该次触发前 60s 滑动窗口 vTPM，灰色虚线为购买量</p>
           </div>
           <div class="flex items-center gap-3 text-xs">
             <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-600"></span>≤购买量</div>
             <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-300"></span>&gt;购买量</div>
-            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>429</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>429（秒级事件）</div>
             <div class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-slate-400 border-t border-dashed"></span>购买量</div>
           </div>
         </div>
@@ -463,6 +463,27 @@
       }
     })();
 
+    /* ===== 429 限流事件流：触发时刻精确到秒，独立于分钟级 vTPM 数据 ===== */
+    let evSeed = 2024;
+    const evRnd = () => { evSeed = (evSeed * 9301 + 49297) % 233280; return evSeed / 233280; };
+    minuteData.forEach(d => {
+      if (!d.has429) return;
+      const count = 1 + Math.floor(evRnd() * 4); // 该自然分钟内 1~4 次触发
+      d.throttleEvents = [];
+      for (let k = 0; k < count; k++) {
+        const t429 = new Date(d.time);
+        t429.setSeconds(Math.floor(evRnd() * 60));
+        // 触发时 60s 滑动窗口值必超购买量
+        const sliding = +(CAPACITY + 1 + evRnd() * 5).toFixed(1);
+        d.throttleEvents.push({
+          label: t429.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          sliding
+        });
+      }
+      // 同一分钟内多次触发，仅保留窗口值最高的 1 次用于图上展示
+      d.peak429 = d.throttleEvents.reduce((a, b) => (a.sliding >= b.sliding ? a : b));
+    });
+
     /* ===== vTPM 分钟级柱状图 + 429 红点 ===== */
     function renderVtpmChart() {
       const svg = document.getElementById('vtpm-svg');
@@ -492,11 +513,12 @@
       parts += `<line x1="${pL}" y1="${capY}" x2="${W - pR}" y2="${capY}" stroke="#64748b" stroke-width="1.5" stroke-dasharray="6,4"/>`;
       parts += `<text x="${pL + 6}" y="${capY - 5}" font-size="9" fill="#64748b" font-weight="500">购买量 ${CAPACITY} 万 vTPM</text>`;
 
+      // 429 红点：秒级事件，纵高对应该次触发前 60s 滑动窗口 vTPM（非分钟柱高）
+      // 同一分钟内多次触发仅展示窗口值最高的 1 次（peak429）
       minuteData.forEach((d, i) => {
-        if (d.has429) {
+        if (d.peak429) {
           const cx = pL + i * slot + slot / 2;
-          const h = (d.vtpm / maxV) * ch;
-          const cy = pT + ch - h - 10;
+          const cy = pT + ch - (d.peak429.sliding / maxV) * ch - 10;
           parts += `<circle cx="${cx}" cy="${cy}" r="4" fill="#ef4444" stroke="#fff" stroke-width="1.5"/>`;
           parts += `<circle cx="${cx}" cy="${cy}" r="10" fill="transparent" onmouseenter="show429Tip(${i},this)" onmouseleave="hide429Tip()"/>`;
         }
@@ -512,15 +534,22 @@
 
     function show429Tip(idx, el) {
       const d = minuteData[idx];
+      const peak = d.peak429;
+      const others = d.throttleEvents
+        .filter(e => e !== peak)
+        .sort((a, b) => b.sliding - a.sliding)
+        .map(e => `<p style="color:#94a3b8">　· ${e.label} 触发 · 窗口 ${e.sliding} 万</p>`)
+        .join('');
       const tip = document.getElementById('vtpm-tooltip');
       const wrap = document.getElementById('vtpm-chart-wrap');
       const wrapRect = wrap.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
       tip.innerHTML = `
-        <p style="color:#fca5a5;font-weight:600">429 限流 · ${d.label}</p>
-        <p>该点前 60s 滑动窗口 vTPM：<b style="color:#ef4444">${d.sliding} 万</b></p>
-        <p>当前自然分钟 vTPM：${d.vtpm} 万</p>
-        <p style="color:#94a3b8">购买量：${CAPACITY} 万 vTPM · 超出 ${Math.max(0, (d.sliding - CAPACITY).toFixed(1))} 万</p>
+        <p style="color:#fca5a5;font-weight:600">429 限流 · ${peak.label} 触发（精确到秒）</p>
+        <p>该秒前 60s 滑动窗口 vTPM：<b style="color:#ef4444">${peak.sliding} 万</b></p>
+        <p>所在自然分钟 vTPM：${d.vtpm} 万（分钟级，与事件不同源）</p>
+        <p>本分钟共 ${d.throttleEvents.length} 次 429，图上仅展示峰值最高的 1 次${others}</p>
+        <p style="color:#94a3b8">购买量：${CAPACITY} 万 vTPM · 超出 ${(peak.sliding - CAPACITY).toFixed(1)} 万</p>
       `;
       tip.style.display = 'block';
       tip.style.left = (elRect.left - wrapRect.left + 14) + 'px';
