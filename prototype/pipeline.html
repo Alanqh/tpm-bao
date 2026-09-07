@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>监控数据链路 - 产品手册</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --sf-purple: #6e29f6;
+      --sf-purple-dark: #4f19cf;
+      --sf-purple-light: #F5F3FF;
+    }
+    .text-primary { color: var(--sf-purple); }
+    .bg-primary { background-color: var(--sf-purple); }
+    .border-primary { border-color: var(--sf-purple); }
+    .switcher-tab {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+    .switcher-tab.active { background: var(--sf-purple); color: white; }
+    .doc-nav-link {
+      display: block;
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.375rem;
+      color: #475569;
+      font-size: 0.875rem;
+      transition: all 0.15s;
+    }
+    .doc-nav-link:hover { color: var(--sf-purple); background: #F8FAFC; }
+    .doc-nav-link.active {
+      color: var(--sf-purple);
+      background: var(--sf-purple-light);
+      font-weight: 500;
+    }
+    .doc-content h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0F172A;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #E2E8F0;
+    }
+    .doc-content h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1E293B;
+      margin-top: 1.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .doc-content p {
+      color: #475569;
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+    .doc-content ul {
+      list-style: disc;
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+      color: #475569;
+      line-height: 1.75;
+    }
+    .doc-content li {
+      margin-bottom: 0.375rem;
+    }
+    .doc-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.875rem;
+    }
+    .doc-content th,
+    .doc-content td {
+      border: 1px solid #E2E8F0;
+      padding: 0.625rem 0.875rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    .doc-content th {
+      background: #F8FAFC;
+      font-weight: 600;
+      color: #334155;
+    }
+    .doc-content td {
+      color: #475569;
+    }
+    .doc-callout {
+      background: #F8FAFC;
+      border-left: 4px solid var(--sf-purple);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.25rem 0;
+    }
+    .doc-callout p { margin-bottom: 0.25rem; }
+    .doc-callout p:last-child { margin-bottom: 0; }
+    .doc-formula {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.875rem;
+      color: #334155;
+      margin: 1rem 0;
+      line-height: 1.8;
+    }
+    .tag {
+      display: inline-block;
+      padding: 0.0625rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      line-height: 1.5;
+      vertical-align: 1px;
+    }
+    .tag-ev   { background: #FEE2E2; color: #B91C1C; }
+    .tag-log  { background: #E0F2FE; color: #0369A1; }
+    .tag-met  { background: #DCFCE7; color: #15803D; }
+    .tag-both { background: #FEF3C7; color: #B45309; }
+    svg text { font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body class="bg-white text-slate-800">
+  <!-- 原型切换栏 -->
+  <div class="sticky top-0 z-[100] bg-slate-900 text-white text-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-10 gap-1 overflow-x-auto">
+        <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
+        <a href="index.html" class="switcher-tab">官网首页</a>
+        <a href="purchase.html" class="switcher-tab">购买意向</a>
+        <a href="terms.html" class="switcher-tab">购买须知</a>
+        <a href="balance.html?tab=package" class="switcher-tab">资源包</a>
+        <a href="usage.html" class="switcher-tab">资源包监控</a>
+        <a href="pipeline.html" class="switcher-tab active">监控数据链路</a>
+        <a href="admin-inventory.html" class="switcher-tab">后台管理</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 文档顶部栏 -->
+  <header class="sticky top-10 z-40 bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">SF</div>
+        <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
+        <div class="h-5 w-px bg-slate-200"></div>
+        <h1 class="text-slate-700 text-sm font-medium">监控数据链路 · 指标如何获取、聚合、成事件、落存储</h1>
+      </div>
+      <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-medium">U</div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid lg:grid-cols-6 gap-10">
+      <!-- 左侧目录 -->
+      <aside class="lg:col-span-2 hidden lg:block">
+        <div class="sticky top-32">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-diagram-project text-primary"></i>本页目录
+          </p>
+          <nav class="doc-toc space-y-0.5">
+            <a href="#overview" class="doc-nav-link active">1 · 链路总览</a>
+            <a href="#stages" class="doc-nav-link">2 · 单个请求：各阶段提取什么</a>
+            <a href="#sample" class="doc-nav-link">3 · 示例：14:32 这一分钟发生了什么</a>
+            <a href="#aggregation" class="doc-nav-link">4 · 聚合：怎么从原始请求变成分钟数据</a>
+            <a href="#events" class="doc-nav-link">5 · 事件：怎么形成、字段是什么</a>
+            <a href="#storage" class="doc-nav-link">6 · 存储：metrics / events / logs 三库</a>
+            <a href="#mapping" class="doc-nav-link">7 · 呈现：页面元素与数据源的对应</a>
+          </nav>
+          <div class="mt-6 p-3 rounded-lg bg-violet-50 border border-violet-100 text-xs text-slate-600 leading-relaxed">
+            <p class="font-medium text-violet-700 mb-1"><i class="fa-solid fa-lightbulb mr-1"></i>一句话</p>
+            <p><b>请求全程产生日志</b>；<b>判定瞬间产生事件</b>（秒级）；<b>分钟闭合时聚合产生指标</b>（分钟级）。三种数据、三类存储、三套查询，页面上每个元素都有明确来源。</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 右侧文档 -->
+      <article class="lg:col-span-4 doc-content max-w-3xl">
+        <p class="text-slate-500 text-sm not-prose">本页说明「资源包监控」（前台 usage.html 与后台 admin-usage.html）页面上的每一条数据，从请求进入网关到出现在图表上，分别经过哪些阶段、在哪个时点提取、如何聚合、如何形成事件、如何存储。</p>
+
+        <!-- 1 总览 -->
+        <section id="overview">
+          <h2>1 · 链路总览</h2>
+          <p>一条 API 请求进入平台后，监控数据按「三个出口」流出：</p>
+          <div class="doc-formula">
+            请求 ──► 网关（路由/归属）──► 限流器（60s 滑动窗口判定）──► 缓存查询 ──► 推理（首 token / 流式）──► 响应完成
+              │                                                            │
+              │                                                            ├─(即时)──► <b>事件 events</b>（秒级：429 限流）
+              ├─(全程逐字段)────────────────────────────────────────► <b>日志 logs</b>（单请求全字段）
+              │                                                            │
+              └─(延迟到整分钟闭合)──────────────────────────────────► <b>指标 metrics</b>（分钟桶：vTPM / TTFT / TPOT / 5xx）
+          </div>
+          <table>
+            <thead>
+              <tr><th>出口</th><th>写入时机</th><th>时间粒度</th><th>数据形态</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>事件 events</b></td>
+                <td>判定发生的<b>那个瞬间</b>（如限流器拒绝请求的时刻）</td>
+                <td><b>秒级</b>（HH:MM:SS）</td>
+                <td>一条告警性质的结构化记录，携带判定依据（窗口值）与关联请求 ID</td>
+              </tr>
+              <tr>
+                <td><b>日志 logs</b></td>
+                <td>响应完成（或被拒绝）时一次性落盘</td>
+                <td>单请求</td>
+                <td>rid、状态码、TTFT/TPOT、token 数、cache 命中等全字段</td>
+              </tr>
+              <tr>
+                <td><b>指标 metrics</b></td>
+                <td>自然分钟闭合时（每分钟第 0 秒触发）批量聚合</td>
+                <td>分钟级</td>
+                <td>该资源包该分钟的桶值（求和 / 分位数 / 计数）</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="doc-callout">
+            <p><b>为什么 429 红点和分钟柱「不同源」：</b>429 是请求进入限流器那一刻的<b>即时判定</b>，事件即时生成、时刻精确到秒；分钟柱是分钟闭合时对<b>成功请求</b>的<b>事后聚合</b>。两者产生时刻不同、口径不同（窗口值 vs 分钟求和），所以同一分钟里红点的高度与柱顶不需要一致。</p>
+          </div>
+        </section>
+
+        <!-- 2 阶段 -->
+        <section id="stages">
+          <h2>2 · 单个请求：各阶段提取什么</h2>
+          <p>下表按请求生命周期逐段说明：每个阶段发生在什么时点、提取哪些指标、这些指标后续流向哪里（<span class="tag tag-ev">事</span>=写事件、<span class="tag tag-log">日</span>=写日志、<span class="tag tag-met">指</span>=等分钟闭合进指标、<span class="tag tag-both">日+指</span>=同时进日志与指标）。</p>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:15%">阶段</th>
+                <th style="width:17%">发生时点</th>
+                <th>提取的内容</th>
+                <th style="width:13%">流向</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>网关路由</b></td>
+                <td>请求进入（t₀）</td>
+                <td>model_name → 资源包 Pool 的绑定关系、计费归属（预留 or Serverless 兜底）</td>
+                <td><span class="tag tag-log">日</span></td>
+              </tr>
+              <tr>
+                <td><b>限流器判定</b></td>
+                <td>推理前，瞬时</td>
+                <td>以「进入时刻」向前取 60s 滑动窗口的历史 token 流量求得的<b>窗口 vTPM</b>，与购买量比较；不落历史库（仅判定瞬间存在），若超限则连同窗口值写事件</td>
+                <td><span class="tag tag-ev">事</span><span class="tag tag-log" style="margin-left:2px">日</span></td>
+              </tr>
+              <tr>
+                <td><b>缓存查询</b></td>
+                <td>推理前</td>
+                <td>前缀 cache 命中 token 数 / 未命中 token 数（决定实算部分）</td>
+                <td><span class="tag tag-log">日</span></td>
+              </tr>
+              <tr>
+                <td><b>首个 token</b></td>
+                <td>流式开始</td>
+                <td><b>TTFT</b> = 首 token 时刻 − t₀（ms）</td>
+                <td><span class="tag tag-both">日+指</span></td>
+              </tr>
+              <tr>
+                <td><b>逐 token 生成</b></td>
+                <td>流式过程</td>
+                <td><b>TPOT</b> = 相邻 token 平均间隔（ms），累计输出 tokens</td>
+                <td><span class="tag tag-both">日+指</span></td>
+              </tr>
+              <tr>
+                <td><b>响应完成</b></td>
+                <td>流结束</td>
+                <td>状态码（2xx / 429 / 5xx）、输入+输出 tokens 合计、请求时长</td>
+                <td><span class="tag tag-both">日+指</span></td>
+              </tr>
+              <tr>
+                <td><b>分钟闭合</b></td>
+                <td>下一分钟第 0 秒</td>
+                <td>对本分钟内所有请求的原始点做聚合（见第 4 节），生成分钟桶</td>
+                <td><span class="tag tag-met">指</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="doc-callout">
+            <p><b>429 请求没有「推理阶段」。</b>它在限流器就被拒绝，不会产生 TTFT/TPOT/tokens，因此分钟柱（对这些求和）天然不包含 429 请求——被拒绝的请求没有消耗预留算力。</p>
+          </div>
+        </section>
+
+        <!-- 3 示例 -->
+        <section id="sample">
+          <h2>3 · 示例：14:32 这一分钟发生了什么</h2>
+          <p>下图用一分钟的抽样（与监控页 mock 数据同口径）完整走一遍链路：4 个请求 → 1 次即时 429 判定（秒级事件）→ 分钟闭合聚合。</p>
+          <figure class="my-6">
+            <svg id="flow-svg" viewBox="0 0 960 560" class="w-full h-auto" style="min-height:420px">
+              <!-- 分区标题 -->
+              <text x="10" y="20" font-size="11" font-weight="600" fill="#7c3aed">A · 请求流（原始请求，秒级）</text>
+              <text x="10" y="167" font-size="11" font-weight="600" fill="#7c3aed">B · 限流器即时判定（60s 滑动窗口）</text>
+              <text x="10" y="227" font-size="11" font-weight="600" fill="#7c3aed">C · 即时事件（秒级，判定瞬间生成）</text>
+              <text x="10" y="277" font-size="11" font-weight="600" fill="#7c3aed">D · 分钟闭合聚合（14:33:00 触发，分钟级）</text>
+
+              <!-- 时间刻度（A 区底部） -->
+              <g stroke="#E2E8F0" stroke-width="1">
+                <line x1="120" y1="20" x2="120" y2="146"/>
+                <line x1="253.3" y1="20" x2="253.3" y2="146"/>
+                <line x1="386.7" y1="20" x2="386.7" y2="146"/>
+                <line x1="520" y1="20" x2="520" y2="146"/>
+                <line x1="653.3" y1="20" x2="653.3" y2="146"/>
+                <line x1="786.7" y1="20" x2="786.7" y2="146"/>
+                <line x1="920" y1="20" x2="920" y2="146"/>
+              </g>
+              <g font-size="8.5" fill="#94a3b8" text-anchor="middle">
+                <text x="120" y="158">14:32:00</text>
+                <text x="253.3" y="158">:10</text>
+                <text x="386.7" y="158">:20</text>
+                <text x="520" y="158">:30</text>
+                <text x="653.3" y="158">:40</text>
+                <text x="786.7" y="158">:50</text>
+                <text x="920" y="158">14:33:00</text>
+              </g>
+
+              <!-- 行1 req_9d4b77e1 OK 200: 12s→24s -->
+              <text x="108" y="38" font-size="8.5" fill="#64748b" text-anchor="end">req_9d4b77e1</text>
+              <rect x="280" y="30" width="160" height="14" rx="3" fill="#7c3aed" opacity="0.85"/>
+              <circle cx="292" cy="37" r="3.2" fill="#7c3aed" stroke="#fff" stroke-width="1"/>
+              <circle cx="440" cy="37" r="3.2" fill="#94a3b8" stroke="#fff" stroke-width="1"/>
+              <text x="360" y="27" font-size="8" fill="#94a3b8" text-anchor="middle">200 · tokens 计入分钟柱</text>
+
+              <!-- 行2 req_7b2e9a3d OK 200: 30s→36s，首token 31.1s -->
+              <text x="108" y="68" font-size="8.5" fill="#64748b" text-anchor="end">req_7b2e9a3d</text>
+              <rect x="520" y="60" width="80" height="14" rx="3" fill="#7c3aed" opacity="0.85"/>
+              <polygon points="535,60 537.6,64 535,68 532.4,64" fill="#4c1d95"/>
+              <circle cx="600" cy="67" r="3.2" fill="#94a3b8" stroke="#fff" stroke-width="1"/>
+              <text x="560" y="57" font-size="8" fill="#4c1d95" text-anchor="middle">首 token · TTFT 115ms</text>
+
+              <!-- 行3 req_8a3f2e1c 429: 45s→45.4s -->
+              <text x="108" y="98" font-size="8.5" fill="#64748b" text-anchor="end">req_8a3f2e1c</text>
+              <rect x="720" y="90" width="5.3" height="14" rx="2" fill="#ef4444"/>
+              <text x="722.6" y="87" font-size="8" fill="#ef4444" text-anchor="middle" font-weight="600">× 429</text>
+              <text x="740" y="107" font-size="8" fill="#ef4444">未推理 · 无 TTFT/tokens</text>
+
+              <!-- 行4 req_c44a88f0 500: 51s→56.5s -->
+              <text x="108" y="128" font-size="8.5" fill="#64748b" text-anchor="end">req_c44a88f0</text>
+              <rect x="800" y="120" width="73.3" height="14" rx="3" fill="#f97316" opacity="0.9"/>
+              <circle cx="873.3" cy="127" r="3" fill="#c2410c" stroke="#fff" stroke-width="1"/>
+              <text x="836" y="117" font-size="8" fill="#c2410c" text-anchor="middle">推理失败 → 500</text>
+
+              <!-- B 滑动窗口带：[14:31:46, 14:32:45] -->
+              <rect x="120" y="176" width="600" height="26" rx="4" fill="#ef4444" fill-opacity="0.06" stroke="#ef4444" stroke-opacity="0.5" stroke-width="1" stroke-dasharray="5,3"/>
+              <line x1="120" y1="172" x2="120" y2="206" stroke="#ef4444" stroke-opacity="0.5" stroke-width="1"/>
+              <text x="132" y="171" font-size="8.5" fill="#b91c1c">← 窗口左端回溯到 14:31:46（跨上一分钟，本图裁剪）</text>
+              <line x1="720" y1="176" x2="720" y2="202" stroke="#ef4444" stroke-width="1.5"/>
+              <text x="730" y="186" font-size="9" fill="#b91c1c" font-weight="600">判定时刻 14:32:45</text>
+              <text x="730" y="198" font-size="8.5" fill="#b91c1c">窗口 vTPM 312 万 &gt; 购买量 300 万</text>
+              <text x="420" y="197" font-size="8.5" fill="#64748b">窗口 vTPM = 过去 60s 内已进入请求的 token 流量合计（瞬时计算，不落指标库）</text>
+
+              <!-- C 事件 -->
+              <line x1="720" y1="206" x2="720" y2="234" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,2"/>
+              <circle cx="720" cy="239" r="5" fill="#ef4444" stroke="#fff" stroke-width="1.5"/>
+              <text x="734" y="236" font-size="9" fill="#b91c1c" font-weight="600">throttle 事件</text>
+              <text x="734" y="248" font-size="8.5" fill="#94a3b8">occur_at=14:32:45 · window=312万 · rid=req_8a3f2e1c</text>
+
+              <!-- D 分钟闭合 -->
+              <line x1="920" y1="286" x2="920" y2="430" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="6,4"/>
+              <polygon points="920,438 915.5,429 924.5,429" fill="#7c3aed"/>
+              <text x="905" y="292" font-size="9" fill="#7c3aed" text-anchor="end" font-weight="600">分钟闭合触发 ▸</text>
+              <text x="905" y="305" font-size="8.5" fill="#94a3b8" text-anchor="end">对本分钟全部原始点聚合</text>
+
+              <!-- D 指标桶卡片 -->
+              <rect x="140" y="316" width="380" height="108" rx="8" fill="#F8FAFC" stroke="#E2E8F0"/>
+              <text x="156" y="338" font-size="10.5" font-weight="600" fill="#166534">metrics · 分钟桶（14:32）</text>
+              <g font-size="8.5" fill="#475569">
+                <text x="156" y="358">vTPM 分钟柱 = 89.7 万（3 条成功请求 tokens 求和，429 不计）</text>
+                <text x="156" y="374">TTFT P95 = 115 ms（请求级 {94, 115} 取分位）</text>
+                <text x="156" y="390">TPOT P95 = 19 ms（{17, 19} 取分位）</text>
+                <text x="156" y="406">5xx 计数 = 1（500 计入；429 不属于 5xx）</text>
+              </g>
+              <!-- D 事件卡片 -->
+              <rect x="546" y="316" width="330" height="108" rx="8" fill="#FEF2F2" stroke="#FECACA"/>
+              <text x="562" y="338" font-size="10.5" font-weight="600" fill="#b91c1c">events · 本分钟追加</text>
+              <g font-size="8.5" fill="#475569">
+                <text x="562" y="358">throttle 1 条：14:32:45 · 312 万（秒级，即时已写入）</text>
+                <text x="562" y="374">SLA 无违约：TTFT 115 ≤ 阈值 120，TPOT 19 ≤ 25</text>
+                <text x="562" y="390">5xx 1 &lt; 3，未达到成事件条件，仅进 metrics 计数</text>
+                <text x="562" y="406">若同分钟多次 429：全量入库，展示层取峰值最高 1 条</text>
+              </g>
+
+              <!-- 底部产出 -->
+              <text x="10" y="468" font-size="11" font-weight="600" fill="#7c3aed">E · 落库后呈现</text>
+              <g font-size="8.5">
+                <rect x="140" y="478" width="150" height="52" rx="6" fill="#F5F3FF" stroke="#DDD6FE"/>
+                <text x="215" y="500" fill="#5b21b6" text-anchor="middle" font-weight="600">usage.html 图表</text>
+                <text x="215" y="514" fill="#64748b" text-anchor="middle">分钟柱 / 折线 / 5xx</text>
+                <rect x="310" y="478" width="150" height="52" rx="6" fill="#FEF2F2" stroke="#FECACA"/>
+                <text x="385" y="500" fill="#b91c1c" text-anchor="middle" font-weight="600">429 红点</text>
+                <text x="385" y="514" fill="#64748b" text-anchor="middle">events · 按分钟取峰值 1 条</text>
+                <rect x="480" y="478" width="150" height="52" rx="6" fill="#FEF3C7" stroke="#FDE68A"/>
+                <text x="555" y="500" fill="#b45309" text-anchor="middle" font-weight="600">事件大表</text>
+                <text x="555" y="514" fill="#64748b" text-anchor="middle">events · 全量列出</text>
+                <rect x="650" y="478" width="150" height="52" rx="6" fill="#E0F2FE" stroke="#BAE6FD"/>
+                <text x="725" y="500" fill="#0369a1" text-anchor="middle" font-weight="600">请求日志表</text>
+                <text x="725" y="514" fill="#64748b" text-anchor="middle">logs · 单请求字段</text>
+                <text x="820" y="508" fill="#94a3b8">▸</text>
+              </g>
+              <text x="10" y="556" font-size="8.5" fill="#94a3b8">示例分钟与「资源包监控」页 mock 数据同口径：3 条成功请求 + 1 次秒级 429；图 D 右侧规则对应事件大表中的违约分类。</text>
+            </svg>
+            <figcaption class="text-center text-xs text-slate-500 mt-2">图 1 · 一条请求从进入到落库的全链路（示例：14:32 ~ 14:33）</figcaption>
+          </figure>
+        </section>
+
+        <!-- 4 聚合 -->
+        <section id="aggregation">
+          <h2>4 · 聚合：怎么从原始请求变成分钟数据</h2>
+          <p>聚合只发生在<b>分钟闭合</b>这一个时刻（每小时第 x 分 0 秒触发，处理前一分钟的原始点），规则按指标口径分开：</p>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:18%">指标</th>
+                <th style="width:26%">聚合公式</th>
+                <th style="width:30%">参与样本</th>
+                <th>为什么这样聚合</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>vTPM 分钟柱</b></td>
+                <td>Σ(请求 tokens)，分钟内求和</td>
+                <td>本分钟<b>成功请求</b>（2xx）的 in+out tokens；429 不计</td>
+                <td>柱子表达的是「这一分钟实际消耗了多少预留吞吐」，被拒绝的请求没有消耗</td>
+              </tr>
+              <tr>
+                <td><b>TTFT</b></td>
+                <td>P95(请求 TTFT)</td>
+                <td>本分钟成功请求的首 token 时延样本</td>
+                <td>分位数比均值更能反映长尾体验，与 SLA 阈值 120ms 直接比较</td>
+              </tr>
+              <tr>
+                <td><b>TPOT</b></td>
+                <td>P95(请求 TPOT)</td>
+                <td>本分钟成功请求的 token 间隔样本</td>
+                <td>同上，阈值 25ms</td>
+              </tr>
+              <tr>
+                <td><b>5xx 数量</b></td>
+                <td>Count(状态码 ≥ 500)</td>
+                <td>本分钟全部响应完成的请求</td>
+                <td>分钟级计数呈现趋势；429 属于 4xx，不混入</td>
+              </tr>
+              <tr>
+                <td><b>滑动窗口 vTPM</b></td>
+                <td colspan="3">——<b>不聚合</b>。它只在限流器判定瞬间计算，只随 429 事件落入 events；metrics 分钟桶中不存在任何窗口值</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="doc-callout">
+            <p><b>聚合的去噪设计：</b>分钟桶写完即不可变（幂等重算），时区按资源包归属地取自然分钟；跨分钟的请求（跨 14:33:00 未结束）归属<b>结束时刻</b>所在分钟，避免双计。</p>
+          </div>
+        </section>
+
+        <!-- 5 事件 -->
+        <section id="events">
+          <h2>5 · 事件：怎么形成、字段是什么</h2>
+          <p>事件不是聚合出来的，而是<b>判定规则命中时即时生成</b>。分两类：</p>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:16%">类别</th>
+                <th style="width:17%">生成时机</th>
+                <th style="width:14%">时间戳</th>
+                <th>触发条件与携带字段</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>即时类</b><br>（throttle 429）</td>
+                <td>限流器拒绝请求的瞬间</td>
+                <td><b>秒级</b></td>
+                <td>窗口 vTPM &gt; 购买量。字段：occur_at（HH:MM:SS）、window（60s 窗口值）、购买量、超出量、rid（被拒请求）、pool、model</td>
+              </tr>
+              <tr>
+                <td><b>闭合类</b><br>（SLA 违约、5xx 集中）</td>
+                <td>分钟闭合、聚合完成后判定</td>
+                <td>分钟级</td>
+                <td>TTFT 分钟 P95 &gt; 120ms → B 类违约；TPOT P95 &gt; 25ms → B 类；本分钟 5xx 计数 ≥ 3 → C 类。字段：occur_at（分钟）、对应的分位值/计数、pool</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>同一分钟内多次 429 的处理</h3>
+          <ul>
+            <li><b>存储层：</b>每次触发都独立写一条事件，全量保留、可全量检索（事件大表按时间倒序完整列出）。</li>
+            <li><b>展示层：</b>红点以分钟为横轴单位，一分钟只画 1 个点——取该分钟内<b>窗口值最高的 1 条</b>（峰值最有代表性），点的高度锚定该条的窗口值而非分钟柱高度；其余事件在悬停浮层中逐条列出（时刻 + 窗口值）。</li>
+            <li>这是纯展示规则，不修改、不合并存储数据。</li>
+          </ul>
+        </section>
+
+        <!-- 6 存储 -->
+        <section id="storage">
+          <h2>6 · 存储：metrics / events / logs 三库</h2>
+          <p>按「查询模式」分离存储，一份数据不重复承担两种读写特征：</p>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:15%">库</th>
+                <th style="width:21%">写路径</th>
+                <th style="width:13%">粒度 / 键</th>
+                <th style="width:12%">保留期</th>
+                <th>读模式（页面如何查询）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>metrics</b><br><span class="text-xs text-slate-400">分钟桶时序</span></td>
+                <td>分钟闭合批量写入，一次一行</td>
+                <td>分钟 / (pool, minute)</td>
+                <td>90 天</td>
+                <td>渲染图表直读时间范围；体积小（1 点/分钟/包），长期保留支持回看 7d/30d</td>
+              </tr>
+              <tr>
+                <td><b>events</b><br><span class="text-xs text-slate-400">事件表</span></td>
+                <td>判定瞬间追加（429），或分钟闭合后追加（SLA/5xx）</td>
+                <td>秒或分钟 / (pool, occur_at)</td>
+                <td>90 天</td>
+                <td>按时间范围 + 类型 + pool 过滤，支撑事件大表与红点（红点点位查询 group by 分钟取 max window）</td>
+              </tr>
+              <tr>
+                <td><b>logs</b><br><span class="text-xs text-slate-400">请求日志</span></td>
+                <td>响应完成时一行落盘（含被拒的 429 行）</td>
+                <td>单请求 / rid</td>
+                <td>7 天</td>
+                <td>按时间范围扫表 + rid/状态码/模型筛选；体积最大，短保留，明细下钻只覆盖近期</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="doc-callout">
+            <p><b>为什么 logs 只留 7 天：</b>原始日志量比聚合结果大 3~4 个数量级（每次请求一行 vs 每分钟一行）。图表回看 90 天靠的是「体积小可长留」的 metrics/events；要看 7 天前某个请求的明细，需要提前导出。</p>
+          </div>
+        </section>
+
+        <!-- 7 呈现映射 -->
+        <section id="mapping">
+          <h2>7 · 呈现：页面元素与数据源的对应</h2>
+          <p>「资源包监控」页（前台 usage.html / 后台 admin-usage.html）上每个元素的来源一览：</p>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:24%">页面元素</th>
+                <th style="width:15%">数据源</th>
+                <th style="width:15%">粒度</th>
+                <th>取数说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>vTPM 分钟柱（主图）</td>
+                <td>metrics</td>
+                <td>分钟</td>
+                <td>直读分钟桶 tokens 求和列</td>
+              </tr>
+              <tr>
+                <td>429 红点 + 悬停浮层</td>
+                <td>events（即时类）</td>
+                <td>秒 / 图上按分钟峰值</td>
+                <td>group by 分钟取 max(window)；浮层列出该分钟全部事件与所在分钟 vTPM（注明不同源）</td>
+              </tr>
+              <tr>
+                <td>TTFT / TPOT 折线 + SLA 阈值线</td>
+                <td>metrics</td>
+                <td>分钟</td>
+                <td>P95 序列；阈值线为购买 SLA 常量</td>
+              </tr>
+              <tr>
+                <td>5xx 分钟柱</td>
+                <td>metrics</td>
+                <td>分钟</td>
+                <td>status ≥ 500 计数列</td>
+              </tr>
+              <tr>
+                <td>事件大表（事件 Tab）</td>
+                <td>events</td>
+                <td>全量</td>
+                <td>时间倒序 + Tab（违约/限流/系统）+ 时间筛选 + 搜索联动</td>
+              </tr>
+              <tr>
+                <td>请求日志表（日志 Tab）</td>
+                <td>logs</td>
+                <td>单请求</td>
+                <td>前台列：时刻/rid/状态码/vTPM/TTFT/TPOT/备注；后台扩展列：cache 命中/未命中、输出 tokens、是否限流</td>
+              </tr>
+              <tr>
+                <td>SLA 赔付规则表（后台）</td>
+                <td>配置</td>
+                <td>—</td>
+                <td>静态规则，与闭合类事件的违约分类（A/B/C）对应</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="doc-callout">
+            <p><b>同一分钟的数值可能不相等，这是口径正确的表现：</b>分钟柱 = 该分钟成功请求 tokens 之和（metrics）；红点高度 = 某次触发前 60s 窗口值（events，秒级）；日志表里那一行 = 单个请求明细（logs）。三者回答的是三个不同的问题——消耗了多少、何时被限、哪个请求出的问题。</p>
+          </div>
+        </section>
+      </article>
+    </div>
+  </div>
+
+  <footer class="border-t border-slate-200 mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+      <span>硅基流动 · 预留 vTPM 资源包原型「监控数据链路」</span>
+      <span>数据为演示用途 mock 生成 · <a href="usage.html" class="text-primary hover:underline">查看监控页</a></span>
+    </div>
+  </footer>
+
+  <script>
+    // 目录滚动高亮（与 terms.html 同模式）
+    (function () {
+      const links = [...document.querySelectorAll('.doc-toc .doc-nav-link')];
+      const secs = [...document.querySelectorAll('.doc-content section[id]')];
+      function onScroll() {
+        let cur = secs[0] && secs[0].id;
+        for (const s of secs) {
+          if (s.getBoundingClientRect().top < 140) cur = s.id;
+        }
+        links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
+</body>
+</html>
