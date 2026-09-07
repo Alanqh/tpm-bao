@@ -176,7 +176,7 @@
       <!-- 标题 -->
       <div class="mb-4">
         <h2 class="text-lg font-semibold text-slate-900">资源包管理</h2>
-        <p class="text-xs text-slate-500 mt-0.5">管理预留 vTPM 库存、已售出资源包及后台操作记录。</p>
+        <p class="text-xs text-slate-500 mt-0.5">管理预留 vTPM 资源包与 SKU 配置。</p>
       </div>
 
       <!-- 操作按钮行 -->
@@ -184,48 +184,56 @@
         <button onclick="openGrantModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
           <i class="fa-solid fa-gift text-[10px]"></i>手动交付资源包
         </button>
-        <a href="admin-sku.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-default text-xs font-medium">
-          <i class="fa-solid fa-sliders text-[10px]"></i>SKU 配置
-        </a>
       </div>
 
       <!-- Tab 切换 -->
       <div class="admin-card">
         <div class="flex border-b border-slate-200 px-2">
-          <button type="button" class="admin-tab active" data-tab="inventory" onclick="switchTab('inventory')">库存管理</button>
+          <button type="button" class="admin-tab active" data-tab="sku-config" onclick="switchTab('sku-config')">SKU 配置</button>
           <button type="button" class="admin-tab" data-tab="sold" onclick="switchTab('sold')">已发放资源包</button>
           <button type="button" class="admin-tab" data-tab="logs" onclick="switchTab('logs')">操作记录</button>
+          <button type="button" class="admin-tab" data-tab="inventory" onclick="switchTab('inventory')">库存看板</button>
         </div>
 
-        <!-- 库存管理 -->
-        <div id="tab-inventory" class="p-4">
-          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <div>
-              <h3 class="text-sm font-semibold text-slate-900">SKU 库存看板</h3>
-              <p class="text-[11px] text-slate-500 mt-0.5">选择日期范围，查看每个 SKU 在对应日期当天剩余可售出的 vTPM。</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-              <input id="range-start" type="date" value="2026-09-01" class="border border-slate-300 rounded px-2 py-1.5 text-xs outline-none focus:border-violet-500">
-              <span class="text-xs text-slate-400">至</span>
-              <input id="range-end" type="date" value="2026-09-07" class="border border-slate-300 rounded px-2 py-1.5 text-xs outline-none focus:border-violet-500">
-              <button onclick="renderInventoryBoard()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded admin-btn-default text-xs font-medium">刷新</button>
-              <button onclick="openAdjustModal()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">调整库存</button>
-            </div>
+        <!-- SKU 配置 -->
+        <div id="tab-sku-config" class="p-4">
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            <button onclick="openSkuModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
+              <i class="fa-solid fa-plus text-[10px]"></i>新增 SKU
+            </button>
           </div>
 
           <div class="overflow-x-auto border border-slate-200 rounded-lg">
             <table class="min-w-full text-[11px]">
               <thead class="bg-slate-50 text-slate-600 sticky top-0">
-                <tr id="inventory-head">
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200 min-w-[180px]">SKU</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">配置总量</th>
-                  <!-- 日期列由 JS 填充 -->
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU ID</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU 名称</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">关联模型</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最小购买 vTPM 量</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最小购买周期</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">售卖窗口</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">售卖状态</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">总库存</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作</th>
                 </tr>
               </thead>
-              <tbody id="inventory-body" class="divide-y divide-slate-200">
+              <tbody id="sku-config-body" class="divide-y divide-slate-200">
                 <!-- 数据行由 JS 填充 -->
               </tbody>
             </table>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-3">售卖状态自动判定；总库存一期人工维护。</p>
+        </div>
+
+        <!-- 库存看板（一期占位） -->
+        <div id="tab-inventory" class="p-4 hidden">
+          <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
+              <i class="fa-solid fa-warehouse text-2xl"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-900 mb-1">库存管理</h3>
+            <p class="text-xs text-slate-500 max-w-md leading-relaxed">一期人工维护，请在「SKU 配置」中调整库存。</p>
           </div>
         </div>
 
@@ -239,7 +247,7 @@
                 <option>全部状态</option>
                 <option>生效中</option>
                 <option>已过期</option>
-                <option>已作废</option>
+                <option>已回收</option>
               </select>
             </div>
           </div>
@@ -271,8 +279,7 @@
                   <td class="px-3 py-3">
                     <a href="admin-usage.html?pkg=P001" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
                     <button onclick="showDetail('P001')" class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">详情</button>
-                    <button class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">延期</button>
-                    <button class="text-orange-600 hover:text-orange-700 text-[11px]">作废</button>
+                    <button class="text-red-600 hover:text-red-700 text-[11px]">回收</button>
                   </td>
                 </tr>
                 <tr>
@@ -287,8 +294,7 @@
                   <td class="px-3 py-3">
                     <a href="admin-usage.html?pkg=P002" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
                     <button onclick="showDetail('P002')" class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">详情</button>
-                    <button class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">延期</button>
-                    <button class="text-orange-600 hover:text-orange-700 text-[11px]">作废</button>
+                    <button class="text-red-600 hover:text-red-700 text-[11px]">回收</button>
                   </td>
                 </tr>
                 <tr>
@@ -318,8 +324,7 @@
               <select class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
                 <option>全部操作</option>
                 <option>手动发放</option>
-                <option>延期</option>
-                <option>作废</option>
+                <option>回收</option>
                 <option>调整库存</option>
               </select>
             </div>
@@ -346,16 +351,8 @@
                   <td class="px-3 py-3 text-[11px] text-slate-500">大客户季度采购</td>
                 </tr>
                 <tr>
-                  <td class="px-3 py-3 text-slate-500">2026-08-20 15:18</td>
-                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px]">延期</span></td>
-                  <td class="px-3 py-3 font-mono text-[11px]">P002</td>
-                  <td class="px-3 py-3">+200 万 vTPM，延期 30 天</td>
-                  <td class="px-3 py-3">销售李四</td>
-                  <td class="px-3 py-3 text-[11px] text-slate-500">续签年度合同赠送</td>
-                </tr>
-                <tr>
                   <td class="px-3 py-3 text-slate-500">2026-08-20 11:05</td>
-                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 text-[10px]">作废</span></td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-[10px]">回收</span></td>
                   <td class="px-3 py-3 font-mono text-[11px]">P004</td>
                   <td class="px-3 py-3">-100 万 vTPM</td>
                   <td class="px-3 py-3">运营王五</td>
@@ -411,8 +408,7 @@
         <div>
           <label class="block text-slate-600 mb-1">SKU</label>
           <select id="adjust-sku" onchange="updateAdjustCurrentTotal()" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500">
-            <option value="vtpm-dsv4f-001">vtpm-dsv4f-001 · Deepseek V4 Flash 0731 预留 vTPM</option>
-            <option value="vtpm-glm52-001">vtpm-glm52-001 · GLM 5.2 预留 vTPM</option>
+            <!-- 选项由 JS 动态填充 -->
           </select>
         </div>
         <div>
@@ -426,7 +422,63 @@
       </div>
       <div class="mt-5 flex justify-end gap-2">
         <button onclick="closeAdjustModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
-        <button onclick="closeAdjustModal(); alert('库存调整已记录')" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">确认</button>
+        <button onclick="saveAdjust()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 新增 / 编辑 SKU -->
+  <div id="modal-sku" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-lg mx-4 p-5 border border-slate-200 max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900" id="sku-modal-title">新增 SKU</h3>
+        <button onclick="closeSkuModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div id="sku-id-block" class="hidden">
+          <label class="block text-xs font-medium text-slate-700 mb-1">SKU ID</label>
+          <input id="sku-id" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">SKU 名称 <span class="text-red-500">*</span></label>
+          <input id="sku-name" type="text" placeholder="如：Deepseek V4 Flash 0731 预留 vTPM" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">关联模型（model） <span class="text-red-500">*</span></label>
+          <input id="sku-model" type="text" placeholder="如：deepseek-v4-flash-0731" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500 font-mono">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">最小购买 vTPM 量（万 vTPM） <span class="text-red-500">*</span></label>
+            <input id="sku-min-vtpm" type="number" min="1" step="1" value="10" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">最小购买周期（天） <span class="text-red-500">*</span></label>
+            <input id="sku-min-cycle" type="number" min="1" step="1" value="30" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">开始售卖时间 <span class="text-red-500">*</span></label>
+            <input id="sku-sell-start" type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">截止售卖时间 <span class="text-red-500">*</span></label>
+            <input id="sku-sell-end" type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
+          <textarea id="sku-note" rows="2" placeholder="选填，如售卖批次、定价说明等" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></textarea>
+        </div>
+        <p id="sku-form-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2"></p>
+        <div class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-500 leading-relaxed">
+          保存后立即生效。
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeSkuModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
+        <button onclick="saveSku()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">保存</button>
       </div>
     </div>
   </div>
@@ -441,7 +493,7 @@
 
       <!-- Step 1: 确定 subject_id -->
       <div class="border border-slate-200 rounded-lg p-3 mb-3">
-        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">1</span>确定客户 subject_id（仅支持填写一个）</p>
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">1</span>确定客户 subject_id</p>
         <div class="flex gap-2">
           <input id="grant-subject" type="text" list="grant-subject-list" placeholder="输入 subject_id，如 sub_3x9a2b1c" class="flex-1 rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
           <datalist id="grant-subject-list">
@@ -450,23 +502,26 @@
           </datalist>
           <button type="button" onclick="loadPools()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium whitespace-nowrap">查询 Pool</button>
         </div>
-        <p id="grant-pool-hint" class="text-[11px] text-slate-400 mt-1.5">确定 subject_id 后，将加载该客户 Pool（project/group）下的对象作为下拉选项。</p>
+        <p id="grant-pool-hint" class="text-[11px] text-slate-400 mt-1.5">可选择 1~3 个 Pool 同时交付。</p>
         <div class="mt-3 hidden" id="grant-pool-block">
-          <label class="block text-xs font-medium text-slate-700 mb-1">选择 Pool 对象（payload）</label>
-          <select id="grant-pool" onchange="onPoolChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+          <label class="block text-xs font-medium text-slate-700 mb-1">选择 Pool（最多 3 个）</label>
+          <div id="grant-pool-list" class="space-y-2 mb-2">
+            <!-- JS 填充 checkbox -->
+          </div>
+          <p id="grant-pool-max" class="hidden text-[11px] text-orange-500">最多只能选择 3 个 Pool 对象</p>
         </div>
       </div>
 
       <!-- Step 2: SKU 信息 -->
       <div class="border border-slate-200 rounded-lg p-3 mb-3">
-        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择 Payload 关联的 SKU</p>
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择本次交付关联的 SKU</p>
         <div id="grant-sku-block" class="hidden">
           <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500 mb-2"></select>
           <div id="grant-sku-info" class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600 grid grid-cols-2 sm:grid-cols-4 gap-2">
             <!-- JS 填充 -->
           </div>
         </div>
-        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择 Pool 对象后，将加载该 Payload 关联的 SKU 及其售卖规则。</p>
+        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择 Pool 后选择 SKU。</p>
       </div>
 
       <!-- Step 3: 交付配置 -->
@@ -475,28 +530,27 @@
         <div id="grant-config" class="hidden space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-700 mb-1">交付份数 <span class="text-slate-400 font-normal">（每份 = 最小购买 vTPM 量）</span></label>
+              <label class="block text-xs font-medium text-slate-700 mb-1">交付份数</label>
               <input id="grant-multiplier" type="number" min="1" max="20" step="1" value="1" onchange="renderGrantSummary()" oninput="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
               <p id="grant-total-preview" class="text-[11px] text-violet-600 font-medium mt-1"></p>
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-700 mb-1">购买周期 <span class="text-slate-400 font-normal">（受截止售卖时间约束）</span></label>
+              <label class="block text-xs font-medium text-slate-700 mb-1">购买周期</label>
               <select id="grant-cycle" onchange="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
-              <p class="text-[11px] text-slate-400 mt-1">周期为最小购买周期的整数倍，可选范围由 SKU 截止售卖时间动态计算。</p>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-700 mb-1">开始时间（固定）</label>
+              <label class="block text-xs font-medium text-slate-700 mb-1">开始时间</label>
               <input id="grant-start" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-700 mb-1">结束时间（自动计算，不可编辑）</label>
+              <label class="block text-xs font-medium text-slate-700 mb-1">结束时间</label>
               <input id="grant-end" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
             </div>
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">超量路由配置 <span class="text-slate-400 font-normal">（沿用客户购买意向中的选择）</span></label>
+            <label class="block text-xs font-medium text-slate-700 mb-1">超量路由配置</label>
             <div class="grid grid-cols-2 gap-2">
               <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
                 <input type="radio" name="grant-serverless" value="off" checked onchange="renderGrantSummary()" class="mt-0.5">
@@ -518,7 +572,6 @@
             <label class="block text-xs font-medium text-slate-700 mb-1">最终 model_name 预览</label>
             <div class="bg-slate-900 rounded-lg px-3 py-2.5">
               <p id="grant-model-preview" class="font-mono text-xs text-violet-300 break-all">-</p>
-              <p class="text-[11px] text-slate-400 mt-1">格式 /Pool 对象名/model，交付后以资源包「交付详情」展示给客户。</p>
             </div>
             <p id="grant-requested-note" class="text-[11px] text-slate-400 mt-1"></p>
           </div>
@@ -529,7 +582,7 @@
           <!-- 交付汇总 -->
           <div id="grant-summary" class="bg-violet-50 border border-violet-100 rounded-lg p-3 text-[11px] text-slate-700 leading-relaxed"></div>
         </div>
-        <p id="grant-config-hint" class="text-[11px] text-slate-400">选择 SKU 后进行交付配置；开始时间固定为操作当天 0 点，结束时间自动计算。</p>
+        <p id="grant-config-hint" class="text-[11px] text-slate-400">选择 SKU 后进行交付配置。</p>
       </div>
 
       <div class="mt-5 flex justify-end gap-2">
@@ -544,12 +597,36 @@
     function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); }
 
     function openAdjustModal(sku) {
+      const select = document.getElementById('adjust-sku');
+      select.innerHTML = grantSkus.map(s =>
+        `<option value="${s.id}">${s.id} · ${s.name}</option>`
+      ).join('');
       if (sku) {
-        document.getElementById('adjust-sku').value = sku;
+        select.value = sku;
       }
+      updateAdjustCurrentTotal();
       const modal = document.getElementById('modal-adjust');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+    }
+
+    function saveAdjust() {
+      const skuId = document.getElementById('adjust-sku').value;
+      const newTotal = parseInt(document.getElementById('adjust-new').value, 10);
+      if (!Number.isInteger(newTotal) || newTotal < 0) {
+        alert('请输入有效的总库存数值（万 vTPM）。');
+        return;
+      }
+      let item = inventorySkus.find(s => s.id === skuId);
+      if (!item) {
+        item = { id: skuId, total: 0, issued: 0 };
+        inventorySkus.push(item);
+      }
+      item.total = newTotal;
+      document.getElementById('adjust-new').value = '';
+      closeAdjustModal();
+      renderSkuConfigTable();
+      alert('库存调整已记录：' + skuId + ' 总库存更新为 ' + newTotal.toLocaleString() + ' 万 vTPM。');
     }
 
     function closeAdjustModal() {
@@ -561,7 +638,7 @@
     function switchTab(tab) {
       document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
       document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
-      ['inventory', 'sold', 'logs'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
+      ['sku-config', 'inventory', 'sold', 'logs'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
       document.getElementById('tab-' + tab).classList.remove('hidden');
     }
 
@@ -581,18 +658,19 @@
 
     // ===== 手动交付：数据与联动 =====
     // subject_id → 客户 Pool 对象关系表
+    // 注意：Pool 与 SKU 不在此处预关联，而是通过每次发放动作进行关联。
     const subjectPools = {
       'sub_3x9a2b1c': {
         name: '智象科技',
         pools: [
-          { id: 'pool_3x9_alpha', name: 'proj-alpha', skuIds: ['vtpm-dsv4f-001'], requested: 'deepseek-v4-flash-0731-prod', serverless: true },
-          { id: 'pool_3x9_beta', name: 'proj-beta', skuIds: ['vtpm-dsv4f-001', 'vtpm-glm52-001'], requested: 'deepseek-v4-flash-0731-custom', serverless: false }
+          { id: 'pool_3x9_alpha', name: 'proj-alpha', requested: 'deepseek-v4-flash-0731-prod', serverless: true },
+          { id: 'pool_3x9_beta', name: 'proj-beta', requested: 'deepseek-v4-flash-0731-custom', serverless: false }
         ]
       },
       'sub_7k2m5n8p': {
         name: '星河互娱',
         pools: [
-          { id: 'pool_7k2_gamma', name: 'proj-gamma', skuIds: ['vtpm-glm52-001'], requested: 'glm-5.2-prod', serverless: false }
+          { id: 'pool_7k2_gamma', name: 'proj-gamma', requested: 'glm-5.2-prod', serverless: false }
         ]
       }
     };
@@ -606,11 +684,124 @@
 
     function grantSkuById(id) { return grantSkus.find(s => s.id === id); }
 
+    // ===== SKU 配置（第一个 Tab） =====
+    function skuSellState(s) {
+      const now = new Date();
+      const start = new Date(s.sellStart + 'T00:00:00');
+      const end = new Date(s.sellEnd + 'T23:59:59');
+      if (now < start) return { label: '未开始', cls: 'bg-slate-100 text-slate-600' };
+      if (now > end) return { label: '已截止', cls: 'bg-red-50 text-red-600' };
+      return { label: '售卖中', cls: 'bg-green-100 text-green-700' };
+    }
+
+    function inventoryTotalBySku(skuId) {
+      const item = inventorySkus.find(s => s.id === skuId);
+      return item ? item.total : 0;
+    }
+
+    function renderSkuConfigTable() {
+      document.getElementById('sku-config-body').innerHTML = grantSkus.map(s => {
+        const st = skuSellState(s);
+        const total = inventoryTotalBySku(s.id);
+        return `
+          <tr>
+            <td class="px-3 py-3 font-mono text-[11px]">${s.id}</td>
+            <td class="px-3 py-3 font-medium">${s.name}</td>
+            <td class="px-3 py-3 font-mono text-[11px]">${s.model}</td>
+            <td class="px-3 py-3">${s.minVtpm} 万 vTPM</td>
+            <td class="px-3 py-3">${s.minCycle} 天</td>
+            <td class="px-3 py-3 text-slate-500">${s.sellStart} 00:00 ~ ${s.sellEnd} 24:00</td>
+            <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${st.cls}">${st.label}</span></td>
+            <td class="px-3 py-3">${total.toLocaleString()} 万 vTPM</td>
+            <td class="px-3 py-3">
+              <button onclick="openAdjustModal('${s.id}')" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">调整库存</button>
+              <button onclick="openSkuModal('${s.id}')" class="text-violet-600 hover:text-violet-700 text-[11px]">编辑</button>
+            </td>
+          </tr>
+        `;
+      }).join('') || `<tr><td colspan="9" class="px-3 py-6 text-center text-slate-400">暂无 SKU</td></tr>`;
+    }
+
+    let editingSkuId = null;
+
+    function openSkuModal(id) {
+      editingSkuId = id || null;
+      const err = document.getElementById('sku-form-error');
+      err.classList.add('hidden');
+      if (id) {
+        const s = grantSkus.find(x => x.id === id);
+        document.getElementById('sku-modal-title').textContent = '编辑 SKU';
+        document.getElementById('sku-id-block').classList.remove('hidden');
+        document.getElementById('sku-id').value = s.id;
+        document.getElementById('sku-name').value = s.name;
+        document.getElementById('sku-model').value = s.model;
+        document.getElementById('sku-min-vtpm').value = s.minVtpm;
+        document.getElementById('sku-min-cycle').value = s.minCycle;
+        document.getElementById('sku-sell-start').value = s.sellStart;
+        document.getElementById('sku-sell-end').value = s.sellEnd;
+      } else {
+        document.getElementById('sku-modal-title').textContent = '新增 SKU';
+        document.getElementById('sku-id-block').classList.add('hidden');
+        document.getElementById('sku-id').value = '';
+        document.getElementById('sku-name').value = '';
+        document.getElementById('sku-model').value = '';
+        document.getElementById('sku-min-vtpm').value = 10;
+        document.getElementById('sku-min-cycle').value = 30;
+        document.getElementById('sku-sell-start').value = '';
+        document.getElementById('sku-sell-end').value = '';
+      }
+      const modal = document.getElementById('modal-sku');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSkuModal() {
+      const modal = document.getElementById('modal-sku');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function showSkuError(msg) {
+      const err = document.getElementById('sku-form-error');
+      err.textContent = msg;
+      err.classList.remove('hidden');
+    }
+
+    function saveSku() {
+      const name = document.getElementById('sku-name').value.trim();
+      const model = document.getElementById('sku-model').value.trim();
+      const minVtpm = parseInt(document.getElementById('sku-min-vtpm').value, 10);
+      const minCycle = parseInt(document.getElementById('sku-min-cycle').value, 10);
+      const sellStart = document.getElementById('sku-sell-start').value;
+      const sellEnd = document.getElementById('sku-sell-end').value;
+
+      if (!name) return showSkuError('请填写 SKU 名称。');
+      if (!model) return showSkuError('请填写关联模型（model）。');
+      if (!Number.isInteger(minVtpm) || minVtpm < 1) return showSkuError('最小购买 vTPM 量必须为不小于 1 的整数（万 vTPM）。');
+      if (!Number.isInteger(minCycle) || minCycle < 1) return showSkuError('最小购买周期必须为不小于 1 的整数（天）。');
+      if (!sellStart || !sellEnd) return showSkuError('请填写开始售卖时间与截止售卖时间。');
+      if (new Date(sellEnd + 'T00:00:00') <= new Date(sellStart + 'T00:00:00')) return showSkuError('截止售卖时间必须晚于开始售卖时间。');
+
+      if (editingSkuId) {
+        const s = grantSkus.find(x => x.id === editingSkuId);
+        Object.assign(s, { name, model, minVtpm, minCycle, sellStart, sellEnd });
+      } else {
+        const nextId = 'vtpm-' + model.replace(/[^a-z0-9]/gi, '').slice(0, 6).toLowerCase() + '-' + String(grantSkus.length + 1).padStart(3, '0');
+        grantSkus.push({ id: nextId, name, model, minVtpm, minCycle, sellStart, sellEnd });
+        // 新 SKU 默认总库存为 0
+        inventorySkus.push({ id: nextId, total: 0, issued: 0 });
+      }
+      renderSkuConfigTable();
+      closeSkuModal();
+      alert(editingSkuId ? 'SKU 已更新。' : 'SKU 已新增。');
+    }
+
     function openGrantModal() {
       // 重置三步状态
       document.getElementById('grant-subject').value = '';
       document.getElementById('grant-pool-block').classList.add('hidden');
-      document.getElementById('grant-pool').innerHTML = '';
+      document.getElementById('grant-pool-list').innerHTML = '';
+      document.getElementById('grant-pool-max').classList.add('hidden');
       document.getElementById('grant-sku-block').classList.add('hidden');
       document.getElementById('grant-config').classList.add('hidden');
       document.getElementById('grant-config-hint').classList.remove('hidden');
@@ -618,7 +809,7 @@
       openModal('grant');
     }
 
-    // Step 1: 确定 subject_id → 加载 Pool 对象
+    // Step 1: 确定 subject_id → 加载 Pool 对象（多选，最多 3 个）
     function loadPools() {
       const sid = document.getElementById('grant-subject').value.trim();
       const poolBlock = document.getElementById('grant-pool-block');
@@ -629,42 +820,70 @@
       skuBlock.classList.add('hidden');
       config.classList.add('hidden');
       document.getElementById('grant-config-hint').classList.remove('hidden');
+      document.getElementById('grant-pool-max').classList.add('hidden');
       if (!customer) {
         poolBlock.classList.add('hidden');
-        document.getElementById('grant-pool').innerHTML = '';
-        document.getElementById('grant-pool-hint').innerHTML = `<span class="text-red-500">未找到该 subject_id 对应的客户 Pool，请确认后重试。</span>`;
+        document.getElementById('grant-pool-list').innerHTML = '';
+        document.getElementById('grant-pool-hint').innerHTML = `<span class="text-red-500">未找到该客户的 Pool。</span>`;
         return;
       }
-      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，该 subject_id 下共有 ${customer.pools.length} 个 Pool 对象，请选择交付目标：`;
-      document.getElementById('grant-pool').innerHTML = customer.pools.map(p =>
-        `<option value="${p.id}">${p.name}（payload：关联 ${p.skuIds.length} 个 SKU）</option>`
-      ).join('');
+      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，共 ${customer.pools.length} 个 Pool，可选 1~3 个：`;
+      document.getElementById('grant-pool-list').innerHTML = customer.pools.map((p, idx) => `
+        <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+          <input type="checkbox" name="grant-pool" value="${p.id}" ${idx === 0 ? 'checked' : ''} onchange="onPoolChange()" class="mt-0.5">
+          <span>
+            <span class="block text-xs font-medium text-slate-800">${p.name}</span>
+            <span class="block text-[11px] text-slate-400">原始 model_name：${p.requested}</span>
+          </span>
+        </label>
+      `).join('');
       poolBlock.classList.remove('hidden');
       onPoolChange();
     }
 
-    // Step 2: 选中 Pool 对象（payload）→ 加载关联 SKU
-    function onPoolChange() {
+    function getSelectedPools() {
       const sid = document.getElementById('grant-subject').value.trim();
-      const poolId = document.getElementById('grant-pool').value;
       const customer = subjectPools[sid];
-      if (!customer) return;
-      const pool = customer.pools.find(p => p.id === poolId);
-      if (!pool) return;
+      if (!customer) return [];
+      const checked = Array.from(document.querySelectorAll('input[name="grant-pool"]:checked')).map(cb => cb.value);
+      return customer.pools.filter(p => checked.includes(p.id));
+    }
+
+    // Step 2: 选中 Pool 对象（payload）→ 全部 SKU 可选，由本次发放动作关联
+    function onPoolChange() {
+      const selectedPools = getSelectedPools();
+      const maxHint = document.getElementById('grant-pool-max');
+      const checkedBoxes = document.querySelectorAll('input[name="grant-pool"]:checked');
+
+      if (checkedBoxes.length > 3) {
+        // 取消最后一次勾选，强制最多 3 个
+        event && event.target && (event.target.checked = false);
+        maxHint.classList.remove('hidden');
+      } else {
+        maxHint.classList.add('hidden');
+      }
 
       const config = document.getElementById('grant-config');
       config.classList.add('hidden');
       document.getElementById('grant-config-hint').classList.remove('hidden');
 
-      const skus = pool.skuIds.map(grantSkuById).filter(Boolean);
-      document.getElementById('grant-sku').innerHTML = skus.map(s =>
+      if (selectedPools.length === 0) {
+        document.getElementById('grant-sku-block').classList.add('hidden');
+        document.getElementById('grant-sku-hint').textContent = '请至少选择 1 个 Pool 对象。';
+        document.getElementById('grant-sku-hint').classList.remove('hidden');
+        return;
+      }
+
+      // Pool 与 SKU 通过本次发放动作关联：展示全部 SKU 供选择
+      document.getElementById('grant-sku').innerHTML = grantSkus.map(s =>
         `<option value="${s.id}">${s.name}（${s.id}）</option>`
       ).join('');
       document.getElementById('grant-sku-block').classList.remove('hidden');
-      document.getElementById('grant-sku-hint').classList.add('hidden');
+      document.getElementById('grant-sku-hint').textContent = `已选 ${selectedPools.length} 个 Pool，选择一个 SKU 关联到该资源包。`;
+      document.getElementById('grant-sku-hint').classList.remove('hidden');
 
-      // 沿用客户购买意向中的超量路由选择
-      const wanted = pool.serverless ? 'on' : 'off';
+      // 沿用第一个选中 Pool 的超量路由选择（多个 Pool 时统一配置）
+      const wanted = selectedPools[0].serverless ? 'on' : 'off';
       document.querySelector(`input[name="grant-serverless"][value="${wanted}"]`).checked = true;
 
       onSkuChange();
@@ -714,10 +933,9 @@
     function renderGrantSummary() {
       const sid = document.getElementById('grant-subject').value.trim();
       const customer = subjectPools[sid];
-      const poolId = document.getElementById('grant-pool').value;
-      const pool = customer && customer.pools.find(p => p.id === poolId);
+      const selectedPools = getSelectedPools();
       const sku = grantSkuById(document.getElementById('grant-sku').value);
-      if (!pool || !sku) return;
+      if (selectedPools.length === 0 || !sku) return;
 
       const multi = Math.max(1, Math.min(20, parseInt(document.getElementById('grant-multiplier').value || '1', 10) || 1));
       document.getElementById('grant-multiplier').value = multi;
@@ -731,24 +949,27 @@
       end.setDate(end.getDate() + k * sku.minCycle + 1);
       document.getElementById('grant-end').value = fmtDateTime(end) + '（开始时间 + ' + (k * sku.minCycle) + ' 天 + 1 天，自动计算）';
 
-      const finalModel = `/${pool.name}/${sku.model}`;
-      document.getElementById('grant-model-preview').textContent = finalModel;
-      document.getElementById('grant-requested-note').textContent = `客户购买意向提交的原始 model_name：${pool.requested}（仅作为需求记录，不用于路由）。`;
+      const finalModels = selectedPools.map(p => `/${p.name}/${sku.model}`);
+      const poolNames = selectedPools.map(p => p.name).join('、');
+      document.getElementById('grant-model-preview').innerHTML = finalModels.map(m => `<p class="font-mono text-xs text-violet-300 break-all">${m}</p>`).join('');
+      document.getElementById('grant-requested-note').textContent = `原始 model_name：${selectedPools.map(p => p.requested).join('、')}（需求记录）。`;
 
       const serverless = document.querySelector('input[name="grant-serverless"]:checked').value === 'on';
       document.getElementById('grant-summary').innerHTML = `
         <p class="font-semibold text-slate-900 mb-1.5">交付汇总</p>
-        <p>· 客户：${customer.name}（subject_id：${sid}）｜ Pool 对象：<span class="font-mono">${pool.name}</span>｜ SKU：${sku.name}</p>
-        <p>· 交付量：${multi} 份 × ${sku.minVtpm} 万 vTPM = <b class="text-violet-700">${totalVtpm.toLocaleString()} 万 vTPM</b>｜ 周期：${k} × ${sku.minCycle} 天</p>
-        <p>· 有效期：${fmtDateTime(start)} ~ ${fmtDateTime(end)}<span class="text-slate-400">（开始固定为当天 0 点；结束 = 开始 + 周期 + 1 天）</span></p>
-        <p>· 超量路由：${serverless ? '超量路由 Serverless，按量计费' : '超量限流，返回 429'}</p>
-        <p>· 最终 model_name：<span class="font-mono text-violet-700">${finalModel}</span></p>
+        <p>· 客户：${customer.name}（${sid}）｜ Pool：${poolNames}｜ SKU：${sku.name}</p>
+        <p>· 交付量：${multi} × ${sku.minVtpm} 万 vTPM = <b class="text-violet-700">${totalVtpm.toLocaleString()} 万 vTPM</b>｜ 周期：${k} × ${sku.minCycle} 天</p>
+        <p>· 有效期：${fmtDateTime(start)} ~ ${fmtDateTime(end)}</p>
+        <p>· 超量路由：${serverless ? 'Serverless 按量计费' : '限流 429'}</p>
+        <p>· 最终 model_name：</p>
+        ${finalModels.map(m => `<p class="font-mono text-violet-700 break-all ml-2">${m}</p>`).join('')}
       `;
     }
 
     function confirmGrant() {
+      const selectedPools = getSelectedPools();
       closeModal('grant');
-      alert('已确认交付：资源包将发放至客户 subject_id，交付完成后前台资源包将展示「交付详情」。');
+      alert(`已交付：关联 ${selectedPools.length} 个 Pool 的预留 vTPM 包。`);
     }
 
     function fmtDate(d) {
@@ -837,7 +1058,7 @@
 
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
-      renderInventoryBoard();
+      renderSkuConfigTable();
       updateAdjustCurrentTotal();
     });
 
@@ -893,7 +1114,7 @@
           <div><span class="text-slate-500">可用范围</span><p class="font-medium text-slate-900 mt-0.5">${d.scope}</p></div>
           <div><span class="text-slate-500">Pool 对象（payload）</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.pool}</p></div>
           <div><span class="text-slate-500">最终 model_name</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.bind}</p></div>
-          <div class="col-span-2"><span class="text-slate-500">客户意向原始 model_name（仅需求记录）</span><p class="font-mono text-slate-500 mt-0.5">${d.requested}</p></div>
+          <div class="col-span-2"><span class="text-slate-500">原始 model_name（需求记录）</span><p class="font-mono text-slate-500 mt-0.5">${d.requested}</p></div>
           <div class="col-span-2"><span class="text-slate-500">超量路由</span><p class="mt-0.5">${d.serverless ? '<span class="text-blue-700">超量路由 Serverless，按量计费</span>' : '<span class="text-slate-500">超量限流，返回 429</span>'}</p></div>
         </div>
         <div>

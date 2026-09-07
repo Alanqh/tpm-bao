@@ -122,10 +122,7 @@
       <!-- 路由与统计说明 -->
       <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-5 text-xs text-slate-600 flex items-start gap-2">
         <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
-        <div>
-          <p>API 请求填写该资源包的 model_name 时将路由到预留算力。限流按 60s 滑动窗口计算，图表按自然分钟聚合呈现。</p>
-          <p class="text-slate-400 mt-0.5">图中红点为 429 限流事件，触发时刻精确到秒（与分钟级 vTPM 柱不同源）；同一分钟内发生多次 429 时，仅展示该分钟内 60s 滑动窗口值最高的 1 次，鼠标悬停可查看该次触发前 60s 窗口的 vTPM 值。</p>
-        </div>
+        <p>任一 model_name 均可路由到预留算力。红点为 429 限流事件（秒级）。</p>
       </div>
 
       <!-- 时间筛选 + 返回 -->
@@ -336,16 +333,17 @@
   <script>
     /* ===== 资源包元数据（与 balance.html 一致） ===== */
     const pkgMap = {
-      'P001': { model: 'Deepseek V4 Flash 0731', amount: 30, bind: '/proj-alpha/deepseek-v4-flash-0731', period: '2026-08-01 ~ 2026-08-30' },
-      'P002': { model: 'GLM 5.2', amount: 20, bind: '/proj-gamma/glm-5.2', period: '2026-09-01 ~ 2026-09-30' }
+      'P001': { model: 'Deepseek V4 Flash 0731', amount: 30, pools: ['proj-alpha', 'proj-beta'], bind: ['/proj-alpha/deepseek-v4-flash-0731', '/proj-beta/deepseek-v4-flash-0731'], period: '2026-08-01 ~ 2026-08-30' },
+      'P002': { model: 'GLM 5.2', amount: 20, pools: ['proj-gamma'], bind: ['/proj-gamma/glm-5.2'], period: '2026-09-01 ~ 2026-09-30' }
     };
     const params = new URLSearchParams(window.location.search);
     const pkgId = params.get('pkg') || 'P001';
     const pkg = pkgMap[pkgId] || pkgMap['P001'];
     const CAPACITY = pkg.amount; // 万 vTPM
+    const binds = Array.isArray(pkg.bind) ? pkg.bind : [pkg.bind];
 
     document.getElementById('pkg-id').textContent = pkgId;
-    document.getElementById('pkg-bind').textContent = pkg.bind;
+    document.getElementById('pkg-bind').innerHTML = binds.map(m => `<span class="font-mono text-slate-700">${m}</span>`).join('<span class="mx-1 text-slate-300">|</span>');
     document.getElementById('pkg-period').textContent = pkg.period;
     document.getElementById('page-title').textContent = pkg.model;
     document.getElementById('pkg-capacity').textContent = `${CAPACITY} 万 vTPM`;
