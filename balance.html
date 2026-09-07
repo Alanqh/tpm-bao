@@ -226,16 +226,7 @@
             <p class="flex justify-between"><span class="text-slate-400">状态</span><span id="modal-status"></span></p>
             <p class="flex justify-between"><span class="text-slate-400">有效期</span><span id="modal-period"></span></p>
             <p class="flex justify-between"><span class="text-slate-400">可用范围</span><span id="modal-scope" class="text-right max-w-[60%]"></span></p>
-            <div class="flex justify-between items-start" id="modal-bind-row">
-              <span class="text-slate-400">最终 model_name</span>
-              <div class="text-right max-w-[60%]">
-                <div id="modal-bind" class="font-mono"></div>
-                <p class="text-xs text-slate-400 mt-1">由 Pool 对象与模型组合生成（/Pool 对象名/model），API 请求填写该 model_name 将路由到您的预留算力资源</p>
-              </div>
-            </div>
-            <div class="flex justify-between" id="modal-pool-row"><span class="text-slate-400">Pool 对象</span><span id="modal-pool" class="font-mono text-xs text-slate-700"></span></div>
-            <div class="flex justify-between" id="modal-serverless-row"><span class="text-slate-400">超量路由</span><span id="modal-serverless" class="text-xs text-slate-700"></span></div>
-            <p class="flex justify-between" id="modal-id-row"><span class="text-slate-400">资源包 ID</span><span id="modal-id" class="font-mono text-xs"></span></p>
+            <p class="flex justify-between"><span class="text-slate-400">资源包 ID</span><span id="modal-id" class="font-mono text-xs"></span></p>
             <p class="flex justify-between" id="modal-status-flow-row"><span class="text-slate-400">可操作</span><span id="modal-status-flow" class="text-slate-700 text-xs"></span></p>
           </div>
 
@@ -462,24 +453,6 @@
       document.getElementById('modal-period').textContent = p.period;
       document.getElementById('modal-scope').textContent = p.scope;
 
-      const bindRow = document.getElementById('modal-bind-row');
-      const poolRow = document.getElementById('modal-pool-row');
-      const serverlessRow = document.getElementById('modal-serverless-row');
-      if (p.bind) {
-        bindRow.classList.remove('hidden');
-        poolRow.classList.remove('hidden');
-        serverlessRow.classList.remove('hidden');
-        const binds = Array.isArray(p.bind) ? p.bind : [p.bind];
-        document.getElementById('modal-bind').innerHTML = binds.map(b => `<span class="inline-block bg-slate-100 px-1.5 py-0.5 rounded text-xs mr-1 mb-1 max-w-[160px] truncate align-top" title="${b.replace(/"/g, '&quot;')}">${b}</span>`).join(' ');
-        document.getElementById('modal-pool').textContent = p.pool;
-        document.getElementById('modal-serverless').innerHTML = p.serverless
-          ? `<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">已开启：超量路由 Serverless，按量计费</span>`
-          : `<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500">未开启：超量请求返回 429</span>`;
-      } else {
-        bindRow.classList.add('hidden');
-        poolRow.classList.add('hidden');
-        serverlessRow.classList.add('hidden');
-      }
       document.getElementById('modal-id').textContent = p.id;
 
       const statusFlowRow = document.getElementById('modal-status-flow-row');
