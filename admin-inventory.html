@@ -592,6 +592,52 @@
     </div>
   </div>
 
+  <!-- Modal: 创建新 Pool -->
+  <div id="modal-create-pool" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5 border border-slate-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">创建新 Pool</h3>
+        <button onclick="closeCreatePoolModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-600 mb-1">subject_id</label>
+          <input id="create-pool-subject" type="text" disabled class="w-full border border-slate-200 rounded px-2 py-1.5 bg-slate-50 text-slate-500">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">Pool 名称 <span class="text-red-500">*</span></label>
+          <input id="create-pool-name" type="text" placeholder="如 proj-delta" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">原始 model_name（需求记录）</label>
+          <input id="create-pool-requested" type="text" placeholder="如 deepseek-v4-flash-0731-prod" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500 font-mono">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">超量路由</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+              <input type="radio" name="create-pool-serverless" value="off" checked class="mt-0.5">
+              <span>
+                <span class="block text-xs font-medium text-slate-800">限流 429</span>
+              </span>
+            </label>
+            <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+              <input type="radio" name="create-pool-serverless" value="on" class="mt-0.5">
+              <span>
+                <span class="block text-xs font-medium text-slate-800">Serverless 按量计费</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <p id="create-pool-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2"></p>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeCreatePoolModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
+        <button onclick="confirmCreatePool()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">创建</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); document.getElementById('modal-' + id).classList.add('flex'); }
     function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); }
@@ -809,6 +855,52 @@
       openModal('grant');
     }
 
+    function openCreatePoolModal() {
+      const sid = document.getElementById('grant-subject').value.trim();
+      document.getElementById('create-pool-subject').value = sid;
+      document.getElementById('create-pool-name').value = '';
+      document.getElementById('create-pool-requested').value = '';
+      document.querySelector('input[name="create-pool-serverless"][value="off"]').checked = true;
+      document.getElementById('create-pool-error').classList.add('hidden');
+      const modal = document.getElementById('modal-create-pool');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeCreatePoolModal() {
+      const modal = document.getElementById('modal-create-pool');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function confirmCreatePool() {
+      const sid = document.getElementById('grant-subject').value.trim();
+      const customer = subjectPools[sid];
+      if (!customer) return;
+      const name = document.getElementById('create-pool-name').value.trim();
+      const requested = document.getElementById('create-pool-requested').value.trim();
+      const serverless = document.querySelector('input[name="create-pool-serverless"]:checked').value === 'on';
+      const err = document.getElementById('create-pool-error');
+
+      if (!name) {
+        err.textContent = '请填写 Pool 名称。';
+        err.classList.remove('hidden');
+        return;
+      }
+      if (customer.pools.some(p => p.name === name)) {
+        err.textContent = '该 Pool 名称已存在。';
+        err.classList.remove('hidden');
+        return;
+      }
+
+      const safe = name.replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 8);
+      const newId = 'pool_' + sid.replace(/[^a-z0-9]/gi, '').slice(0, 6) + '_' + (safe || String(Date.now()).slice(-6));
+      customer.pools.push({ id: newId, name, requested: requested || '', serverless });
+      renderPoolList(customer);
+      closeCreatePoolModal();
+      document.getElementById('grant-pool-hint').textContent = `已创建 Pool「${name}」，请勾选后交付。`;
+    }
+
     // Step 1: 确定 subject_id → 加载 Pool 对象（多选，最多 3 个）
     function loadPools() {
       const sid = document.getElementById('grant-subject').value.trim();
@@ -828,17 +920,23 @@
         return;
       }
       document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，共 ${customer.pools.length} 个 Pool，可选 1~3 个：`;
-      document.getElementById('grant-pool-list').innerHTML = customer.pools.map((p, idx) => `
-        <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
-          <input type="checkbox" name="grant-pool" value="${p.id}" ${idx === 0 ? 'checked' : ''} onchange="onPoolChange()" class="mt-0.5">
-          <span>
-            <span class="block text-xs font-medium text-slate-800">${p.name}</span>
-            <span class="block text-[11px] text-slate-400">原始 model_name：${p.requested}</span>
-          </span>
-        </label>
-      `).join('');
+      renderPoolList(customer);
       poolBlock.classList.remove('hidden');
       onPoolChange();
+    }
+
+    function renderPoolList(customer) {
+      const list = document.getElementById('grant-pool-list');
+      list.innerHTML = customer.pools.map((p, idx) => `
+        <label class="flex items-center gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+          <input type="checkbox" name="grant-pool" value="${p.id}" ${idx === 0 ? 'checked' : ''} onchange="onPoolChange()" class="mt-0.5">
+          <span class="text-xs font-medium text-slate-800">${p.name}</span>
+        </label>
+      `).join('') + `
+        <button type="button" onclick="openCreatePoolModal()" class="flex items-center justify-center gap-1.5 border border-dashed border-slate-300 rounded-lg p-2.5 text-xs text-slate-500 hover:border-violet-400 hover:text-violet-600 transition-colors">
+          <i class="fa-solid fa-plus"></i>创建新 Pool
+        </button>
+      `;
     }
 
     function getSelectedPools() {
