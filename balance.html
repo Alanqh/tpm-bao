@@ -64,7 +64,6 @@
         <a href="purchase.html" class="switcher-tab">购买意向</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
         <a href="balance.html?tab=package" class="switcher-tab active">资源包</a>
-        <a href="usage.html" class="switcher-tab">资源包监控</a>
         <a href="pipeline.html" class="switcher-tab">监控数据链路</a>
         <a href="admin-inventory.html" class="switcher-tab">后台管理</a>
       </div>
@@ -314,7 +313,7 @@
 
   <script>
     const packages = [
-      { id: 'P001', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 30, unit: '万 vTPM', used: 0, status: 'active', period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-alpha', 'proj-beta'], serverless: true, requested: ['deepseek-v4-flash-0731', 'deepseek-v4-flash-0731-prod'], bind: ['/proj-alpha/deepseek-v4-flash-0731', '/proj-beta/deepseek-v4-flash-0731'], factors: [
+      { id: 'P001', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 30, unit: '万 vTPM', used: 0, status: 'active', period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-alpha', 'proj-beta'], serverless: true, bind: ['/proj-alpha/deepseek-v4-flash-0731', '/proj-beta/deepseek-v4-flash-0731'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
@@ -322,17 +321,17 @@
         { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
         { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
       ]},
-      { id: 'P002', type: 'vtpm', name: '预留 vTPM', model: 'GLM 5.2', amount: 20, unit: '万 vTPM', used: 0, status: 'active', period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理', pools: ['proj-gamma'], serverless: false, requested: ['glm-5.2', 'glm-5.2-prod'], bind: ['/proj-gamma/glm-5.2'], factors: [
+      { id: 'P002', type: 'vtpm', name: '预留 vTPM', model: 'GLM 5.2', amount: 20, unit: '万 vTPM', used: 0, status: 'active', period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理', pools: ['proj-gamma'], serverless: false, bind: ['/proj-gamma/glm-5.2'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
       ]},
       { id: 'P003', type: 'tokens', name: 'Tokens 包', model: '通用 Tokens', amount: 1200, unit: '万 tokens', remain: 850, status: 'active', period: '2026-06-15 ~ 2026-12-15', scope: '平台按 tokens 计量计费的模型服务', bind: null },
       { id: 'P004', type: 'tokens', name: 'Tokens 包', model: '通用 Tokens', amount: 1000, unit: '万 tokens', remain: 0, status: 'used', period: '2026-05-01 ~ 2026-07-31', scope: '平台按 tokens 计量计费的模型服务', bind: null },
-      { id: 'P005', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'expired', period: '2026-07-01 ~ 2026-07-31', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-beta'], serverless: false, requested: ['deepseek-v4-flash-0731-demo'], bind: ['/proj-beta/deepseek-v4-flash-0731'], factors: [
+      { id: 'P005', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'expired', period: '2026-07-01 ~ 2026-07-31', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-beta'], serverless: false, bind: ['/proj-beta/deepseek-v4-flash-0731'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 }
       ]},
-      { id: 'P006', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'cancelled', period: '2026-06-01 ~ 2026-06-30', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-beta'], serverless: false, requested: ['deepseek-v4-flash-0731-cancelled'], bind: ['/proj-beta/deepseek-v4-flash-0731'], factors: [
+      { id: 'P006', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'cancelled', period: '2026-06-01 ~ 2026-06-30', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-beta'], serverless: false, bind: ['/proj-beta/deepseek-v4-flash-0731'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 }
       ]}
@@ -491,7 +490,6 @@
       if (!p || p.type !== 'vtpm' || !p.bind) return;
       const finalModels = Array.isArray(p.bind) ? p.bind : [p.bind];
       const primaryModel = finalModels[0];
-      const requested = (p.requested || []).join('、');
       const pools = Array.isArray(p.pools) ? p.pools : (p.pool ? [p.pool] : []);
       const poolText = pools.join('、');
 
@@ -504,7 +502,6 @@
         <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">预留算力</p><p class="text-sm text-slate-800">${p.amount} ${p.unit}</p></div>
         <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">有效期</p><p class="text-sm text-slate-800">${p.period}</p></div>
         <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">超量路由</p><p class="text-sm">${p.serverless ? '<span class="text-blue-700">Serverless 按量计费</span>' : '<span class="text-slate-500">限流 429</span>'}</p></div>
-        <div class="sf-card p-3 sm:col-span-2"><p class="text-xs text-slate-400 mb-1">原始 model_name（需求记录）</p><p class="font-mono text-sm text-slate-500">${requested || '—'}</p></div>
       `;
 
       document.getElementById('delivery-curl').textContent =

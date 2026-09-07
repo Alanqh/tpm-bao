@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>操作记录 - 预留 vTPM 后台</title>
+  <title>操作记录 - 资源包管理</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -66,7 +66,6 @@
         <a href="purchase.html" class="switcher-tab">购买意向</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
         <a href="balance.html?tab=package" class="switcher-tab">资源包</a>
-        <a href="usage.html" class="switcher-tab">资源包监控</a>
         <a href="pipeline.html" class="switcher-tab">监控数据链路</a>
         <a href="admin-inventory.html" class="switcher-tab active">后台管理</a>
       </div>
@@ -84,7 +83,7 @@
         <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
       </div>
       <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
-      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">预留 vTPM 操作记录</h1>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">资源包管理 - 操作记录</h1>
     </div>
     <div class="flex items-center gap-3">
       <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
@@ -116,16 +115,28 @@
           <span>活动运营</span>
         </div>
 
+        <div class="pl-6 space-y-0.5">
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
+        </div>
+
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
           <i class="fa-solid fa-chevron-down text-xs"></i>
-          <span>MaaS 运营管理</span>
+          <span>资源包管理</span>
         </div>
 
         <div class="pl-6 space-y-0.5">
-          <a href="balance.html?tab=package" class="admin-sidebar-link"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包</a>
-          <a href="admin-inventory.html" class="admin-sidebar-link"><i class="fa-solid fa-clipboard-list w-4 text-center"></i>资源包管理</a>
-          <a href="admin-sku.html" class="admin-sidebar-link"><i class="fa-solid fa-sliders w-4 text-center"></i>SKU 配置</a>
+          <a href="admin-inventory.html" class="admin-sidebar-link"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
           <a href="admin-usage.html" class="admin-sidebar-link"><i class="fa-solid fa-chart-line w-4 text-center"></i>资源包监控</a>
+          <a href="admin-records.html" class="admin-sidebar-link active"><i class="fa-solid fa-clock-rotate-left w-4 text-center"></i>操作记录</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
+          <i class="fa-solid fa-chevron-right text-xs transition-transform"></i>
+          <span>MaaS 运营管理</span>
+        </div>
+
+        <div id="maas-menu" class="pl-6 space-y-0.5 hidden">
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-server w-4 text-center"></i>客户任务/数据</a>
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-layer-group w-4 text-center"></i>Serverless 管理</a>
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-link w-4 text-center"></i>MaaS 专属端点</a>
@@ -154,10 +165,16 @@
     <main class="flex-1 p-4 min-w-0">
       <!-- 面包屑 -->
       <nav class="text-xs text-slate-500 mb-4">
-        <span class="text-slate-700">管理后台</span>
+        <span class="text-slate-700">资源包管理</span>
         <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
-        <span class="text-slate-700">预留 vTPM 操作记录</span>
+        <span class="text-slate-700">操作记录</span>
       </nav>
+
+      <!-- BI 面板提示 -->
+      <div class="mb-4 bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-start gap-2 text-xs text-blue-700">
+        <i class="fa-solid fa-circle-info mt-0.5"></i>
+        <p>该页面后续将使用 BI 面板嵌入，当前为静态示意数据。</p>
+      </div>
 
       <!-- 标题 -->
       <div class="mb-4">
@@ -212,7 +229,6 @@
               <option>续购</option>
               <option>废弃</option>
               <option>锁库存</option>
-              <option>调整库存</option>
             </select>
           </div>
         </div>
@@ -266,15 +282,7 @@
                 <td class="px-3 py-2">销售张三</td>
                 <td class="px-3 py-2">企业客户预留</td>
               </tr>
-              <tr>
-                <td class="px-3 py-2 text-slate-500">2026-08-19 10:22</td>
-                <td class="px-3 py-2"><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px]">调整库存</span></td>
-                <td class="px-3 py-2">-</td>
-                <td class="px-3 py-2">GLM 5.2</td>
-                <td class="px-3 py-2">总量 15,000 万 vTPM → 20,000 万 vTPM</td>
-                <td class="px-3 py-2">运营王五</td>
-                <td class="px-3 py-2">补容</td>
-              </tr>
+
             </tbody>
           </table>
         </div>
@@ -318,5 +326,20 @@
       </div>
     </main>
   </div>
+  <script>
+    function toggleMenu(id, el) {
+      const menu = document.getElementById(id);
+      const icon = el.querySelector('i');
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-down');
+      } else {
+        menu.classList.add('hidden');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-right');
+      }
+    }
+  </script>
 </body>
 </html>

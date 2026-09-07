@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>资源包管理 - 活动运营</title>
+  <title>资源包管理 - 资源包管理</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -77,7 +77,6 @@
         <a href="purchase.html" class="switcher-tab">购买意向</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
         <a href="balance.html?tab=package" class="switcher-tab">资源包</a>
-        <a href="usage.html" class="switcher-tab">资源包监控</a>
         <a href="pipeline.html" class="switcher-tab">监控数据链路</a>
         <a href="admin-inventory.html" class="switcher-tab active">后台管理</a>
       </div>
@@ -95,7 +94,7 @@
         <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
       </div>
       <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
-      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">活动运营 - 资源包管理</h1>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">资源包管理 - 资源包管理</h1>
     </div>
     <div class="flex items-center gap-3">
       <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
@@ -130,8 +129,17 @@
         <div class="pl-6 space-y-0.5">
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>资源包管理</span>
+        </div>
+
+        <div class="pl-6 space-y-0.5">
           <a href="admin-inventory.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
-          <a href="admin-sku.html" class="admin-sidebar-link"><i class="fa-solid fa-sliders w-4 text-center"></i>SKU 配置</a>
+          <a href="admin-usage.html" class="admin-sidebar-link"><i class="fa-solid fa-chart-line w-4 text-center"></i>资源包监控</a>
+          <a href="admin-records.html" class="admin-sidebar-link"><i class="fa-solid fa-clock-rotate-left w-4 text-center"></i>操作记录</a>
         </div>
 
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
@@ -168,7 +176,7 @@
     <main class="flex-1 p-4 min-w-0">
       <!-- 面包屑 -->
       <nav class="text-xs text-slate-500 mb-4">
-        <span class="text-slate-700">活动运营</span>
+        <span class="text-slate-700">资源包管理</span>
         <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
         <span class="text-slate-700">资源包管理</span>
       </nav>
@@ -176,7 +184,7 @@
       <!-- 标题 -->
       <div class="mb-4">
         <h2 class="text-lg font-semibold text-slate-900">资源包管理</h2>
-        <p class="text-xs text-slate-500 mt-0.5">管理预留 vTPM 资源包与 SKU 配置。</p>
+        <p class="text-xs text-slate-500 mt-0.5">管理预留 vTPM 资源包与商品上下架。</p>
       </div>
 
       <!-- 操作按钮行 -->
@@ -189,27 +197,28 @@
       <!-- Tab 切换 -->
       <div class="admin-card">
         <div class="flex border-b border-slate-200 px-2">
-          <button type="button" class="admin-tab active" data-tab="sku-config" onclick="switchTab('sku-config')">SKU 配置</button>
+          <button type="button" class="admin-tab active" data-tab="product" onclick="switchTab('product')">商品管理</button>
           <button type="button" class="admin-tab" data-tab="sold" onclick="switchTab('sold')">已发放资源包</button>
           <button type="button" class="admin-tab" data-tab="logs" onclick="switchTab('logs')">操作记录</button>
           <button type="button" class="admin-tab" data-tab="inventory" onclick="switchTab('inventory')">库存看板</button>
         </div>
 
-        <!-- SKU 配置 -->
-        <div id="tab-sku-config" class="p-4">
-          <div class="flex flex-wrap items-center gap-3 mb-4">
+        <!-- 商品管理 -->
+        <div id="tab-product" class="p-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <button onclick="openSkuModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
-              <i class="fa-solid fa-plus text-[10px]"></i>新增 SKU
+              <i class="fa-solid fa-plus text-[10px]"></i>新增商品
             </button>
+            <input type="text" placeholder="搜索商品 / SKU / 模型" class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500" oninput="renderProductConfigTable(this.value)">
           </div>
 
           <div class="overflow-x-auto border border-slate-200 rounded-lg">
             <table class="min-w-full text-[11px]">
               <thead class="bg-slate-50 text-slate-600 sticky top-0">
                 <tr>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU ID</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU 名称</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">关联模型</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">商品 ID</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">商品名称</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU / 模型</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最小购买 vTPM 量</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最小购买周期</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">售卖窗口</th>
@@ -218,12 +227,12 @@
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作</th>
                 </tr>
               </thead>
-              <tbody id="sku-config-body" class="divide-y divide-slate-200">
+              <tbody id="product-config-body" class="divide-y divide-slate-200">
                 <!-- 数据行由 JS 填充 -->
               </tbody>
             </table>
           </div>
-          <p class="text-[11px] text-slate-400 mt-3">售卖状态自动判定；总库存一期人工维护。</p>
+          <p class="text-[11px] text-slate-400 mt-3">售卖状态按当前日期与售卖窗口自动判定：当前时间早于开始售卖时间为「未开始」，晚于截止售卖时间当天 24:00 为「已截止」。</p>
         </div>
 
         <!-- 库存看板（一期占位） -->
@@ -233,7 +242,7 @@
               <i class="fa-solid fa-warehouse text-2xl"></i>
             </div>
             <h3 class="text-sm font-semibold text-slate-900 mb-1">库存管理</h3>
-            <p class="text-xs text-slate-500 max-w-md leading-relaxed">一期人工维护，请在「SKU 配置」中调整库存。</p>
+            <p class="text-xs text-slate-500 max-w-md leading-relaxed">库存已与商品绑定，请在「商品管理」中新增或编辑商品时一并调整。</p>
           </div>
         </div>
 
@@ -325,7 +334,6 @@
                 <option>全部操作</option>
                 <option>手动发放</option>
                 <option>回收</option>
-                <option>调整库存</option>
               </select>
             </div>
           </div>
@@ -358,14 +366,7 @@
                   <td class="px-3 py-3">运营王五</td>
                   <td class="px-3 py-3 text-[11px] text-slate-500">客服工单 #1024，误发回退</td>
                 </tr>
-                <tr>
-                  <td class="px-3 py-3 text-slate-500">2026-08-19 10:22</td>
-                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px]">调整库存</span></td>
-                  <td class="px-3 py-3 font-mono text-[11px]">vtpm-glm52-001</td>
-                  <td class="px-3 py-3">总量 15,000 万 vTPM → 20,000 万 vTPM</td>
-                  <td class="px-3 py-3">运营王五</td>
-                  <td class="px-3 py-3 text-[11px] text-slate-500">补容：Q3 需求上涨</td>
-                </tr>
+
               </tbody>
             </table>
           </div>
@@ -397,92 +398,6 @@
     </div>
   </div>
 
-  <!-- Modal: 调整库存 -->
-  <div id="modal-adjust" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5 border border-slate-200">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-sm font-semibold text-slate-900">调整库存</h3>
-        <button onclick="closeAdjustModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-slate-600 mb-1">SKU</label>
-          <select id="adjust-sku" onchange="updateAdjustCurrentTotal()" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500">
-            <!-- 选项由 JS 动态填充 -->
-          </select>
-        </div>
-        <div>
-          <label class="block text-slate-600 mb-1">当前配置总量</label>
-          <input id="adjust-current" type="text" disabled class="w-full border border-slate-200 rounded px-2 py-1.5 bg-slate-50 text-slate-500" value="30,000 万 vTPM">
-        </div>
-        <div>
-          <label class="block text-slate-600 mb-1">调整后总量（万 vTPM）</label>
-          <input id="adjust-new" type="number" step="10" min="10" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500" placeholder="例如 30000">
-        </div>
-      </div>
-      <div class="mt-5 flex justify-end gap-2">
-        <button onclick="closeAdjustModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
-        <button onclick="saveAdjust()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">确认</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: 新增 / 编辑 SKU -->
-  <div id="modal-sku" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg w-full max-w-lg mx-4 p-5 border border-slate-200 max-h-[92vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-sm font-semibold text-slate-900" id="sku-modal-title">新增 SKU</h3>
-        <button onclick="closeSkuModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="space-y-3">
-        <div id="sku-id-block" class="hidden">
-          <label class="block text-xs font-medium text-slate-700 mb-1">SKU ID</label>
-          <input id="sku-id" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">SKU 名称 <span class="text-red-500">*</span></label>
-          <input id="sku-name" type="text" placeholder="如：Deepseek V4 Flash 0731 预留 vTPM" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">关联模型（model） <span class="text-red-500">*</span></label>
-          <input id="sku-model" type="text" placeholder="如：deepseek-v4-flash-0731" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500 font-mono">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">最小购买 vTPM 量（万 vTPM） <span class="text-red-500">*</span></label>
-            <input id="sku-min-vtpm" type="number" min="1" step="1" value="10" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">最小购买周期（天） <span class="text-red-500">*</span></label>
-            <input id="sku-min-cycle" type="number" min="1" step="1" value="30" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">开始售卖时间 <span class="text-red-500">*</span></label>
-            <input id="sku-sell-start" type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">截止售卖时间 <span class="text-red-500">*</span></label>
-            <input id="sku-sell-end" type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
-          <textarea id="sku-note" rows="2" placeholder="选填，如售卖批次、定价说明等" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></textarea>
-        </div>
-        <p id="sku-form-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2"></p>
-        <div class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-500 leading-relaxed">
-          保存后立即生效。
-        </div>
-      </div>
-      <div class="mt-5 flex justify-end gap-2">
-        <button onclick="closeSkuModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
-        <button onclick="saveSku()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">保存</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Modal: 手动交付预留 vTPM 资源包 -->
   <div id="modal-grant" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
     <div class="bg-white rounded-lg w-full max-w-2xl mx-4 p-5 border border-slate-200 max-h-[92vh] overflow-y-auto">
@@ -491,9 +406,9 @@
         <button onclick="closeModal('grant')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- Step 1: 确定 subject_id -->
+      <!-- Step 1: 确定 subject_id 和 pool -->
       <div class="border border-slate-200 rounded-lg p-3 mb-3">
-        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">1</span>确定客户 subject_id</p>
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">1</span>确定 subject_id 和 pool</p>
         <div class="flex gap-2">
           <input id="grant-subject" type="text" list="grant-subject-list" placeholder="输入 subject_id，如 sub_3x9a2b1c" class="flex-1 rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
           <datalist id="grant-subject-list">
@@ -512,16 +427,16 @@
         </div>
       </div>
 
-      <!-- Step 2: SKU 信息 -->
+      <!-- Step 2: 商品信息 -->
       <div class="border border-slate-200 rounded-lg p-3 mb-3">
-        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择本次交付关联的 SKU</p>
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择本次交付关联的商品</p>
         <div id="grant-sku-block" class="hidden">
           <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500 mb-2"></select>
           <div id="grant-sku-info" class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600 grid grid-cols-2 sm:grid-cols-4 gap-2">
             <!-- JS 填充 -->
           </div>
         </div>
-        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择 Pool 后选择 SKU。</p>
+        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择 Pool 后选择商品。</p>
       </div>
 
       <!-- Step 3: 交付配置 -->
@@ -573,16 +488,13 @@
             <div class="bg-slate-900 rounded-lg px-3 py-2.5">
               <p id="grant-model-preview" class="font-mono text-xs text-violet-300 break-all">-</p>
             </div>
-            <p id="grant-requested-note" class="text-[11px] text-slate-400 mt-1"></p>
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
             <textarea id="grant-note" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="2" placeholder="填写交付原因或其他说明"></textarea>
           </div>
-          <!-- 交付汇总 -->
-          <div id="grant-summary" class="bg-violet-50 border border-violet-100 rounded-lg p-3 text-[11px] text-slate-700 leading-relaxed"></div>
         </div>
-        <p id="grant-config-hint" class="text-[11px] text-slate-400">选择 SKU 后进行交付配置。</p>
+        <p id="grant-config-hint" class="text-[11px] text-slate-400">选择商品后进行交付配置。</p>
       </div>
 
       <div class="mt-5 flex justify-end gap-2">
@@ -601,33 +513,8 @@
       </div>
       <div class="space-y-3 text-xs">
         <div>
-          <label class="block text-slate-600 mb-1">subject_id</label>
-          <input id="create-pool-subject" type="text" disabled class="w-full border border-slate-200 rounded px-2 py-1.5 bg-slate-50 text-slate-500">
-        </div>
-        <div>
           <label class="block text-slate-600 mb-1">Pool 名称 <span class="text-red-500">*</span></label>
           <input id="create-pool-name" type="text" placeholder="如 proj-delta" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500">
-        </div>
-        <div>
-          <label class="block text-slate-600 mb-1">原始 model_name（需求记录）</label>
-          <input id="create-pool-requested" type="text" placeholder="如 deepseek-v4-flash-0731-prod" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500 font-mono">
-        </div>
-        <div>
-          <label class="block text-slate-600 mb-1">超量路由</label>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
-              <input type="radio" name="create-pool-serverless" value="off" checked class="mt-0.5">
-              <span>
-                <span class="block text-xs font-medium text-slate-800">限流 429</span>
-              </span>
-            </label>
-            <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
-              <input type="radio" name="create-pool-serverless" value="on" class="mt-0.5">
-              <span>
-                <span class="block text-xs font-medium text-slate-800">Serverless 按量计费</span>
-              </span>
-            </label>
-          </div>
         </div>
         <p id="create-pool-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2"></p>
       </div>
@@ -638,53 +525,78 @@
     </div>
   </div>
 
+  <!-- Modal: 新增 / 编辑商品 -->
+  <div id="modal-sku" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg w-full max-w-lg mx-4 p-5 border border-slate-200 max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900" id="sku-modal-title">新增商品</h3>
+        <button onclick="closeSkuModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3">
+        <div id="sku-id-block" class="hidden">
+          <label class="block text-xs font-medium text-slate-700 mb-1">商品 ID</label>
+          <input id="sku-id" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">商品名称 <span class="text-red-500">*</span></label>
+          <input id="sku-name" type="text" placeholder="如：Deepseek V4 Flash 0731 预留 vTPM" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU <span class="text-red-500">*</span> <span class="text-slate-400 font-normal">SKU 已关联模型，选择后自动带出</span></label>
+          <select id="sku-master" onchange="onSkuMasterChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">关联模型（model）</label>
+          <input id="sku-model" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 font-mono">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">最小购买 vTPM 量（万 vTPM） <span class="text-red-500">*</span></label>
+            <input id="sku-min-vtpm" type="number" min="1" step="1" value="10" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">最小购买周期（天） <span class="text-red-500">*</span></label>
+            <input id="sku-min-cycle" type="number" min="1" step="1" value="30" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">开始售卖时间 <span class="text-red-500">*</span></label>
+            <input id="sku-sell-start" type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">截止售卖时间 <span class="text-red-500">*</span></label>
+            <input id="sku-sell-end" type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">总库存（万 vTPM）</label>
+          <input id="sku-total" type="number" min="0" step="10" value="0" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
+          <textarea id="sku-note" rows="2" placeholder="选填，如售卖批次、定价说明等" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></textarea>
+        </div>
+        <p id="sku-form-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2"></p>
+        <div class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-500 leading-relaxed">
+          保存后商品立即上架，将同步至「手动交付资源包」弹窗：交付份数以最小购买 vTPM 量为基数、购买周期以最小购买周期为基数，且交付有效期结束时间不得晚于截止售卖时间当天 24:00。
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeSkuModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
+        <button onclick="saveSku()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">保存</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); document.getElementById('modal-' + id).classList.add('flex'); }
     function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); }
 
-    function openAdjustModal(sku) {
-      const select = document.getElementById('adjust-sku');
-      select.innerHTML = grantSkus.map(s =>
-        `<option value="${s.id}">${s.id} · ${s.name}</option>`
-      ).join('');
-      if (sku) {
-        select.value = sku;
-      }
-      updateAdjustCurrentTotal();
-      const modal = document.getElementById('modal-adjust');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function saveAdjust() {
-      const skuId = document.getElementById('adjust-sku').value;
-      const newTotal = parseInt(document.getElementById('adjust-new').value, 10);
-      if (!Number.isInteger(newTotal) || newTotal < 0) {
-        alert('请输入有效的总库存数值（万 vTPM）。');
-        return;
-      }
-      let item = inventorySkus.find(s => s.id === skuId);
-      if (!item) {
-        item = { id: skuId, total: 0, issued: 0 };
-        inventorySkus.push(item);
-      }
-      item.total = newTotal;
-      document.getElementById('adjust-new').value = '';
-      closeAdjustModal();
-      renderSkuConfigTable();
-      alert('库存调整已记录：' + skuId + ' 总库存更新为 ' + newTotal.toLocaleString() + ' 万 vTPM。');
-    }
-
-    function closeAdjustModal() {
-      const modal = document.getElementById('modal-adjust');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
     function switchTab(tab) {
       document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
       document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
-      ['sku-config', 'inventory', 'sold', 'logs'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
+      ['product', 'inventory', 'sold', 'logs'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
       document.getElementById('tab-' + tab).classList.remove('hidden');
     }
 
@@ -703,34 +615,41 @@
     }
 
     // ===== 手动交付：数据与联动 =====
-    // subject_id → 客户 Pool 对象关系表
-    // 注意：Pool 与 SKU 不在此处预关联，而是通过每次发放动作进行关联。
     const subjectPools = {
       'sub_3x9a2b1c': {
         name: '智象科技',
         pools: [
-          { id: 'pool_3x9_alpha', name: 'proj-alpha', requested: 'deepseek-v4-flash-0731-prod', serverless: true },
-          { id: 'pool_3x9_beta', name: 'proj-beta', requested: 'deepseek-v4-flash-0731-custom', serverless: false }
+          { id: 'pool_3x9_alpha', name: 'proj-alpha' },
+          { id: 'pool_3x9_beta', name: 'proj-beta' }
         ]
       },
       'sub_7k2m5n8p': {
         name: '星河互娱',
         pools: [
-          { id: 'pool_7k2_gamma', name: 'proj-gamma', requested: 'glm-5.2-prod', serverless: false }
+          { id: 'pool_7k2_gamma', name: 'proj-gamma' }
         ]
       }
     };
 
-    // SKU 配置（与 admin-sku.html 保持一致）
-    const grantSkus = [
-      { id: 'vtpm-dsv4f-001', name: 'Deepseek V4 Flash 0731 预留 vTPM', model: 'deepseek-v4-flash-0731', minVtpm: 10, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31' },
-      { id: 'vtpm-glm52-001', name: 'GLM 5.2 预留 vTPM', model: 'glm-5.2', minVtpm: 20, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30' },
-      { id: 'vtpm-kimik2-001', name: 'Kimi K2 预留 vTPM', model: 'kimi-k2-instruct', minVtpm: 15, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31' }
+    // SKU 主数据
+    const skuMaster = [
+      { id: 'sku-dsv4f', name: 'Deepseek V4 Flash 0731', model: 'deepseek-v4-flash-0731' },
+      { id: 'sku-glm52', name: 'GLM 5.2', model: 'glm-5.2' },
+      { id: 'sku-kimik2', name: 'Kimi K2', model: 'kimi-k2-instruct' }
     ];
 
-    function grantSkuById(id) { return grantSkus.find(s => s.id === id); }
+    // 商品列表（由 SKU 带出模型）
+    const products = [
+      { id: 'vtpm-dsv4f-001', name: 'Deepseek V4 Flash 0731 预留 vTPM', skuId: 'sku-dsv4f', minVtpm: 10, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31', total: 30000, note: '主力售卖批次' },
+      { id: 'vtpm-glm52-001', name: 'GLM 5.2 预留 vTPM', skuId: 'sku-glm52', minVtpm: 20, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30', total: 20000, note: 'Q4 活动批次' },
+      { id: 'vtpm-kimik2-001', name: 'Kimi K2 预留 vTPM', skuId: 'sku-kimik2', minVtpm: 15, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31', total: 0, note: '新模型预售批次' }
+    ];
 
-    // ===== SKU 配置（第一个 Tab） =====
+    function skuMasterById(id) { return skuMaster.find(s => s.id === id); }
+    function productById(id) { return products.find(s => s.id === id); }
+    function productModel(p) { const m = skuMasterById(p.skuId); return m ? m.model : '-'; }
+
+    // ===== 商品管理 Tab（只读摘要） =====
     function skuSellState(s) {
       const now = new Date();
       const start = new Date(s.sellStart + 'T00:00:00');
@@ -740,61 +659,82 @@
       return { label: '售卖中', cls: 'bg-green-100 text-green-700' };
     }
 
-    function inventoryTotalBySku(skuId) {
-      const item = inventorySkus.find(s => s.id === skuId);
-      return item ? item.total : 0;
-    }
-
-    function renderSkuConfigTable() {
-      document.getElementById('sku-config-body').innerHTML = grantSkus.map(s => {
+    function renderProductConfigTable(keyword = '') {
+      const kw = keyword.trim().toLowerCase();
+      const list = products.filter(s => !kw || s.name.toLowerCase().includes(kw) || productModel(s).toLowerCase().includes(kw) || s.id.toLowerCase().includes(kw));
+      document.getElementById('product-config-body').innerHTML = list.map(s => {
         const st = skuSellState(s);
-        const total = inventoryTotalBySku(s.id);
+        const m = skuMasterById(s.skuId);
         return `
           <tr>
             <td class="px-3 py-3 font-mono text-[11px]">${s.id}</td>
             <td class="px-3 py-3 font-medium">${s.name}</td>
-            <td class="px-3 py-3 font-mono text-[11px]">${s.model}</td>
+            <td class="px-3 py-3">
+              <p class="font-mono text-[11px]">${m ? m.id : '-'}</p>
+              <p class="text-[10px] text-slate-400">model: ${m ? m.model : '-'}</p>
+            </td>
             <td class="px-3 py-3">${s.minVtpm} 万 vTPM</td>
             <td class="px-3 py-3">${s.minCycle} 天</td>
             <td class="px-3 py-3 text-slate-500">${s.sellStart} 00:00 ~ ${s.sellEnd} 24:00</td>
             <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${st.cls}">${st.label}</span></td>
-            <td class="px-3 py-3">${total.toLocaleString()} 万 vTPM</td>
+            <td class="px-3 py-3">${s.total.toLocaleString()} 万 vTPM</td>
             <td class="px-3 py-3">
-              <button onclick="openAdjustModal('${s.id}')" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">调整库存</button>
               <button onclick="openSkuModal('${s.id}')" class="text-violet-600 hover:text-violet-700 text-[11px]">编辑</button>
             </td>
           </tr>
         `;
-      }).join('') || `<tr><td colspan="9" class="px-3 py-6 text-center text-slate-400">暂无 SKU</td></tr>`;
+      }).join('') || `<tr><td colspan="9" class="px-3 py-6 text-center text-slate-400">${kw ? '未找到匹配的商品' : '暂无商品'}</td></tr>`;
     }
 
-    let editingSkuId = null;
+    // ===== 商品管理：新增 / 编辑 =====
+    let editingId = null;
+
+    function productSkuLabel(p) { const m = skuMasterById(p.skuId); return m ? `${m.id} · ${m.name}` : p.skuId; }
+
+    function renderSkuMasterOptions(selectedId) {
+      const select = document.getElementById('sku-master');
+      select.innerHTML = `<option value="">请选择 SKU</option>` + skuMaster.map(s =>
+        `<option value="${s.id}" ${s.id === selectedId ? 'selected' : ''}>${s.id} · ${s.name}</option>`
+      ).join('');
+    }
+
+    function onSkuMasterChange() {
+      const skuId = document.getElementById('sku-master').value;
+      const m = skuMasterById(skuId);
+      document.getElementById('sku-model').value = m ? m.model : '';
+    }
 
     function openSkuModal(id) {
-      editingSkuId = id || null;
+      editingId = id || null;
       const err = document.getElementById('sku-form-error');
       err.classList.add('hidden');
       if (id) {
-        const s = grantSkus.find(x => x.id === id);
-        document.getElementById('sku-modal-title').textContent = '编辑 SKU';
+        const s = products.find(x => x.id === id);
+        document.getElementById('sku-modal-title').textContent = '编辑商品';
         document.getElementById('sku-id-block').classList.remove('hidden');
         document.getElementById('sku-id').value = s.id;
         document.getElementById('sku-name').value = s.name;
-        document.getElementById('sku-model').value = s.model;
+        renderSkuMasterOptions(s.skuId);
+        document.getElementById('sku-model').value = productModel(s);
         document.getElementById('sku-min-vtpm').value = s.minVtpm;
         document.getElementById('sku-min-cycle').value = s.minCycle;
         document.getElementById('sku-sell-start').value = s.sellStart;
         document.getElementById('sku-sell-end').value = s.sellEnd;
+        document.getElementById('sku-total').value = s.total;
+        document.getElementById('sku-note').value = s.note || '';
       } else {
-        document.getElementById('sku-modal-title').textContent = '新增 SKU';
+        document.getElementById('sku-modal-title').textContent = '新增商品';
         document.getElementById('sku-id-block').classList.add('hidden');
         document.getElementById('sku-id').value = '';
         document.getElementById('sku-name').value = '';
+        renderSkuMasterOptions('');
         document.getElementById('sku-model').value = '';
         document.getElementById('sku-min-vtpm').value = 10;
         document.getElementById('sku-min-cycle').value = 30;
         document.getElementById('sku-sell-start').value = '';
         document.getElementById('sku-sell-end').value = '';
+        document.getElementById('sku-total').value = 0;
+        document.getElementById('sku-note').value = '';
       }
       const modal = document.getElementById('modal-sku');
       modal.classList.remove('hidden');
@@ -815,35 +755,36 @@
 
     function saveSku() {
       const name = document.getElementById('sku-name').value.trim();
+      const skuId = document.getElementById('sku-master').value;
       const model = document.getElementById('sku-model').value.trim();
       const minVtpm = parseInt(document.getElementById('sku-min-vtpm').value, 10);
       const minCycle = parseInt(document.getElementById('sku-min-cycle').value, 10);
       const sellStart = document.getElementById('sku-sell-start').value;
       const sellEnd = document.getElementById('sku-sell-end').value;
+      const total = parseInt(document.getElementById('sku-total').value, 10) || 0;
+      const note = document.getElementById('sku-note').value.trim();
 
-      if (!name) return showSkuError('请填写 SKU 名称。');
-      if (!model) return showSkuError('请填写关联模型（model）。');
+      if (!name) return showSkuError('请填写商品名称。');
+      if (!skuId) return showSkuError('请选择 SKU。');
+      if (!model) return showSkuError('SKU 未关联模型，请选择有效 SKU。');
       if (!Number.isInteger(minVtpm) || minVtpm < 1) return showSkuError('最小购买 vTPM 量必须为不小于 1 的整数（万 vTPM）。');
       if (!Number.isInteger(minCycle) || minCycle < 1) return showSkuError('最小购买周期必须为不小于 1 的整数（天）。');
       if (!sellStart || !sellEnd) return showSkuError('请填写开始售卖时间与截止售卖时间。');
       if (new Date(sellEnd + 'T00:00:00') <= new Date(sellStart + 'T00:00:00')) return showSkuError('截止售卖时间必须晚于开始售卖时间。');
 
-      if (editingSkuId) {
-        const s = grantSkus.find(x => x.id === editingSkuId);
-        Object.assign(s, { name, model, minVtpm, minCycle, sellStart, sellEnd });
+      if (editingId) {
+        const s = products.find(x => x.id === editingId);
+        Object.assign(s, { name, skuId, minVtpm, minCycle, sellStart, sellEnd, total, note });
       } else {
-        const nextId = 'vtpm-' + model.replace(/[^a-z0-9]/gi, '').slice(0, 6).toLowerCase() + '-' + String(grantSkus.length + 1).padStart(3, '0');
-        grantSkus.push({ id: nextId, name, model, minVtpm, minCycle, sellStart, sellEnd });
-        // 新 SKU 默认总库存为 0
-        inventorySkus.push({ id: nextId, total: 0, issued: 0 });
+        const nextId = 'vtpm-' + model.replace(/[^a-z0-9]/gi, '').slice(0, 6).toLowerCase() + '-' + String(products.length + 1).padStart(3, '0');
+        products.push({ id: nextId, name, skuId, minVtpm, minCycle, sellStart, sellEnd, total, note });
       }
-      renderSkuConfigTable();
+      renderProductConfigTable(document.querySelector('#tab-product input[oninput*="renderProductConfigTable"]').value);
       closeSkuModal();
-      alert(editingSkuId ? 'SKU 已更新。' : 'SKU 已新增。');
+      alert(editingId ? '商品已更新，交付选项将同步生效。' : '商品已上架，交付选项将同步生效。');
     }
 
     function openGrantModal() {
-      // 重置三步状态
       document.getElementById('grant-subject').value = '';
       document.getElementById('grant-pool-block').classList.add('hidden');
       document.getElementById('grant-pool-list').innerHTML = '';
@@ -856,11 +797,7 @@
     }
 
     function openCreatePoolModal() {
-      const sid = document.getElementById('grant-subject').value.trim();
-      document.getElementById('create-pool-subject').value = sid;
       document.getElementById('create-pool-name').value = '';
-      document.getElementById('create-pool-requested').value = '';
-      document.querySelector('input[name="create-pool-serverless"][value="off"]').checked = true;
       document.getElementById('create-pool-error').classList.add('hidden');
       const modal = document.getElementById('modal-create-pool');
       modal.classList.remove('hidden');
@@ -878,8 +815,6 @@
       const customer = subjectPools[sid];
       if (!customer) return;
       const name = document.getElementById('create-pool-name').value.trim();
-      const requested = document.getElementById('create-pool-requested').value.trim();
-      const serverless = document.querySelector('input[name="create-pool-serverless"]:checked').value === 'on';
       const err = document.getElementById('create-pool-error');
 
       if (!name) {
@@ -895,20 +830,18 @@
 
       const safe = name.replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 8);
       const newId = 'pool_' + sid.replace(/[^a-z0-9]/gi, '').slice(0, 6) + '_' + (safe || String(Date.now()).slice(-6));
-      customer.pools.push({ id: newId, name, requested: requested || '', serverless });
+      customer.pools.push({ id: newId, name });
       renderPoolList(customer);
       closeCreatePoolModal();
       document.getElementById('grant-pool-hint').textContent = `已创建 Pool「${name}」，请勾选后交付。`;
     }
 
-    // Step 1: 确定 subject_id → 加载 Pool 对象（多选，最多 3 个）
     function loadPools() {
       const sid = document.getElementById('grant-subject').value.trim();
       const poolBlock = document.getElementById('grant-pool-block');
       const skuBlock = document.getElementById('grant-sku-block');
       const config = document.getElementById('grant-config');
       const customer = subjectPools[sid];
-      // 联动清理后两步
       skuBlock.classList.add('hidden');
       config.classList.add('hidden');
       document.getElementById('grant-config-hint').classList.remove('hidden');
@@ -947,14 +880,12 @@
       return customer.pools.filter(p => checked.includes(p.id));
     }
 
-    // Step 2: 选中 Pool 对象（payload）→ 全部 SKU 可选，由本次发放动作关联
     function onPoolChange() {
       const selectedPools = getSelectedPools();
       const maxHint = document.getElementById('grant-pool-max');
       const checkedBoxes = document.querySelectorAll('input[name="grant-pool"]:checked');
 
       if (checkedBoxes.length > 3) {
-        // 取消最后一次勾选，强制最多 3 个
         event && event.target && (event.target.checked = false);
         maxHint.classList.remove('hidden');
       } else {
@@ -972,49 +903,41 @@
         return;
       }
 
-      // Pool 与 SKU 通过本次发放动作关联：展示全部 SKU 供选择
-      document.getElementById('grant-sku').innerHTML = grantSkus.map(s =>
+      document.getElementById('grant-sku').innerHTML = products.map(s =>
         `<option value="${s.id}">${s.name}（${s.id}）</option>`
       ).join('');
       document.getElementById('grant-sku-block').classList.remove('hidden');
-      document.getElementById('grant-sku-hint').textContent = `已选 ${selectedPools.length} 个 Pool，选择一个 SKU 关联到该资源包。`;
+      document.getElementById('grant-sku-hint').textContent = `已选 ${selectedPools.length} 个 Pool，选择一个商品关联到该资源包。`;
       document.getElementById('grant-sku-hint').classList.remove('hidden');
-
-      // 沿用第一个选中 Pool 的超量路由选择（多个 Pool 时统一配置）
-      const wanted = selectedPools[0].serverless ? 'on' : 'off';
-      document.querySelector(`input[name="grant-serverless"][value="${wanted}"]`).checked = true;
 
       onSkuChange();
     }
 
-    // Step 3a: 选中 SKU → 显示售卖规则 + 动态周期
     function onSkuChange() {
-      const sku = grantSkuById(document.getElementById('grant-sku').value);
+      const product = productById(document.getElementById('grant-sku').value);
       const config = document.getElementById('grant-config');
-      if (!sku) { config.classList.add('hidden'); return; }
+      if (!product) { config.classList.add('hidden'); return; }
 
       document.getElementById('grant-sku-info').innerHTML = `
-        <div><p class="text-slate-400 mb-0.5">最小购买 vTPM 量</p><p class="font-semibold text-slate-800">${sku.minVtpm} 万 vTPM</p></div>
-        <div><p class="text-slate-400 mb-0.5">最小购买周期</p><p class="font-semibold text-slate-800">${sku.minCycle} 天（约 1 个月）</p></div>
-        <div><p class="text-slate-400 mb-0.5">开始售卖时间</p><p class="font-semibold text-slate-800">${sku.sellStart} 00:00</p></div>
-        <div><p class="text-slate-400 mb-0.5">截止售卖时间</p><p class="font-semibold text-slate-800">${sku.sellEnd} 24:00</p></div>
+        <div><p class="text-slate-400 mb-0.5">最小购买 vTPM 量</p><p class="font-semibold text-slate-800">${product.minVtpm} 万 vTPM</p></div>
+        <div><p class="text-slate-400 mb-0.5">最小购买周期</p><p class="font-semibold text-slate-800">${product.minCycle} 天（约 1 个月）</p></div>
+        <div><p class="text-slate-400 mb-0.5">开始售卖时间</p><p class="font-semibold text-slate-800">${product.sellStart} 00:00</p></div>
+        <div><p class="text-slate-400 mb-0.5">截止售卖时间</p><p class="font-semibold text-slate-800">${product.sellEnd} 24:00</p></div>
       `;
 
-      // 开始时间固定为操作当天 0 点
       const start = new Date();
       start.setHours(0, 0, 0, 0);
       document.getElementById('grant-start').value = fmtDateTime(start) + '（操作当天 0 点，固定）';
 
-      // 动态周期选项：结束时间（开始 + k×最小周期 + 1 天）不能晚于截止售卖时间
-      const sellEnd = new Date(sku.sellEnd + 'T00:00:00');
+      const sellEnd = new Date(product.sellEnd + 'T00:00:00');
       const options = [];
       for (let k = 1; k <= 24; k++) {
         const probe = new Date(start);
-        probe.setDate(probe.getDate() + k * sku.minCycle);
+        probe.setDate(probe.getDate() + k * product.minCycle);
         if (probe > sellEnd) break;
         const endDate = new Date(probe);
         endDate.setDate(endDate.getDate() + 1);
-        options.push({ k, days: k * sku.minCycle, end: endDate });
+        options.push({ k, days: k * product.minCycle, end: endDate });
       }
       document.getElementById('grant-cycle').innerHTML = options.map(o => {
         const months = o.k;
@@ -1027,41 +950,25 @@
       renderGrantSummary();
     }
 
-    // Step 3b: 汇总联动
     function renderGrantSummary() {
-      const sid = document.getElementById('grant-subject').value.trim();
-      const customer = subjectPools[sid];
       const selectedPools = getSelectedPools();
-      const sku = grantSkuById(document.getElementById('grant-sku').value);
-      if (selectedPools.length === 0 || !sku) return;
+      const product = productById(document.getElementById('grant-sku').value);
+      if (selectedPools.length === 0 || !product) return;
 
       const multi = Math.max(1, Math.min(20, parseInt(document.getElementById('grant-multiplier').value || '1', 10) || 1));
       document.getElementById('grant-multiplier').value = multi;
-      const totalVtpm = multi * sku.minVtpm;
-      document.getElementById('grant-total-preview').textContent = `合计交付：${multi} × ${sku.minVtpm} 万 vTPM = ${totalVtpm.toLocaleString()} 万 vTPM`;
+      const totalVtpm = multi * product.minVtpm;
+      document.getElementById('grant-total-preview').textContent = `合计交付：${multi} × ${product.minVtpm} 万 vTPM = ${totalVtpm.toLocaleString()} 万 vTPM`;
 
-      // 结束时间 = 开始 + 周期 + 1 天
       const k = parseInt(document.getElementById('grant-cycle').value || '1', 10) || 1;
       const start = new Date(); start.setHours(0, 0, 0, 0);
       const end = new Date(start);
-      end.setDate(end.getDate() + k * sku.minCycle + 1);
-      document.getElementById('grant-end').value = fmtDateTime(end) + '（开始时间 + ' + (k * sku.minCycle) + ' 天 + 1 天，自动计算）';
+      end.setDate(end.getDate() + k * product.minCycle + 1);
+      document.getElementById('grant-end').value = fmtDateTime(end) + '（开始时间 + ' + (k * product.minCycle) + ' 天 + 1 天，自动计算）';
 
-      const finalModels = selectedPools.map(p => `/${p.name}/${sku.model}`);
-      const poolNames = selectedPools.map(p => p.name).join('、');
+      const model = productModel(product);
+      const finalModels = selectedPools.map(p => `/${p.name}/${model}`);
       document.getElementById('grant-model-preview').innerHTML = finalModels.map(m => `<p class="font-mono text-xs text-violet-300 break-all">${m}</p>`).join('');
-      document.getElementById('grant-requested-note').textContent = `原始 model_name：${selectedPools.map(p => p.requested).join('、')}（需求记录）。`;
-
-      const serverless = document.querySelector('input[name="grant-serverless"]:checked').value === 'on';
-      document.getElementById('grant-summary').innerHTML = `
-        <p class="font-semibold text-slate-900 mb-1.5">交付汇总</p>
-        <p>· 客户：${customer.name}（${sid}）｜ Pool：${poolNames}｜ SKU：${sku.name}</p>
-        <p>· 交付量：${multi} × ${sku.minVtpm} 万 vTPM = <b class="text-violet-700">${totalVtpm.toLocaleString()} 万 vTPM</b>｜ 周期：${k} × ${sku.minCycle} 天</p>
-        <p>· 有效期：${fmtDateTime(start)} ~ ${fmtDateTime(end)}</p>
-        <p>· 超量路由：${serverless ? 'Serverless 按量计费' : '限流 429'}</p>
-        <p>· 最终 model_name：</p>
-        ${finalModels.map(m => `<p class="font-mono text-violet-700 break-all ml-2">${m}</p>`).join('')}
-      `;
     }
 
     function confirmGrant() {
@@ -1080,84 +987,9 @@
       return fmtDate(d) + ' 00:00';
     }
 
-    // SKU 库存看板数据
-    const inventorySkus = [
-      { id: 'vtpm-dsv4f-001', name: 'Deepseek V4 Flash 0731 预留 vTPM', total: 30000, issued: 8500 },
-      { id: 'vtpm-glm52-001', name: 'GLM 5.2 预留 vTPM', total: 20000, issued: 3800 }
-    ];
-    const inventoryDaily = {
-      'vtpm-dsv4f-001': {
-        '2026-09-01': 8500, '2026-09-02': 8200, '2026-09-03': 7900, '2026-09-04': 7600,
-        '2026-09-05': 7300, '2026-09-06': 7000, '2026-09-07': 6700
-      },
-      'vtpm-glm52-001': {
-        '2026-09-01': 7200, '2026-09-02': 6900, '2026-09-03': 6600, '2026-09-04': 6300,
-        '2026-09-05': 6000, '2026-09-06': 5700, '2026-09-07': 5400
-      }
-    };
-
-    function getDateRange(start, end) {
-      const dates = [];
-      const s = new Date(start + 'T00:00:00');
-      const e = new Date(end + 'T00:00:00');
-      if (s > e) return dates;
-      for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        dates.push(`${yyyy}-${mm}-${dd}`);
-      }
-      return dates;
-    }
-
-    function renderInventoryBoard() {
-      const start = document.getElementById('range-start').value;
-      const end = document.getElementById('range-end').value;
-      const dates = getDateRange(start, end);
-      const headRow = document.getElementById('inventory-head');
-      const tbody = document.getElementById('inventory-body');
-
-      // 渲染表头
-      headRow.innerHTML = `
-        <th class="px-3 py-2 text-left font-medium border-b border-slate-200 min-w-[180px]">SKU</th>
-        <th class="px-3 py-2 text-left font-medium border-b border-slate-200">配置总量</th>
-        ${dates.map(date => {
-          const label = date.slice(5);
-          return `<th class="px-3 py-2 text-left font-medium border-b border-slate-200 min-w-[80px]">${label}</th>`;
-        }).join('')}
-      `;
-
-      // 渲染行
-      tbody.innerHTML = inventorySkus.map(sku => {
-        const totalText = sku.total.toLocaleString() + ' 万 vTPM';
-        const cells = dates.map(date => {
-          const val = inventoryDaily[sku.id]?.[date];
-          const text = val !== undefined ? val.toLocaleString() + ' 万' : '-';
-          return `<td class="px-3 py-3 align-top">${text}</td>`;
-        }).join('');
-        return `
-          <tr>
-            <td class="px-3 py-3 align-top">
-              <p class="font-medium text-slate-900">${sku.name}</p>
-              <p class="font-mono text-[10px] text-slate-400 mt-0.5">${sku.id}</p>
-            </td>
-            <td class="px-3 py-3 align-top">${totalText}</td>
-            ${cells}
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function updateAdjustCurrentTotal() {
-      const skuId = document.getElementById('adjust-sku').value;
-      const sku = inventorySkus.find(s => s.id === skuId);
-      document.getElementById('adjust-current').value = sku ? sku.total.toLocaleString() + ' 万 vTPM' : '-';
-    }
-
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
-      renderSkuConfigTable();
-      updateAdjustCurrentTotal();
+      renderProductConfigTable();
     });
 
     // 后台预留 vTPM 详情数据
@@ -1166,7 +998,7 @@
         model: 'Deepseek V4 Flash 0731', sku: 'vtpm-dsv4f-001', amount: 300, unit: '万 vTPM',
         status: '生效中', statusCls: 'bg-green-100 text-green-700',
         period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理',
-        bind: '/proj-alpha/deepseek-v4-flash-0731', pool: 'proj-alpha', requested: 'deepseek-v4-flash-0731-prod', serverless: true,
+        bind: '/proj-alpha/deepseek-v4-flash-0731', pool: 'proj-alpha',
         factors: [
           { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
           { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
@@ -1180,7 +1012,7 @@
         model: 'GLM 5.2', sku: 'vtpm-glm52-001', amount: 200, unit: '万 vTPM',
         status: '生效中', statusCls: 'bg-green-100 text-green-700',
         period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理',
-        bind: '/proj-gamma/glm-5.2', pool: 'proj-gamma', requested: 'glm-5.2-prod', serverless: false,
+        bind: '/proj-gamma/glm-5.2', pool: 'proj-gamma',
         factors: [
           { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
           { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
@@ -1205,15 +1037,13 @@
       document.getElementById('detail-body').innerHTML = `
         <div class="grid grid-cols-2 gap-3">
           <div><span class="text-slate-500">资源包 ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${id}</p></div>
-          <div><span class="text-slate-500">SKU ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.sku}</p></div>
+          <div><span class="text-slate-500">商品 ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.sku}</p></div>
           <div><span class="text-slate-500">购买量</span><p class="font-medium text-slate-900 mt-0.5">${d.amount} ${d.unit}</p></div>
           <div><span class="text-slate-500">状态</span><p class="mt-0.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${d.statusCls}">${d.status}</span></p></div>
           <div><span class="text-slate-500">有效期</span><p class="font-medium text-slate-900 mt-0.5">${d.period}</p></div>
           <div><span class="text-slate-500">可用范围</span><p class="font-medium text-slate-900 mt-0.5">${d.scope}</p></div>
           <div><span class="text-slate-500">Pool 对象（payload）</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.pool}</p></div>
           <div><span class="text-slate-500">最终 model_name</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.bind}</p></div>
-          <div class="col-span-2"><span class="text-slate-500">原始 model_name（需求记录）</span><p class="font-mono text-slate-500 mt-0.5">${d.requested}</p></div>
-          <div class="col-span-2"><span class="text-slate-500">超量路由</span><p class="mt-0.5">${d.serverless ? '<span class="text-blue-700">超量路由 Serverless，按量计费</span>' : '<span class="text-slate-500">超量限流，返回 429</span>'}</p></div>
         </div>
         <div>
           <p class="text-sm font-medium text-slate-900 mb-2">折算系数</p>
