@@ -195,6 +195,122 @@
     </main>
   </div>
 
+  <!-- 详情弹窗 -->
+  <div id="detail-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 id="modal-title" class="text-xl font-bold text-slate-900"></h3>
+            <span id="modal-type" class="inline-block px-2 py-0.5 rounded text-xs font-medium mt-1.5"></span>
+          </div>
+          <button type="button" onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+
+        <div class="space-y-4">
+          <div class="bg-slate-50 rounded-xl p-4">
+            <p id="modal-amount-label" class="text-xs text-slate-500 mb-1"></p>
+            <p id="modal-amount" class="text-2xl font-bold text-slate-900"></p>
+          </div>
+
+          <div id="modal-progress-wrap" class="hidden">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600">已使用</span>
+              <span id="modal-progress-text" class="font-medium"></span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2">
+              <div id="modal-progress-bar" class="bg-violet-600 h-2 rounded-full" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="space-y-2 text-sm text-slate-600">
+            <p class="flex justify-between"><span class="text-slate-400">状态</span><span id="modal-status"></span></p>
+            <p class="flex justify-between"><span class="text-slate-400">有效期</span><span id="modal-period"></span></p>
+            <p class="flex justify-between"><span class="text-slate-400">可用范围</span><span id="modal-scope" class="text-right max-w-[60%]"></span></p>
+            <p class="flex justify-between"><span class="text-slate-400">资源包 ID</span><span id="modal-id" class="font-mono text-xs"></span></p>
+          </div>
+
+          <!-- 折算系数 -->
+          <div id="modal-factor-row" class="hidden">
+            <p class="text-sm font-medium text-slate-900 mb-2">折算系数</p>
+            <p class="text-xs text-slate-500 mb-2">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+                <thead class="bg-slate-50 text-slate-600">
+                  <tr>
+                    <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
+                    <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
+                    <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
+                    <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
+                    <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
+                    <th class="px-3 py-2 text-left font-medium">输出系数</th>
+                  </tr>
+                </thead>
+                <tbody id="modal-factor-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 rounded-xl p-4 text-xs text-slate-500 space-y-1">
+            <p>· 适用于符合条件的资源抵扣；</p>
+            <p>· 请在有效期内使用，逾期未使用部分不予退还；</p>
+            <p>· 不可出售、转让或折抵现金。</p>
+          </div>
+        </div>
+
+        <div class="mt-6 flex gap-3 justify-end" id="modal-actions">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
+          <a id="modal-action" href="usage.html" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium hidden">查看监控</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 交付详情弹窗 -->
+  <div id="delivery-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDelivery()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900">交付详情</h3>
+            <p id="delivery-model" class="text-sm text-slate-500 mt-1"></p>
+          </div>
+          <button type="button" onclick="closeDelivery()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- 最终 model_name -->
+          <div class="bg-gradient-to-br from-violet-600 to-violet-800 rounded-xl p-5 text-white">
+            <p class="text-xs opacity-80 mb-2">最终 model_name（任一均可路由到预留算力）</p>
+            <div class="flex items-center justify-between gap-3">
+              <p id="delivery-final" class="text-xl sm:text-2xl font-mono font-bold break-all"></p>
+              <button type="button" onclick="copyFinalModel()" class="shrink-0 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-medium"><i class="fa-regular fa-copy mr-1"></i>复制</button>
+            </div>
+            <p class="text-xs opacity-75 mt-3">格式：/Pool 对象名/model</p>
+          </div>
+
+          <!-- 交付关键信息 -->
+          <div id="delivery-grid" class="grid sm:grid-cols-2 gap-3 text-sm"></div>
+
+          <!-- 示例调用 -->
+          <div>
+            <p class="text-sm font-medium text-slate-900 mb-2">示例</p>
+            <pre id="delivery-curl" class="bg-slate-900 text-slate-100 rounded-lg p-4 text-xs font-mono overflow-x-auto leading-relaxed"></pre>
+          </div>
+
+          <!-- 注意事项 -->
+          <div id="delivery-overflow-tip" class="rounded-xl p-4 text-xs leading-relaxed"></div>
+        </div>
+
+        <div class="mt-6 flex gap-3 justify-end">
+          <button type="button" onclick="closeDelivery()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
+          <a id="delivery-usage-link" href="usage.html" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium">查看监控</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     const packages = [
@@ -273,7 +389,7 @@
         const grayBadgeCls = isGray ? 'bg-slate-100 text-slate-400' : typeBadgeCls;
 
         return `
-          <div class="sf-card p-5 relative package-item ${p.status} cursor-pointer hover:shadow-md transition-shadow" data-type="${p.type}" onclick="location.href='usage.html?pkg=${p.id}'">
+          <div class="sf-card p-5 relative package-item ${p.status} cursor-pointer hover:shadow-md transition-shadow" data-type="${p.type}" onclick="openDetail('${p.id}')">
             <div class="flex items-start justify-between mb-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg ${grayIconBg} flex items-center justify-center"><i class="fa-solid ${icon}"></i></div>
@@ -297,11 +413,141 @@
               ${p.bind ? `<p>绑定：${Array.isArray(p.bind) ? p.bind.join('、') : p.bind}</p>` : `<p>ID：${p.id}</p>`}
             </div>
             <div class="flex items-center gap-3 text-sm">
-              ${isVtpm ? `<a href="usage.html?pkg=${p.id}" class="text-violet-600 hover:text-violet-700 font-medium" onclick="event.stopPropagation()">查看详情</a>` : ''}
+              ${isVtpm ? `<a href="usage.html?pkg=${p.id}" class="text-violet-600 hover:text-violet-700 font-medium" onclick="event.stopPropagation()">查看监控</a><button type="button" class="text-blue-600 hover:text-blue-700 font-medium" onclick="event.stopPropagation(); openDelivery('${p.id}')">交付详情</button>` : ''}
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    function openDetail(id) {
+      const p = packages.find(x => x.id === id);
+      if (!p) return;
+      const s = statusMap[p.status];
+      const isVtpm = p.type === 'vtpm';
+
+      document.getElementById('modal-type').textContent = isVtpm ? '预留 vTPM' : 'Tokens 包';
+      document.getElementById('modal-type').className = `inline-block px-2 py-0.5 rounded text-xs font-medium mt-1.5 ${isVtpm ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`;
+      document.getElementById('modal-title').textContent = p.model;
+      document.getElementById('modal-amount-label').textContent = isVtpm ? '预留算力' : '剩余资源';
+      document.getElementById('modal-amount').textContent = `${isVtpm ? p.amount : (p.remain ?? p.amount).toLocaleString()} ${p.unit}`;
+      document.getElementById('modal-status').innerHTML = `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${s.cls}">${s.label}</span>`;
+      document.getElementById('modal-period').textContent = p.period;
+      document.getElementById('modal-scope').textContent = p.scope;
+
+      document.getElementById('modal-id').textContent = p.id;
+
+      const progressWrap = document.getElementById('modal-progress-wrap');
+      if (!isVtpm) {
+        progressWrap.classList.remove('hidden');
+        const pct = getUsedPercent(p);
+        document.getElementById('modal-progress-text').textContent = `${pct}%`;
+        document.getElementById('modal-progress-bar').style.width = `${pct}%`;
+      } else {
+        progressWrap.classList.add('hidden');
+      }
+
+      const factorRow = document.getElementById('modal-factor-row');
+      if (isVtpm && p.factors) {
+        factorRow.classList.remove('hidden');
+        document.getElementById('modal-factor-body').innerHTML = p.factors.map(f => `
+          <tr>
+            <td class="px-3 py-2">${f.input}</td>
+            <td class="px-3 py-2">${f.cache}</td>
+            <td class="px-3 py-2">${f.output}</td>
+            <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
+            <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
+            <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
+          </tr>
+        `).join('');
+      } else {
+        factorRow.classList.add('hidden');
+      }
+
+      const actionsBox = document.getElementById('modal-actions');
+      if (isVtpm) {
+        actionsBox.innerHTML = `
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
+          <a href="usage.html?pkg=${p.id}" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium">查看监控</a>
+        `;
+      } else {
+        actionsBox.innerHTML = `
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
+        `;
+      }
+
+      document.getElementById('detail-modal').classList.remove('hidden');
+      document.getElementById('detail-modal').classList.add('flex');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('detail-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function openDelivery(id) {
+      const p = packages.find(x => x.id === id);
+      if (!p || p.type !== 'vtpm' || !p.bind) return;
+      const finalModels = Array.isArray(p.bind) ? p.bind : [p.bind];
+      const primaryModel = finalModels[0];
+      const requested = (p.requested || []).join('、');
+      const pools = Array.isArray(p.pools) ? p.pools : (p.pool ? [p.pool] : []);
+      const poolText = pools.join('、');
+
+      document.getElementById('delivery-model').innerHTML = `${p.model} · <span class="text-slate-400 font-mono">${p.id}</span>`;
+      document.getElementById('delivery-final').innerHTML = finalModels.map(m => `<p class="font-mono text-xl sm:text-2xl font-bold break-all">${m}</p>`).join('');
+      document.getElementById('delivery-usage-link').href = `usage.html?pkg=${p.id}`;
+
+      document.getElementById('delivery-grid').innerHTML = `
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">Pool 对象（${pools.length} 个）</p><p class="font-mono text-sm text-slate-800">${poolText}</p></div>
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">预留算力</p><p class="text-sm text-slate-800">${p.amount} ${p.unit}</p></div>
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">有效期</p><p class="text-sm text-slate-800">${p.period}</p></div>
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">超量路由</p><p class="text-sm">${p.serverless ? '<span class="text-blue-700">Serverless 按量计费</span>' : '<span class="text-slate-500">限流 429</span>'}</p></div>
+        <div class="sf-card p-3 sm:col-span-2"><p class="text-xs text-slate-400 mb-1">原始 model_name（需求记录）</p><p class="font-mono text-sm text-slate-500">${requested || '—'}</p></div>
+      `;
+
+      document.getElementById('delivery-curl').textContent =
+`curl https://api.siliconflow.cn/v1/chat/completions \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "${primaryModel}",
+    "messages": [
+      {"role": "user", "content": "你好"}
+    ],
+    "stream": true
+  }'`;
+
+      const tip = document.getElementById('delivery-overflow-tip');
+      if (p.serverless) {
+        tip.className = 'rounded-xl p-4 text-xs leading-relaxed bg-blue-50 text-blue-900 border border-blue-100';
+        tip.innerHTML = '<i class="fa-solid fa-circle-info mr-1"></i>超量请求将路由至相同模型的 Serverless 服务并按量计费。';
+      } else {
+        tip.className = 'rounded-xl p-4 text-xs leading-relaxed bg-amber-50 text-amber-900 border border-amber-100';
+        tip.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i>超量请求将返回 429。';
+      }
+
+      const modal = document.getElementById('delivery-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeDelivery() {
+      const modal = document.getElementById('delivery-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function copyFinalModel() {
+      const text = Array.from(document.getElementById('delivery-final').querySelectorAll('p')).map(p => p.textContent.trim()).join('\n');
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+      }
+      const btn = event.currentTarget;
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i>已复制';
+      setTimeout(() => { btn.innerHTML = original; }, 1500);
     }
 
     // Tab 切换
