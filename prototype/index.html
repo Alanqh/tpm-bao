@@ -292,6 +292,10 @@
                 </div>
                 <div class="text-3xl font-bold text-primary">¥<span id="price-total">9,900</span></div>
                 <p class="text-xs text-slate-500 mt-2">基于 <span id="price-model">Deepseek V4 Flash 0731</span> × <span id="price-units">30</span> 万 vTPM × <span id="price-cycle">30</span> 天</p>
+                <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
+                  <i class="fa-solid fa-arrow-right-arrow-left text-[10px]"></i>
+                  1 vTPM ≈ 1,000 TPM，当前约合 <span id="tpm-equiv" class="font-medium text-slate-700">3 亿</span> TPM/分钟
+                </p>
               </div>
             </div>
           </div>
@@ -500,6 +504,13 @@
     function formatPrice(n) {
       return n.toLocaleString();
     }
+    function formatTpmEquiv(units) {
+      const tpm = units * 10000 * 1000; // 1 vTPM ≈ 1000 TPM
+      if (tpm >= 100000000) {
+        return Math.floor(tpm / 100000000).toLocaleString() + ' 亿';
+      }
+      return Math.floor(tpm / 10000).toLocaleString() + ' 万';
+    }
     function getSelectedModel() {
       return document.getElementById('model-select').value;
     }
@@ -527,6 +538,7 @@
       priceModelEl.textContent = model ? model.name : modelId;
       priceUnitsEl.textContent = units;
       priceCycleEl.textContent = days;
+      document.getElementById('tpm-equiv').textContent = formatTpmEquiv(units);
     }
     function updateSummary() {
       const units = parseInt(unitsEl.value);
