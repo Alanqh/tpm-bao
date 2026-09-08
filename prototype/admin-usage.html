@@ -121,17 +121,7 @@
         <div class="pl-6 space-y-0.5">
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
-        </div>
-
-        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
-          <i class="fa-solid fa-chevron-down text-xs"></i>
-          <span>资源包管理</span>
-        </div>
-
-        <div class="pl-6 space-y-0.5">
           <a href="admin-inventory.html" class="admin-sidebar-link"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
-          <a href="admin-usage.html" class="admin-sidebar-link active"><i class="fa-solid fa-chart-line w-4 text-center"></i>资源包监控</a>
-          <a href="admin-records.html" class="admin-sidebar-link"><i class="fa-solid fa-clock-rotate-left w-4 text-center"></i>操作记录</a>
         </div>
 
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
@@ -168,7 +158,7 @@
     <main class="flex-1 p-4 min-w-0">
       <!-- 面包屑 -->
       <nav class="text-xs text-slate-500 mb-4">
-        <span class="text-slate-700">资源包管理</span>
+        <span class="text-slate-700">活动运营</span>
         <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
         <span class="text-slate-700">资源包监控</span>
       </nav>
@@ -193,17 +183,6 @@
             </div>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <a href="admin-inventory.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-default text-xs font-medium">
-            <i class="fa-solid fa-arrow-left text-[10px]"></i>返回资源包管理
-          </a>
-        </div>
-      </div>
-
-      <!-- 路由与统计说明 -->
-      <div class="admin-card p-3 mb-4 text-xs text-slate-600 flex items-start gap-2">
-        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
-        <p>任一 model_name 均可路由到预留算力。红点为 429 限流事件（秒级）。</p>
       </div>
 
       <!-- 时间筛选器 -->
@@ -385,28 +364,7 @@
         </div>
       </div>
 
-      <!-- SLA 赔付规则 -->
-      <div class="admin-card p-4">
-        <h4 class="text-sm font-semibold text-slate-900 mb-3">SLA 赔付规则</h4>
-        <p class="text-xs text-slate-500 mb-3">某个自然分钟不论哪类违约均计为违约分钟，按月累计。</p>
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-xs">
-            <thead class="bg-slate-50 text-slate-600">
-              <tr>
-                <th class="px-3 py-2 text-left font-medium">累计违约分钟/月</th>
-                <th class="px-3 py-2 text-left font-medium">赔付比例</th>
-                <th class="px-3 py-2 text-left font-medium">附加权</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 text-slate-700">
-              <tr><td class="px-3 py-2">≤ 3 分钟</td><td class="px-3 py-2">0%</td><td class="px-3 py-2">容忍窗口</td></tr>
-              <tr><td class="px-3 py-2">4–30 分钟</td><td class="px-3 py-2">10%</td><td class="px-3 py-2">—</td></tr>
-              <tr><td class="px-3 py-2">31–120 分钟</td><td class="px-3 py-2">30%</td><td class="px-3 py-2">—</td></tr>
-              <tr><td class="px-3 py-2">&gt; 120 分钟</td><td class="px-3 py-2">100%</td><td class="px-3 py-2">触发退出权，进入协商流程</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+
     </main>
   </div>
 
@@ -583,14 +541,6 @@
         return `${x},${y}`;
       }).join(' ');
       parts += `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-
-      minuteData.forEach((d, i) => {
-        if (d[key] > threshold) {
-          const x = pL + (i / (n - 1)) * cw;
-          const y = pT + ch - (d[key] / maxV) * ch;
-          parts += `<circle cx="${x}" cy="${y}" r="3" fill="#ef4444"><title>${d.label} · ${d[key]}${unit}（超 SLA ${threshold}${unit}）</title></circle>`;
-        }
-      });
 
       const thY = pT + ch - (threshold / maxV) * ch;
       parts += `<line x1="${pL}" y1="${thY}" x2="${W - pR}" y2="${thY}" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6,4"/>`;
