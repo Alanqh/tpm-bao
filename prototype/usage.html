@@ -117,46 +117,35 @@
         </div>
       </div>
 
-      <!-- 路由与统计说明 -->
-      <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-5 text-xs text-slate-600 flex items-start gap-2">
-        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
-        <p>任一 model_name 均可路由到预留算力。红点为 429 限流事件（秒级）。</p>
-      </div>
-
-      <!-- 时间筛选 + 返回 -->
+      <!-- 时间筛选 -->
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-        <div class="flex items-center gap-2">
-          <div class="relative" id="time-picker">
-            <button type="button" onclick="toggleTimePicker()" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 shadow-sm">
-              <i class="fa-regular fa-clock text-xs text-slate-400"></i>
-              <span id="time-label">最近 1 小时</span>
-              <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
-            </button>
-            <div id="time-panel" class="hidden absolute right-0 mt-1 w-80 bg-white border border-slate-200 rounded-lg shadow-lg p-3 z-50">
-              <p class="text-xs text-slate-500 mb-2">快捷选项</p>
-              <div class="grid grid-cols-2 gap-2 mb-3">
-                <button type="button" onclick="selectTime('1h')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="1h">最近 1 小时</button>
-                <button type="button" onclick="selectTime('24h')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="24h">最近 24 小时</button>
-                <button type="button" onclick="selectTime('7d')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="7d">最近 7 天</button>
-                <button type="button" onclick="selectTime('30d')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="30d">最近 30 天</button>
-              </div>
-              <div class="border-t border-slate-100 pt-3">
-                <p class="text-xs text-slate-500 mb-2">自定义范围</p>
-                <div class="flex items-center gap-2">
-                  <input type="date" id="custom-start" class="flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
-                  <span class="text-xs text-slate-400">至</span>
-                  <input type="date" id="custom-end" class="flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
-                </div>
-              </div>
-              <div class="flex justify-end gap-2 mt-3 pt-2 border-t border-slate-100">
-                <button type="button" onclick="closeTimePicker()" class="px-2.5 py-1 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-50">取消</button>
-                <button type="button" onclick="applyCustomTime()" class="px-2.5 py-1 text-xs rounded bg-violet-600 text-white hover:bg-violet-700">应用</button>
+        <div class="relative" id="time-picker">
+          <button type="button" onclick="toggleTimePicker()" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 shadow-sm">
+            <i class="fa-regular fa-clock text-xs text-slate-400"></i>
+            <span id="time-label">最近 1 小时</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+          </button>
+          <div id="time-panel" class="hidden absolute left-0 mt-1 w-80 bg-white border border-slate-200 rounded-lg shadow-lg p-3 z-50">
+            <p class="text-xs text-slate-500 mb-2">快捷选项</p>
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <button type="button" onclick="selectTime('1h')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="1h">最近 1 小时</button>
+              <button type="button" onclick="selectTime('24h')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="24h">最近 24 小时</button>
+              <button type="button" onclick="selectTime('7d')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="7d">最近 7 天</button>
+              <button type="button" onclick="selectTime('30d')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="30d">最近 30 天</button>
+            </div>
+            <div class="border-t border-slate-100 pt-3">
+              <p class="text-xs text-slate-500 mb-2">自定义范围</p>
+              <div class="flex items-center gap-2">
+                <input type="date" id="custom-start" class="flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+                <span class="text-xs text-slate-400">至</span>
+                <input type="date" id="custom-end" class="flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
               </div>
             </div>
+            <div class="flex justify-end gap-2 mt-3 pt-2 border-t border-slate-100">
+              <button type="button" onclick="closeTimePicker()" class="px-2.5 py-1 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-50">取消</button>
+              <button type="button" onclick="applyCustomTime()" class="px-2.5 py-1 text-xs rounded bg-violet-600 text-white hover:bg-violet-700">应用</button>
+            </div>
           </div>
-          <a href="balance.html?tab=package" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 bg-white shadow-sm">
-            <i class="fa-solid fa-arrow-left text-xs"></i>返回
-          </a>
         </div>
       </div>
 
@@ -492,15 +481,6 @@
         return `${x},${y}`;
       }).join(' ');
       parts += `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-
-      // 超阈值红点
-      minuteData.forEach((d, i) => {
-        if (d[key] > threshold) {
-          const x = pL + (i / (n - 1)) * cw;
-          const y = pT + ch - (d[key] / maxV) * ch;
-          parts += `<circle cx="${x}" cy="${y}" r="3" fill="#ef4444"><title>${d.label} · ${d[key]}${unit}（超 SLA ${threshold}${unit}）</title></circle>`;
-        }
-      });
 
       // SLA 阈值虚线
       const thY = pT + ch - (threshold / maxV) * ch;
