@@ -342,7 +342,8 @@
                     <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
                     <div class="flex-1 min-w-0">
                       <p class="text-xs text-slate-500">推荐 vTPM 量</p>
-                      <p id="rec-vtpm" class="text-lg font-bold text-slate-900 truncate">300 万 vTPM</p>
+                      <p id="rec-vtpm" class="text-lg font-bold text-slate-900 truncate">100 万 vTPM</p>
+                      <p class="text-[11px] text-slate-400 mt-1">根据 TPM 与 vTPM <button type="button" onclick="openFactorModal()" class="text-violet-600 hover:text-violet-700 underline underline-offset-2">折算系数</button> 计算得到</p>
                     </div>
                   </div>
                 </div>
@@ -360,30 +361,6 @@
               <button type="button" id="apply-rec" class="w-full py-2.5 rounded-lg border border-violet-600 text-violet-600 text-sm font-medium hover:bg-violet-50 transition-colors">
                 应用推荐到左侧配置
               </button>
-
-              <!-- 折算系数表 -->
-              <div class="pt-4 border-t border-slate-200">
-                <div class="flex items-center gap-2 mb-2">
-                  <i class="fa-solid fa-table text-violet-600 text-xs"></i>
-                  <h4 class="text-xs font-semibold text-slate-900">折算系数 · <span id="factor-model-name">Deepseek V4 Flash 0731</span></h4>
-                </div>
-                <p class="text-xs text-slate-500 mb-2">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
-                <div class="overflow-x-auto">
-                  <table class="min-w-full text-[11px] border border-slate-200 rounded-lg bg-white">
-                    <thead class="bg-slate-50 text-slate-600">
-                      <tr>
-                        <th class="px-2 py-1.5 text-left font-medium">输入长度</th>
-                        <th class="px-2 py-1.5 text-left font-medium">Cache 命中</th>
-                        <th class="px-2 py-1.5 text-left font-medium">输出长度</th>
-                        <th class="px-2 py-1.5 text-left font-medium">未命中</th>
-                        <th class="px-2 py-1.5 text-left font-medium">命中</th>
-                        <th class="px-2 py-1.5 text-left font-medium">输出</th>
-                      </tr>
-                    </thead>
-                    <tbody id="factor-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
-                  </table>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -396,6 +373,37 @@
       </div>
     </div>
   </section>
+
+  <!-- 折算系数弹窗 -->
+  <div id="factor-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeFactorModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">折算系数表 · <span id="factor-modal-model">Deepseek V4 Flash 0731</span></h3>
+            <p class="text-xs text-slate-500 mt-1">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。当前场景命中的系数行已标红。</p>
+          </div>
+          <button type="button" onclick="closeFactorModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border border-slate-200 rounded-lg">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="px-4 py-3 text-left font-medium">输入长度区间</th>
+                <th class="px-4 py-3 text-left font-medium">Cache 命中区间</th>
+                <th class="px-4 py-3 text-left font-medium">输出长度区间</th>
+                <th class="px-4 py-3 text-left font-medium">输入未命中系数</th>
+                <th class="px-4 py-3 text-left font-medium">输入命中系数</th>
+                <th class="px-4 py-3 text-left font-medium">输出系数</th>
+              </tr>
+            </thead>
+            <tbody id="factor-modal-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- 如何选择 -->
   <section class="py-20 bg-white border-b border-slate-100">
@@ -550,25 +558,6 @@
       const modelId = getSelectedModel();
       const model = modelList.find(m => m.id === modelId);
       document.getElementById('model-desc').textContent = model ? model.desc : '';
-      renderFactorTable(model);
-    }
-    function renderFactorTable(model) {
-      document.getElementById('factor-model-name').textContent = model ? model.name : '-';
-      const tbody = document.getElementById('factor-table-body');
-      if (!model || !model.factors || model.factors.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="px-2 py-2 text-slate-400">暂无折算系数数据</td></tr>';
-        return;
-      }
-      tbody.innerHTML = model.factors.map(f => `
-        <tr>
-          <td class="px-2 py-1.5">${f.input}</td>
-          <td class="px-2 py-1.5">${f.cache}</td>
-          <td class="px-2 py-1.5">${f.output}</td>
-          <td class="px-2 py-1.5 font-mono">${f.inputF.toFixed(2)}</td>
-          <td class="px-2 py-1.5 font-mono">${f.cacheF.toFixed(2)}</td>
-          <td class="px-2 py-1.5 font-mono">${f.outputF.toFixed(2)}</td>
-        </tr>
-      `).join('');
     }
     function matchFactor(model, input, cacheRate, output) {
       if (!model || !model.factors) return null;
@@ -585,6 +574,47 @@
         return byInput[0];
       }
       return model.factors[0];
+    }
+    function renderFactorModalTable(model, matchedFactor) {
+      document.getElementById('factor-modal-model').textContent = model ? model.name : '-';
+      const tbody = document.getElementById('factor-modal-body');
+      if (!model || !model.factors || model.factors.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-slate-400">暂无折算系数数据</td></tr>';
+        return;
+      }
+      const isMatched = (f) => matchedFactor &&
+        f.input === matchedFactor.input &&
+        f.cache === matchedFactor.cache &&
+        f.output === matchedFactor.output;
+      tbody.innerHTML = model.factors.map(f => {
+        const highlight = isMatched(f) ? 'bg-red-50 text-red-700 font-medium' : '';
+        return `
+        <tr class="${highlight}">
+          <td class="px-4 py-3">${f.input}</td>
+          <td class="px-4 py-3">${f.cache}</td>
+          <td class="px-4 py-3">${f.output}</td>
+          <td class="px-4 py-3 font-mono">${f.inputF.toFixed(2)}</td>
+          <td class="px-4 py-3 font-mono">${f.cacheF.toFixed(2)}</td>
+          <td class="px-4 py-3 font-mono">${f.outputF.toFixed(2)}</td>
+        </tr>
+      `}).join('');
+    }
+    function openFactorModal() {
+      const modelId = getSelectedModel();
+      const model = modelList.find(m => m.id === modelId);
+      const input = Math.max(0, parseInt(sceneInputEl.value) || 0);
+      const cacheRate = Math.max(0, Math.min(100, parseInt(sceneCacheEl.value) || 0));
+      const output = Math.max(0, parseInt(sceneOutputEl.value) || 0);
+      const matched = matchFactor(model, input, cacheRate, output);
+      renderFactorModalTable(model, matched);
+      const modal = document.getElementById('factor-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+    function closeFactorModal() {
+      const modal = document.getElementById('factor-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
     }
     function updatePrice() {
       const modelId = getSelectedModel();
