@@ -111,22 +111,22 @@
         <!-- 产品配置 -->
         <div class="p-6 md:p-8 border-b border-slate-100">
           <h2 class="text-lg font-bold text-slate-900 mb-1">产品配置</h2>
-          <p class="text-slate-500 text-sm mb-6">请选择 SKU 名称与购买规格，售卖规则与控制台后台发放时保持一致。</p>
+          <p class="text-slate-500 text-sm mb-6">请选择需要预留 vTPM 的模型与购买规格。后台会根据所选模型自动匹配对应的 SKU 与售卖规则。</p>
 
           <div class="space-y-5">
-            <!-- 1. SKU 名称 -->
+            <!-- 1. 模型名称 -->
             <div>
-              <label class="block text-sm font-medium text-slate-900 mb-2">选择 SKU 名称 <span class="text-red-500">*</span></label>
-              <select name="sku" id="sku" class="survey-input survey-select" required>
-                <option value="vtpm-dsv4f-001">Deepseek V4 Flash 0731 预留 vTPM</option>
-                <option value="vtpm-glm52-001">GLM 5.2 预留 vTPM</option>
-                <option value="vtpm-kimik2-001">Kimi K2 预留 vTPM</option>
+              <label class="block text-sm font-medium text-slate-900 mb-2">选择模型 <span class="text-red-500">*</span></label>
+              <select name="model" id="model" class="survey-input survey-select" required>
+                <option value="deepseek-v4-flash-0731">Deepseek V4 Flash 0731</option>
+                <option value="glm-5.2">GLM 5.2</option>
+                <option value="kimi-k2-instruct">Kimi K2</option>
               </select>
-              <p class="text-xs text-slate-400 mt-1.5">不同 SKU 对应不同的模型与售卖规则，选择后请在下方确认售卖规则。</p>
+              <p class="text-xs text-slate-400 mt-1.5">飞书问卷中本题使用「下拉题」，选项为固定模型列表，不可动态联动。</p>
             </div>
 
-            <!-- SKU 售卖规则 -->
-            <div id="sku-info" class="bg-slate-50 rounded-lg p-3.5 text-xs text-slate-600 grid grid-cols-2 gap-3">
+            <!-- 模型/套餐 售卖规则 -->
+            <div id="model-info" class="bg-slate-50 rounded-lg p-3.5 text-xs text-slate-600 grid grid-cols-2 gap-3">
               <!-- JS 填充 -->
             </div>
 
@@ -136,22 +136,20 @@
                 <label class="block text-sm font-medium text-slate-900 mb-2">购买份数 <span class="text-red-500">*</span></label>
                 <input type="number" name="multiplier" id="multiplier" min="1" max="20" step="1" value="1" required class="survey-input">
                 <p id="total-preview" class="text-xs text-primary font-medium mt-1.5"></p>
-                <p class="text-xs text-slate-400 mt-1">每份 = SKU 最小购买 vTPM 量，可填写 1 ~ 20 份。</p>
+                <p class="text-xs text-slate-400 mt-1">每份 = 该模型最小购买 vTPM 量，可填写 1 ~ 20 份。飞书问卷中可设置数字题的 1~20 范围。</p>
               </div>
               <div>
-                <label class="block text-sm font-medium text-slate-900 mb-2">购买周期 <span class="text-red-500">*</span></label>
-                <select name="cycle" id="cycle" class="survey-input survey-select" required>
-                  <!-- JS 动态填充 -->
-                </select>
-                <p class="text-xs text-slate-400 mt-1">周期为最小购买周期的整数倍，可选范围由 SKU 截止售卖时间动态计算。</p>
+                <label class="block text-sm font-medium text-slate-900 mb-2">购买周期（最小周期的倍数）<span class="text-red-500">*</span></label>
+                <input type="number" name="cycle" id="cycle" min="1" max="24" step="1" value="1" required class="survey-input">
+                <p class="text-xs text-slate-400 mt-1">1 倍 = 最小购买周期。飞书问卷中可设置数字题的最大/最小值，但无法根据模型动态限制。</p>
               </div>
             </div>
 
             <!-- 有效期预览 -->
             <div>
-              <label class="block text-sm font-medium text-slate-900 mb-2">有效期预览</label>
+              <label class="block text-sm font-medium text-slate-900 mb-2">有效期预览（原型辅助）</label>
               <input type="text" id="period-preview" disabled class="survey-input font-mono text-xs">
-              <p class="text-xs text-slate-400 mt-1.5">开始时间固定为提交当天 0 点；结束时间 = 开始时间 + 购买周期 + 1 天，自动计算不可编辑。</p>
+              <p class="text-xs text-slate-400 mt-1.5">开始时间固定为提交当天 0 点；结束时间 = 开始时间 + 购买周期 × 最小购买周期 + 1 天。飞书问卷无法实时计算并展示此预览，销售确认时另行通知。</p>
             </div>
 
             <!-- 3. 超量路由 -->
@@ -180,7 +178,7 @@
             <div>
               <label class="block text-sm font-medium text-slate-900 mb-3">Pool 名称 <span class="text-red-500">*</span></label>
               <div class="border border-slate-200 rounded-lg p-4 bg-slate-50/50">
-                <p class="text-xs text-slate-600 mb-3">此处填写的是您侧的 <b>Pool 名称</b>（project/group 体系中的对象名称），而不是 model_name。它仅作为您的需求记录，用于开通时为您创建专属 Pool；平台将为每个 Pool 名称按 <span class="font-mono text-primary font-medium">/Pool 名称/模型</span> 生成一个专属的最终 model_name（下方实时预览），多个 Pool 将归属到同一个预留 vTPM 包，交付后以资源包「交付详情」展示的为准。</p>
+                <p class="text-xs text-slate-600 mb-3">此处填写的是您侧的 <b>Pool 名称</b>（project/group 体系中的对象名称），而不是 model_name。平台将为每个 Pool 名称按 <span class="font-mono text-primary font-medium">/Pool 名称/模型</span> 生成一个专属的最终 model_name（下方实时预览），多个 Pool 将归属到同一个预留 vTPM 包，交付后以资源包「交付详情」展示的为准。</p>
                 <div id="pool-tags" class="flex flex-wrap gap-2 mb-3">
                   <!-- JS 渲染 tag -->
                 </div>
@@ -188,13 +186,13 @@
                   <input type="text" id="pool_input" placeholder="例如：ztech-llm-prod" class="survey-input flex-1">
                   <button type="button" id="add-pool" class="px-3 py-2 rounded-lg bg-violet-600 text-white text-sm hover:bg-violet-700 transition">添加</button>
                 </div>
-                <p class="text-xs text-slate-400 mt-2">最多 3 个 Pool。</p>
+                <p class="text-xs text-slate-400 mt-2">最多 3 个 Pool。飞书问卷中无 Tag 输入组件，可用一个「文本题」让填写者用英文逗号分隔多个 Pool，或拆成 3 个可选文本题。</p>
                 <p id="pool-error" class="hidden text-xs text-red-500 mt-2">请至少填写一个 Pool 名称</p>
                 <p id="pool-max" class="hidden text-xs text-orange-500 mt-2">最多可填写 3 个 Pool 名称</p>
                 <input type="hidden" name="pool_names" id="pool_names_hidden">
               </div>
               <div class="bg-slate-900 rounded-lg px-3.5 py-3 mt-3">
-                <p class="text-[11px] text-slate-400 mb-1.5">最终 model_name 预览（格式 /Pool 名称/模型）</p>
+                <p class="text-[11px] text-slate-400 mb-1.5">最终 model_name 预览（格式 /Pool 名称/模型，原型辅助）</p>
                 <div id="pool-preview" class="space-y-1"><p class="font-mono text-xs text-slate-500 italic">请添加 Pool 名称后在此预览</p></div>
               </div>
             </div>
@@ -277,14 +275,14 @@
   </footer>
 
   <script>
-    // 商品配置（与后台发放弹窗保持一致）
-    const purchaseSkus = [
-      { id: 'vtpm-dsv4f-001', name: 'Deepseek V4 Flash 0731 预留 vTPM', model: 'deepseek-v4-flash-0731', minVtpm: 10, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31' },
-      { id: 'vtpm-glm52-001', name: 'GLM 5.2 预留 vTPM', model: 'glm-5.2', minVtpm: 20, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30' },
-      { id: 'vtpm-kimik2-001', name: 'Kimi K2 预留 vTPM', model: 'kimi-k2-instruct', minVtpm: 15, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31' }
+    // 模型配置（用户选择模型，后台自动匹配 SKU；与后台发放弹窗保持一致）
+    const purchaseModels = [
+      { modelId: 'deepseek-v4-flash-0731', name: 'Deepseek V4 Flash 0731', skuId: 'vtpm-dsv4f-001', skuName: 'Deepseek V4 Flash 0731 预留 vTPM', minVtpm: 10, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31' },
+      { modelId: 'glm-5.2', name: 'GLM 5.2', skuId: 'vtpm-glm52-001', skuName: 'GLM 5.2 预留 vTPM', minVtpm: 20, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30' },
+      { modelId: 'kimi-k2-instruct', name: 'Kimi K2', skuId: 'vtpm-kimik2-001', skuName: 'Kimi K2 预留 vTPM', minVtpm: 15, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31' }
     ];
-    function skuById(id) { return purchaseSkus.find(s => s.id === id); }
-    function currentSku() { return skuById(document.getElementById('sku').value); }
+    function modelById(id) { return purchaseModels.find(m => m.modelId === id); }
+    function currentModel() { return modelById(document.getElementById('model').value); }
 
     function fmtDate(d) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -293,35 +291,24 @@
     // 开始时间固定为提交当天 0 点（与后台发放保持一致）
     function toStart() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
 
-    // ---- SKU 售卖规则卡片 ----
-    function renderSkuInfo(sku) {
-      document.getElementById('sku-info').innerHTML = `
-        <div><p class="text-slate-400 mb-0.5">SKU 名称</p><p class="font-semibold text-slate-800">${sku.name}</p></div>
-        <div><p class="text-slate-400 mb-0.5">最小购买 vTPM 量（每份）</p><p class="font-semibold text-slate-800">${sku.minVtpm} 万 vTPM</p></div>
-        <div><p class="text-slate-400 mb-0.5">最小购买周期</p><p class="font-semibold text-slate-800">${sku.minCycle} 天（约 1 个月）</p></div>
-        <div><p class="text-slate-400 mb-0.5">开始售卖时间</p><p class="font-semibold text-slate-800">${sku.sellStart} 00:00</p></div>
-        <div><p class="text-slate-400 mb-0.5">截止售卖时间</p><p class="font-semibold text-slate-800">${sku.sellEnd} 24:00</p></div>
-        <div><p class="text-slate-400 mb-0.5">平台公网模型（model）</p><p class="font-semibold text-slate-800 font-mono text-[11px]">${sku.model}</p></div>
+    // ---- 模型/套餐 售卖规则卡片 ----
+    function renderModelInfo(model) {
+      document.getElementById('model-info').innerHTML = `
+        <div><p class="text-slate-400 mb-0.5">模型名称</p><p class="font-semibold text-slate-800">${model.name}</p></div>
+        <div><p class="text-slate-400 mb-0.5">对应 SKU</p><p class="font-semibold text-slate-800 font-mono text-[11px]">${model.skuId}</p></div>
+        <div><p class="text-slate-400 mb-0.5">最小购买 vTPM 量（每份）</p><p class="font-semibold text-slate-800">${model.minVtpm} 万 vTPM</p></div>
+        <div><p class="text-slate-400 mb-0.5">最小购买周期</p><p class="font-semibold text-slate-800">${model.minCycle} 天（约 1 个月）</p></div>
+        <div><p class="text-slate-400 mb-0.5">开始售卖时间</p><p class="font-semibold text-slate-800">${model.sellStart} 00:00</p></div>
+        <div><p class="text-slate-400 mb-0.5">截止售卖时间</p><p class="font-semibold text-slate-800">${model.sellEnd} 24:00</p></div>
       `;
     }
 
-    // ---- 动态购买周期：结束时间（提交当天 + k×最小周期）不能晚于截止售卖时间 ----
-    function rebuildCycle(sku) {
-      const start = toStart();
-      const sellEnd = new Date(sku.sellEnd + 'T00:00:00');
-      const options = [];
-      for (let k = 1; k <= 24; k++) {
-        const probe = new Date(start);
-        probe.setDate(probe.getDate() + k * sku.minCycle);
-        if (probe > sellEnd) break;
-        const end = new Date(probe);
-        end.setDate(end.getDate() + 1);
-        options.push({ k, days: k * sku.minCycle, end });
-      }
-      document.getElementById('cycle').innerHTML = options.map(o =>
-        `<option value="${o.k}">${o.k} × 最小购买周期（${o.days} 天，结束至 ${fmtDate(o.end)} 00:00）</option>`
-      ).join('') || '<option value="" disabled>无可选周期（已超出截止售卖时间）</option>';
-      document.getElementById('cycle').selectedIndex = 0;
+    // ---- 购买周期：以最小周期的倍数填写（飞书问卷中用数字题实现） ----
+    function clampCycle() {
+      const raw = parseInt(document.getElementById('cycle').value || '1', 10) || 1;
+      const k = Math.max(1, Math.min(24, raw));
+      document.getElementById('cycle').value = k;
+      return k;
     }
 
     // ---- 汇总联动 ----
@@ -333,16 +320,16 @@
     }
 
     function renderSummary() {
-      const sku = currentSku();
-      if (!sku) return;
+      const model = currentModel();
+      if (!model) return;
       const multi = clampMultiplier();
-      const totalVtpm = multi * sku.minVtpm;
-      document.getElementById('total-preview').textContent = `合计购买：${multi} × ${sku.minVtpm} 万 vTPM = ${totalVtpm.toLocaleString()} 万 vTPM`;
+      const k = clampCycle();
+      const totalVtpm = multi * model.minVtpm;
+      document.getElementById('total-preview').textContent = `合计购买：${multi} × ${model.minVtpm} 万 vTPM = ${totalVtpm.toLocaleString()} 万 vTPM`;
 
-      const k = parseInt(document.getElementById('cycle').value || '1', 10) || 1;
       const start = toStart();
       const end = new Date(start);
-      end.setDate(end.getDate() + k * sku.minCycle + 1);
+      end.setDate(end.getDate() + k * model.minCycle + 1);
       document.getElementById('period-preview').value = `${fmtDateTime(start)} ~ ${fmtDateTime(end)}`;
       renderPoolPreview();
     }
@@ -357,14 +344,14 @@
     const poolMax = document.getElementById('pool-max');
 
     function renderPoolPreview() {
-      const sku = currentSku();
-      if (!sku) return;
+      const model = currentModel();
+      if (!model) return;
       const box = document.getElementById('pool-preview');
       if (poolNames.length === 0) {
         box.innerHTML = `<p class="font-mono text-xs text-slate-500 italic">请添加 Pool 名称后在此预览</p>`;
       } else {
         box.innerHTML = poolNames.map(n =>
-          `<p class="font-mono text-xs text-violet-300 break-all" title="Pool 名称：${n.replace(/"/g, '&quot;')}">/${n}/<span class="text-slate-400">${sku.model}</span></p>`
+          `<p class="font-mono text-xs text-violet-300 break-all" title="Pool 名称：${n.replace(/"/g, '&quot;')}">/${n}/<span class="text-slate-400">${model.modelId}</span></p>`
         ).join('');
       }
     }
@@ -375,7 +362,7 @@
         tagsBox.innerHTML = `<span class="text-xs text-slate-400 italic">暂无 Pool 名称，请添加</span>`;
       } else {
         tagsBox.innerHTML = poolNames.map((name, idx) => `
-          <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-violet-100 text-violet-700 text-xs max-w-[180px] min-w-0" title="最终 model_name 预览：/${name}/${currentSku() ? currentSku().model : ''}">
+          <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-violet-100 text-violet-700 text-xs max-w-[180px] min-w-0" title="最终 model_name 预览：/${name}/${currentModel() ? currentModel().modelId : ''}">
             <span class="truncate">${name}</span>
             <button type="button" data-idx="${idx}" class="remove-tag w-4 h-4 rounded-full hover:bg-violet-200 flex items-center justify-center leading-none text-violet-500 flex-shrink-0">×</button>
           </span>
@@ -410,15 +397,15 @@
       if (e.key === 'Enter') { e.preventDefault(); addPool(); }
     });
 
-    document.getElementById('sku').addEventListener('change', () => {
-      const sku = currentSku();
-      if (!sku) return;
-      renderSkuInfo(sku);
-      rebuildCycle(sku);
+    document.getElementById('model').addEventListener('change', () => {
+      const model = currentModel();
+      if (!model) return;
+      renderModelInfo(model);
       renderSummary();
     });
     document.getElementById('multiplier').addEventListener('input', renderSummary);
     document.getElementById('multiplier').addEventListener('change', renderSummary);
+    document.getElementById('cycle').addEventListener('input', renderSummary);
     document.getElementById('cycle').addEventListener('change', renderSummary);
 
     // ---- 提交 ----
@@ -430,22 +417,22 @@
       }
       poolError.classList.add('hidden');
 
-      const sku = currentSku();
+      const model = currentModel();
       const multi = clampMultiplier();
-      const totalVtpm = multi * sku.minVtpm;
-      const k = parseInt(document.getElementById('cycle').value || '1', 10) || 1;
+      const totalVtpm = multi * model.minVtpm;
+      const k = clampCycle();
       const start = toStart();
       const end = new Date(start);
-      end.setDate(end.getDate() + k * sku.minCycle + 1);
+      end.setDate(end.getDate() + k * model.minCycle + 1);
       const serverless = document.querySelector('input[name="serverless_route"]:checked').value === 'on';
 
       document.getElementById('success-detail').innerHTML = `
         <p class="font-semibold text-slate-900 mb-1.5">购买意向摘要</p>
-        <p>· SKU 名称：<span class="font-medium text-slate-800">${sku.name}</span></p>
-        <p>· 购买量：${multi} 份 × ${sku.minVtpm} 万 vTPM = <span class="font-medium text-primary">${totalVtpm.toLocaleString()} 万 vTPM</span>｜ 周期：${k} × ${sku.minCycle} 天</p>
+        <p>· 模型：<span class="font-medium text-slate-800">${model.name}</span>｜ 对应 SKU：<span class="font-medium text-slate-800">${model.skuName}</span></p>
+        <p>· 购买量：${multi} 份 × ${model.minVtpm} 万 vTPM = <span class="font-medium text-primary">${totalVtpm.toLocaleString()} 万 vTPM</span>｜ 周期：${k} × ${model.minCycle} 天</p>
         <p>· 有效期：${fmtDateTime(start)} ~ ${fmtDateTime(end)}</p>
         <p>· 超量路由：${serverless ? 'Serverless 按量计费' : '限流 429'}</p>
-        ${poolNames.map(n => `<p>· Pool 名称：<span class="font-mono">${n}</span> ｜ 预览 model_name：<span class="font-mono text-primary">/${n}/${sku.model}</span></p>`).join('')}
+        ${poolNames.map(n => `<p>· Pool 名称：<span class="font-mono">${n}</span> ｜ 预览 model_name：<span class="font-mono text-primary">/${n}/${model.modelId}</span></p>`).join('')}
       `;
       document.getElementById('intent-form').classList.add('hidden');
       document.getElementById('success-msg').classList.remove('hidden');
@@ -455,9 +442,8 @@
 
     // 初始化
     (function init() {
-      const sku = currentSku();
-      renderSkuInfo(sku);
-      rebuildCycle(sku);
+      const model = currentModel();
+      renderModelInfo(model);
       renderSummary();
       renderTags();
     })();
