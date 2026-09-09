@@ -197,7 +197,7 @@
             <button onclick="openSkuModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
               <i class="fa-solid fa-plus text-[10px]"></i>新增商品
             </button>
-            <input type="text" placeholder="搜索商品 / SKU / 模型" class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500" oninput="renderProductConfigTable(this.value)">
+            <input type="text" placeholder="搜索商品 / Payload / 模型 / SKU" class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500" oninput="renderProductConfigTable(this.value)">
           </div>
 
           <div class="overflow-x-auto border border-slate-200 rounded-lg">
@@ -206,9 +206,10 @@
                 <tr>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">商品 ID</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">商品名称</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU / 模型</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">Payload / 模型 / SKU</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最小购买 vTPM 量</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最小购买周期</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">单价</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">售卖窗口</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">售卖状态</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">总库存</th>
@@ -220,7 +221,6 @@
               </tbody>
             </table>
           </div>
-          <p class="text-[11px] text-slate-400 mt-3">售卖状态按当前日期与售卖窗口自动判定：当前时间早于开始售卖时间为「未开始」，晚于截止售卖时间当天 24:00 为「已截止」。</p>
         </div>
 
         <!-- 库存看板（一期占位） -->
@@ -254,8 +254,8 @@
                 <tr>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">资源包 ID</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">subject_id</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU ID</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">SKU 名称</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">商品ID</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">商品名称</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">数量</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">有效期</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最终 model_name</th>
@@ -267,7 +267,7 @@
                 <tr>
                   <td class="px-3 py-3 font-mono text-[11px]">P001</td>
                   <td class="px-3 py-3 font-mono text-[11px]">sub_3x9a2b1c</td>
-                  <td class="px-3 py-3 font-mono text-[11px]">vtpm-dsv4f-001</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">001</td>
                   <td class="px-3 py-3">Deepseek V4 Flash 0731 预留 vTPM</td>
                   <td class="px-3 py-3">300 万 vTPM</td>
                   <td class="px-3 py-3">2026-08-01 ~ 2026-08-30</td>
@@ -282,7 +282,7 @@
                 <tr>
                   <td class="px-3 py-3 font-mono text-[11px]">P002</td>
                   <td class="px-3 py-3 font-mono text-[11px]">sub_7k2m5n8p</td>
-                  <td class="px-3 py-3 font-mono text-[11px]">vtpm-glm52-001</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">002</td>
                   <td class="px-3 py-3">GLM 5.2 预留 vTPM</td>
                   <td class="px-3 py-3">200 万 vTPM</td>
                   <td class="px-3 py-3">2026-09-01 ~ 2026-09-30</td>
@@ -297,7 +297,7 @@
                 <tr>
                   <td class="px-3 py-3 font-mono text-[11px]">P004</td>
                   <td class="px-3 py-3 font-mono text-[11px]">sub_2q4r6s7t</td>
-                  <td class="px-3 py-3 font-mono text-[11px]">tokens-common-001</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">004</td>
                   <td class="px-3 py-3">通用 Tokens 包</td>
                   <td class="px-3 py-3">1,000 万 tokens</td>
                   <td class="px-3 py-3">2026-05-01 ~ 2026-07-31</td>
@@ -530,12 +530,28 @@
           <input id="sku-name" type="text" placeholder="如：Deepseek V4 Flash 0731 预留 vTPM" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU <span class="text-red-500">*</span> <span class="text-slate-400 font-normal">SKU 已关联模型，选择后自动带出</span></label>
-          <select id="sku-master" onchange="onSkuMasterChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+          <label class="block text-xs font-medium text-slate-700 mb-1">选择 vTPM Payload <span class="text-red-500">*</span> <span class="text-slate-400 font-normal">Payload 已关联 playground 模型与 SKU，选择后自动带出</span></label>
+          <select id="sku-master" onchange="onPayloadChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">关联模型（model）</label>
-          <input id="sku-model" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 font-mono">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">关联模型（playground）</label>
+            <input id="sku-model-id" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">模型名称</label>
+            <input id="sku-model-name" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">关联 SKU ID</label>
+            <input id="sku-sku-id" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">关联 SKU Code</label>
+            <input id="sku-sku-code" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 font-mono">
+          </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
@@ -546,6 +562,14 @@
             <label class="block text-xs font-medium text-slate-700 mb-1">最小购买周期（天） <span class="text-red-500">*</span></label>
             <input id="sku-min-cycle" type="number" min="1" step="1" value="30" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
           </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">单价（单位：元） <span class="text-red-500">*</span></label>
+          <div class="relative">
+            <span class="absolute left-2.5 top-1.5 text-xs text-slate-500">¥</span>
+            <input id="sku-price" type="number" min="0" step="1" placeholder="如 99000" class="w-full rounded border-slate-300 pl-6 pr-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">对应「最小购买 vTPM 量 × 最小购买周期」的价格。</p>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
@@ -566,9 +590,6 @@
           <textarea id="sku-note" rows="2" placeholder="选填，如售卖批次、定价说明等" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></textarea>
         </div>
         <p id="sku-form-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2"></p>
-        <div class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-500 leading-relaxed">
-          保存后商品立即上架，将同步至「手动交付资源包」弹窗：交付份数以最小购买 vTPM 量为基数、购买周期以最小购买周期为基数，且交付有效期结束时间不得晚于截止售卖时间当天 24:00。
-        </div>
       </div>
       <div class="mt-5 flex justify-end gap-2">
         <button onclick="closeSkuModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
@@ -619,23 +640,26 @@
       }
     };
 
-    // SKU 主数据
-    const skuMaster = [
-      { id: 'sku-dsv4f', name: 'Deepseek V4 Flash 0731', model: 'deepseek-v4-flash-0731' },
-      { id: 'sku-glm52', name: 'GLM 5.2', model: 'glm-5.2' },
-      { id: 'sku-kimik2', name: 'Kimi K2', model: 'kimi-k2-instruct' }
+    // vTPM Payload 主数据（一个 Payload 关联一个 playground 模型与一个 SKU）
+    const payloadMaster = [
+      { id: 'payload-dsv4f', name: 'Deepseek V4 Flash 0731 预留 vTPM', modelId: 'playground-dsv4f', modelName: 'Deepseek V4 Flash 0731', skuId: '23456', skuCode: 'DSV4F-VTPM' },
+      { id: 'payload-glm52', name: 'GLM 5.2 预留 vTPM', modelId: 'playground-glm52', modelName: 'GLM 5.2', skuId: '34567', skuCode: 'GLM52-VTPM' },
+      { id: 'payload-kimik2', name: 'Kimi K2 预留 vTPM', modelId: 'playground-kimik2', modelName: 'Kimi K2', skuId: '4567', skuCode: 'KIMIK2-VTPM' }
     ];
 
-    // 商品列表（由 SKU 带出模型）
+    // 商品列表（由 Payload 带出 playground 模型与 SKU）
     const products = [
-      { id: 'vtpm-dsv4f-001', name: 'Deepseek V4 Flash 0731 预留 vTPM', skuId: 'sku-dsv4f', minVtpm: 10, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31', total: 30000, note: '主力售卖批次' },
-      { id: 'vtpm-glm52-001', name: 'GLM 5.2 预留 vTPM', skuId: 'sku-glm52', minVtpm: 20, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30', total: 20000, note: 'Q4 活动批次' },
-      { id: 'vtpm-kimik2-001', name: 'Kimi K2 预留 vTPM', skuId: 'sku-kimik2', minVtpm: 15, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31', total: 0, note: '新模型预售批次' }
+      { id: '001', name: 'Deepseek V4 Flash 0731 预留 vTPM', payloadId: 'payload-dsv4f', minVtpm: 10, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31', total: 30000, price: 99000, note: '主力售卖批次' },
+      { id: '002', name: 'GLM 5.2 预留 vTPM', payloadId: 'payload-glm52', minVtpm: 20, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30', total: 20000, price: 198000, note: 'Q4 活动批次' },
+      { id: '003', name: 'Kimi K2 预留 vTPM', payloadId: 'payload-kimik2', minVtpm: 15, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31', total: 0, price: 148500, note: '新模型预售批次' }
     ];
 
-    function skuMasterById(id) { return skuMaster.find(s => s.id === id); }
+    function payloadMasterById(id) { return payloadMaster.find(s => s.id === id); }
     function productById(id) { return products.find(s => s.id === id); }
-    function productModel(p) { const m = skuMasterById(p.skuId); return m ? m.model : '-'; }
+    function productModelId(p) { const m = payloadMasterById(p.payloadId); return m ? m.modelId : '-'; }
+    function productModelName(p) { const m = payloadMasterById(p.payloadId); return m ? m.modelName : '-'; }
+    function productSkuId(p) { const m = payloadMasterById(p.payloadId); return m ? m.skuId : '-'; }
+    function productSkuCode(p) { const m = payloadMasterById(p.payloadId); return m ? m.skuCode : '-'; }
 
     // ===== 商品管理 Tab（只读摘要） =====
     function skuSellState(s) {
@@ -643,26 +667,28 @@
       const start = new Date(s.sellStart + 'T00:00:00');
       const end = new Date(s.sellEnd + 'T23:59:59');
       if (now < start) return { label: '未开始', cls: 'bg-slate-100 text-slate-600' };
-      if (now > end) return { label: '已截止', cls: 'bg-red-50 text-red-600' };
+      if (now > end) return { label: '已下架', cls: 'bg-red-50 text-red-600' };
       return { label: '售卖中', cls: 'bg-green-100 text-green-700' };
     }
 
     function renderProductConfigTable(keyword = '') {
       const kw = keyword.trim().toLowerCase();
-      const list = products.filter(s => !kw || s.name.toLowerCase().includes(kw) || productModel(s).toLowerCase().includes(kw) || s.id.toLowerCase().includes(kw));
+      const list = products.filter(s => !kw || s.name.toLowerCase().includes(kw) || productModelName(s).toLowerCase().includes(kw) || productSkuCode(s).toLowerCase().includes(kw) || s.id.toLowerCase().includes(kw));
       document.getElementById('product-config-body').innerHTML = list.map(s => {
         const st = skuSellState(s);
-        const m = skuMasterById(s.skuId);
+        const payload = payloadMasterById(s.payloadId);
         return `
           <tr>
             <td class="px-3 py-3 font-mono text-[11px]">${s.id}</td>
             <td class="px-3 py-3 font-medium">${s.name}</td>
             <td class="px-3 py-3">
-              <p class="font-mono text-[11px]">${m ? m.id : '-'}</p>
-              <p class="text-[10px] text-slate-400">model: ${m ? m.model : '-'}</p>
+              <p class="font-mono text-[11px]">${payload ? payload.id : '-'}</p>
+              <p class="text-[10px] text-slate-400">model: ${productModelId(s)} / ${productModelName(s)}</p>
+              <p class="text-[10px] text-slate-400">sku: ${productSkuId(s)} / ${productSkuCode(s)}</p>
             </td>
             <td class="px-3 py-3">${s.minVtpm} 万 vTPM</td>
             <td class="px-3 py-3">${s.minCycle} 天</td>
+            <td class="px-3 py-3">¥${s.price.toLocaleString()}</td>
             <td class="px-3 py-3 text-slate-500">${s.sellStart} 00:00 ~ ${s.sellEnd} 24:00</td>
             <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${st.cls}">${st.label}</span></td>
             <td class="px-3 py-3">${s.total.toLocaleString()} 万 vTPM</td>
@@ -671,25 +697,28 @@
             </td>
           </tr>
         `;
-      }).join('') || `<tr><td colspan="9" class="px-3 py-6 text-center text-slate-400">${kw ? '未找到匹配的商品' : '暂无商品'}</td></tr>`;
+      }).join('') || `<tr><td colspan="10" class="px-3 py-6 text-center text-slate-400">${kw ? '未找到匹配的商品' : '暂无商品'}</td></tr>`;
     }
 
     // ===== 商品管理：新增 / 编辑 =====
     let editingId = null;
 
-    function productSkuLabel(p) { const m = skuMasterById(p.skuId); return m ? `${m.id} · ${m.name}` : p.skuId; }
+    function productPayloadLabel(p) { const m = payloadMasterById(p.payloadId); return m ? `${m.id} · ${m.name}` : p.payloadId; }
 
-    function renderSkuMasterOptions(selectedId) {
+    function renderPayloadOptions(selectedId) {
       const select = document.getElementById('sku-master');
-      select.innerHTML = `<option value="">请选择 SKU</option>` + skuMaster.map(s =>
+      select.innerHTML = `<option value="">请选择 vTPM Payload</option>` + payloadMaster.map(s =>
         `<option value="${s.id}" ${s.id === selectedId ? 'selected' : ''}>${s.id} · ${s.name}</option>`
       ).join('');
     }
 
-    function onSkuMasterChange() {
-      const skuId = document.getElementById('sku-master').value;
-      const m = skuMasterById(skuId);
-      document.getElementById('sku-model').value = m ? m.model : '';
+    function onPayloadChange() {
+      const payloadId = document.getElementById('sku-master').value;
+      const p = payloadMasterById(payloadId);
+      document.getElementById('sku-model-id').value = p ? p.modelId : '';
+      document.getElementById('sku-model-name').value = p ? p.modelName : '';
+      document.getElementById('sku-sku-id').value = p ? p.skuId : '';
+      document.getElementById('sku-sku-code').value = p ? p.skuCode : '';
     }
 
     function openSkuModal(id) {
@@ -702,10 +731,11 @@
         document.getElementById('sku-id-block').classList.remove('hidden');
         document.getElementById('sku-id').value = s.id;
         document.getElementById('sku-name').value = s.name;
-        renderSkuMasterOptions(s.skuId);
-        document.getElementById('sku-model').value = productModel(s);
+        renderPayloadOptions(s.payloadId);
+        onPayloadChange();
         document.getElementById('sku-min-vtpm').value = s.minVtpm;
         document.getElementById('sku-min-cycle').value = s.minCycle;
+        document.getElementById('sku-price').value = s.price;
         document.getElementById('sku-sell-start').value = s.sellStart;
         document.getElementById('sku-sell-end').value = s.sellEnd;
         document.getElementById('sku-total').value = s.total;
@@ -715,10 +745,14 @@
         document.getElementById('sku-id-block').classList.add('hidden');
         document.getElementById('sku-id').value = '';
         document.getElementById('sku-name').value = '';
-        renderSkuMasterOptions('');
-        document.getElementById('sku-model').value = '';
+        renderPayloadOptions('');
+        document.getElementById('sku-model-id').value = '';
+        document.getElementById('sku-model-name').value = '';
+        document.getElementById('sku-sku-id').value = '';
+        document.getElementById('sku-sku-code').value = '';
         document.getElementById('sku-min-vtpm').value = 10;
         document.getElementById('sku-min-cycle').value = 30;
+        document.getElementById('sku-price').value = '';
         document.getElementById('sku-sell-start').value = '';
         document.getElementById('sku-sell-end').value = '';
         document.getElementById('sku-total').value = 0;
@@ -743,29 +777,32 @@
 
     function saveSku() {
       const name = document.getElementById('sku-name').value.trim();
-      const skuId = document.getElementById('sku-master').value;
-      const model = document.getElementById('sku-model').value.trim();
+      const payloadId = document.getElementById('sku-master').value;
+      const payload = payloadMasterById(payloadId);
       const minVtpm = parseInt(document.getElementById('sku-min-vtpm').value, 10);
       const minCycle = parseInt(document.getElementById('sku-min-cycle').value, 10);
+      const price = parseInt(document.getElementById('sku-price').value, 10);
       const sellStart = document.getElementById('sku-sell-start').value;
       const sellEnd = document.getElementById('sku-sell-end').value;
       const total = parseInt(document.getElementById('sku-total').value, 10) || 0;
       const note = document.getElementById('sku-note').value.trim();
 
       if (!name) return showSkuError('请填写商品名称。');
-      if (!skuId) return showSkuError('请选择 SKU。');
-      if (!model) return showSkuError('SKU 未关联模型，请选择有效 SKU。');
+      if (!payloadId) return showSkuError('请选择 vTPM Payload。');
+      if (!payload) return showSkuError('Payload 未关联模型与 SKU，请选择有效 Payload。');
       if (!Number.isInteger(minVtpm) || minVtpm < 1) return showSkuError('最小购买 vTPM 量必须为不小于 1 的整数（万 vTPM）。');
       if (!Number.isInteger(minCycle) || minCycle < 1) return showSkuError('最小购买周期必须为不小于 1 的整数（天）。');
+      if (!Number.isInteger(price) || price < 0) return showSkuError('单价必须为不小于 0 的整数。');
       if (!sellStart || !sellEnd) return showSkuError('请填写开始售卖时间与截止售卖时间。');
       if (new Date(sellEnd + 'T00:00:00') <= new Date(sellStart + 'T00:00:00')) return showSkuError('截止售卖时间必须晚于开始售卖时间。');
 
       if (editingId) {
         const s = products.find(x => x.id === editingId);
-        Object.assign(s, { name, skuId, minVtpm, minCycle, sellStart, sellEnd, total, note });
+        Object.assign(s, { name, payloadId, minVtpm, minCycle, price, sellStart, sellEnd, total, note });
       } else {
-        const nextId = 'vtpm-' + model.replace(/[^a-z0-9]/gi, '').slice(0, 6).toLowerCase() + '-' + String(products.length + 1).padStart(3, '0');
-        products.push({ id: nextId, name, skuId, minVtpm, minCycle, sellStart, sellEnd, total, note });
+        const modelIdSafe = payload.modelId.replace(/[^a-z0-9]/gi, '').slice(0, 6).toLowerCase();
+        const nextId = 'vtpm-' + modelIdSafe + '-' + String(products.length + 1).padStart(3, '0');
+        products.push({ id: nextId, name, payloadId, minVtpm, minCycle, price, sellStart, sellEnd, total, note });
       }
       renderProductConfigTable(document.querySelector('#tab-product input[oninput*="renderProductConfigTable"]').value);
       closeSkuModal();
@@ -954,7 +991,7 @@
       end.setDate(end.getDate() + k * product.minCycle + 1);
       document.getElementById('grant-end').value = fmtDateTime(end) + '（开始时间 + ' + (k * product.minCycle) + ' 天 + 1 天，自动计算）';
 
-      const model = productModel(product);
+      const model = productModelName(product);
       const finalModels = selectedPools.map(p => `/${p.name}/${model}`);
       document.getElementById('grant-model-preview').innerHTML = finalModels.map(m => `<p class="font-mono text-xs text-violet-300 break-all">${m}</p>`).join('');
     }
@@ -983,7 +1020,7 @@
     // 后台预留 vTPM 详情数据
     const detailData = {
       'P001': {
-        model: 'Deepseek V4 Flash 0731', sku: 'vtpm-dsv4f-001', amount: 300, unit: '万 vTPM',
+        model: 'Deepseek V4 Flash 0731', sku: '23456', amount: 300, unit: '万 vTPM',
         status: '生效中', statusCls: 'bg-green-100 text-green-700',
         period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理',
         bind: '/proj-alpha/deepseek-v4-flash-0731', pool: 'proj-alpha',
@@ -997,7 +1034,7 @@
         ]
       },
       'P002': {
-        model: 'GLM 5.2', sku: 'vtpm-glm52-001', amount: 200, unit: '万 vTPM',
+        model: 'GLM 5.2', sku: '34567', amount: 200, unit: '万 vTPM',
         status: '生效中', statusCls: 'bg-green-100 text-green-700',
         period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理',
         bind: '/proj-gamma/glm-5.2', pool: 'proj-gamma',
