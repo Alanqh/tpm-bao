@@ -15,7 +15,6 @@
     .text-primary { color: var(--sf-purple); }
     .bg-primary { background-color: var(--sf-purple); }
     .border-primary { border-color: var(--sf-purple); }
-    .ring-primary { --tw-ring-color: var(--sf-purple); }
     .switcher-tab {
       padding: 0.25rem 0.75rem;
       border-radius: 9999px;
@@ -32,43 +31,12 @@
       border-radius: 16px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
-    .survey-input {
-      width: 100%;
-      border: 1px solid #E2E8F0;
-      border-radius: 8px;
-      padding: 0.625rem 0.875rem;
-      font-size: 0.9375rem;
-      transition: all 0.15s;
-      outline: none;
-    }
-    .survey-input:focus {
-      border-color: var(--sf-purple);
-      box-shadow: 0 0 0 3px rgba(110,41,246,0.1);
-    }
-    .survey-input:disabled {
-      background: #F8FAFC;
-      color: #64748B;
-    }
-    .survey-select {
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-      background-position: right 0.75rem center;
-      background-repeat: no-repeat;
-      background-size: 1.25rem;
-    }
-    .survey-radio:checked + div {
-      border-color: var(--sf-purple);
-      background-color: #F5F3FF;
-    }
-    .survey-radio:checked + div .radio-title { color: var(--sf-purple); }
     .survey-btn {
       background-color: var(--sf-purple);
       color: white;
       transition: all 0.2s;
     }
-    .survey-btn:hover {
-      background-color: var(--sf-purple-dark);
-    }
+    .survey-btn:hover { background-color: var(--sf-purple-dark); }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -78,7 +46,6 @@
       <div class="flex items-center h-10 gap-1 overflow-x-auto">
         <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
         <a href="index.html" class="switcher-tab">官网首页</a>
-        <a href="purchase.html" class="switcher-tab active">购买意向</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
         <a href="balance.html?tab=package" class="switcher-tab">资源包</a>
         <a href="pipeline.html" class="switcher-tab">监控数据链路</a>
@@ -87,7 +54,7 @@
     </div>
   </div>
 
-  <!-- 问卷头部 -->
+  <!-- 头部 -->
   <div class="bg-primary py-8 md:py-10">
     <div class="max-w-2xl mx-auto px-4 sm:px-6">
       <div class="flex items-center gap-2 text-white/80 text-sm mb-3">
@@ -101,169 +68,31 @@
 
   <main class="py-8 pb-16">
     <div class="max-w-2xl mx-auto px-4 sm:px-6">
-      <!-- 进度提示 -->
-      <div class="flex items-center gap-2 text-xs text-slate-500 mb-4">
-        <span class="px-2 py-1 rounded bg-violet-100 text-primary font-medium">飞书问卷</span>
-        <span>预计填写时间 2 分钟</span>
+      <div class="survey-card p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-full bg-violet-100 text-primary flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-arrow-up-right-from-square text-xl"></i>
+          </div>
+          <div class="min-w-0">
+            <h2 class="text-lg font-bold text-slate-900 mb-2">请前往飞书问卷填写购买意向</h2>
+            <p class="text-sm text-slate-600 mb-5">为便于销售团队统一跟进，购买意向已迁移至飞书问卷。点击下方按钮即可填写，预计耗时 2 分钟。</p>
+            <a href="https://siliconflow.feishu.cn/share/base/form/shrcnfZ74tmCteZScSOLZOAsMs0" target="_blank" rel="noopener noreferrer" class="survey-btn inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium">
+              <span>打开飞书问卷</span>
+              <i class="fa-solid fa-external-link-alt text-xs"></i>
+            </a>
+            <p class="text-xs text-slate-400 mt-4">链接地址：https://siliconflow.feishu.cn/share/base/form/shrcnfZ74tmCteZScSOLZOAsMs0</p>
+          </div>
+        </div>
       </div>
 
-      <form id="intent-form" class="survey-card overflow-hidden" onsubmit="return handleSubmit(event)">
-        <!-- 产品配置 -->
-        <div class="p-6 md:p-8 border-b border-slate-100">
-          <h2 class="text-lg font-bold text-slate-900 mb-1">产品配置</h2>
-          <p class="text-slate-500 text-sm mb-6">请选择需要预留 vTPM 的模型与购买规格。后台会根据所选模型自动匹配对应的 SKU 与售卖规则。</p>
-
-          <div class="space-y-5">
-            <!-- 1. 模型名称 -->
-            <div>
-              <label class="block text-sm font-medium text-slate-900 mb-2">选择模型 <span class="text-red-500">*</span></label>
-              <select name="model" id="model" class="survey-input survey-select" required>
-                <option value="deepseek-v4-flash-0731">Deepseek V4 Flash 0731</option>
-                <option value="glm-5.2">GLM 5.2</option>
-                <option value="kimi-k2-instruct">Kimi K2</option>
-              </select>
-              <p class="text-xs text-slate-400 mt-1.5">飞书问卷中本题使用「下拉题」，选项为固定模型列表，不可动态联动。</p>
-            </div>
-
-            <!-- 模型/套餐 售卖规则 -->
-            <div id="model-info" class="bg-slate-50 rounded-lg p-3.5 text-xs text-slate-600 grid grid-cols-2 gap-3">
-              <!-- JS 填充 -->
-            </div>
-
-            <!-- 2. 购买份数 / 购买周期 -->
-            <div class="grid md:grid-cols-2 gap-5">
-              <div>
-                <label class="block text-sm font-medium text-slate-900 mb-2">购买份数 <span class="text-red-500">*</span></label>
-                <input type="number" name="multiplier" id="multiplier" min="1" max="20" step="1" value="1" required class="survey-input">
-                <p id="total-preview" class="text-xs text-primary font-medium mt-1.5"></p>
-                <p class="text-xs text-slate-400 mt-1">每份 = 该模型最小购买 vTPM 量，可填写 1 ~ 20 份。飞书问卷中可设置数字题的 1~20 范围。</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-900 mb-2">购买周期（最小周期的倍数）<span class="text-red-500">*</span></label>
-                <input type="number" name="cycle" id="cycle" min="1" max="24" step="1" value="1" required class="survey-input">
-                <p class="text-xs text-slate-400 mt-1">1 倍 = 最小购买周期。飞书问卷中可设置数字题的最大/最小值，但无法根据模型动态限制。</p>
-              </div>
-            </div>
-
-            <!-- 有效期预览 -->
-            <div>
-              <label class="block text-sm font-medium text-slate-900 mb-2">有效期预览（原型辅助）</label>
-              <input type="text" id="period-preview" disabled class="survey-input font-mono text-xs">
-              <p class="text-xs text-slate-400 mt-1.5">开始时间固定为提交当天 0 点；结束时间 = 开始时间 + 购买周期 × 最小购买周期 + 1 天。飞书问卷无法实时计算并展示此预览，销售确认时另行通知。</p>
-            </div>
-
-            <!-- 3. 超量路由 -->
-            <div>
-              <label class="block text-sm font-medium text-slate-900 mb-2">超量路由配置 <span class="text-red-500">*</span></label>
-              <div class="grid sm:grid-cols-2 gap-3">
-                <label class="block">
-                  <input type="radio" name="serverless_route" value="off" class="survey-radio hidden" checked>
-                  <div class="border border-slate-200 rounded-lg p-4 h-full cursor-pointer bg-white">
-                    <p class="radio-title text-sm font-medium text-slate-900 mb-1">超量限流</p>
-                    <p class="text-xs text-slate-500">超出预留 vTPM 时返回 429，不产生额外费用。</p>
-                  </div>
-                </label>
-                <label class="block">
-                  <input type="radio" name="serverless_route" value="on" class="survey-radio hidden">
-                  <div class="border border-slate-200 rounded-lg p-4 h-full cursor-pointer bg-white">
-                    <p class="radio-title text-sm font-medium text-slate-900 mb-1">超量路由 Serverless（按量计费）</p>
-                    <p class="text-xs text-slate-500">超量请求自动路由至相同模型的 Serverless 服务，超出部分按量计费。</p>
-                  </div>
-                </label>
-              </div>
-              <p class="text-xs text-slate-400 mt-2">交付后在资源包「交付详情」中查看。</p>
-            </div>
-
-            <!-- 4. Pool 名称 -->
-            <div>
-              <label class="block text-sm font-medium text-slate-900 mb-3">Pool 名称 <span class="text-red-500">*</span></label>
-              <div class="border border-slate-200 rounded-lg p-4 bg-slate-50/50">
-                <p class="text-xs text-slate-600 mb-3">此处填写的是您侧的 <b>Pool 名称</b>（project/group 体系中的对象名称），而不是 model_name。平台将为每个 Pool 名称按 <span class="font-mono text-primary font-medium">/Pool 名称/模型</span> 生成一个专属的最终 model_name（下方实时预览），多个 Pool 将归属到同一个预留 vTPM 包，交付后以资源包「交付详情」展示的为准。</p>
-                <div id="pool-tags" class="flex flex-wrap gap-2 mb-3">
-                  <!-- JS 渲染 tag -->
-                </div>
-                <div class="flex gap-2">
-                  <input type="text" id="pool_input" placeholder="例如：ztech-llm-prod" class="survey-input flex-1">
-                  <button type="button" id="add-pool" class="px-3 py-2 rounded-lg bg-violet-600 text-white text-sm hover:bg-violet-700 transition">添加</button>
-                </div>
-                <p class="text-xs text-slate-400 mt-2">最多 3 个 Pool。飞书问卷中无 Tag 输入组件，可用一个「文本题」让填写者用英文逗号分隔多个 Pool，或拆成 3 个可选文本题。</p>
-                <p id="pool-error" class="hidden text-xs text-red-500 mt-2">请至少填写一个 Pool 名称</p>
-                <p id="pool-max" class="hidden text-xs text-orange-500 mt-2">最多可填写 3 个 Pool 名称</p>
-                <input type="hidden" name="pool_names" id="pool_names_hidden">
-              </div>
-              <div class="bg-slate-900 rounded-lg px-3.5 py-3 mt-3">
-                <p class="text-[11px] text-slate-400 mb-1.5">最终 model_name 预览（格式 /Pool 名称/模型，原型辅助）</p>
-                <div id="pool-preview" class="space-y-1"><p class="font-mono text-xs text-slate-500 italic">请添加 Pool 名称后在此预览</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 联系信息 -->
-        <div class="p-6 md:p-8 border-b border-slate-100">
-          <h2 class="text-lg font-bold text-slate-900 mb-1">联系信息</h2>
-          <p class="text-slate-500 text-sm mb-6">请填写企业负责人信息，便于销售团队与您联系。</p>
-
-          <div class="space-y-5">
-            <div class="grid md:grid-cols-2 gap-5">
-              <div>
-                <label class="block text-sm font-medium text-slate-900 mb-2">联系人姓名 <span class="text-red-500">*</span></label>
-                <input type="text" name="contact_name" required placeholder="请输入姓名" class="survey-input">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-900 mb-2">联系电话 <span class="text-red-500">*</span></label>
-                <input type="tel" name="contact_phone" required placeholder="请输入手机号" class="survey-input">
-              </div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-5">
-              <div>
-                <label class="block text-sm font-medium text-slate-900 mb-2">企业邮箱 <span class="text-red-500">*</span></label>
-                <input type="email" name="contact_email" required placeholder="name@company.com" class="survey-input">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-900 mb-2">企业名称</label>
-                <input type="text" name="company" placeholder="请输入企业全称" class="survey-input">
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-slate-900 mb-2">补充说明</label>
-              <textarea name="remark" rows="3" placeholder="可填写预期调用量、上线时间、特殊 SLA 要求等" class="survey-input resize-none"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- 协议与提交 -->
-        <div class="p-6 md:p-8 bg-slate-50">
-          <label class="flex items-start gap-3 cursor-pointer mb-6">
-            <input type="checkbox" id="agree" required class="mt-1 w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary">
-            <span class="text-sm text-slate-600">我已阅读并同意 <a href="terms.html" target="_blank" class="text-primary hover:underline">《预留 vTPM 购买须知》</a>，包括购买规则、SLA 保障与赔付、模型更换及退款规则。</span>
-          </label>
-
-          <div class="flex flex-col sm:flex-row items-center gap-4">
-            <button type="submit" class="survey-btn w-full sm:w-auto px-8 py-3 rounded-lg font-medium">提交购买意向</button>
-            <span class="text-sm text-slate-400">提交后销售团队将在 1 个工作日内联系您</span>
-          </div>
-        </div>
-      </form>
-
-      <!-- 提交成功提示 -->
-      <div id="success-msg" class="hidden survey-card p-6 md:p-8 mt-6 border-l-4 border-green-500 bg-green-50">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-check"></i></div>
-          <div class="min-w-0">
-            <h3 class="font-semibold text-slate-900 text-lg">意向已提交</h3>
-            <p class="text-sm text-slate-600 mt-1">销售团队将在 1 个工作日内与您联系。如需加急，请拨打客服热线 400-XXX-XXXX。</p>
-            <div id="success-detail" class="mt-4 bg-white rounded-lg border border-slate-200 p-4 text-xs text-slate-600 leading-relaxed">
-              <!-- JS 渲染购买摘要 -->
-            </div>
-            <div class="mt-4 flex gap-4">
-              <a href="index.html" class="text-sm text-primary hover:underline">返回官网首页</a>
-              <a href="balance.html?tab=package" class="text-sm text-slate-500 hover:underline">查看我的资源包</a>
-            </div>
-          </div>
-        </div>
+      <div class="mt-6 survey-card p-6 md:p-8">
+        <h3 class="text-sm font-bold text-slate-900 mb-3">填写前准备</h3>
+        <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside">
+          <li>确认需要预留 vTPM 的模型名称</li>
+          <li>预估购买份数与周期（最小购买周期为 30 天）</li>
+          <li>准备好企业联系人、电话与邮箱</li>
+          <li>提前确定 Pool 名称（用于生成最终 model_name）</li>
+        </ul>
       </div>
     </div>
   </main>
@@ -273,180 +102,5 @@
       <p>© 2026 硅基流动 SiliconFlow. 本页面为产品原型，具体规则以最终合同与控制台公示为准。</p>
     </div>
   </footer>
-
-  <script>
-    // 模型配置（用户选择模型，后台自动匹配 SKU；与后台发放弹窗保持一致）
-    const purchaseModels = [
-      { modelId: 'deepseek-v4-flash-0731', name: 'Deepseek V4 Flash 0731', skuId: 'vtpm-dsv4f-001', skuName: 'Deepseek V4 Flash 0731 预留 vTPM', minVtpm: 10, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31' },
-      { modelId: 'glm-5.2', name: 'GLM 5.2', skuId: 'vtpm-glm52-001', skuName: 'GLM 5.2 预留 vTPM', minVtpm: 20, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30' },
-      { modelId: 'kimi-k2-instruct', name: 'Kimi K2', skuId: 'vtpm-kimik2-001', skuName: 'Kimi K2 预留 vTPM', minVtpm: 15, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31' }
-    ];
-    function modelById(id) { return purchaseModels.find(m => m.modelId === id); }
-    function currentModel() { return modelById(document.getElementById('model').value); }
-
-    function fmtDate(d) {
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    }
-    function fmtDateTime(d) { return fmtDate(d) + ' 00:00'; }
-    // 开始时间固定为提交当天 0 点（与后台发放保持一致）
-    function toStart() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
-
-    // ---- 模型/套餐 售卖规则卡片 ----
-    function renderModelInfo(model) {
-      document.getElementById('model-info').innerHTML = `
-        <div><p class="text-slate-400 mb-0.5">模型名称</p><p class="font-semibold text-slate-800">${model.name}</p></div>
-        <div><p class="text-slate-400 mb-0.5">对应 SKU</p><p class="font-semibold text-slate-800 font-mono text-[11px]">${model.skuId}</p></div>
-        <div><p class="text-slate-400 mb-0.5">最小购买 vTPM 量（每份）</p><p class="font-semibold text-slate-800">${model.minVtpm} 万 vTPM</p></div>
-        <div><p class="text-slate-400 mb-0.5">最小购买周期</p><p class="font-semibold text-slate-800">${model.minCycle} 天（约 1 个月）</p></div>
-        <div><p class="text-slate-400 mb-0.5">开始售卖时间</p><p class="font-semibold text-slate-800">${model.sellStart} 00:00</p></div>
-        <div><p class="text-slate-400 mb-0.5">截止售卖时间</p><p class="font-semibold text-slate-800">${model.sellEnd} 24:00</p></div>
-      `;
-    }
-
-    // ---- 购买周期：以最小周期的倍数填写（飞书问卷中用数字题实现） ----
-    function clampCycle() {
-      const raw = parseInt(document.getElementById('cycle').value || '1', 10) || 1;
-      const k = Math.max(1, Math.min(24, raw));
-      document.getElementById('cycle').value = k;
-      return k;
-    }
-
-    // ---- 汇总联动 ----
-    function clampMultiplier() {
-      const raw = parseInt(document.getElementById('multiplier').value || '1', 10) || 1;
-      const multi = Math.max(1, Math.min(20, raw));
-      document.getElementById('multiplier').value = multi;
-      return multi;
-    }
-
-    function renderSummary() {
-      const model = currentModel();
-      if (!model) return;
-      const multi = clampMultiplier();
-      const k = clampCycle();
-      const totalVtpm = multi * model.minVtpm;
-      document.getElementById('total-preview').textContent = `合计购买：${multi} × ${model.minVtpm} 万 vTPM = ${totalVtpm.toLocaleString()} 万 vTPM`;
-
-      const start = toStart();
-      const end = new Date(start);
-      end.setDate(end.getDate() + k * model.minCycle + 1);
-      document.getElementById('period-preview').value = `${fmtDateTime(start)} ~ ${fmtDateTime(end)}`;
-      renderPoolPreview();
-    }
-
-    // ---- Pool 名称 tag 管理 ----
-    let poolNames = [];
-    const poolInput = document.getElementById('pool_input');
-    const addPoolBtn = document.getElementById('add-pool');
-    const tagsBox = document.getElementById('pool-tags');
-    const poolHidden = document.getElementById('pool_names_hidden');
-    const poolError = document.getElementById('pool-error');
-    const poolMax = document.getElementById('pool-max');
-
-    function renderPoolPreview() {
-      const model = currentModel();
-      if (!model) return;
-      const box = document.getElementById('pool-preview');
-      if (poolNames.length === 0) {
-        box.innerHTML = `<p class="font-mono text-xs text-slate-500 italic">请添加 Pool 名称后在此预览</p>`;
-      } else {
-        box.innerHTML = poolNames.map(n =>
-          `<p class="font-mono text-xs text-violet-300 break-all" title="Pool 名称：${n.replace(/"/g, '&quot;')}">/${n}/<span class="text-slate-400">${model.modelId}</span></p>`
-        ).join('');
-      }
-    }
-
-    function renderTags() {
-      poolMax.classList.add('hidden');
-      if (poolNames.length === 0) {
-        tagsBox.innerHTML = `<span class="text-xs text-slate-400 italic">暂无 Pool 名称，请添加</span>`;
-      } else {
-        tagsBox.innerHTML = poolNames.map((name, idx) => `
-          <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-violet-100 text-violet-700 text-xs max-w-[180px] min-w-0" title="最终 model_name 预览：/${name}/${currentModel() ? currentModel().modelId : ''}">
-            <span class="truncate">${name}</span>
-            <button type="button" data-idx="${idx}" class="remove-tag w-4 h-4 rounded-full hover:bg-violet-200 flex items-center justify-center leading-none text-violet-500 flex-shrink-0">×</button>
-          </span>
-        `).join('');
-      }
-      poolHidden.value = poolNames.join(',');
-      renderPoolPreview();
-      document.querySelectorAll('.remove-tag').forEach(btn => {
-        btn.addEventListener('click', () => {
-          poolNames.splice(parseInt(btn.dataset.idx), 1);
-          renderTags();
-        });
-      });
-    }
-
-    function addPool() {
-      const val = poolInput.value.trim();
-      if (!val) return;
-      if (poolNames.length >= 3) {
-        poolMax.classList.remove('hidden');
-        poolInput.value = '';
-        return;
-      }
-      if (poolNames.includes(val)) { poolInput.value = ''; return; }
-      poolNames.push(val);
-      poolInput.value = '';
-      renderTags();
-    }
-
-    addPoolBtn.addEventListener('click', addPool);
-    poolInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); addPool(); }
-    });
-
-    document.getElementById('model').addEventListener('change', () => {
-      const model = currentModel();
-      if (!model) return;
-      renderModelInfo(model);
-      renderSummary();
-    });
-    document.getElementById('multiplier').addEventListener('input', renderSummary);
-    document.getElementById('multiplier').addEventListener('change', renderSummary);
-    document.getElementById('cycle').addEventListener('input', renderSummary);
-    document.getElementById('cycle').addEventListener('change', renderSummary);
-
-    // ---- 提交 ----
-    function handleSubmit(e) {
-      e.preventDefault();
-      if (poolNames.length === 0) {
-        poolError.classList.remove('hidden');
-        return false;
-      }
-      poolError.classList.add('hidden');
-
-      const model = currentModel();
-      const multi = clampMultiplier();
-      const totalVtpm = multi * model.minVtpm;
-      const k = clampCycle();
-      const start = toStart();
-      const end = new Date(start);
-      end.setDate(end.getDate() + k * model.minCycle + 1);
-      const serverless = document.querySelector('input[name="serverless_route"]:checked').value === 'on';
-
-      document.getElementById('success-detail').innerHTML = `
-        <p class="font-semibold text-slate-900 mb-1.5">购买意向摘要</p>
-        <p>· 模型：<span class="font-medium text-slate-800">${model.name}</span>｜ 对应 SKU：<span class="font-medium text-slate-800">${model.skuName}</span></p>
-        <p>· 购买量：${multi} 份 × ${model.minVtpm} 万 vTPM = <span class="font-medium text-primary">${totalVtpm.toLocaleString()} 万 vTPM</span>｜ 周期：${k} × ${model.minCycle} 天</p>
-        <p>· 有效期：${fmtDateTime(start)} ~ ${fmtDateTime(end)}</p>
-        <p>· 超量路由：${serverless ? 'Serverless 按量计费' : '限流 429'}</p>
-        ${poolNames.map(n => `<p>· Pool 名称：<span class="font-mono">${n}</span> ｜ 预览 model_name：<span class="font-mono text-primary">/${n}/${model.modelId}</span></p>`).join('')}
-      `;
-      document.getElementById('intent-form').classList.add('hidden');
-      document.getElementById('success-msg').classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return false;
-    }
-
-    // 初始化
-    (function init() {
-      const model = currentModel();
-      renderModelInfo(model);
-      renderSummary();
-      renderTags();
-    })();
-  </script>
 </body>
 </html>
