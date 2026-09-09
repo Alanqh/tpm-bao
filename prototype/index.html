@@ -261,14 +261,14 @@
               <div>
                 <div class="flex justify-between items-center mb-2">
                   <label class="text-sm font-medium text-slate-700">预留 vTPM 数量</label>
-                  <span class="text-sm"><span id="units-display" class="font-bold text-primary">30</span> 万 vTPM</span>
+                  <span class="text-sm"><span id="units-display" class="font-bold text-primary">300</span> 万 vTPM</span>
                 </div>
-                <input id="units" type="range" min="10" max="100" step="10" value="30" class="w-full accent-primary h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                <input id="units" type="range" min="100" max="1000" step="100" value="300" class="w-full accent-primary h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
                 <div class="flex justify-between text-xs text-slate-400 mt-2">
-                  <span>10 万</span>
                   <span>100 万</span>
+                  <span>1000 万</span>
                 </div>
-                <input type="hidden" id="vtpm-total" value="30">
+                <input type="hidden" id="vtpm-total" value="300">
               </div>
 
               <!-- 周期 -->
@@ -290,8 +290,8 @@
                   <span class="text-sm text-slate-600">预估总价</span>
                   <span class="text-xs text-slate-400">不含税</span>
                 </div>
-                <div class="text-3xl font-bold text-primary">¥<span id="price-total">9,900</span></div>
-                <p class="text-xs text-slate-500 mt-2">基于 <span id="price-model">Deepseek V4 Flash 0731</span> × <span id="price-units">30</span> 万 vTPM × <span id="price-cycle">30</span> 天</p>
+                <div class="text-3xl font-bold text-primary">¥<span id="price-total">99,000</span></div>
+                <p class="text-xs text-slate-500 mt-2">基于 <span id="price-model">Deepseek V4 Flash 0731</span> × <span id="price-units">300</span> 万 vTPM × <span id="price-cycle">30</span> 天</p>
               </div>
             </div>
           </div>
@@ -334,7 +334,7 @@
               <div>
                 <label class="block text-xs font-medium text-slate-600 mb-1">vTPM 数量（与左侧联动，单位：万）</label>
                 <div class="flex items-center gap-3">
-                  <input id="calc-vtpm" type="number" min="10" max="100" step="10" value="30" class="flex-1 rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                  <input id="calc-vtpm" type="number" min="100" max="1000" step="100" value="300" class="flex-1 rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
                   <span class="text-sm text-slate-500">万 vTPM</span>
                 </div>
               </div>
@@ -345,7 +345,7 @@
                     <div class="w-10 h-10 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-memory"></i></div>
                     <div class="flex-1 min-w-0">
                       <p class="text-xs text-slate-500">输入未命中 Cache / 分钟</p>
-                      <p id="calc-miss" class="text-lg font-bold text-slate-900 truncate">300,000 tokens</p>
+                      <p id="calc-miss" class="text-lg font-bold text-slate-900 truncate">3,000,000 tokens</p>
                     </div>
                   </div>
                 </div>
@@ -354,7 +354,7 @@
                     <div class="w-10 h-10 rounded-lg bg-green-50 text-green-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-bolt"></i></div>
                     <div class="flex-1 min-w-0">
                       <p class="text-xs text-slate-500">输入命中 Cache / 分钟</p>
-                      <p id="calc-hit" class="text-lg font-bold text-slate-900 truncate">12,000,000 tokens</p>
+                      <p id="calc-hit" class="text-lg font-bold text-slate-900 truncate">120,000,000 tokens</p>
                     </div>
                   </div>
                 </div>
@@ -363,7 +363,7 @@
                     <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
                     <div class="flex-1 min-w-0">
                       <p class="text-xs text-slate-500">输出可承载 / 分钟</p>
-                      <p id="calc-output" class="text-lg font-bold text-slate-900 truncate">100,000 tokens</p>
+                      <p id="calc-output" class="text-lg font-bold text-slate-900 truncate">1,000,000 tokens</p>
                     </div>
                   </div>
                 </div>
@@ -603,7 +603,7 @@
     }
     function updateCalc() {
       let units = parseInt(calcVtpmEl.value) || 0;
-      units = Math.max(10, Math.min(100, Math.round(units / 10) * 10));
+      units = Math.max(100, Math.min(1000, Math.round(units / 100) * 100));
       calcVtpmEl.value = units;
       if (unitsEl.value != units) {
         unitsEl.value = units;
