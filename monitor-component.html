@@ -15,7 +15,6 @@
     .chart-tooltip .tip-row.tip-sub { margin-left: 16px; color: #cbd5e1; }
     .chart-tooltip .tip-dot { width: 8px; height: 8px; border-radius: 1px; flex-shrink: 0; }
     .chart-tooltip .tip-dot.round { border-radius: 50%; }
-    .chart-tooltip .tip-line { width: 12px; height: 0; border-top: 1.5px dashed #94a3b8; flex-shrink: 0; }
     .filter-pill { padding: 0.375rem 0.875rem; border: 1px solid #E2E8F0; border-radius: 9999px; font-size: 0.8125rem; color: #475569; transition: all 0.15s; cursor: pointer; background: #fff; }
     .filter-pill:hover { border-color: #C4B5FD; color: #7C3AED; }
     .filter-pill.active { background: #F5F3FF; border-color: #7C3AED; color: #7C3AED; font-weight: 500; }
@@ -417,10 +416,12 @@
       let html = `<div class="tip-title">${d.label}</div>`;
       html += `<div class="tip-row"><span class="tip-dot" style="background:${barColor}"></span>自然分钟 vTPM ${d.vtpm} 万</div>`;
       if (d.peak429) {
+        const count = d.throttleEvents ? d.throttleEvents.length : 1;
         html += `<div class="tip-row"><span class="tip-dot round" style="background:#ef4444"></span>429 限流 · ${d.peak429.label}</div>`;
-        html += `<div class="tip-row tip-sub">滑动窗口 ${d.peak429.sliding} 万 / 超出 +${(d.peak429.sliding - CAPACITY).toFixed(1)} 万</div>`;
+        html += `<div class="tip-row tip-sub">触发时刻前 60s 滑动窗口 ${d.peak429.sliding} 万</div>`;
+        html += `<div class="tip-row tip-sub">超出购买量 +${(d.peak429.sliding - CAPACITY).toFixed(1)} 万</div>`;
+        html += `<div class="tip-row tip-sub">本分钟共 ${count} 次 429</div>`;
       }
-      html += `<div class="tip-row" style="margin-top:6px"><span class="tip-line"></span>购买量 ${CAPACITY} 万 vTPM</div>`;
       return html;
     }
 
