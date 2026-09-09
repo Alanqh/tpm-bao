@@ -9,7 +9,13 @@
   <style>
     :root { --sf-purple: #7C3AED; --sf-purple-light: #F5F3FF; }
     .sf-card { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; }
-    .chart-tooltip { position: absolute; display: none; background: #1e293b; color: #f1f5f9; padding: 8px 12px; border-radius: 8px; font-size: 11px; line-height: 1.6; pointer-events: none; z-index: 50; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .chart-tooltip { position: absolute; display: none; background: rgba(30, 41, 59, 0.96); color: #f1f5f9; padding: 10px 14px; border-radius: 10px; font-size: 11px; line-height: 1.5; pointer-events: none; z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,0.25); backdrop-filter: blur(4px); min-width: 180px; }
+    .chart-tooltip .tip-title { font-weight: 600; font-size: 12px; margin-bottom: 8px; color: #fff; }
+    .chart-tooltip .tip-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .chart-tooltip .tip-row.tip-sub { margin-left: 16px; color: #cbd5e1; }
+    .chart-tooltip .tip-dot { width: 8px; height: 8px; border-radius: 1px; flex-shrink: 0; }
+    .chart-tooltip .tip-dot.round { border-radius: 50%; }
+    .chart-tooltip .tip-line { width: 12px; height: 0; border-top: 1.5px dashed #94a3b8; flex-shrink: 0; }
     .filter-pill { padding: 0.375rem 0.875rem; border: 1px solid #E2E8F0; border-radius: 9999px; font-size: 0.8125rem; color: #475569; transition: all 0.15s; cursor: pointer; background: #fff; }
     .filter-pill:hover { border-color: #C4B5FD; color: #7C3AED; }
     .filter-pill.active { background: #F5F3FF; border-color: #7C3AED; color: #7C3AED; font-weight: 500; }
@@ -400,22 +406,22 @@
       const wrap = document.getElementById('vtpm-chart-wrap');
       const wrapRect = wrap.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
-      if (d.peak429) {
-        tip.innerHTML = show429Html(d.peak429);
-      } else {
-        tip.innerHTML = `<p>${d.label}</p><p>${d.vtpm} 万 vTPM</p>`;
-      }
+      tip.innerHTML = buildVtpmTip(d);
       tip.style.display = 'block';
       tip.style.left = (elRect.left - wrapRect.left + elRect.width / 2 - tip.offsetWidth / 2) + 'px';
       tip.style.top = (elRect.top - wrapRect.top - tip.offsetHeight - 6) + 'px';
     }
 
-    function show429Html(peak) {
-      return `
-        <p>${peak.label} 429 限流</p>
-        <p>${peak.sliding} 万 / ${CAPACITY} 万</p>
-        <p>+${(peak.sliding - CAPACITY).toFixed(1)} 万</p>
-      `;
+    function buildVtpmTip(d) {
+      const barColor = d.vtpm > CAPACITY ? '#c4b5fd' : '#7c3aed';
+      let html = `<div class="tip-title">${d.label}</div>`;
+      html += `<div class="tip-row"><span class="tip-dot" style="background:${barColor}"></span>自然分钟 vTPM ${d.vtpm} 万</div>`;
+      if (d.peak429) {
+        html += `<div class="tip-row"><span class="tip-dot round" style="background:#ef4444"></span>429 限流 · ${d.peak429.label}</div>`;
+        html += `<div class="tip-row tip-sub">滑动窗口 ${d.peak429.sliding} 万 / 超出 +${(d.peak429.sliding - CAPACITY).toFixed(1)} 万</div>`;
+      }
+      html += `<div class="tip-row" style="margin-top:6px"><span class="tip-line"></span>购买量 ${CAPACITY} 万 vTPM</div>`;
+      return html;
     }
 
     function show429Tip(idx, el) {
@@ -424,7 +430,7 @@
       const wrap = document.getElementById('vtpm-chart-wrap');
       const wrapRect = wrap.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
-      tip.innerHTML = show429Html(d.peak429);
+      tip.innerHTML = buildVtpmTip(d);
       tip.style.display = 'block';
       tip.style.left = (elRect.left - wrapRect.left + 14) + 'px';
       tip.style.top = (elRect.top - wrapRect.top - tip.offsetHeight - 8) + 'px';
