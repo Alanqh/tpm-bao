@@ -49,127 +49,145 @@
     </div>
   </div>
 
-  <!-- 时间筛选 -->
-  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-    <div class="relative" id="time-picker">
-      <button type="button" onclick="toggleTimePicker()" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 shadow-sm">
-        <i class="fa-regular fa-clock text-xs text-slate-400"></i>
-        <span id="time-label">最近 1 小时</span>
-        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
-      </button>
-      <div id="time-panel" class="hidden absolute left-0 mt-1 w-80 bg-white border border-slate-200 rounded-lg shadow-lg p-3 z-50">
-        <p class="text-xs text-slate-500 mb-2">快捷选项</p>
-        <div class="grid grid-cols-2 gap-2 mb-3">
-          <button type="button" onclick="selectTime('1h')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="1h">最近 1 小时</button>
-          <button type="button" onclick="selectTime('24h')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="24h">最近 24 小时</button>
-          <button type="button" onclick="selectTime('7d')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="7d">最近 7 天</button>
-          <button type="button" onclick="selectTime('30d')" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="30d">最近 30 天</button>
-        </div>
-        <div class="border-t border-slate-100 pt-3">
-          <p class="text-xs text-slate-500 mb-2">自定义范围</p>
-          <div class="flex items-center gap-2">
-            <input type="date" id="custom-start" class="flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
-            <span class="text-xs text-slate-400">至</span>
-            <input type="date" id="custom-end" class="flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+  <!-- 顶部 Tab 切换 -->
+  <div class="flex items-center gap-1 border-b border-slate-200 mb-4">
+    <button class="tab-btn active" data-tab="metrics" onclick="switchTab('metrics')">指标监控</button>
+    <button class="tab-btn" data-tab="events" onclick="switchTab('events')">事件</button>
+    <button class="tab-btn" data-tab="logs" onclick="switchTab('logs')">日志</button>
+  </div>
+
+  <!-- ===== 指标监控 Tab ===== -->
+  <div id="metrics-tab">
+    <!-- 时间筛选 -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+      <div class="relative time-picker" data-suffix="metrics">
+        <button type="button" class="time-toggle inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 shadow-sm">
+          <i class="fa-regular fa-clock text-xs text-slate-400"></i>
+          <span class="time-label">最近 1 小时</span>
+          <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+        </button>
+        <div class="time-panel hidden absolute left-0 mt-1 w-80 bg-white border border-slate-200 rounded-lg shadow-lg p-3 z-50">
+          <p class="text-xs text-slate-500 mb-2">快捷选项</p>
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border bg-violet-50 border-violet-500 text-violet-600 text-left" data-value="1h">最近 1 小时</button>
+            <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="24h">最近 24 小时</button>
+            <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="7d">最近 7 天</button>
+            <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="30d">最近 30 天</button>
+          </div>
+          <div class="border-t border-slate-100 pt-3">
+            <p class="text-xs text-slate-500 mb-2">自定义范围</p>
+            <div class="flex items-center gap-2">
+              <input type="date" class="custom-start flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+              <span class="text-xs text-slate-400">至</span>
+              <input type="date" class="custom-end flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 mt-3 pt-2 border-t border-slate-100">
+            <button type="button" class="time-cancel px-2.5 py-1 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-50">取消</button>
+            <button type="button" class="time-apply px-2.5 py-1 text-xs rounded bg-violet-600 text-white hover:bg-violet-700">应用</button>
           </div>
         </div>
-        <div class="flex justify-end gap-2 mt-3 pt-2 border-t border-slate-100">
-          <button type="button" onclick="closeTimePicker()" class="px-2.5 py-1 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-50">取消</button>
-          <button type="button" onclick="applyCustomTime()" class="px-2.5 py-1 text-xs rounded bg-violet-600 text-white hover:bg-violet-700">应用</button>
+      </div>
+    </div>
+
+    <!-- vTPM 分钟级消耗图（主图） -->
+    <div class="sf-card p-5 mb-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">vTPM 分钟级消耗趋势</h2>
+          <p class="text-xs text-slate-500 mt-0.5">分钟柱按自然分钟聚合 · 红点为 429 限流事件（秒级），纵高对应该次触发前 60s 滑动窗口 vTPM</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 text-xs">
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-violet-600"></span>自然分钟 vTPM</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>429 限流</div>
+          <div class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-slate-400 border-t border-dashed"></span>购买量</div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- ===== vTPM 分钟级消耗图（主图） ===== -->
-  <div class="sf-card p-5 mb-4">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-      <div>
-        <h2 class="text-base font-bold text-slate-900">vTPM 分钟级消耗趋势</h2>
-        <p class="text-xs text-slate-500 mt-0.5">分钟柱按自然分钟聚合 · 紫色柱为分钟消耗总量；红点为 429 限流事件（秒级），纵高对应该次触发前 60s 滑动窗口 vTPM，灰色虚线为购买量</p>
-      </div>
-      <div class="flex items-center gap-3 text-xs">
-        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-600"></span>≤购买量</div>
-        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-300"></span>>购买量</div>
-        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>429（秒级事件）</div>
-        <div class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-slate-400 border-t border-dashed"></span>购买量</div>
+      <div class="relative" id="vtpm-chart-wrap">
+        <svg id="vtpm-svg" viewBox="0 0 920 280" class="w-full h-auto" style="min-height:200px"></svg>
+        <div id="vtpm-tooltip" class="chart-tooltip"></div>
       </div>
     </div>
-    <div class="relative" id="vtpm-chart-wrap">
-      <svg id="vtpm-svg" viewBox="0 0 920 280" class="w-full h-auto" style="min-height:200px"></svg>
-      <div id="vtpm-tooltip" class="chart-tooltip"></div>
-    </div>
-  </div>
 
-  <!-- ===== TTFT + TPOT 折线图 ===== -->
-  <div class="grid lg:grid-cols-2 gap-4 mb-4">
-    <div class="sf-card p-5">
+    <!-- TTFT + TPOT 折线图 -->
+    <div class="grid lg:grid-cols-2 gap-4 mb-4">
+      <div class="sf-card p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-bold text-slate-900">P95 TTFT 趋势</h2>
+          <div class="flex items-center gap-3 text-xs">
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>P95 TTFT</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-amber-500 border-t border-dashed"></span>SLA 120ms</div>
+          </div>
+        </div>
+        <svg id="ttft-svg" viewBox="0 0 460 200" class="w-full h-auto" style="min-height:160px"></svg>
+      </div>
+      <div class="sf-card p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-bold text-slate-900">P95 TPOT 趋势</h2>
+          <div class="flex items-center gap-3 text-xs">
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>P95 TPOT</div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-amber-500 border-t border-dashed"></span>SLA 25ms</div>
+          </div>
+        </div>
+        <svg id="tpot-svg" viewBox="0 0 460 200" class="w-full h-auto" style="min-height:160px"></svg>
+      </div>
+    </div>
+
+    <!-- 5XX 分钟趋势 -->
+    <div class="sf-card p-5 mb-4">
       <div class="flex items-center justify-between mb-3">
-        <h2 class="text-base font-bold text-slate-900">P95 TTFT 趋势</h2>
+        <h2 class="text-base font-bold text-slate-900">5xx 请求数分钟趋势</h2>
         <div class="flex items-center gap-3 text-xs">
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>P95 TTFT</div>
-          <div class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-amber-500 border-t border-dashed"></span>SLA 120ms</div>
+          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>5xx / 超时</div>
         </div>
       </div>
-      <svg id="ttft-svg" viewBox="0 0 460 200" class="w-full h-auto" style="min-height:160px"></svg>
-    </div>
-    <div class="sf-card p-5">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-base font-bold text-slate-900">P95 TPOT 趋势</h2>
-        <div class="flex items-center gap-3 text-xs">
-          <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>P95 TPOT</div>
-          <div class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-amber-500 border-t border-dashed"></span>SLA 25ms</div>
-        </div>
-      </div>
-      <svg id="tpot-svg" viewBox="0 0 460 200" class="w-full h-auto" style="min-height:160px"></svg>
+      <svg id="error-svg" viewBox="0 0 920 180" class="w-full h-auto" style="min-height:140px"></svg>
     </div>
   </div>
 
-  <!-- ===== 5XX 分钟趋势 ===== -->
-  <div class="sf-card p-5 mb-4">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-base font-bold text-slate-900">5xx 请求数分钟趋势</h2>
-      <div class="flex items-center gap-3 text-xs">
-        <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>5xx / 超时</div>
+  <!-- ===== 事件 Tab ===== -->
+  <div id="events-tab" class="hidden">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+      <div class="flex items-center gap-2">
+        <div class="relative time-picker" data-suffix="events">
+          <button type="button" class="time-toggle inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 shadow-sm">
+            <i class="fa-regular fa-clock text-xs text-slate-400"></i>
+            <span class="time-label">最近 1 小时</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+          </button>
+          <div class="time-panel hidden absolute left-0 mt-1 w-80 bg-white border border-slate-200 rounded-lg shadow-lg p-3 z-50">
+            <p class="text-xs text-slate-500 mb-2">快捷选项</p>
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border bg-violet-50 border-violet-500 text-violet-600 text-left" data-value="1h">最近 1 小时</button>
+            <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="24h">最近 24 小时</button>
+            <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="7d">最近 7 天</button>
+            <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="30d">最近 30 天</button>
+          </div>
+          <div class="border-t border-slate-100 pt-3">
+            <p class="text-xs text-slate-500 mb-2">自定义范围</p>
+            <div class="flex items-center gap-2">
+              <input type="date" class="custom-start flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+              <span class="text-xs text-slate-400">至</span>
+              <input type="date" class="custom-end flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 mt-3 pt-2 border-t border-slate-100">
+            <button type="button" class="time-cancel px-2.5 py-1 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-50">取消</button>
+            <button type="button" class="time-apply px-2.5 py-1 text-xs rounded bg-violet-600 text-white hover:bg-violet-700">应用</button>
+          </div>
+        </div>
       </div>
     </div>
-    <svg id="error-svg" viewBox="0 0 920 180" class="w-full h-auto" style="min-height:140px"></svg>
-  </div>
-
-  <!-- ===== 事件 & 日志（共用筛选 + 两张大表） ===== -->
-  <div class="sf-card p-5 mb-4">
-    <!-- Tab 切换 -->
-    <div class="flex items-center gap-1 border-b border-slate-200 mb-4">
-      <button class="tab-btn active" data-tab="events" onclick="switchTableTab('events')">事件大表</button>
-      <button class="tab-btn" data-tab="logs" onclick="switchTableTab('logs')">请求日志表</button>
-    </div>
-
-    <!-- 共用筛选 -->
-    <div class="flex flex-wrap items-center gap-2 mb-4">
-      <div class="flex items-center gap-2" id="type-filter-events">
+    <div class="flex items-center gap-2">
         <span class="text-xs text-slate-500">类型</span>
         <button class="filter-pill active" data-etype="all">全部</button>
-        <button class="filter-pill" data-etype="breach">违约事件</button>
-        <button class="filter-pill" data-etype="throttle">限流事件</button>
-        <button class="filter-pill" data-etype="system">系统事件</button>
-      </div>
-      <div class="flex items-center gap-2 hidden" id="type-filter-logs">
-        <span class="text-xs text-slate-500">状态码</span>
-        <button class="filter-pill active" data-ltype="all">全部</button>
-        <button class="filter-pill" data-ltype="200">200</button>
-        <button class="filter-pill" data-ltype="429">429</button>
-        <button class="filter-pill" data-ltype="5xx">5xx</button>
-      </div>
-      <div class="ml-auto flex items-center gap-2">
-        <div class="relative">
-          <i class="fa-solid fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
-          <input type="text" id="search-input" placeholder="搜索关键词…" class="pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg outline-none focus:border-violet-500 w-48">
-        </div>
+        <button class="filter-pill" data-etype="breach">违约</button>
+        <button class="filter-pill" data-etype="throttle">限流</button>
+        <button class="filter-pill" data-etype="system">系统</button>
       </div>
     </div>
 
-    <!-- 事件大表 -->
-    <div id="events-table-wrap">
+    <div class="sf-card p-5 mb-4">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm">
           <thead class="bg-slate-50 text-slate-600 text-xs">
@@ -193,9 +211,55 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- 请求日志表 -->
-    <div id="logs-table-wrap" class="hidden">
+  <!-- ===== 日志 Tab ===== -->
+  <div id="logs-tab" class="hidden">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+      <div class="flex items-center gap-2">
+        <div class="relative time-picker" data-suffix="logs">
+          <button type="button" class="time-toggle inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 shadow-sm">
+            <i class="fa-regular fa-clock text-xs text-slate-400"></i>
+            <span class="time-label">最近 1 小时</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+          </button>
+          <div class="time-panel hidden absolute left-0 mt-1 w-80 bg-white border border-slate-200 rounded-lg shadow-lg p-3 z-50">
+            <p class="text-xs text-slate-500 mb-2">快捷选项</p>
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border bg-violet-50 border-violet-500 text-violet-600 text-left" data-value="1h">最近 1 小时</button>
+            <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="24h">最近 24 小时</button>
+            <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="7d">最近 7 天</button>
+            <button type="button" class="time-opt px-2.5 py-1.5 text-xs rounded border border-slate-200 hover:border-violet-500 hover:text-violet-600 text-left" data-value="30d">最近 30 天</button>
+          </div>
+          <div class="border-t border-slate-100 pt-3">
+            <p class="text-xs text-slate-500 mb-2">自定义范围</p>
+            <div class="flex items-center gap-2">
+              <input type="date" class="custom-start flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+              <span class="text-xs text-slate-400">至</span>
+              <input type="date" class="custom-end flex-1 text-xs border border-slate-200 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 mt-3 pt-2 border-t border-slate-100">
+            <button type="button" class="time-cancel px-2.5 py-1 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-50">取消</button>
+            <button type="button" class="time-apply px-2.5 py-1 text-xs rounded bg-violet-600 text-white hover:bg-violet-700">应用</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs text-slate-500">状态码</span>
+        <button class="filter-pill active" data-ltype="all">全部</button>
+        <button class="filter-pill" data-ltype="200">200</button>
+        <button class="filter-pill" data-ltype="429">429</button>
+        <button class="filter-pill" data-ltype="5xx">5xx</button>
+        <div class="relative ml-2">
+          <i class="fa-solid fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+          <input type="text" id="search-input" placeholder="搜索关键词…" class="pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg outline-none focus:border-violet-500 w-48">
+        </div>
+      </div>
+    </div>
+
+    <div class="sf-card p-5 mb-4">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm">
           <thead class="bg-slate-50 text-slate-600 text-xs" id="logs-thead">
@@ -306,7 +370,7 @@
         const h = (d.vtpm / maxV) * ch;
         const y = pT + ch - h;
         const fill = d.vtpm > CAPACITY ? '#c4b5fd' : '#7c3aed';
-        parts += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${fill}" rx="1.5" opacity="0.85"><title>${d.label} · ${d.vtpm} 万 vTPM${d.breach ? ' · ' + d.breach + '类违约' : ''}</title></rect>`;
+        parts += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${fill}" rx="1.5" opacity="0.85" data-idx="${i}" onmouseenter="showBarTip(${i},this)" onmouseleave="hideVtpmTip()"><title>${d.label} · ${d.vtpm} 万 vTPM</title></rect>`;
       });
 
       const capY = pT + ch - (CAPACITY / maxV) * ch;
@@ -318,7 +382,7 @@
           const cx = pL + i * slot + slot / 2;
           const cy = pT + ch - (d.peak429.sliding / maxV) * ch - 10;
           parts += `<circle cx="${cx}" cy="${cy}" r="4" fill="#ef4444" stroke="#fff" stroke-width="1.5"/>`;
-          parts += `<circle cx="${cx}" cy="${cy}" r="10" fill="transparent" onmouseenter="show429Tip(${i},this)" onmouseleave="hide429Tip()"/>`;
+          parts += `<circle cx="${cx}" cy="${cy}" r="10" fill="transparent" onmouseenter="show429Tip(${i},this)" onmouseleave="hideVtpmTip()"/>`;
         }
       });
 
@@ -330,30 +394,42 @@
       svg.innerHTML = parts;
     }
 
-    function show429Tip(idx, el) {
+    function showBarTip(idx, el) {
       const d = minuteData[idx];
-      const peak = d.peak429;
-      const others = d.throttleEvents
-        .filter(e => e !== peak)
-        .sort((a, b) => b.sliding - a.sliding)
-        .map(e => `<p style="color:#94a3b8">　· ${e.label} 触发 · 窗口 ${e.sliding} 万</p>`)
-        .join('');
       const tip = document.getElementById('vtpm-tooltip');
       const wrap = document.getElementById('vtpm-chart-wrap');
       const wrapRect = wrap.getBoundingClientRect();
       const elRect = el.getBoundingClientRect();
-      tip.innerHTML = `
-        <p style="color:#fca5a5;font-weight:600">429 限流 · ${peak.label} 触发（精确到秒）</p>
-        <p>该秒前 60s 滑动窗口 vTPM：<b style="color:#ef4444">${peak.sliding} 万</b></p>
-        <p>所在自然分钟 vTPM：${d.vtpm} 万（分钟级，与事件不同源）</p>
-        <p>本分钟共 ${d.throttleEvents.length} 次 429，图上仅展示峰值最高的 1 次${others}</p>
-        <p style="color:#94a3b8">购买量：${CAPACITY} 万 vTPM · 超出 ${(peak.sliding - CAPACITY).toFixed(1)} 万</p>
+      if (d.peak429) {
+        tip.innerHTML = show429Html(d.peak429);
+      } else {
+        tip.innerHTML = `<p>${d.label}</p><p>${d.vtpm} 万 vTPM</p>`;
+      }
+      tip.style.display = 'block';
+      tip.style.left = (elRect.left - wrapRect.left + elRect.width / 2 - tip.offsetWidth / 2) + 'px';
+      tip.style.top = (elRect.top - wrapRect.top - tip.offsetHeight - 6) + 'px';
+    }
+
+    function show429Html(peak) {
+      return `
+        <p>${peak.label} 429 限流</p>
+        <p>${peak.sliding} 万 / ${CAPACITY} 万</p>
+        <p>+${(peak.sliding - CAPACITY).toFixed(1)} 万</p>
       `;
+    }
+
+    function show429Tip(idx, el) {
+      const d = minuteData[idx];
+      const tip = document.getElementById('vtpm-tooltip');
+      const wrap = document.getElementById('vtpm-chart-wrap');
+      const wrapRect = wrap.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      tip.innerHTML = show429Html(d.peak429);
       tip.style.display = 'block';
       tip.style.left = (elRect.left - wrapRect.left + 14) + 'px';
       tip.style.top = (elRect.top - wrapRect.top - tip.offsetHeight - 8) + 'px';
     }
-    function hide429Tip() { document.getElementById('vtpm-tooltip').style.display = 'none'; }
+    function hideVtpmTip() { document.getElementById('vtpm-tooltip').style.display = 'none'; }
 
     /* ===== 折线图（TTFT / TPOT） ===== */
     function renderLineChart(svgId, key, color, threshold, unit) {
@@ -441,7 +517,6 @@
     ];
 
     /* ===== 请求日志数据 ===== */
-    const adminFields = { cacheHit: '—', cacheMiss: '—', outTokens: '—', throttle: 0 };
     const logsData = [
       { time: '14:32:45', rid: 'req_8a3f2e1c', model: pkg.bind, code: 429, vtpm: '312 万', ttft: '—', tpot: '—', note: '滑动窗口超限，429', ...(isAdmin ? { cacheHit: '—', cacheMiss: '—', outTokens: '—', throttle: 1 } : {}) },
       { time: '14:32:30', rid: 'req_7b2e9a3d', model: pkg.bind, code: 200, vtpm: '280 万', ttft: '115', tpot: '18', note: '', ...(isAdmin ? { cacheHit: '12,480', cacheMiss: '3,210', outTokens: '856', throttle: 0 } : {}) },
@@ -545,25 +620,24 @@
       document.getElementById('logs-count').textContent = `共 ${data.length} 条`;
     }
 
-    function switchTableTab(tab) {
+    function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-      document.getElementById('events-table-wrap').classList.toggle('hidden', tab !== 'events');
-      document.getElementById('logs-table-wrap').classList.toggle('hidden', tab !== 'logs');
-      document.getElementById('type-filter-events').classList.toggle('hidden', tab !== 'events');
-      document.getElementById('type-filter-logs').classList.toggle('hidden', tab !== 'logs');
+      document.getElementById('metrics-tab').classList.toggle('hidden', tab !== 'metrics');
+      document.getElementById('events-tab').classList.toggle('hidden', tab !== 'events');
+      document.getElementById('logs-tab').classList.toggle('hidden', tab !== 'logs');
     }
 
-    document.querySelectorAll('#type-filter-events .filter-pill').forEach(btn => {
+    document.querySelectorAll('#events-tab .filter-pill').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('#type-filter-events .filter-pill').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#events-tab .filter-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         eventFilter = btn.dataset.etype;
         renderEvents();
       });
     });
-    document.querySelectorAll('#type-filter-logs .filter-pill').forEach(btn => {
+    document.querySelectorAll('#logs-tab .filter-pill').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('#type-filter-logs .filter-pill').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#logs-tab .filter-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         logFilter = btn.dataset.ltype;
         renderLogs();
@@ -574,26 +648,44 @@
       renderEvents(); renderLogs();
     });
 
-    /* ===== 时间选择器 ===== */
-    function toggleTimePicker() { document.getElementById('time-panel').classList.toggle('hidden'); }
-    function closeTimePicker() { document.getElementById('time-panel').classList.add('hidden'); }
-    function selectTime(value) {
-      const labels = { '1h': '最近 1 小时', '24h': '最近 24 小时', '7d': '最近 7 天', '30d': '最近 30 天' };
-      document.getElementById('time-label').textContent = labels[value];
-      document.querySelectorAll('.time-opt').forEach(btn => {
-        btn.classList.toggle('bg-violet-50', btn.dataset.value === value);
-        btn.classList.toggle('border-violet-500', btn.dataset.value === value);
-        btn.classList.toggle('text-violet-600', btn.dataset.value === value);
+    /* ===== 通用时间选择器初始化 ===== */
+    function initTimePicker(wrapper) {
+      const suffix = wrapper.dataset.suffix;
+      const toggle = wrapper.querySelector('.time-toggle');
+      const panel = wrapper.querySelector('.time-panel');
+      const label = wrapper.querySelector('.time-label');
+      const opts = wrapper.querySelectorAll('.time-opt');
+      const startInput = wrapper.querySelector('.custom-start');
+      const endInput = wrapper.querySelector('.custom-end');
+      const cancelBtn = wrapper.querySelector('.time-cancel');
+      const applyBtn = wrapper.querySelector('.time-apply');
+
+      toggle.addEventListener('click', (e) => { e.stopPropagation(); panel.classList.toggle('hidden'); });
+      cancelBtn.addEventListener('click', () => panel.classList.add('hidden'));
+      applyBtn.addEventListener('click', () => {
+        const s = startInput.value, e = endInput.value;
+        if (s && e) { label.textContent = `${s} 至 ${e}`; panel.classList.add('hidden'); }
       });
-      closeTimePicker();
+      opts.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const value = btn.dataset.value;
+          const labels = { '1h': '最近 1 小时', '24h': '最近 24 小时', '7d': '最近 7 天', '30d': '最近 30 天' };
+          label.textContent = labels[value];
+          opts.forEach(b => {
+            b.classList.toggle('bg-violet-50', b === btn);
+            b.classList.toggle('border-violet-500', b === btn);
+            b.classList.toggle('text-violet-600', b === btn);
+          });
+          panel.classList.add('hidden');
+        });
+      });
     }
-    function applyCustomTime() {
-      const s = document.getElementById('custom-start').value, e = document.getElementById('custom-end').value;
-      if (s && e) { document.getElementById('time-label').textContent = `${s} 至 ${e}`; closeTimePicker(); }
-    }
+
+    document.querySelectorAll('.time-picker').forEach(initTimePicker);
     document.addEventListener('click', (e) => {
-      const p = document.getElementById('time-picker');
-      if (p && !p.contains(e.target)) closeTimePicker();
+      document.querySelectorAll('.time-panel').forEach(p => {
+        if (!p.closest('.time-picker').contains(e.target)) p.classList.add('hidden');
+      });
     });
 
     /* ===== 初始化 ===== */
