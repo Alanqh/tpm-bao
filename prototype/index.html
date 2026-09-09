@@ -671,7 +671,7 @@
       }
       recVtpmEl.textContent = `${recWan.toLocaleString()} 万 vTPM`;
       recVtpmEl.dataset.value = recWan;
-      recDetailEl.textContent = `实际所需 ${Math.ceil(actualVtpm).toLocaleString()} vTPM/分钟，按 ${VTPM_STEP} 万步长向上取整`;
+      recDetailEl.textContent = `当前业务场景需要 ${Math.ceil(actualVtpm).toLocaleString()} vTPM`;
     }
     unitsEl.addEventListener('input', updateSummary);
     [sceneInputEl, sceneCacheEl, sceneOutputEl, sceneRpmEl].forEach(el => el.addEventListener('input', updateRecommendation));
