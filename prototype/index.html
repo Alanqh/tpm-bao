@@ -296,103 +296,95 @@
             </div>
           </div>
 
-          <!-- 右侧性能 -->
+          <!-- 右侧容量推荐 -->
           <div class="p-6 lg:p-8 bg-slate-50/50">
-            <h3 class="font-semibold text-lg text-slate-900 mb-6 flex items-center gap-2">
+            <h3 class="font-semibold text-lg text-slate-900 mb-2 flex items-center gap-2">
               <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm"><i class="fa-solid fa-gauge-high"></i></span>
-              性能试算
+              容量推荐
             </h3>
+            <p class="text-xs text-slate-500 mb-5">输入业务场景参数，结合当前模型折算系数，估算所需预留 vTPM。</p>
 
             <div class="space-y-5">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-medium text-slate-600 mb-1">输入长度区间</label>
-                  <select id="input-range" class="w-full rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                    <option value="short">0 ~ 128K</option>
-                    <option value="medium">128K ~ 256K</option>
-                    <option value="long">256K+</option>
-                  </select>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">平均输入长度</label>
+                  <div class="flex items-center gap-2">
+                    <input id="scene-input" type="number" min="0" value="20000" class="flex-1 rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                    <span class="text-xs text-slate-500">tokens</span>
+                  </div>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-slate-600 mb-1">Cache 命中率区间</label>
-                  <select id="cache-range" class="w-full rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                    <option value="low">0% ~ 50%</option>
-                    <option value="mid">50% ~ 90%</option>
-                    <option value="high">90% ~ 100%</option>
-                  </select>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">平均 Cache 命中率</label>
+                  <div class="flex items-center gap-2">
+                    <input id="scene-cache" type="number" min="0" max="100" value="30" class="flex-1 rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                    <span class="text-xs text-slate-500">%</span>
+                  </div>
                 </div>
-                <div class="sm:col-span-2">
-                  <label class="block text-xs font-medium text-slate-600 mb-1">输出长度区间</label>
-                  <select id="output-range" class="w-full rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                    <option value="short">0 ~ 512</option>
-                    <option value="medium">512 ~ 4K</option>
-                    <option value="long">4K+</option>
-                  </select>
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">平均输出长度</label>
+                  <div class="flex items-center gap-2">
+                    <input id="scene-output" type="number" min="0" value="1000" class="flex-1 rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                    <span class="text-xs text-slate-500">tokens</span>
+                  </div>
                 </div>
-              </div>
-
-              <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">vTPM 数量（与左侧联动，单位：万）</label>
-                <div class="flex items-center gap-3">
-                  <input id="calc-vtpm" type="number" min="100" max="1000" step="100" value="300" class="flex-1 rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                  <span class="text-sm text-slate-500">万 vTPM</span>
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">平均 RPM</label>
+                  <div class="flex items-center gap-2">
+                    <input id="scene-rpm" type="number" min="1" value="100" class="flex-1 rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
+                    <span class="text-xs text-slate-500">请求/分</span>
+                  </div>
                 </div>
               </div>
 
               <div class="grid gap-3">
                 <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-memory"></i></div>
+                    <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
                     <div class="flex-1 min-w-0">
-                      <p class="text-xs text-slate-500">输入未命中 Cache / 分钟</p>
-                      <p id="calc-miss" class="text-lg font-bold text-slate-900 truncate">3,000,000 tokens</p>
+                      <p class="text-xs text-slate-500">推荐 vTPM 量</p>
+                      <p id="rec-vtpm" class="text-lg font-bold text-slate-900 truncate">300 万 vTPM</p>
                     </div>
                   </div>
                 </div>
                 <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-green-50 text-green-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-check"></i></div>
                     <div class="flex-1 min-w-0">
-                      <p class="text-xs text-slate-500">输入命中 Cache / 分钟</p>
-                      <p id="calc-hit" class="text-lg font-bold text-slate-900 truncate">120,000,000 tokens</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-xs text-slate-500">输出可承载 / 分钟</p>
-                      <p id="calc-output" class="text-lg font-bold text-slate-900 truncate">1,000,000 tokens</p>
+                      <p class="text-xs text-slate-500">当前选择</p>
+                      <p id="rec-current" class="text-lg font-bold text-slate-900 truncate">300 万 vTPM · 满足</p>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- 折算系数表 -->
-        <div class="px-6 lg:px-8 py-6 border-t border-slate-200 bg-slate-50/50">
-          <div class="flex items-center gap-2 mb-3">
-            <i class="fa-solid fa-table text-violet-600"></i>
-            <h4 class="text-sm font-semibold text-slate-900">折算系数 · <span id="factor-model-name">Deepseek V4 Flash 0731</span></h4>
-          </div>
-          <p class="text-xs text-slate-500 mb-3">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-xs border border-slate-200 rounded-lg bg-white">
-              <thead class="bg-slate-50 text-slate-600">
-                <tr>
-                  <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
-                  <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
-                  <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
-                  <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
-                  <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
-                  <th class="px-3 py-2 text-left font-medium">输出系数</th>
-                </tr>
-              </thead>
-              <tbody id="factor-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
-            </table>
+              <button type="button" id="apply-rec" class="w-full py-2.5 rounded-lg border border-violet-600 text-violet-600 text-sm font-medium hover:bg-violet-50 transition-colors">
+                应用推荐到左侧配置
+              </button>
+
+              <!-- 折算系数表 -->
+              <div class="pt-4 border-t border-slate-200">
+                <div class="flex items-center gap-2 mb-2">
+                  <i class="fa-solid fa-table text-violet-600 text-xs"></i>
+                  <h4 class="text-xs font-semibold text-slate-900">折算系数 · <span id="factor-model-name">Deepseek V4 Flash 0731</span></h4>
+                </div>
+                <p class="text-xs text-slate-500 mb-2">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full text-[11px] border border-slate-200 rounded-lg bg-white">
+                    <thead class="bg-slate-50 text-slate-600">
+                      <tr>
+                        <th class="px-2 py-1.5 text-left font-medium">输入长度</th>
+                        <th class="px-2 py-1.5 text-left font-medium">Cache 命中</th>
+                        <th class="px-2 py-1.5 text-left font-medium">输出长度</th>
+                        <th class="px-2 py-1.5 text-left font-medium">未命中</th>
+                        <th class="px-2 py-1.5 text-left font-medium">命中</th>
+                        <th class="px-2 py-1.5 text-left font-medium">输出</th>
+                      </tr>
+                    </thead>
+                    <tbody id="factor-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -530,19 +522,16 @@
     const unitsDisplay = document.getElementById('units-display');
     const vtpmTotalEl = document.getElementById('vtpm-total');
     const cycleBtns = document.querySelectorAll('.cycle-btn');
-    const calcVtpmEl = document.getElementById('calc-vtpm');
     const priceTotalEl = document.getElementById('price-total');
     const priceModelEl = document.getElementById('price-model');
     const priceUnitsEl = document.getElementById('price-units');
     const priceCycleEl = document.getElementById('price-cycle');
-    const factorTable = {
-      input: { short: 1, medium: 1.5, long: 2.5 },
-      cache: { low: 0.7, mid: 0.85, high: 0.95 },
-      output: { short: 1, medium: 2, long: 4 }
-    };
-    function formatTokens(n) {
-      return Math.floor(n).toLocaleString() + ' tokens';
-    }
+    const recVtpmEl = document.getElementById('rec-vtpm');
+    const recCurrentEl = document.getElementById('rec-current');
+    const sceneInputEl = document.getElementById('scene-input');
+    const sceneCacheEl = document.getElementById('scene-cache');
+    const sceneOutputEl = document.getElementById('scene-output');
+    const sceneRpmEl = document.getElementById('scene-rpm');
     function formatPrice(n) {
       return n.toLocaleString();
     }
@@ -555,7 +544,7 @@
         <option value="${m.id}" data-price="${m.price}" data-desc="${m.desc}">${m.name} · ¥${formatPrice(m.price)}/10万 vTPM/30天</option>
       `).join('');
       updateModelDesc();
-      select.addEventListener('change', () => { updateModelDesc(); updatePrice(); });
+      select.addEventListener('change', () => { updateModelDesc(); updatePrice(); updateRecommendation(); });
     }
     function updateModelDesc() {
       const modelId = getSelectedModel();
@@ -567,19 +556,35 @@
       document.getElementById('factor-model-name').textContent = model ? model.name : '-';
       const tbody = document.getElementById('factor-table-body');
       if (!model || !model.factors || model.factors.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="px-3 py-3 text-slate-400">暂无折算系数数据</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="px-2 py-2 text-slate-400">暂无折算系数数据</td></tr>';
         return;
       }
       tbody.innerHTML = model.factors.map(f => `
         <tr>
-          <td class="px-3 py-2">${f.input}</td>
-          <td class="px-3 py-2">${f.cache}</td>
-          <td class="px-3 py-2">${f.output}</td>
-          <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
-          <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
-          <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
+          <td class="px-2 py-1.5">${f.input}</td>
+          <td class="px-2 py-1.5">${f.cache}</td>
+          <td class="px-2 py-1.5">${f.output}</td>
+          <td class="px-2 py-1.5 font-mono">${f.inputF.toFixed(2)}</td>
+          <td class="px-2 py-1.5 font-mono">${f.cacheF.toFixed(2)}</td>
+          <td class="px-2 py-1.5 font-mono">${f.outputF.toFixed(2)}</td>
         </tr>
       `).join('');
+    }
+    function matchFactor(model, input, cacheRate, output) {
+      if (!model || !model.factors) return null;
+      const inputKey = input < 128000 ? '0 ~ 128K' : (input < 256000 ? '128K ~ 256K' : '256K+');
+      const cacheKey = cacheRate < 50 ? '0%' : '50% ~ 100%';
+      const outputKey = output < 512 ? '0 ~ 512' : (output < 4096 ? '512 ~ 4K' : '4K+');
+      const exact = model.factors.find(f => f.input === inputKey && f.cache === cacheKey && f.output === outputKey);
+      if (exact) return exact;
+      // 降级匹配：先按输入，再按 cache，再按输出
+      const byInput = model.factors.filter(f => f.input === inputKey);
+      if (byInput.length) {
+        const byCache = byInput.filter(f => f.cache === cacheKey);
+        if (byCache.length) return byCache[0];
+        return byInput[0];
+      }
+      return model.factors[0];
     }
     function updatePrice() {
       const modelId = getSelectedModel();
@@ -597,27 +602,31 @@
       const units = parseInt(unitsEl.value);
       unitsDisplay.textContent = units;
       vtpmTotalEl.value = units;
-      calcVtpmEl.value = units;
       updatePrice();
-      updateCalc();
+      updateRecommendation();
     }
-    function updateCalc() {
-      let units = parseInt(calcVtpmEl.value) || 0;
-      units = Math.max(100, Math.min(1000, Math.round(units / 100) * 100));
-      calcVtpmEl.value = units;
-      if (unitsEl.value != units) {
-        unitsEl.value = units;
-        unitsDisplay.textContent = units;
-        vtpmTotalEl.value = units;
-        updatePrice();
+    function updateRecommendation() {
+      const modelId = getSelectedModel();
+      const model = modelList.find(m => m.id === modelId);
+      const input = Math.max(0, parseInt(sceneInputEl.value) || 0);
+      const cacheRate = Math.max(0, Math.min(100, parseInt(sceneCacheEl.value) || 0));
+      const output = Math.max(0, parseInt(sceneOutputEl.value) || 0);
+      const rpm = Math.max(1, parseInt(sceneRpmEl.value) || 1);
+      const current = parseInt(unitsEl.value) || 0;
+      let recWan = current;
+      if (model && model.factors) {
+        const f = matchFactor(model, input, cacheRate, output);
+        const missTokens = input * rpm * (1 - cacheRate / 100);
+        const hitTokens = input * rpm * (cacheRate / 100);
+        const outTokens = output * rpm;
+        const vtpmPerMin = (missTokens * f.inputF + hitTokens * f.cacheF + outTokens * f.outputF) / 1000;
+        recWan = Math.max(100, Math.min(1000, Math.ceil((vtpmPerMin / 10000) / 100) * 100));
       }
-      const base = units * 10000; // 试算内部按实际 vTPM 数量计算
-      const inputF = factorTable.input[document.getElementById('input-range').value];
-      const cacheF = factorTable.cache[document.getElementById('cache-range').value];
-      const outputF = factorTable.output[document.getElementById('output-range').value];
-      document.getElementById('calc-miss').textContent = formatTokens(base * 1000 / inputF);
-      document.getElementById('calc-hit').textContent = formatTokens(base * 1000 / inputF / (1 - cacheF + 0.025) / 0.025);
-      document.getElementById('calc-output').textContent = formatTokens(base * 1000 / 3 / outputF);
+      recVtpmEl.textContent = `${recWan.toLocaleString()} 万 vTPM`;
+      recVtpmEl.dataset.value = recWan;
+      const statusText = current >= recWan ? '满足' : '建议增加';
+      const statusColor = current >= recWan ? 'text-green-600' : 'text-orange-600';
+      recCurrentEl.innerHTML = `${current.toLocaleString()} 万 vTPM · <span class="${statusColor}">${statusText}</span>`;
     }
     cycleBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -629,8 +638,12 @@
       });
     });
     unitsEl.addEventListener('input', updateSummary);
-    ['input-range','cache-range','output-range'].forEach(id => document.getElementById(id).addEventListener('change', updateCalc));
-    calcVtpmEl.addEventListener('input', updateCalc);
+    [sceneInputEl, sceneCacheEl, sceneOutputEl, sceneRpmEl].forEach(el => el.addEventListener('input', updateRecommendation));
+    document.getElementById('apply-rec').addEventListener('click', () => {
+      const rec = parseInt(recVtpmEl.dataset.value) || 100;
+      unitsEl.value = rec;
+      updateSummary();
+    });
     renderModels();
     updateSummary();
   </script>
