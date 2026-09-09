@@ -721,6 +721,18 @@
       document.getElementById('sku-sku-code').value = p ? p.skuCode : '';
     }
 
+    function setPayloadSelectDisabled(disabled) {
+      const select = document.getElementById('sku-master');
+      select.disabled = disabled;
+      if (disabled) {
+        select.classList.add('bg-slate-50', 'text-slate-500', 'cursor-not-allowed');
+        select.classList.remove('focus:border-violet-500');
+      } else {
+        select.classList.remove('bg-slate-50', 'text-slate-500', 'cursor-not-allowed');
+        select.classList.add('focus:border-violet-500');
+      }
+    }
+
     function openSkuModal(id) {
       editingId = id || null;
       const err = document.getElementById('sku-form-error');
@@ -733,6 +745,7 @@
         document.getElementById('sku-name').value = s.name;
         renderPayloadOptions(s.payloadId);
         onPayloadChange();
+        setPayloadSelectDisabled(true);
         document.getElementById('sku-min-vtpm').value = s.minVtpm;
         document.getElementById('sku-min-cycle').value = s.minCycle;
         document.getElementById('sku-price').value = s.price;
@@ -746,6 +759,7 @@
         document.getElementById('sku-id').value = '';
         document.getElementById('sku-name').value = '';
         renderPayloadOptions('');
+        setPayloadSelectDisabled(false);
         document.getElementById('sku-model-id').value = '';
         document.getElementById('sku-model-name').value = '';
         document.getElementById('sku-sku-id').value = '';
@@ -777,8 +791,6 @@
 
     function saveSku() {
       const name = document.getElementById('sku-name').value.trim();
-      const payloadId = document.getElementById('sku-master').value;
-      const payload = payloadMasterById(payloadId);
       const minVtpm = parseInt(document.getElementById('sku-min-vtpm').value, 10);
       const minCycle = parseInt(document.getElementById('sku-min-cycle').value, 10);
       const price = parseInt(document.getElementById('sku-price').value, 10);
@@ -788,8 +800,6 @@
       const note = document.getElementById('sku-note').value.trim();
 
       if (!name) return showSkuError('请填写商品名称。');
-      if (!payloadId) return showSkuError('请选择 vTPM Payload。');
-      if (!payload) return showSkuError('Payload 未关联模型与 SKU，请选择有效 Payload。');
       if (!Number.isInteger(minVtpm) || minVtpm < 1) return showSkuError('最小购买 vTPM 量必须为不小于 1 的整数（万 vTPM）。');
       if (!Number.isInteger(minCycle) || minCycle < 1) return showSkuError('最小购买周期必须为不小于 1 的整数（天）。');
       if (!Number.isInteger(price) || price < 0) return showSkuError('单价必须为不小于 0 的整数。');
@@ -798,8 +808,12 @@
 
       if (editingId) {
         const s = products.find(x => x.id === editingId);
-        Object.assign(s, { name, payloadId, minVtpm, minCycle, price, sellStart, sellEnd, total, note });
+        Object.assign(s, { name, minVtpm, minCycle, price, sellStart, sellEnd, total, note });
       } else {
+        const payloadId = document.getElementById('sku-master').value;
+        const payload = payloadMasterById(payloadId);
+        if (!payloadId) return showSkuError('请选择 vTPM Payload。');
+        if (!payload) return showSkuError('Payload 未关联模型与 SKU，请选择有效 Payload。');
         const modelIdSafe = payload.modelId.replace(/[^a-z0-9]/gi, '').slice(0, 6).toLowerCase();
         const nextId = 'vtpm-' + modelIdSafe + '-' + String(products.length + 1).padStart(3, '0');
         products.push({ id: nextId, name, payloadId, minVtpm, minCycle, price, sellStart, sellEnd, total, note });
