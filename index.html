@@ -225,8 +225,8 @@
   <section class="py-20 bg-[#F8FAFC]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
-        <h2 class="sf-section-title">产品规格与价格</h2>
-        <p class="sf-section-subtitle">选择模型、vTPM 数量与购买周期，实时查看对应的价格与性能保障。</p>
+        <h2 class="sf-section-title">产品价格</h2>
+        <p class="sf-section-subtitle">选择模型、vTPM 数量与购买周期，实时查看对应的价格。</p>
       </div>
 
       <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
@@ -234,9 +234,8 @@
         <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
           <div class="flex items-center gap-3 text-white">
             <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center"><i class="fa-solid fa-sliders"></i></div>
-            <span class="font-semibold">实时配置器</span>
+            <span class="font-semibold">购买预留vTPM</span>
           </div>
-          <span class="text-white/80 text-sm">价格与性能随配置实时更新</span>
         </div>
 
         <div class="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
@@ -284,11 +283,10 @@
               <div class="bg-gradient-to-br from-violet-50 to-indigo-50 rounded-xl p-5 border border-violet-100">
                 <div class="flex justify-between items-center mb-1">
                   <span class="text-sm text-slate-600">预估总价</span>
-                  <span class="text-xs text-slate-400">不含税</span>
                 </div>
                 <div class="text-3xl font-bold text-primary">¥<span id="price-total">99,000</span></div>
-                <p class="text-xs text-slate-500 mt-2">基于 <span id="price-model">Deepseek V4 Flash 0731</span> × <span id="price-units">300</span> 万 vTPM × <span id="price-cycle">30</span> 天</p>
-                <p class="text-xs text-slate-400 mt-1">单价：<span id="price-unit">¥3,300</span>/10 万 vTPM/30 天</p>
+                <p class="text-xs text-slate-500 mt-2"><span id="price-model">Deepseek V4 Flash 0731</span> × <span id="price-units">300</span> 万 vTPM × <span id="price-cycle">30</span> 天</p>
+                <p class="text-xs text-slate-400 mt-1">单价：<span id="price-unit">¥3,300</span>/100 万 vTPM/30 天</p>
               </div>
             </div>
           </div>
@@ -328,7 +326,7 @@
                   <label class="block text-xs font-medium text-slate-600 mb-1">平均 RPM</label>
                   <div class="flex items-center gap-2">
                     <input id="scene-rpm" type="number" min="1" value="100" class="flex-1 rounded-lg border-slate-300 px-3 py-2 border text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white">
-                    <span class="text-xs text-slate-500">请求/分</span>
+                    <span class="text-xs text-slate-500">请求/分钟</span>
                   </div>
                 </div>
               </div>
@@ -339,7 +337,7 @@
                   <div class="flex-1 min-w-0">
                     <p class="text-xs text-slate-500">推荐购买 vTPM 量</p>
                     <p id="rec-vtpm" class="text-lg font-bold text-slate-900 truncate">100 万 vTPM</p>
-                    <p id="rec-detail" class="text-[11px] text-slate-400 mt-1 truncate">实际所需 1,620 vTPM/分钟，按 100 万步长向上取整</p>
+                    <p id="rec-detail" class="text-[11px] text-slate-400 mt-1 truncate">当前业务场景需要 1,620 vTPM</p>
                     <p class="text-[11px] text-slate-400 mt-0.5">根据 TPM 与 vTPM <button type="button" onclick="openFactorModal()" class="text-violet-600 hover:text-violet-700 underline underline-offset-2">折算系数</button> 计算得到</p>
                   </div>
                 </div>
@@ -350,12 +348,6 @@
               </button>
             </div>
           </div>
-        </div>
-
-        <!-- 底部 CTA -->
-        <div class="bg-slate-50 px-6 py-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p class="text-sm text-slate-500">说明：不同模型对应不同的 vTPM 容量、折算系数与价格。实际可购买数量以提交订单时的库存校验结果为准。预留 vTPM 本身不超售；库存不足时，可选择候补或咨询其他可用模型。长周期及小时、天级短期规格暂不提供。</p>
-          <a href="purchase.html" class="px-8 py-3 rounded-lg sf-btn-primary text-white font-medium whitespace-nowrap">立即咨询</a>
         </div>
       </div>
     </div>
