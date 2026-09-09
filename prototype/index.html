@@ -292,10 +292,6 @@
                 </div>
                 <div class="text-3xl font-bold text-primary">¥<span id="price-total">9,900</span></div>
                 <p class="text-xs text-slate-500 mt-2">基于 <span id="price-model">Deepseek V4 Flash 0731</span> × <span id="price-units">30</span> 万 vTPM × <span id="price-cycle">30</span> 天</p>
-                <p class="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
-                  <i class="fa-solid fa-arrow-right-arrow-left text-[10px]"></i>
-                  1 vTPM ≈ 1,000 TPM，当前约合 <span id="tpm-equiv" class="font-medium text-slate-700">3 亿</span> TPM/分钟
-                </p>
               </div>
             </div>
           </div>
@@ -373,6 +369,30 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- 折算系数表 -->
+        <div class="px-6 lg:px-8 py-6 border-t border-slate-200 bg-slate-50/50">
+          <div class="flex items-center gap-2 mb-3">
+            <i class="fa-solid fa-table text-violet-600"></i>
+            <h4 class="text-sm font-semibold text-slate-900">折算系数 · <span id="factor-model-name">Deepseek V4 Flash 0731</span></h4>
+          </div>
+          <p class="text-xs text-slate-500 mb-3">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-slate-200 rounded-lg bg-white">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
+                  <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
+                  <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
+                  <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
+                  <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
+                  <th class="px-3 py-2 text-left font-medium">输出系数</th>
+                </tr>
+              </thead>
+              <tbody id="factor-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+            </table>
           </div>
         </div>
 
@@ -476,8 +496,30 @@
   <script>
     // 模型配置：新增模型只需在此数组追加即可自动渲染到选购区
     const modelList = [
-      { id: 'deepseek-v4-flash-0731', name: 'Deepseek V4 Flash 0731', price: 3300, desc: '高性价比通用模型' },
-      { id: 'glm-5.2', name: 'GLM 5.2', price: 2900, desc: '中文场景优化' }
+      {
+        id: 'deepseek-v4-flash-0731',
+        name: 'Deepseek V4 Flash 0731',
+        price: 3300,
+        desc: '高性价比通用模型',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.05, outputF: 2.00 },
+          { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
+          { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
+        ]
+      },
+      {
+        id: 'glm-5.2',
+        name: 'GLM 5.2',
+        price: 2900,
+        desc: '中文场景优化',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
+        ]
+      }
     ];
     const priceTable = {};
     modelList.forEach(m => priceTable[m.id] = m.price);
@@ -504,13 +546,6 @@
     function formatPrice(n) {
       return n.toLocaleString();
     }
-    function formatTpmEquiv(units) {
-      const tpm = units * 10000 * 1000; // 1 vTPM ≈ 1000 TPM
-      if (tpm >= 100000000) {
-        return Math.floor(tpm / 100000000).toLocaleString() + ' 亿';
-      }
-      return Math.floor(tpm / 10000).toLocaleString() + ' 万';
-    }
     function getSelectedModel() {
       return document.getElementById('model-select').value;
     }
@@ -526,6 +561,25 @@
       const modelId = getSelectedModel();
       const model = modelList.find(m => m.id === modelId);
       document.getElementById('model-desc').textContent = model ? model.desc : '';
+      renderFactorTable(model);
+    }
+    function renderFactorTable(model) {
+      document.getElementById('factor-model-name').textContent = model ? model.name : '-';
+      const tbody = document.getElementById('factor-table-body');
+      if (!model || !model.factors || model.factors.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="px-3 py-3 text-slate-400">暂无折算系数数据</td></tr>';
+        return;
+      }
+      tbody.innerHTML = model.factors.map(f => `
+        <tr>
+          <td class="px-3 py-2">${f.input}</td>
+          <td class="px-3 py-2">${f.cache}</td>
+          <td class="px-3 py-2">${f.output}</td>
+          <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
+          <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
+          <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
+        </tr>
+      `).join('');
     }
     function updatePrice() {
       const modelId = getSelectedModel();
@@ -538,7 +592,6 @@
       priceModelEl.textContent = model ? model.name : modelId;
       priceUnitsEl.textContent = units;
       priceCycleEl.textContent = days;
-      document.getElementById('tpm-equiv').textContent = formatTpmEquiv(units);
     }
     function updateSummary() {
       const units = parseInt(unitsEl.value);
