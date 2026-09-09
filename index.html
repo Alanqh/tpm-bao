@@ -244,7 +244,7 @@
           <div class="p-6 lg:p-8">
             <h3 class="font-semibold text-lg text-slate-900 mb-6 flex items-center gap-2">
               <span class="w-8 h-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-sm"><i class="fa-solid fa-cart-shopping"></i></span>
-              购买配置
+              预留 vTPM 价格
             </h3>
 
             <div class="space-y-6">
@@ -274,14 +274,10 @@
               <!-- 周期 -->
               <div>
                 <label class="block text-sm font-medium text-slate-700 mb-3">购买周期</label>
-                <div class="flex flex-wrap gap-2">
-                  <button type="button" class="cycle-btn active px-4 py-2 rounded-full border text-sm font-medium" data-cycle="1">30 天</button>
-                  <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium" data-cycle="2">60 天</button>
-                  <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium" data-cycle="3">90 天</button>
-                  <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium" data-cycle="4">120 天</button>
-                  <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium" data-cycle="5">150 天</button>
-                  <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium" data-cycle="6">180 天</button>
+                <div id="cycle-container" class="flex flex-wrap gap-2">
+                  <!-- 由 JS 根据商品配置动态渲染 -->
                 </div>
+                <p id="cycle-hint" class="text-xs text-slate-400 mt-2 hidden">可选周期根据当前时间及商品售卖截止时间计算。</p>
               </div>
 
               <!-- 价格估算 -->
@@ -292,15 +288,16 @@
                 </div>
                 <div class="text-3xl font-bold text-primary">¥<span id="price-total">99,000</span></div>
                 <p class="text-xs text-slate-500 mt-2">基于 <span id="price-model">Deepseek V4 Flash 0731</span> × <span id="price-units">300</span> 万 vTPM × <span id="price-cycle">30</span> 天</p>
+                <p class="text-xs text-slate-400 mt-1">单价：<span id="price-unit">¥3,300</span>/10 万 vTPM/30 天</p>
               </div>
             </div>
           </div>
 
-          <!-- 右侧容量推荐 -->
+          <!-- 右侧 vTPM 计算器 -->
           <div class="p-6 lg:p-8 bg-slate-50/50">
             <h3 class="font-semibold text-lg text-slate-900 mb-2 flex items-center gap-2">
               <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm"><i class="fa-solid fa-gauge-high"></i></span>
-              容量推荐
+              vTPM 计算器
             </h3>
             <p class="text-xs text-slate-500 mb-5">输入业务场景参数，结合当前模型折算系数，估算所需预留 vTPM。</p>
 
@@ -336,24 +333,14 @@
                 </div>
               </div>
 
-              <div class="grid gap-3">
-                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-xs text-slate-500">推荐 vTPM 量</p>
-                      <p id="rec-vtpm" class="text-lg font-bold text-slate-900 truncate">100 万 vTPM</p>
-                      <p class="text-[11px] text-slate-400 mt-1">根据 TPM 与 vTPM <button type="button" onclick="openFactorModal()" class="text-violet-600 hover:text-violet-700 underline underline-offset-2">折算系数</button> 计算得到</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-check"></i></div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-xs text-slate-500">当前选择</p>
-                      <p id="rec-current" class="text-lg font-bold text-slate-900 truncate">300 万 vTPM · 满足</p>
-                    </div>
+              <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs text-slate-500">推荐购买 vTPM 量</p>
+                    <p id="rec-vtpm" class="text-lg font-bold text-slate-900 truncate">100 万 vTPM</p>
+                    <p id="rec-detail" class="text-[11px] text-slate-400 mt-1 truncate">实际所需 1,620 vTPM/分钟，按 100 万步长向上取整</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">根据 TPM 与 vTPM <button type="button" onclick="openFactorModal()" class="text-violet-600 hover:text-violet-700 underline underline-offset-2">折算系数</button> 计算得到</p>
                   </div>
                 </div>
               </div>
@@ -494,13 +481,16 @@
   </footer>
 
   <script>
-    // 模型配置：新增模型只需在此数组追加即可自动渲染到选购区
+    // 商品配置：新增模型/商品只需在此数组追加即可自动渲染到选购区
     const modelList = [
       {
         id: 'deepseek-v4-flash-0731',
         name: 'Deepseek V4 Flash 0731',
         price: 3300,
         desc: '高性价比通用模型',
+        minCycle: 30,
+        cycleStep: 30,
+        sellEnd: '2026-12-31',
         factors: [
           { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
           { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
@@ -515,27 +505,30 @@
         name: 'GLM 5.2',
         price: 2900,
         desc: '中文场景优化',
+        minCycle: 30,
+        cycleStep: 30,
+        sellEnd: '2026-11-30',
         factors: [
           { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
           { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
         ]
       }
     ];
-    const priceTable = {};
-    modelList.forEach(m => priceTable[m.id] = m.price);
-    const cycleDays = { 1: 30, 2: 60, 3: 90, 4: 120, 5: 150, 6: 180 };
-    let selectedCycle = 1;
-    let modelEls = [];
+    const VTPM_STEP = 100; // 万 vTPM 购买步长
+    const VTPM_MIN = 100;  // 万 vTPM 最小购买量
+    const VTPM_MAX = 1000; // 万 vTPM 最大购买量
+    let selectedCycleDays = 30;
     const unitsEl = document.getElementById('units');
     const unitsDisplay = document.getElementById('units-display');
     const vtpmTotalEl = document.getElementById('vtpm-total');
-    const cycleBtns = document.querySelectorAll('.cycle-btn');
+    const cycleContainer = document.getElementById('cycle-container');
+    const cycleHint = document.getElementById('cycle-hint');
     const priceTotalEl = document.getElementById('price-total');
     const priceModelEl = document.getElementById('price-model');
     const priceUnitsEl = document.getElementById('price-units');
     const priceCycleEl = document.getElementById('price-cycle');
     const recVtpmEl = document.getElementById('rec-vtpm');
-    const recCurrentEl = document.getElementById('rec-current');
+    const recDetailEl = document.getElementById('rec-detail');
     const sceneInputEl = document.getElementById('scene-input');
     const sceneCacheEl = document.getElementById('scene-cache');
     const sceneOutputEl = document.getElementById('scene-output');
@@ -546,18 +539,50 @@
     function getSelectedModel() {
       return document.getElementById('model-select').value;
     }
+    function getModel() {
+      const modelId = getSelectedModel();
+      return modelList.find(m => m.id === modelId);
+    }
     function renderModels() {
       const select = document.getElementById('model-select');
-      select.innerHTML = modelList.map((m, i) => `
-        <option value="${m.id}" data-price="${m.price}" data-desc="${m.desc}">${m.name} · ¥${formatPrice(m.price)}/10万 vTPM/30天</option>
-      `).join('');
+      select.innerHTML = modelList.map((m) => `<option value="${m.id}">${m.name}</option>`).join('');
       updateModelDesc();
-      select.addEventListener('change', () => { updateModelDesc(); updatePrice(); updateRecommendation(); });
+      select.addEventListener('change', () => { updateModelDesc(); renderCycles(); updatePrice(); updateRecommendation(); });
     }
     function updateModelDesc() {
-      const modelId = getSelectedModel();
-      const model = modelList.find(m => m.id === modelId);
+      const model = getModel();
       document.getElementById('model-desc').textContent = model ? model.desc : '';
+    }
+    function calcAvailableCycles(model) {
+      if (!model) return [];
+      const today = new Date();
+      const end = new Date(model.sellEnd);
+      // 商品可售卖剩余天数（至少保留一个最小周期）
+      const maxDays = Math.max(0, Math.floor((end - today) / (1000 * 60 * 60 * 24)) + 1);
+      const cycles = [];
+      for (let d = model.minCycle; d <= maxDays; d += model.cycleStep) {
+        cycles.push(d);
+      }
+      return cycles.length ? cycles : [model.minCycle];
+    }
+    function renderCycles() {
+      const model = getModel();
+      const cycles = calcAvailableCycles(model);
+      cycleContainer.innerHTML = cycles.map((d, i) => `
+        <button type="button" class="cycle-btn px-4 py-2 rounded-full border text-sm font-medium ${i === 0 ? 'active' : ''}" data-days="${d}">${d} 天</button>
+      `).join('');
+      cycleHint.classList.toggle('hidden', cycles.length <= 3);
+      selectedCycleDays = cycles[0] || 30;
+      // 重新绑定事件
+      document.querySelectorAll('.cycle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.cycle-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-slate-600', 'border-slate-300'); b.classList.remove('bg-primary', 'text-white', 'border-primary'); });
+          btn.classList.remove('text-slate-600', 'border-slate-300');
+          btn.classList.add('active');
+          selectedCycleDays = parseInt(btn.dataset.days);
+          updatePrice();
+        });
+      });
     }
     function matchFactor(model, input, cacheRate, output) {
       if (!model || !model.factors) return null;
@@ -566,7 +591,6 @@
       const outputKey = output < 512 ? '0 ~ 512' : (output < 4096 ? '512 ~ 4K' : '4K+');
       const exact = model.factors.find(f => f.input === inputKey && f.cache === cacheKey && f.output === outputKey);
       if (exact) return exact;
-      // 降级匹配：先按输入，再按 cache，再按输出
       const byInput = model.factors.filter(f => f.input === inputKey);
       if (byInput.length) {
         const byCache = byInput.filter(f => f.cache === cacheKey);
@@ -600,8 +624,7 @@
       `}).join('');
     }
     function openFactorModal() {
-      const modelId = getSelectedModel();
-      const model = modelList.find(m => m.id === modelId);
+      const model = getModel();
       const input = Math.max(0, parseInt(sceneInputEl.value) || 0);
       const cacheRate = Math.max(0, Math.min(100, parseInt(sceneCacheEl.value) || 0));
       const output = Math.max(0, parseInt(sceneOutputEl.value) || 0);
@@ -617,16 +640,15 @@
       modal.classList.remove('flex');
     }
     function updatePrice() {
-      const modelId = getSelectedModel();
-      const model = modelList.find(m => m.id === modelId);
+      const model = getModel();
       const units = parseInt(unitsEl.value); // 单位：万 vTPM
-      const days = cycleDays[selectedCycle];
       // price 为每 10万 vTPM/30天 的价格
-      const total = (model ? model.price : 0) * (units / 10) * (days / 30);
+      const total = (model ? model.price : 0) * (units / 10) * (selectedCycleDays / 30);
       priceTotalEl.textContent = formatPrice(total);
-      priceModelEl.textContent = model ? model.name : modelId;
+      priceModelEl.textContent = model ? model.name : '-';
       priceUnitsEl.textContent = units;
-      priceCycleEl.textContent = days;
+      priceCycleEl.textContent = selectedCycleDays;
+      document.getElementById('price-unit').textContent = `¥${formatPrice(model ? model.price : 0)}`;
     }
     function updateSummary() {
       const units = parseInt(unitsEl.value);
@@ -635,46 +657,39 @@
       updatePrice();
       updateRecommendation();
     }
+    function roundVtpmWan(vtpmPerMin) {
+      const wan = vtpmPerMin / 10000;
+      return Math.max(VTPM_MIN, Math.min(VTPM_MAX, Math.ceil(wan / VTPM_STEP) * VTPM_STEP));
+    }
     function updateRecommendation() {
-      const modelId = getSelectedModel();
-      const model = modelList.find(m => m.id === modelId);
+      const model = getModel();
       const input = Math.max(0, parseInt(sceneInputEl.value) || 0);
       const cacheRate = Math.max(0, Math.min(100, parseInt(sceneCacheEl.value) || 0));
       const output = Math.max(0, parseInt(sceneOutputEl.value) || 0);
       const rpm = Math.max(1, parseInt(sceneRpmEl.value) || 1);
-      const current = parseInt(unitsEl.value) || 0;
-      let recWan = current;
+      let recWan = VTPM_MIN;
+      let actualVtpm = 0;
       if (model && model.factors) {
         const f = matchFactor(model, input, cacheRate, output);
         const missTokens = input * rpm * (1 - cacheRate / 100);
         const hitTokens = input * rpm * (cacheRate / 100);
         const outTokens = output * rpm;
-        const vtpmPerMin = (missTokens * f.inputF + hitTokens * f.cacheF + outTokens * f.outputF) / 1000;
-        recWan = Math.max(100, Math.min(1000, Math.ceil((vtpmPerMin / 10000) / 100) * 100));
+        actualVtpm = (missTokens * f.inputF + hitTokens * f.cacheF + outTokens * f.outputF) / 1000;
+        recWan = roundVtpmWan(actualVtpm);
       }
       recVtpmEl.textContent = `${recWan.toLocaleString()} 万 vTPM`;
       recVtpmEl.dataset.value = recWan;
-      const statusText = current >= recWan ? '满足' : '建议增加';
-      const statusColor = current >= recWan ? 'text-green-600' : 'text-orange-600';
-      recCurrentEl.innerHTML = `${current.toLocaleString()} 万 vTPM · <span class="${statusColor}">${statusText}</span>`;
+      recDetailEl.textContent = `实际所需 ${Math.ceil(actualVtpm).toLocaleString()} vTPM/分钟，按 ${VTPM_STEP} 万步长向上取整`;
     }
-    cycleBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        cycleBtns.forEach(b => { b.classList.remove('active'); b.classList.add('text-slate-600', 'border-slate-300'); b.classList.remove('bg-primary', 'text-white', 'border-primary'); });
-        btn.classList.remove('text-slate-600', 'border-slate-300');
-        btn.classList.add('active');
-        selectedCycle = parseInt(btn.dataset.cycle);
-        updatePrice();
-      });
-    });
     unitsEl.addEventListener('input', updateSummary);
     [sceneInputEl, sceneCacheEl, sceneOutputEl, sceneRpmEl].forEach(el => el.addEventListener('input', updateRecommendation));
     document.getElementById('apply-rec').addEventListener('click', () => {
-      const rec = parseInt(recVtpmEl.dataset.value) || 100;
+      const rec = parseInt(recVtpmEl.dataset.value) || VTPM_MIN;
       unitsEl.value = rec;
       updateSummary();
     });
     renderModels();
+    renderCycles();
     updateSummary();
   </script>
 </body>
