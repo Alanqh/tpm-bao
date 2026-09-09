@@ -75,9 +75,9 @@
         <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
         <a href="index.html" class="switcher-tab">官网首页</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
-        <a href="balance.html?tab=package" class="switcher-tab">资源包</a>
+        <a href="packages.html" class="switcher-tab">资源包</a>
         <a href="pipeline.html" class="switcher-tab">监控数据链路</a>
-        <a href="admin-inventory.html" class="switcher-tab active">后台管理</a>
+        <a href="admin-packages.html" class="switcher-tab active">后台管理</a>
       </div>
     </div>
   </div>
@@ -93,7 +93,7 @@
         <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
       </div>
       <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
-      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">资源包管理 - 资源包管理</h1>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">资源包管理</h1>
     </div>
     <div class="flex items-center gap-3">
       <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
@@ -126,7 +126,9 @@
         </div>
 
         <div class="pl-6 space-y-0.5">
-          <a href="admin-inventory.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
+          <a href="admin-packages.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
+          <a href="admin-monitor.html" class="admin-sidebar-link"><i class="fa-solid fa-chart-line w-4 text-center"></i>资源包监控</a>
+          <a href="admin-operations.html" class="admin-sidebar-link"><i class="fa-solid fa-clock-rotate-left w-4 text-center"></i>操作记录</a>
         </div>
 
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
@@ -273,7 +275,7 @@
                   <td class="px-3 py-3 font-mono text-[11px]">/proj-alpha/deepseek-v4-flash-0731</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
                   <td class="px-3 py-3">
-                    <a href="admin-usage.html?pkg=P001" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
+                    <a href="admin-monitor.html?pkg=P001" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
                     <button onclick="showDetail('P001')" class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">详情</button>
                     <button class="text-red-600 hover:text-red-700 text-[11px]">回收</button>
                   </td>
@@ -288,7 +290,7 @@
                   <td class="px-3 py-3 font-mono text-[11px]">/proj-gamma/glm-5.2</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
                   <td class="px-3 py-3">
-                    <a href="admin-usage.html?pkg=P002" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
+                    <a href="admin-monitor.html?pkg=P002" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
                     <button onclick="showDetail('P002')" class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">详情</button>
                     <button class="text-red-600 hover:text-red-700 text-[11px]">回收</button>
                   </td>
