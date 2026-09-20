@@ -203,7 +203,7 @@
                   <th class="text-left px-3 py-2 font-medium">商品code</th>
                   <th class="text-left px-3 py-2 font-medium">商品名称</th>
                   <th class="text-left px-3 py-2 font-medium">商品类型</th>
-                  <th class="text-left px-3 py-2 font-medium">购买量step（份）</th>
+                  <th class="text-left px-3 py-2 font-medium">购买量step（万 vTPM）</th>
                   <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
                   <th class="text-left px-3 py-2 font-medium">售卖周期</th>
                   <th class="text-left px-3 py-2 font-medium">vTPM折算系数(版本)</th>
@@ -224,7 +224,7 @@
                   <th class="text-left px-3 py-2 font-medium">商品code</th>
                   <th class="text-left px-3 py-2 font-medium">商品名称</th>
                   <th class="text-left px-3 py-2 font-medium">商品类型</th>
-                  <th class="text-left px-3 py-2 font-medium">购买量step（份）</th>
+                  <th class="text-left px-3 py-2 font-medium">购买量step（万 vTPM）</th>
                   <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
                   <th class="text-left px-3 py-2 font-medium">售卖周期</th>
                   <th class="text-left px-3 py-2 font-medium">vTPM折算系数(版本)</th>
@@ -274,7 +274,7 @@
             <table class="w-full text-sm">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th class="text-left px-3 py-2 font-medium">购买量step（份）</th>
+                  <th class="text-left px-3 py-2 font-medium">购买量step（万 vTPM）</th>
                   <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
                   <th class="text-left px-3 py-2 font-medium">关联vTPM折算系数配置</th>
                   <th class="text-left px-3 py-2 font-medium">SLO赔付规则(版本)</th>
@@ -329,12 +329,12 @@
 
   <!-- Modal: 新增商品 -->
   <div id="modal-product" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
         <h3 class="text-sm font-semibold text-slate-900">新增商品</h3>
         <button type="button" onclick="closeModal('product')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="p-5 grid grid-cols-2 gap-4">
+      <div class="p-5 grid grid-cols-1 gap-4">
         <div>
           <label class="form-label">商品类型</label>
           <select class="form-input"><option>maas-vtpm-chat</option></select>
@@ -348,7 +348,7 @@
           <input id="inp-name" class="form-input" placeholder="如 vTPM 预留资源包（预）">
         </div>
         <div>
-          <label class="form-label">购买量step（份）</label>
+          <label class="form-label">购买量step（万 vTPM）</label>
           <input id="inp-step-qty" type="number" class="form-input" placeholder="如 100" value="100">
         </div>
         <div>
@@ -388,14 +388,14 @@
 
   <!-- Modal: 创建售卖计划 -->
   <div id="modal-plan-create" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
         <h3 class="text-sm font-semibold text-slate-900">创建售卖计划</h3>
         <button type="button" onclick="closeModal('plan-create')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="p-5 grid grid-cols-2 gap-4">
+      <div class="p-5 grid grid-cols-1 gap-4">
         <div>
-          <label class="form-label">购买量step（份）</label>
+          <label class="form-label">购买量step（万 vTPM）</label>
           <input id="plan-step-qty" type="number" class="form-input" placeholder="如 100">
         </div>
         <div>
@@ -466,7 +466,7 @@
         <h3 class="text-sm font-semibold text-slate-900">创建计费项</h3>
         <button type="button" onclick="closeModal('create-item')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="p-5 grid grid-cols-2 gap-4">
+      <div class="p-5 grid grid-cols-1 gap-4">
         <div>
           <label class="form-label">code</label>
           <input id="item-code" class="form-input" placeholder="如 vtpm.input">
@@ -723,7 +723,7 @@
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品类型</p><p class="text-slate-800 font-medium">${currentProduct.type}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品code</p><p class="font-mono">${currentProduct.code}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品名称</p><p class="font-medium">${currentProduct.name}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买量step</p><p>${currentProduct.stepQty} 份</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买量step</p><p>${currentProduct.stepQty} 万 vTPM</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买周期step</p><p>${currentProduct.stepCycle} 天</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">售卖开始时间</p><p>${currentProduct.start}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">售卖截止时间</p><p>${currentProduct.end}</p></div>
@@ -869,7 +869,7 @@
         <span class="badge ${meta.cls}">${meta.text}</span>
         <span class="text-xs text-slate-400 ml-2">状态流转：未生成价格项 → 待发布 → 已发布（可停用）</span>`;
       document.getElementById('plan-detail-info').innerHTML = `
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买量step</p><p class="text-slate-800 font-medium">${r.stepQty} 份</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买量step</p><p class="text-slate-800 font-medium">${r.stepQty} 万 vTPM</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买周期step</p><p class="text-slate-800 font-medium">${r.stepCycle} 天</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联vTPM折算系数配置</p><p class="text-slate-800 font-medium">${r.factor}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">SLO赔付规则(版本)</p><p class="text-slate-800 font-medium">${r.slo}</p></div>
