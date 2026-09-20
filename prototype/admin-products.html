@@ -299,12 +299,11 @@
               <button id="publish-change-btn" onclick="publishChange()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md hidden"><i class="fa-solid fa-paper-plane mr-1"></i>发布变更</button>
             </div>
             <div id="billing-mode-tip" class="hidden mb-4 text-xs bg-violet-50 border border-violet-200 text-violet-700 rounded-md px-3 py-2">
-              <i class="fa-solid fa-circle-info mr-1"></i>变更编辑台中：可勾选计费项调整生效范围；点击左下角「新增计费项」可新增上架；完成后「发布变更」生效，或「放弃变更」退出。
+              <i class="fa-solid fa-circle-info mr-1"></i>变更编辑台中：可对生效中的计费项进行禁用；点击左下角「新增计费项」可新增上架；完成后「发布变更」生效，或「放弃变更」退出。
             </div>
             <table class="w-full text-sm mb-4">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th class="w-8 px-3 py-2 text-left font-medium"><input type="checkbox" id="check-all" onclick="toggleAllItems(this)" disabled></th>
                   <th class="text-left px-3 py-2 font-medium">计费项code</th>
                   <th class="text-left px-3 py-2 font-medium">名称</th>
                   <th class="text-right px-3 py-2 font-medium">实时价格</th>
@@ -313,6 +312,7 @@
                   <th class="text-left px-3 py-2 font-medium">货币单位</th>
                   <th class="text-left px-3 py-2 font-medium">自动绑定标签</th>
                   <th class="text-left px-3 py-2 font-medium">状态</th>
+                  <th class="text-left px-3 py-2 font-medium">操作</th>
                 </tr>
               </thead>
               <tbody id="billing-tbody" class="divide-y divide-slate-100"></tbody>
@@ -591,9 +591,9 @@
     let planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
     // 默认计费项数据
     const defaultBillingItems = [
-      { code: 'vtpm.input.2001', name: '输入实时价（30天）', price: 0.0084, floor: 0.0079, unit: '份', currency: '元', checked: true },
-      { code: 'vtpm.input.2002', name: '输入实时价（90天）', price: 0.0077, floor: 0.0072, unit: '份', currency: '元', checked: true },
-      { code: 'vtpm.output.2003', name: '输出实时价（180天）', price: 0.031, floor: 0.029, unit: '份', currency: '美元', checked: false }
+      { code: 'vtpm.input.2001', name: '输入实时价（30天）', price: 0.0084, floor: 0.0079, unit: '份', currency: '元' },
+      { code: 'vtpm.input.2002', name: '输入实时价（90天）', price: 0.0077, floor: 0.0072, unit: '份', currency: '元' },
+      { code: 'vtpm.output.2003', name: '输出实时价（180天）', price: 0.031, floor: 0.029, unit: '份', currency: '美元' }
     ];
     let billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
     let changeMode = false;
@@ -674,15 +674,17 @@
     }
     function renderBilling() {
       const isPublished = currentProduct && currentProduct.lifeStatus === '售卖中';
-      const itemStatus = isPublished ? '生效中' : '待上架';
-      const statusCls = isPublished ? 'bg-green-100 text-green-700' : 'bg-amber-50 text-amber-700';
-      // 待上架商品：复选框始终可用；已上架商品：仅变更模式可用
-      const cbDisabled = isPublished && !changeMode ? 'disabled' : '';
-      const checkAll = document.getElementById('check-all');
-      if (checkAll) { checkAll.disabled = isPublished && !changeMode; checkAll.checked = billingItems.length > 0 && billingItems.every(b => b.checked); }
-      document.getElementById('billing-tbody').innerHTML = billingItems.map(b => `
-        <tr class="hover:bg-slate-50 ${changeMode && !b.checked ? 'opacity-40' : ''}">
-          <td class="px-3 py-2 text-center"><input type="checkbox" class="w-4 h-4" ${b.checked ? 'checked' : ''} ${cbDisabled} onchange="toggleItem('${b.code}', this)"></td>
+      document.getElementById('billing-tbody').innerHTML = billingItems.map(b => {
+        const st = b.itemStatus || (isPublished ? '生效中' : '待上架');
+        const stCls = st === '生效中' ? 'bg-green-100 text-green-700' : st === '已禁用' ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-700';
+        // 编辑状态下，生效中的计费项可禁用；已禁用的可启用
+        let actionBtn = '';
+        if (changeMode && isPublished) {
+          if (st === '生效中') actionBtn = `<button onclick="disableItem('${b.code}')" class="text-red-600 hover:underline text-xs">禁用</button>`;
+          else if (st === '已禁用') actionBtn = `<button onclick="enableItem('${b.code}')" class="text-green-600 hover:underline text-xs">启用</button>`;
+        }
+        return `
+        <tr class="hover:bg-slate-50 ${st === '已禁用' ? 'opacity-50' : ''}">
           <td class="px-3 py-2 font-mono text-xs">${b.code}</td>
           <td class="px-3 py-2">${b.name}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${b.price.toFixed(4)}</td>
@@ -690,8 +692,10 @@
           <td class="px-3 py-2 text-xs">${b.unit}</td>
           <td class="px-3 py-2 text-xs">${b.currency}</td>
           <td class="px-3 py-2 text-xs"><span class="badge bg-slate-100 text-slate-600 font-mono">${autoTag()}</span></td>
-          <td class="px-3 py-2"><span class="badge ${statusCls}">${itemStatus}</span></td>
-        </tr>`).join('');
+          <td class="px-3 py-2"><span class="badge ${stCls}">${st}</span></td>
+          <td class="px-3 py-2 whitespace-nowrap">${actionBtn || '—'}</td>
+        </tr>`;
+      }).join('');
     }
 
     // ===== 新增商品 → 创建后直接打开详情页（待上架） =====
@@ -795,9 +799,6 @@
       document.getElementById('publish-change-btn').classList.remove('hidden');
       document.getElementById('billing-mode-tip').classList.remove('hidden');
       document.getElementById('add-item-btn').classList.remove('hidden');
-      const cb = document.getElementById('check-all');
-      cb.disabled = false;
-      cb.checked = billingItems.every(b => b.checked);
       renderBilling();
     }
     function abandonChange() { exitChangeMode(); }
@@ -809,22 +810,16 @@
       document.getElementById('publish-change-btn').classList.add('hidden');
       document.getElementById('billing-mode-tip').classList.add('hidden');
       document.getElementById('add-item-btn').classList.add('hidden');
-      const cb = document.getElementById('check-all');
-      cb.disabled = true;
-      cb.checked = false;
       renderBilling();
     }
-    function toggleAllItems(cb) {
-      if (!changeMode) return;
-      billingItems.forEach(b => { b.checked = cb.checked; });
-      renderBilling();
-    }
-    function toggleItem(code, cb) {
-      if (!changeMode) { cb.checked = !cb.checked; return; }
+    function disableItem(code) {
       const b = billingItems.find(x => x.code === code);
-      if (b) b.checked = cb.checked;
-      const all = document.getElementById('check-all');
-      if (all) all.checked = billingItems.every(x => x.checked);
+      if (b) b.itemStatus = '已禁用';
+      renderBilling();
+    }
+    function enableItem(code) {
+      const b = billingItems.find(x => x.code === code);
+      if (b) b.itemStatus = '生效中';
       renderBilling();
     }
 
@@ -910,7 +905,7 @@
       const price = parseFloat(document.getElementById('item-price').value) || 0.008;
       const currency = document.getElementById('item-currency').value;
       const floor = +(price * 0.95).toFixed(4);
-      billingItems.push({ code, name, price, floor, unit: '份', currency, checked: true });
+      billingItems.push({ code, name, price, floor, unit: '份', currency });
       pendingItems.push({ skuid: 'SKU-' + (2000 + pendingItems.length + 1), skuName: name, fn: 'chat', dim: 'vtpm', itemId: code, unit: '份', price, floor, def: '新增计费项' });
       closeModal('create-item');
       renderBilling();
