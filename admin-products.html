@@ -676,9 +676,13 @@
       const isPublished = currentProduct && currentProduct.lifeStatus === '售卖中';
       const itemStatus = isPublished ? '生效中' : '待上架';
       const statusCls = isPublished ? 'bg-green-100 text-green-700' : 'bg-amber-50 text-amber-700';
+      // 待上架商品：复选框始终可用；已上架商品：仅变更模式可用
+      const cbDisabled = isPublished && !changeMode ? 'disabled' : '';
+      const checkAll = document.getElementById('check-all');
+      if (checkAll) { checkAll.disabled = isPublished && !changeMode; checkAll.checked = billingItems.length > 0 && billingItems.every(b => b.checked); }
       document.getElementById('billing-tbody').innerHTML = billingItems.map(b => `
         <tr class="hover:bg-slate-50 ${changeMode && !b.checked ? 'opacity-40' : ''}">
-          <td class="px-3 py-2"><input type="checkbox" ${b.checked ? 'checked' : ''} ${changeMode ? '' : 'disabled'} onchange="toggleItem('${b.code}', this)"></td>
+          <td class="px-3 py-2 text-center"><input type="checkbox" class="w-4 h-4" ${b.checked ? 'checked' : ''} ${cbDisabled} onchange="toggleItem('${b.code}', this)"></td>
           <td class="px-3 py-2 font-mono text-xs">${b.code}</td>
           <td class="px-3 py-2">${b.name}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${b.price.toFixed(4)}</td>
