@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>后台-商品管理 - 商品管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .switcher-tab {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+    .switcher-tab.active { background: #6e29f6; color: white; }
+
+    .admin-sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      color: #374151;
+      font-size: 0.8125rem;
+      transition: all 0.15s;
+    }
+    .admin-sidebar-link:hover { background: #F5F3FF; color: #7C3AED; }
+    .admin-sidebar-link.active { background: #F5F3FF; color: #7C3AED; font-weight: 500; }
+
+    .admin-card {
+      background: #fff;
+      border: 1px solid #E5E7EB;
+      border-radius: 0.5rem;
+    }
+    .admin-tab {
+      padding: 0.5rem 1rem;
+      border-bottom: 2px solid transparent;
+      color: #6B7280;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .admin-tab:hover { color: #374151; }
+    .admin-tab.active { color: #7C3AED; border-bottom-color: #7C3AED; }
+    .admin-btn-primary {
+      background: #7C3AED;
+      color: white;
+      border: 1px solid #7C3AED;
+    }
+    .admin-btn-primary:hover { background: #6D28D9; }
+    .admin-btn-disabled {
+      background: #F3F4F6;
+      color: #9CA3AF;
+      border: 1px solid #E5E7EB;
+      cursor: not-allowed;
+    }
+    .admin-btn-default {
+      background: #fff;
+      color: #374151;
+      border: 1px solid #D1D5DB;
+    }
+    .admin-btn-default:hover { background: #F9FAFB; }
+
+    .form-label { display: block; font-size: 0.75rem; color: #374151; font-weight: 500; margin-bottom: 0.25rem; }
+    .form-input { width: 100%; border: 1px solid #D1D5DB; border-radius: 0.375rem; padding: 0.4rem 0.6rem; font-size: 0.8125rem; }
+    .form-input:focus { outline: none; border-color: #7C3AED; }
+    .badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.6875rem; }
+  </style>
+</head>
+<body class="bg-[#F3F4F6] text-slate-800">
+  <!-- 原型导航 -->
+  <div class="sticky top-0 z-[100] bg-slate-900 text-white text-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-10 gap-1 overflow-x-auto">
+        <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
+        <a href="index.html" class="switcher-tab">官网首页</a>
+        <a href="terms.html" class="switcher-tab">购买须知</a>
+        <a href="packages.html" class="switcher-tab">资源包</a>
+        <a href="admin-packages.html" class="switcher-tab">后台-预留vTPM管理</a>
+        <a href="admin-products.html" class="switcher-tab active">后台-商品管理</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 顶部 Header -->
+  <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-10 z-50">
+    <div class="flex items-center gap-4">
+      <button class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md">
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">SF</div>
+        <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
+      </div>
+      <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">商品管理（商品定价中心）</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+        <i class="fa-regular fa-moon"></i>
+      </button>
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+        <i class="fa-regular fa-bell"></i>
+      </button>
+      <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-medium">吕</div>
+    </div>
+  </header>
+
+  <div class="flex">
+    <!-- 左侧 Sidebar -->
+    <aside class="w-56 bg-white border-r border-slate-200 flex-shrink-0 hidden md:flex flex-col h-[calc(100vh-3.5rem-2.5rem)] sticky top-[6rem]">
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto text-sm">
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>管理后台</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>账户中心</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>活动运营</span>
+        </div>
+
+        <div class="pl-6 space-y-0.5">
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
+          <a href="admin-packages.html" class="admin-sidebar-link"><i class="fa-solid fa-box-open w-4 text-center"></i>预留vTPM管理</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
+          <i class="fa-solid fa-chevron-right text-xs transition-transform"></i>
+          <span>MaaS 运营管理</span>
+        </div>
+
+        <div id="maas-menu" class="pl-6 space-y-0.5 hidden">
+          <a href="admin-monitor.html" class="admin-sidebar-link"><i class="fa-solid fa-chart-line w-4 text-center"></i>模型监控</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-server w-4 text-center"></i>客户任务/数据</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-layer-group w-4 text-center"></i>Serverless 管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-link w-4 text-center"></i>MaaS 专属端点</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-brain w-4 text-center"></i>推理服务</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-flask w-4 text-center"></i>Playground</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>弹性 GPU 运营管理</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('pricing-menu', this)">
+          <i class="fa-solid fa-chevron-down text-xs transition-transform"></i>
+          <span>商品定价中心</span>
+        </div>
+
+        <div id="pricing-menu" class="pl-6 space-y-0.5">
+          <a href="admin-products.html" class="admin-sidebar-link active"><i class="fa-solid fa-boxes-stacked w-4 text-center"></i>商品管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-list-check w-4 text-center"></i>定价计划</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>平台管理</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 右侧主体 -->
+    <main class="flex-1 p-6 min-w-0">
+      <!-- 面包屑 -->
+      <nav class="text-xs text-slate-500 mb-4">
+        <span class="text-slate-700">商品定价中心</span> > <span class="text-slate-700">商品管理</span>
+      </nav>
+
+      <!-- 列表视图 -->
+      <div id="list-view">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">商品管理</h2>
+            <p class="text-xs text-slate-500 mt-0.5">已上架查看售卖中的商品；待上架为尚无已生效计费项的商品，进入详情后完成上架。</p>
+          </div>
+          <button onclick="openProductModal()" class="admin-btn-primary text-sm px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>新增商品</button>
+        </div>
+
+        <div class="admin-card">
+          <div class="flex border-b border-slate-200 px-2">
+            <button type="button" class="admin-tab" data-tab="listed" onclick="switchTopTab('listed')">已上架</button>
+            <button type="button" class="admin-tab active" data-tab="pending" onclick="switchTopTab('pending')">待上架</button>
+          </div>
+
+          <!-- 已上架 Tab：商品列表 -->
+          <div id="top-tab-listed" class="p-4 hidden">
+            <table class="w-full text-sm">
+              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left px-3 py-2 font-medium">商品code</th>
+                  <th class="text-left px-3 py-2 font-medium">商品名称</th>
+                  <th class="text-left px-3 py-2 font-medium">商品类型</th>
+                  <th class="text-left px-3 py-2 font-medium">购买量step（份）</th>
+                  <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
+                  <th class="text-left px-3 py-2 font-medium">售卖周期</th>
+                  <th class="text-left px-3 py-2 font-medium">vTPM折算系数(版本)</th>
+                  <th class="text-left px-3 py-2 font-medium">SLO赔付规则(版本)</th>
+                  <th class="text-left px-3 py-2 font-medium">状态</th>
+                  <th class="text-left px-3 py-2 font-medium">操作</th>
+                </tr>
+              </thead>
+              <tbody id="listed-tbody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+
+          <!-- 待上架 Tab：商品列表（无已生效计费项） -->
+          <div id="top-tab-pending" class="p-4">
+            <table class="w-full text-sm">
+              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left px-3 py-2 font-medium">商品code</th>
+                  <th class="text-left px-3 py-2 font-medium">商品名称</th>
+                  <th class="text-left px-3 py-2 font-medium">商品类型</th>
+                  <th class="text-left px-3 py-2 font-medium">购买量step（份）</th>
+                  <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
+                  <th class="text-left px-3 py-2 font-medium">售卖周期</th>
+                  <th class="text-left px-3 py-2 font-medium">vTPM折算系数(版本)</th>
+                  <th class="text-left px-3 py-2 font-medium">SLO赔付规则(版本)</th>
+                  <th class="text-left px-3 py-2 font-medium">状态</th>
+                  <th class="text-left px-3 py-2 font-medium">操作</th>
+                </tr>
+              </thead>
+              <tbody id="pending-tbody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 商品详情视图 -->
+      <div id="detail-view" class="hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 id="detail-title" class="text-lg font-semibold text-slate-900">商品详情</h2>
+            <p class="text-xs text-slate-500 mt-0.5">上半部分为创建信息；下半部分管理售卖计划与计费项。</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span id="detail-status" class="badge bg-amber-50 text-amber-700">待上架</span>
+            <button onclick="backToList()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回列表</button>
+          </div>
+        </div>
+
+        <!-- 上半：创建信息 -->
+        <div class="admin-card p-4 mb-4">
+          <p class="text-sm font-medium text-slate-900 mb-3">创建信息</p>
+          <div id="detail-info" class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs"></div>
+        </div>
+
+        <!-- 下半：售卖计划 / 计费项 -->
+        <div class="admin-card">
+          <div class="flex border-b border-slate-200 px-2">
+            <button type="button" class="admin-tab active" data-tab="plan" onclick="switchInnerTab('plan')">售卖计划</button>
+            <button type="button" class="admin-tab" data-tab="billing" onclick="switchInnerTab('billing')">商品上架情况</button>
+          </div>
+
+          <!-- 售卖计划 Tab -->
+          <div id="inner-tab-plan" class="p-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <p class="text-xs text-slate-500">售卖计划定义购买量与周期组合；状态流转：未生成价格项 → 生成价格项 → 待发布 → 发布 → 已发布（可停用）。</p>
+              <button type="button" onclick="openPlanCreateModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
+            </div>
+            <table class="w-full text-sm">
+              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left px-3 py-2 font-medium">购买量step（份）</th>
+                  <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
+                  <th class="text-left px-3 py-2 font-medium">关联vTPM折算系数配置</th>
+                  <th class="text-left px-3 py-2 font-medium">SLO赔付规则(版本)</th>
+                  <th class="text-left px-3 py-2 font-medium">关联计费项</th>
+                  <th class="text-left px-3 py-2 font-medium">开始售卖周期</th>
+                  <th class="text-left px-3 py-2 font-medium">结束售卖周期</th>
+                  <th class="text-left px-3 py-2 font-medium">优先级</th>
+                  <th class="text-left px-3 py-2 font-medium">状态</th>
+                  <th class="text-left px-3 py-2 font-medium">操作</th>
+                </tr>
+              </thead>
+              <tbody id="plan-tbody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+
+          <!-- 计费项 Tab -->
+          <div id="inner-tab-billing" class="p-4 hidden">
+            <!-- 左上：发起变更 / 放弃变更 / 发布变更 -->
+            <div class="flex items-center gap-2 mb-4">
+              <button id="change-mode-btn" onclick="startChangeMode()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>发起变更</button>
+              <button id="abandon-change-btn" onclick="abandonChange()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md hidden"><i class="fa-solid fa-xmark mr-1"></i>放弃变更</button>
+              <button id="publish-change-btn" onclick="publishChange()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md hidden"><i class="fa-solid fa-paper-plane mr-1"></i>发布变更</button>
+            </div>
+            <div id="billing-mode-tip" class="hidden mb-4 text-xs bg-violet-50 border border-violet-200 text-violet-700 rounded-md px-3 py-2">
+              <i class="fa-solid fa-circle-info mr-1"></i>变更编辑台中：可勾选计费项调整生效范围；点击左下角「新增计费项」可新增上架；完成后「发布变更」生效，或「放弃变更」退出。
+            </div>
+            <table class="w-full text-sm mb-4">
+              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="w-8 px-3 py-2 text-left font-medium"><input type="checkbox" id="check-all" onclick="toggleAllItems(this)" disabled></th>
+                  <th class="text-left px-3 py-2 font-medium">计费项code</th>
+                  <th class="text-left px-3 py-2 font-medium">名称</th>
+                  <th class="text-right px-3 py-2 font-medium">实时价格</th>
+                  <th class="text-right px-3 py-2 font-medium">兜底价格</th>
+                  <th class="text-left px-3 py-2 font-medium">计量单位</th>
+                  <th class="text-left px-3 py-2 font-medium">货币单位</th>
+                  <th class="text-left px-3 py-2 font-medium">自动绑定标签</th>
+                  <th class="text-left px-3 py-2 font-medium">状态</th>
+                </tr>
+              </thead>
+              <tbody id="billing-tbody" class="divide-y divide-slate-100"></tbody>
+            </table>
+            <!-- 左下：新增计费项 -->
+            <div class="flex">
+              <button id="add-item-btn" onclick="openCreateItemModal()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md hidden"><i class="fa-solid fa-plus mr-1"></i>新增计费项</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: 新增商品 -->
+  <div id="modal-product" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <h3 class="text-sm font-semibold text-slate-900">新增商品</h3>
+        <button type="button" onclick="closeModal('product')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 grid grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">商品类型</label>
+          <select class="form-input"><option>maas-vtpm-chat</option></select>
+        </div>
+        <div>
+          <label class="form-label">商品code</label>
+          <input id="inp-code" class="form-input" placeholder="如 maas-vtpm-chat-pre">
+        </div>
+        <div>
+          <label class="form-label">商品名称</label>
+          <input id="inp-name" class="form-input" placeholder="如 vTPM 预留资源包（预）">
+        </div>
+        <div>
+          <label class="form-label">购买量step（份）</label>
+          <input id="inp-step-qty" type="number" class="form-input" placeholder="如 100" value="100">
+        </div>
+        <div>
+          <label class="form-label">购买周期step（天）</label>
+          <input id="inp-step-cycle" type="number" class="form-input" placeholder="如 30" value="30">
+        </div>
+        <div>
+          <label class="form-label">售卖开始时间</label>
+          <input id="inp-start" type="datetime-local" step="1" class="form-input" value="2026-10-01T00:00:00">
+        </div>
+        <div>
+          <label class="form-label">售卖截止时间</label>
+          <input id="inp-end" type="datetime-local" step="1" class="form-input" value="2026-12-31T23:59:59">
+        </div>
+        <div>
+          <label class="form-label">关联vTPM折算系数配置（版本）</label>
+          <select class="form-input">
+            <option>vtpm-factor-deepseek v3.4（2026-08）</option>
+            <option>vtpm-factor-glm v2.1（2026-07）</option>
+            <option>vtpm-factor-kimi v1.8（2026-09）</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">关联SLO赔付规则配置（版本）</label>
+          <select class="form-input">
+            <option>slo-rule-95 v5.2（2026-08）</option>
+            <option>slo-rule-99 v3.0（2026-07）</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
+        <button type="button" onclick="closeModal('product')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
+        <button type="button" onclick="submitProduct()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 创建售卖计划 -->
+  <div id="modal-plan-create" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <h3 class="text-sm font-semibold text-slate-900">创建售卖计划</h3>
+        <button type="button" onclick="closeModal('plan-create')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 grid grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">购买量step（份）</label>
+          <input id="plan-step-qty" type="number" class="form-input" placeholder="如 100">
+        </div>
+        <div>
+          <label class="form-label">购买周期step（天）</label>
+          <input id="plan-step-cycle" type="number" class="form-input" placeholder="如 30">
+        </div>
+        <div>
+          <label class="form-label">关联vTPM折算系数配置（版本）</label>
+          <select id="plan-factor" class="form-input">
+            <option>vtpm-factor-deepseek v3.4（2026-08）</option>
+            <option>vtpm-factor-glm v2.1（2026-07）</option>
+            <option>vtpm-factor-kimi v1.8（2026-09）</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">关联SLO赔付规则（版本）</label>
+          <select id="plan-slo" class="form-input">
+            <option>slo-rule-95 v5.2（2026-08）</option>
+            <option>slo-rule-99 v3.0（2026-07）</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">关联计费项</label>
+          <select id="plan-item" class="form-input"></select>
+        </div>
+        <div>
+          <label class="form-label">优先级（0-1000，整百）</label>
+          <select id="plan-priority" class="form-input"><option value="0">0</option><option value="100">100</option><option value="200">200</option><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option><option value="900">900</option><option value="1000">1000</option></select>
+        </div>
+        <div>
+          <label class="form-label">开始售卖周期</label>
+          <input id="plan-start" type="datetime-local" step="1" class="form-input" value="2026-10-01T00:00:00">
+        </div>
+        <div>
+          <label class="form-label">结束售卖周期</label>
+          <input id="plan-end" type="datetime-local" step="1" class="form-input" value="2026-12-31T23:59:59">
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
+        <button type="button" onclick="closeModal('plan-create')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
+        <button type="button" onclick="confirmPlanCreate()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 售卖计划详情 -->
+  <div id="modal-plan-detail" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <h3 class="text-sm font-semibold text-slate-900">售卖计划详情</h3>
+        <button type="button" onclick="closeModal('plan-detail')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5">
+        <div id="plan-detail-status" class="mb-4"></div>
+        <div id="plan-detail-info" class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs"></div>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
+        <button type="button" onclick="openPlanCreateModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
+        <button type="button" onclick="closeModal('plan-detail')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 创建计费项 -->
+  <div id="modal-create-item" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <h3 class="text-sm font-semibold text-slate-900">创建计费项</h3>
+        <button type="button" onclick="closeModal('create-item')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 grid grid-cols-2 gap-4">
+        <div>
+          <label class="form-label">code</label>
+          <input id="item-code" class="form-input" placeholder="如 vtpm.input">
+        </div>
+        <div>
+          <label class="form-label">名称</label>
+          <input id="item-name" class="form-input" placeholder="如 输入实时价">
+        </div>
+        <div>
+          <label class="form-label">刊例价</label>
+          <input id="item-price" type="number" step="0.0001" class="form-input" placeholder="0.008">
+        </div>
+        <div>
+          <label class="form-label">计量单位</label>
+          <select class="form-input"><option>份</option></select>
+        </div>
+        <div>
+          <label class="form-label">货币单位</label>
+          <select id="item-currency" class="form-input"><option>元</option><option>美元</option></select>
+        </div>
+        <div>
+          <label class="form-label">自动绑定标签</label>
+          <input id="item-tag" class="form-input bg-slate-50 text-slate-500" readonly placeholder="自动关联当前商品code">
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
+        <button type="button" onclick="closeModal('create-item')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
+        <button type="button" onclick="confirmCreateItem()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 生成价格项（可修改价格） -->
+  <div id="modal-price" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <h3 class="text-sm font-semibold text-slate-900">生成价格项</h3>
+        <button type="button" onclick="closeModal('price')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5">
+        <p class="text-xs text-slate-500 mb-3">根据关联计费项生成对应价格项，可直接修改价格后确认生成。</p>
+        <table class="w-full text-sm">
+          <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th class="text-left px-3 py-2 font-medium">计费项</th>
+              <th class="text-left px-3 py-2 font-medium">计量单位</th>
+              <th class="text-left px-3 py-2 font-medium">默认价格</th>
+              <th class="text-left px-3 py-2 font-medium">修改价格</th>
+            </tr>
+          </thead>
+          <tbody id="price-tbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
+        <button type="button" onclick="closeModal('price')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
+        <button type="button" onclick="confirmGeneratePrice()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">确认生成</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== 通用 =====
+    function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); document.getElementById('modal-' + id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); }
+
+    function toggleMenu(id, el) {
+      const menu = document.getElementById(id);
+      const icon = el.querySelector('i');
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-down');
+      } else {
+        menu.classList.add('hidden');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-right');
+      }
+    }
+
+    // ===== 顶部 Tab：已上架 / 待上架（默认待上架） =====
+    function switchTopTab(tab) {
+      document.querySelectorAll('.admin-tab[data-tab="listed"], .admin-tab[data-tab="pending"]').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
+      document.getElementById('top-tab-listed').classList.toggle('hidden', tab !== 'listed');
+      document.getElementById('top-tab-pending').classList.toggle('hidden', tab !== 'pending');
+    }
+
+    // ===== 详情页内 Tab：售卖计划 / 计费项 =====
+    function switchInnerTab(tab) {
+      document.querySelectorAll('.admin-tab[data-tab="plan"], .admin-tab[data-tab="billing"]').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
+      document.getElementById('inner-tab-plan').classList.toggle('hidden', tab !== 'plan');
+      document.getElementById('inner-tab-billing').classList.toggle('hidden', tab !== 'billing');
+    }
+
+    // ===== 数据 =====
+    // 已上架商品
+    const listedProducts = [
+      { code: 'maas-vtpm-chat-std', name: 'vTPM 预留资源包（标准）', type: 'maas-vtpm-chat', stepQty: '100', stepCycle: '30', sellStart: '2026-06-01 00:00:00', sellEnd: '2026-12-31 23:59:59', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', status: '售卖中' },
+      { code: 'maas-vtpm-chat-pro', name: 'vTPM 预留资源包（专业）', type: 'maas-vtpm-chat', stepQty: '500', stepCycle: '90', sellStart: '2026-05-01 00:00:00', sellEnd: '2026-11-30 23:59:59', factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', status: '售卖中' }
+    ];
+    // 待上架商品（尚无已生效的计费项）
+    const pendingProducts = [
+      { code: 'maas-vtpm-chat-pre', name: 'vTPM 预留资源包（预）', type: 'maas-vtpm-chat', stepQty: '100', stepCycle: '30', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', status: '待上架' }
+    ];
+    // 可选计费项（供售卖计划下拉选择）
+    const pendingItems = [
+      { skuid: 'SKU-2001', skuName: 'vTPM 预留资源包（预）-100', fn: 'chat', dim: 'vtpm', itemId: 'vtpm.input.2001', unit: '份', price: 0.0084, floor: 0.0079, def: '100份 × 30天' },
+      { skuid: 'SKU-2002', skuName: 'vTPM 预留资源包（预）-500', fn: 'chat', dim: 'vtpm', itemId: 'vtpm.input.2002', unit: '份', price: 0.0077, floor: 0.0072, def: '500份 × 90天' },
+      { skuid: 'SKU-2003', skuName: 'vTPM 预留资源包（预）-1000', fn: 'chat', dim: 'vtpm', itemId: 'vtpm.output.2003', unit: '份', price: 0.031, floor: 0.029, def: '1000份 × 180天' }
+    ];
+    // 当前详情商品占位（新增商品后填充）
+    let currentProduct = null;
+    // 默认售卖计划行
+    const defaultPlanRows = [
+      { stepQty: '100', stepCycle: '30', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.input.2001', itemName: '输入实时价（30天）', start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 100 },
+      { stepQty: '500', stepCycle: '90', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.input.2002', itemName: '输入实时价（90天）', start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 200 },
+      { stepQty: '1000', stepCycle: '180', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.output.2003', itemName: '输出实时价（180天）', start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 300 }
+    ];
+    let planRows = JSON.parse(JSON.stringify(defaultPlanRows));
+    // 状态： pending_price(未生成价格项) / pending_publish(待发布) / published(已发布) / stopped(已停用) / expired(已过期)
+    let planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
+    // 默认计费项数据
+    const defaultBillingItems = [
+      { code: 'vtpm.input.2001', name: '输入实时价（30天）', price: 0.0084, floor: 0.0079, unit: '份', currency: '元', checked: true },
+      { code: 'vtpm.input.2002', name: '输入实时价（90天）', price: 0.0077, floor: 0.0072, unit: '份', currency: '元', checked: true },
+      { code: 'vtpm.output.2003', name: '输出实时价（180天）', price: 0.031, floor: 0.029, unit: '份', currency: '美元', checked: false }
+    ];
+    let billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
+    let changeMode = false;
+    let editTargetRow = -1;
+    // 自动标签：取当前商品code
+    function autoTag() { return currentProduct ? currentProduct.code : '—'; }
+
+    // ===== 渲染 =====
+    function renderListed() {
+      document.getElementById('listed-tbody').innerHTML = listedProducts.map(p => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono text-xs">${p.code}</td>
+          <td class="px-3 py-2">${p.name}</td>
+          <td class="px-3 py-2 text-xs text-slate-500">${p.type}</td>
+          <td class="px-3 py-2 text-xs">${p.stepQty}</td>
+          <td class="px-3 py-2 text-xs">${p.stepCycle}</td>
+          <td class="px-3 py-2 text-xs">${p.sellStart} ~ ${p.sellEnd}</td>
+          <td class="px-3 py-2 text-xs">${p.factor}</td>
+          <td class="px-3 py-2 text-xs">${p.slo}</td>
+          <td class="px-3 py-2"><span class="badge bg-green-100 text-green-700">${p.status}</span></td>
+          <td class="px-3 py-2"><button type="button" onclick="openDetailFromListed('${p.code}')" class="text-violet-600 hover:underline text-xs">详情</button></td>
+        </tr>`).join('');
+    }
+    function renderPending() {
+      document.getElementById('pending-tbody').innerHTML = pendingProducts.map((p, idx) => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-3 py-2 font-mono text-xs">${p.code}</td>
+          <td class="px-3 py-2">${p.name}</td>
+          <td class="px-3 py-2 text-xs text-slate-500">${p.type}</td>
+          <td class="px-3 py-2 text-xs">${p.stepQty}</td>
+          <td class="px-3 py-2 text-xs">${p.stepCycle}</td>
+          <td class="px-3 py-2 text-xs">${p.sellStart} ~ ${p.sellEnd}</td>
+          <td class="px-3 py-2 text-xs">${p.factor}</td>
+          <td class="px-3 py-2 text-xs">${p.slo}</td>
+          <td class="px-3 py-2"><span class="badge bg-amber-50 text-amber-700">${p.status}</span></td>
+          <td class="px-3 py-2"><button type="button" onclick="openPendingDetail(${idx})" class="text-violet-600 hover:underline text-xs">详情</button></td>
+        </tr>`).join('');
+    }
+    function renderPlan() {
+      if (planRows.length === 0) {
+        document.getElementById('plan-tbody').innerHTML = `<tr><td colspan="10" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖计划</td></tr>`;
+        return;
+      }
+      document.getElementById('plan-tbody').innerHTML = planRows.map((r, idx) => {
+        const st = planRowStatuses[idx];
+        const detailBtn = `<button type="button" onclick="openPlanDetail(${idx})" class="text-violet-600 hover:underline text-xs mr-2">详情</button>`;
+        let badge = '', action = '';
+        if (st === 'pending_price') {
+          badge = '<span class="badge bg-amber-50 text-amber-700">未生成价格项</span>';
+          action = `<button type="button" onclick="generatePriceItems(${idx})" class="text-violet-600 hover:underline text-xs">生成价格项</button>`;
+        } else if (st === 'pending_publish') {
+          badge = '<span class="badge bg-blue-50 text-blue-700">待发布</span>';
+          action = `<button type="button" onclick="publishPlanRow(${idx})" class="text-violet-600 hover:underline text-xs">发布</button>`;
+        } else if (st === 'published') {
+          badge = '<span class="badge bg-green-100 text-green-700">已发布</span>';
+          action = `<button type="button" onclick="stopPlanRow(${idx})" class="text-red-500 hover:underline text-xs">停用</button>`;
+        } else if (st === 'stopped') {
+          badge = '<span class="badge bg-slate-100 text-slate-600">已停用</span>';
+          action = '<span class="text-slate-300 text-xs">---</span>';
+        } else {
+          badge = '<span class="badge bg-slate-100 text-slate-600">已过期</span>';
+          action = '<span class="text-slate-300 text-xs">---</span>';
+        }
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="px-3 py-2 text-xs">${r.stepQty}</td>
+            <td class="px-3 py-2 text-xs">${r.stepCycle} 天</td>
+            <td class="px-3 py-2 text-xs">${r.factor}</td>
+            <td class="px-3 py-2 text-xs">${r.slo}</td>
+            <td class="px-3 py-2 text-xs"><div class="font-mono">${r.itemCode}</div><div class="text-slate-500 mt-0.5">${r.itemName}</div></td>
+            <td class="px-3 py-2 text-xs">${r.start}</td>
+            <td class="px-3 py-2 text-xs">${r.end}</td>
+            <td class="px-3 py-2 text-xs">${r.priority}</td>
+            <td class="px-3 py-2">${badge}</td>
+            <td class="px-3 py-2 whitespace-nowrap">${detailBtn}${action}</td>
+          </tr>`;
+      }).join('');
+    }
+    function renderBilling() {
+      const isPublished = currentProduct && currentProduct.lifeStatus === '售卖中';
+      const itemStatus = isPublished ? '生效中' : '待上架';
+      const statusCls = isPublished ? 'bg-green-100 text-green-700' : 'bg-amber-50 text-amber-700';
+      document.getElementById('billing-tbody').innerHTML = billingItems.map(b => `
+        <tr class="hover:bg-slate-50 ${changeMode && !b.checked ? 'opacity-40' : ''}">
+          <td class="px-3 py-2"><input type="checkbox" ${b.checked ? 'checked' : ''} ${changeMode ? '' : 'disabled'} onchange="toggleItem('${b.code}', this)"></td>
+          <td class="px-3 py-2 font-mono text-xs">${b.code}</td>
+          <td class="px-3 py-2">${b.name}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs">${b.price.toFixed(4)}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs">${b.floor.toFixed(4)}</td>
+          <td class="px-3 py-2 text-xs">${b.unit}</td>
+          <td class="px-3 py-2 text-xs">${b.currency}</td>
+          <td class="px-3 py-2 text-xs"><span class="badge bg-slate-100 text-slate-600 font-mono">${autoTag()}</span></td>
+          <td class="px-3 py-2"><span class="badge ${statusCls}">${itemStatus}</span></td>
+        </tr>`).join('');
+    }
+
+    // ===== 新增商品 → 创建后直接打开详情页（待上架） =====
+    function openProductModal() { openModal('product'); }
+    function submitProduct() {
+      currentProduct = {
+        code: (document.getElementById('inp-code').value || 'maas-vtpm-chat-pre').trim(),
+        name: (document.getElementById('inp-name').value || 'vTPM 预留资源包（预）').trim(),
+        type: 'maas-vtpm-chat',
+        stepQty: (document.getElementById('inp-step-qty').value || '100').trim(),
+        stepCycle: (document.getElementById('inp-step-cycle').value || '30').trim(),
+        start: (document.getElementById('inp-start').value || '2026-10-01T00:00:00').replace('T', ' '),
+        end: (document.getElementById('inp-end').value || '2026-12-31T23:59:59').replace('T', ' '),
+        factor: 'vtpm-factor-deepseek v3.4（2026-08）',
+        slo: 'slo-rule-95 v5.2（2026-08）',
+        lifeStatus: '待上架'
+      };
+      planRows = JSON.parse(JSON.stringify(defaultPlanRows));
+      planRows.forEach(r => { r.factor = currentProduct.factor; r.slo = currentProduct.slo; });
+      planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
+      billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
+      closeModal('product');
+      showDetailView();
+    }
+    function showDetailView() {
+      document.getElementById('list-view').classList.add('hidden');
+      document.getElementById('detail-view').classList.remove('hidden');
+      document.getElementById('detail-title').textContent = `${currentProduct.name}（${currentProduct.code}）`;
+      const s = document.getElementById('detail-status');
+      if (currentProduct.lifeStatus === '售卖中') { s.className = 'badge bg-green-100 text-green-700'; s.textContent = '售卖中'; }
+      else if (currentProduct.lifeStatus === '待上架') { s.className = 'badge bg-amber-50 text-amber-700'; s.textContent = '待上架'; }
+      document.getElementById('detail-info').innerHTML = `
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品类型</p><p class="text-slate-800 font-medium">${currentProduct.type}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品code</p><p class="font-mono">${currentProduct.code}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品名称</p><p class="font-medium">${currentProduct.name}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买量step</p><p>${currentProduct.stepQty} 份</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买周期step</p><p>${currentProduct.stepCycle} 天</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">售卖开始时间</p><p>${currentProduct.start}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">售卖截止时间</p><p>${currentProduct.end}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联vTPM折算系数配置(版本)</p><p>${currentProduct.factor}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联SLO赔付规则配置(版本)</p><p>${currentProduct.slo}</p></div>`;
+      renderPlan();
+      renderBilling();
+      switchInnerTab('plan');
+    }
+    function backToList() {
+      document.getElementById('detail-view').classList.add('hidden');
+      document.getElementById('list-view').classList.remove('hidden');
+    }
+    function openDetailFromListed(code) {
+      const p = listedProducts.find(x => x.code === code);
+      if (!p) return;
+      currentProduct = {
+        code: p.code, name: p.name, type: p.type, stepQty: p.stepQty, stepCycle: p.stepCycle, start: p.sellStart, end: p.sellEnd,
+        factor: p.factor + '（2026-08）', slo: p.slo + '（2026-08）', lifeStatus: '售卖中'
+      };
+      planRows = JSON.parse(JSON.stringify(defaultPlanRows));
+      planRows.forEach(r => { r.factor = currentProduct.factor; r.slo = currentProduct.slo; });
+      planRowStatuses = ['published', 'expired', 'stopped'];
+      billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
+      showDetailView();
+    }
+
+    // ===== 售卖计划：状态操作映射 =====
+    function generatePriceItems(idx) {
+      editTargetRow = idx;
+      const target = billingItems.find(b => b.code === planRows[idx].itemCode)
+        || pendingItems.filter(i => i.itemId === planRows[idx].itemCode).map(i => ({ code: i.itemId, name: i.skuName, price: i.price, unit: i.unit, currency: '元' }))[0];
+      document.getElementById('price-tbody').innerHTML = target ? `
+        <tr>
+          <td class="px-3 py-2 font-mono text-xs">${target.code}</td>
+          <td class="px-3 py-2 text-xs">${target.unit}</td>
+          <td class="px-3 py-2 font-mono text-xs">${(target.price).toFixed(4)}</td>
+          <td class="px-3 py-2"><input class="form-input price-edit" value="${(target.price).toFixed(4)}"></td>
+        </tr>` : `<tr><td colspan="4" class="px-3 py-4 text-center text-xs text-slate-400">未找到关联计费项</td></tr>`;
+      openModal('price');
+    }
+    function confirmGeneratePrice() {
+      const inp = document.querySelector('.price-edit');
+      if (inp) {
+        const v = parseFloat(inp.value);
+        if (!isNaN(v) && v >= 0) {
+          const code = inp.closest('tr').querySelector('td').textContent.trim();
+          const b = billingItems.find(x => x.code === code);
+          if (b) b.price = v;
+        }
+      }
+      if (editTargetRow >= 0) { planRowStatuses[editTargetRow] = 'pending_publish'; editTargetRow = -1; }
+      closeModal('price');
+      renderPlan();
+      renderBilling();
+    }
+    function publishPlanRow(idx) { planRowStatuses[idx] = 'published'; renderPlan(); }
+    function stopPlanRow(idx) { planRowStatuses[idx] = 'stopped'; renderPlan(); }
+
+    // ===== 计费项 Tab：编辑台（发起变更 → 放弃变更/发布变更） =====
+    function startChangeMode() {
+      changeMode = true;
+      document.getElementById('change-mode-btn').classList.add('hidden');
+      document.getElementById('abandon-change-btn').classList.remove('hidden');
+      document.getElementById('publish-change-btn').classList.remove('hidden');
+      document.getElementById('billing-mode-tip').classList.remove('hidden');
+      document.getElementById('add-item-btn').classList.remove('hidden');
+      const cb = document.getElementById('check-all');
+      cb.disabled = false;
+      cb.checked = billingItems.every(b => b.checked);
+      renderBilling();
+    }
+    function abandonChange() { exitChangeMode(); }
+    function publishChange() { exitChangeMode(); }
+    function exitChangeMode() {
+      changeMode = false;
+      document.getElementById('change-mode-btn').classList.remove('hidden');
+      document.getElementById('abandon-change-btn').classList.add('hidden');
+      document.getElementById('publish-change-btn').classList.add('hidden');
+      document.getElementById('billing-mode-tip').classList.add('hidden');
+      document.getElementById('add-item-btn').classList.add('hidden');
+      const cb = document.getElementById('check-all');
+      cb.disabled = true;
+      cb.checked = false;
+      renderBilling();
+    }
+    function toggleAllItems(cb) {
+      if (!changeMode) return;
+      billingItems.forEach(b => { b.checked = cb.checked; });
+      renderBilling();
+    }
+    function toggleItem(code, cb) {
+      if (!changeMode) { cb.checked = !cb.checked; return; }
+      const b = billingItems.find(x => x.code === code);
+      if (b) b.checked = cb.checked;
+      const all = document.getElementById('check-all');
+      if (all) all.checked = billingItems.every(x => x.checked);
+      renderBilling();
+    }
+
+    // ===== 售卖计划：创建入口 / 详情 =====
+    function planStatusMeta(st) {
+      const map = {
+        pending_price: { text: '未生成价格项', cls: 'bg-amber-50 text-amber-700' },
+        pending_publish: { text: '待发布', cls: 'bg-blue-50 text-blue-700' },
+        published: { text: '已发布', cls: 'bg-green-100 text-green-700' },
+        stopped: { text: '已停用', cls: 'bg-slate-100 text-slate-600' },
+        expired: { text: '已过期', cls: 'bg-slate-100 text-slate-600' }
+      };
+      return map[st] || map.pending_price;
+    }
+    function openPlanCreateModal() {
+      const sel = document.getElementById('plan-item');
+      const items = [...new Map([
+        ...billingItems.map(b => [b.code, b.name]),
+        ...pendingItems.map(i => [i.itemId, i.skuName])
+      ]).entries()];
+      sel.innerHTML = items.map(([c, n]) => `<option value="${c}">${c} - ${n}</option>`).join('');
+      document.getElementById('plan-step-qty').value = '';
+      document.getElementById('plan-step-cycle').value = '';
+      openModal('plan-create');
+    }
+    function confirmPlanCreate() {
+      const qty = (document.getElementById('plan-step-qty').value || '100').trim();
+      const cycle = (document.getElementById('plan-step-cycle').value || '30').trim();
+      const factor = document.getElementById('plan-factor').value;
+      const slo = document.getElementById('plan-slo').value;
+      const itemSel = document.getElementById('plan-item');
+      const itemCode = itemSel.value || '未选择';
+      const itemName = itemSel.selectedIndex >= 0 ? (itemSel.options[itemSel.selectedIndex].text.split(' - ')[1] || itemCode) : itemCode;
+      const start = (document.getElementById('plan-start').value || '2026-10-01T00:00:00').replace('T', ' ');
+      const end = (document.getElementById('plan-end').value || '2026-12-31T23:59:59').replace('T', ' ');
+      const priority = parseInt(document.getElementById('plan-priority').value) || 0;
+      planRows.push({ stepQty: qty, stepCycle: cycle, factor, slo, itemCode, itemName, start, end, priority });
+      planRowStatuses.push('pending_price');
+      closeModal('plan-create');
+      renderPlan();
+    }
+    function openPlanDetail(idx) {
+      const r = planRows[idx];
+      const meta = planStatusMeta(planRowStatuses[idx]);
+      document.getElementById('plan-detail-status').innerHTML = `
+        <span class="badge ${meta.cls}">${meta.text}</span>
+        <span class="text-xs text-slate-400 ml-2">状态流转：未生成价格项 → 待发布 → 已发布（可停用）</span>`;
+      document.getElementById('plan-detail-info').innerHTML = `
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买量step</p><p class="text-slate-800 font-medium">${r.stepQty} 份</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买周期step</p><p class="text-slate-800 font-medium">${r.stepCycle} 天</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联vTPM折算系数配置</p><p class="text-slate-800 font-medium">${r.factor}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">SLO赔付规则(版本)</p><p class="text-slate-800 font-medium">${r.slo}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联计费项</p><div><p class="font-mono text-slate-800">${r.itemCode}</p><p class="text-slate-500 text-xs mt-0.5">${r.itemName}</p></div></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">开始售卖周期</p><p class="text-slate-800 font-medium">${r.start}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">结束售卖周期</p><p class="text-slate-800 font-medium">${r.end}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">优先级</p><p class="text-slate-800 font-medium">${r.priority}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">所属商品</p><p class="text-slate-800 font-medium">${currentProduct ? currentProduct.name : '—'}</p></div>`;
+      openModal('plan-detail');
+    }
+
+    // ===== 待上架：商品详情 → 进入相同详情页（待上架） =====
+    function openPendingDetail(idx) {
+      const p = pendingProducts[idx];
+      currentProduct = {
+        code: p.code, name: p.name, type: p.type, stepQty: p.stepQty, stepCycle: p.stepCycle, start: p.sellStart, end: p.sellEnd,
+        factor: p.factor + '（2026-08）', slo: p.slo + '（2026-08）', lifeStatus: '待上架'
+      };
+      planRows = JSON.parse(JSON.stringify(defaultPlanRows));
+      planRows.forEach(r => { r.factor = currentProduct.factor; r.slo = currentProduct.slo; });
+      planRowStatuses = ['pending_price', 'pending_price', 'pending_price'];
+      billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
+      showDetailView();
+    }
+
+    // ===== 计费项创建弹窗（新增计费项即新增上架，标签自动关联） =====
+    function openCreateItemModal() {
+      document.getElementById('item-tag').value = autoTag();
+      openModal('create-item');
+    }
+    function confirmCreateItem() {
+      const code = (document.getElementById('item-code').value || 'vtpm.input.new').trim();
+      const name = (document.getElementById('item-name').value || '输入实时价（新）').trim();
+      const price = parseFloat(document.getElementById('item-price').value) || 0.008;
+      const currency = document.getElementById('item-currency').value;
+      const floor = +(price * 0.95).toFixed(4);
+      billingItems.push({ code, name, price, floor, unit: '份', currency, checked: true });
+      pendingItems.push({ skuid: 'SKU-' + (2000 + pendingItems.length + 1), skuName: name, fn: 'chat', dim: 'vtpm', itemId: code, unit: '份', price, floor, def: '新增计费项' });
+      closeModal('create-item');
+      renderBilling();
+      renderPending();
+    }
+
+    // ===== 初始化 =====
+    renderListed();
+    renderPending();
+  </script>
+</body>
+</html>

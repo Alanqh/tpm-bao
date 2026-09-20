@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>资源包管理 - 资源包管理</title>
+  <title>后台-预留vTPM管理 - 预留vTPM管理</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -76,7 +76,8 @@
         <a href="index.html" class="switcher-tab">官网首页</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
         <a href="packages.html" class="switcher-tab">资源包</a>
-        <a href="admin-packages.html" class="switcher-tab active">后台管理</a>
+        <a href="admin-packages.html" class="switcher-tab active">后台-预留vTPM管理</a>
+        <a href="admin-products.html" class="switcher-tab">后台-商品管理</a>
       </div>
     </div>
   </div>
@@ -92,7 +93,7 @@
         <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
       </div>
       <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
-      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">资源包管理</h1>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">预留vTPM管理</h1>
     </div>
     <div class="flex items-center gap-3">
       <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
@@ -125,7 +126,9 @@
         </div>
 
         <div class="pl-6 space-y-0.5">
-          <a href="admin-packages.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
+          <a href="admin-packages.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>预留vTPM管理</a>
         </div>
 
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
@@ -164,13 +167,13 @@
       <nav class="text-xs text-slate-500 mb-4">
         <span class="text-slate-700">活动运营</span>
         <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
-        <span class="text-slate-700">资源包管理</span>
+        <span class="text-slate-700">预留vTPM管理</span>
       </nav>
 
       <!-- 标题 -->
       <div class="mb-4">
-        <h2 class="text-lg font-semibold text-slate-900">资源包管理</h2>
-        <p class="text-xs text-slate-500 mt-0.5">管理预留 vTPM 资源包与商品上下架。</p>
+        <h2 class="text-lg font-semibold text-slate-900">预留vTPM管理</h2>
+        <p class="text-xs text-slate-500 mt-0.5">管理预留 vTPM 资源包的发放与回收。</p>
       </div>
 
       <!-- 操作按钮行 -->
@@ -183,57 +186,24 @@
       <!-- Tab 切换 -->
       <div class="admin-card">
         <div class="flex border-b border-slate-200 px-2">
-          <button type="button" class="admin-tab active" data-tab="product" onclick="switchTab('product')">商品管理</button>
-          <button type="button" class="admin-tab" data-tab="sold" onclick="switchTab('sold')">已发放资源包</button>
+          <button type="button" class="admin-tab active" data-tab="sold" onclick="switchTab('sold')">已发放资源包</button>
           <button type="button" class="admin-tab" data-tab="logs" onclick="switchTab('logs')">操作记录</button>
           <button type="button" class="admin-tab" data-tab="inventory" onclick="switchTab('inventory')">库存看板</button>
         </div>
 
-        <!-- 商品管理 -->
-        <div id="tab-product" class="p-4">
-          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <button onclick="openSkuModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
-              <i class="fa-solid fa-plus text-[10px]"></i>新增商品
-            </button>
-            <input type="text" placeholder="搜索商品 / Payload / 模型 / SKU" class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500" oninput="renderProductConfigTable(this.value)">
-          </div>
-
-          <div class="overflow-x-auto border border-slate-200 rounded-lg">
-            <table class="min-w-full text-[11px]">
-              <thead class="bg-slate-50 text-slate-600 sticky top-0">
-                <tr>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">商品 ID</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">商品名称</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">Payload / 模型 / SKU</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最小购买 vTPM 量</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最小购买周期</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">单价</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">售卖窗口</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">售卖状态</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">总库存</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作</th>
-                </tr>
-              </thead>
-              <tbody id="product-config-body" class="divide-y divide-slate-200">
-                <!-- 数据行由 JS 填充 -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 库存看板（一期占位） -->
+        <!-- 库存看板（后续内嵌 BI 看板） -->
         <div id="tab-inventory" class="p-4 hidden">
           <div class="flex flex-col items-center justify-center py-16 text-center">
             <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
-              <i class="fa-solid fa-warehouse text-2xl"></i>
+              <i class="fa-solid fa-chart-pie text-2xl"></i>
             </div>
-            <h3 class="text-sm font-semibold text-slate-900 mb-1">库存管理</h3>
-            <p class="text-xs text-slate-500 max-w-md leading-relaxed">库存已与商品绑定，请在「商品管理」中新增或编辑商品时一并调整。</p>
+            <h3 class="text-sm font-semibold text-slate-900 mb-1">后续内嵌 BI 看板</h3>
+            <p class="text-xs text-slate-500 max-w-md leading-relaxed">本模块正式内容后续以内嵌 BI 看板提供。</p>
           </div>
         </div>
 
         <!-- 已发放资源包 -->
-        <div id="tab-sold" class="p-4 hidden">
+        <div id="tab-sold" class="p-4">
           <div class="flex justify-between items-center mb-3">
             <h3 class="text-sm font-semibold text-slate-900">已发放资源包</h3>
             <div class="flex gap-2">
@@ -310,58 +280,14 @@
           </div>
         </div>
 
-        <!-- 操作记录 -->
+        <!-- 操作记录（后续内嵌 BI 看板） -->
         <div id="tab-logs" class="p-4 hidden">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-sm font-semibold text-slate-900">操作记录</h3>
-            <div class="flex gap-2">
-              <input type="text" placeholder="搜索操作人 / 用户" class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
-              <select class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
-                <option>全部操作</option>
-                <option>手动发放</option>
-                <option>回收</option>
-              </select>
+          <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
+              <i class="fa-solid fa-chart-column text-2xl"></i>
             </div>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-xs">
-              <thead class="bg-slate-50 text-slate-600">
-                <tr>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">时间</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作类型</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作对象 ID</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">影响</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作人</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">备注</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-200">
-                <tr>
-                  <td class="px-3 py-3 text-slate-500">2026-08-20 16:42</td>
-                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 text-[10px]">手动发放</span></td>
-                  <td class="px-3 py-3 font-mono text-[11px]">P001</td>
-                  <td class="px-3 py-3">+300 万 vTPM</td>
-                  <td class="px-3 py-3">销售张三</td>
-                  <td class="px-3 py-3 text-[11px] text-slate-500">大客户季度采购</td>
-                </tr>
-                <tr>
-                  <td class="px-3 py-3 text-slate-500">2026-08-20 11:05</td>
-                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-[10px]">回收</span></td>
-                  <td class="px-3 py-3 font-mono text-[11px]">P004</td>
-                  <td class="px-3 py-3">-100 万 vTPM</td>
-                  <td class="px-3 py-3">运营王五</td>
-                  <td class="px-3 py-3 text-[11px] text-slate-500">客服工单 #1024，误发回退</td>
-                </tr>
-
-              </tbody>
-            </table>
-          </div>
-          <div class="flex justify-between items-center mt-3 text-xs text-slate-500">
-            <span>共 128 条记录</span>
-            <div class="flex gap-2">
-              <button class="px-2 py-1 border border-slate-300 rounded admin-btn-default">上一页</button>
-              <button class="px-2 py-1 border border-slate-300 rounded admin-btn-default">下一页</button>
-            </div>
+            <h3 class="text-sm font-semibold text-slate-900 mb-1">后续内嵌 BI 看板</h3>
+            <p class="text-xs text-slate-500 max-w-md leading-relaxed">本模块正式内容后续以内嵌 BI 看板提供。</p>
           </div>
         </div>
       </div>
@@ -511,91 +437,6 @@
     </div>
   </div>
 
-  <!-- Modal: 新增 / 编辑商品 -->
-  <div id="modal-sku" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
-    <div class="bg-white rounded-lg w-full max-w-lg mx-4 p-5 border border-slate-200 max-h-[92vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-sm font-semibold text-slate-900" id="sku-modal-title">新增商品</h3>
-        <button onclick="closeSkuModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="space-y-3">
-        <div id="sku-id-block" class="hidden">
-          <label class="block text-xs font-medium text-slate-700 mb-1">商品 ID</label>
-          <input id="sku-id" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">商品名称 <span class="text-red-500">*</span></label>
-          <input id="sku-name" type="text" placeholder="如：Deepseek V4 Flash 0731 预留 vTPM" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">选择 vTPM Payload <span class="text-red-500">*</span> <span class="text-slate-400 font-normal">Payload 已关联 playground 模型与 SKU，选择后自动带出</span></label>
-          <select id="sku-master" onchange="onPayloadChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">关联模型（playground）</label>
-            <input id="sku-model-id" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 font-mono">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">模型名称</label>
-            <input id="sku-model-name" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">关联 SKU ID</label>
-            <input id="sku-sku-id" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 font-mono">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">关联 SKU Code</label>
-            <input id="sku-sku-code" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 font-mono">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">最小购买 vTPM 量（万 vTPM） <span class="text-red-500">*</span></label>
-            <input id="sku-min-vtpm" type="number" min="1" step="1" value="10" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">最小购买周期（天） <span class="text-red-500">*</span></label>
-            <input id="sku-min-cycle" type="number" min="1" step="1" value="30" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">单价（单位：元） <span class="text-red-500">*</span></label>
-          <div class="relative">
-            <span class="absolute left-2.5 top-1.5 text-xs text-slate-500">¥</span>
-            <input id="sku-price" type="number" min="0" step="1" placeholder="如 99000" class="w-full rounded border-slate-300 pl-6 pr-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-          </div>
-          <p class="text-[11px] text-slate-400 mt-1">对应「最小购买 vTPM 量 × 最小购买周期」的价格。</p>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">开始售卖时间 <span class="text-red-500">*</span></label>
-            <input id="sku-sell-start" type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">截止售卖时间 <span class="text-red-500">*</span></label>
-            <input id="sku-sell-end" type="date" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">总库存（万 vTPM）</label>
-          <input id="sku-total" type="number" min="0" step="10" value="0" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
-          <textarea id="sku-note" rows="2" placeholder="选填，如售卖批次、定价说明等" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></textarea>
-        </div>
-        <p id="sku-form-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2"></p>
-      </div>
-      <div class="mt-5 flex justify-end gap-2">
-        <button onclick="closeSkuModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
-        <button onclick="saveSku()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">保存</button>
-      </div>
-    </div>
-  </div>
-
   <script>
     function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); document.getElementById('modal-' + id).classList.add('flex'); }
     function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); }
@@ -603,7 +444,7 @@
     function switchTab(tab) {
       document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
       document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
-      ['product', 'inventory', 'sold', 'logs'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
+      ['inventory', 'sold', 'logs'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
       document.getElementById('tab-' + tab).classList.remove('hidden');
     }
 
@@ -654,172 +495,7 @@
 
     function payloadMasterById(id) { return payloadMaster.find(s => s.id === id); }
     function productById(id) { return products.find(s => s.id === id); }
-    function productModelId(p) { const m = payloadMasterById(p.payloadId); return m ? m.modelId : '-'; }
     function productModelName(p) { const m = payloadMasterById(p.payloadId); return m ? m.modelName : '-'; }
-    function productSkuId(p) { const m = payloadMasterById(p.payloadId); return m ? m.skuId : '-'; }
-    function productSkuCode(p) { const m = payloadMasterById(p.payloadId); return m ? m.skuCode : '-'; }
-
-    // ===== 商品管理 Tab（只读摘要） =====
-    function skuSellState(s) {
-      const now = new Date();
-      const start = new Date(s.sellStart + 'T00:00:00');
-      const end = new Date(s.sellEnd + 'T23:59:59');
-      if (now < start) return { label: '未开始', cls: 'bg-slate-100 text-slate-600' };
-      if (now > end) return { label: '已下架', cls: 'bg-red-50 text-red-600' };
-      return { label: '售卖中', cls: 'bg-green-100 text-green-700' };
-    }
-
-    function renderProductConfigTable(keyword = '') {
-      const kw = keyword.trim().toLowerCase();
-      const list = products.filter(s => !kw || s.name.toLowerCase().includes(kw) || productModelName(s).toLowerCase().includes(kw) || productSkuCode(s).toLowerCase().includes(kw) || s.id.toLowerCase().includes(kw));
-      document.getElementById('product-config-body').innerHTML = list.map(s => {
-        const st = skuSellState(s);
-        const payload = payloadMasterById(s.payloadId);
-        return `
-          <tr>
-            <td class="px-3 py-3 font-mono text-[11px]">${s.id}</td>
-            <td class="px-3 py-3 font-medium">${s.name}</td>
-            <td class="px-3 py-3">
-              <p class="font-mono text-[11px]">${payload ? payload.id : '-'}</p>
-              <p class="text-[10px] text-slate-400">model: ${productModelId(s)} / ${productModelName(s)}</p>
-              <p class="text-[10px] text-slate-400">sku: ${productSkuId(s)} / ${productSkuCode(s)}</p>
-            </td>
-            <td class="px-3 py-3">${s.minVtpm} 万 vTPM</td>
-            <td class="px-3 py-3">${s.minCycle} 天</td>
-            <td class="px-3 py-3">¥${s.price.toLocaleString()}</td>
-            <td class="px-3 py-3 text-slate-500">${s.sellStart} 00:00 ~ ${s.sellEnd} 24:00</td>
-            <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${st.cls}">${st.label}</span></td>
-            <td class="px-3 py-3">${s.total.toLocaleString()} 万 vTPM</td>
-            <td class="px-3 py-3">
-              <button onclick="openSkuModal('${s.id}')" class="text-violet-600 hover:text-violet-700 text-[11px]">编辑</button>
-            </td>
-          </tr>
-        `;
-      }).join('') || `<tr><td colspan="10" class="px-3 py-6 text-center text-slate-400">${kw ? '未找到匹配的商品' : '暂无商品'}</td></tr>`;
-    }
-
-    // ===== 商品管理：新增 / 编辑 =====
-    let editingId = null;
-
-    function productPayloadLabel(p) { const m = payloadMasterById(p.payloadId); return m ? `${m.id} · ${m.name}` : p.payloadId; }
-
-    function renderPayloadOptions(selectedId) {
-      const select = document.getElementById('sku-master');
-      select.innerHTML = `<option value="">请选择 vTPM Payload</option>` + payloadMaster.map(s =>
-        `<option value="${s.id}" ${s.id === selectedId ? 'selected' : ''}>${s.id} · ${s.name}</option>`
-      ).join('');
-    }
-
-    function onPayloadChange() {
-      const payloadId = document.getElementById('sku-master').value;
-      const p = payloadMasterById(payloadId);
-      document.getElementById('sku-model-id').value = p ? p.modelId : '';
-      document.getElementById('sku-model-name').value = p ? p.modelName : '';
-      document.getElementById('sku-sku-id').value = p ? p.skuId : '';
-      document.getElementById('sku-sku-code').value = p ? p.skuCode : '';
-    }
-
-    function setPayloadSelectDisabled(disabled) {
-      const select = document.getElementById('sku-master');
-      select.disabled = disabled;
-      if (disabled) {
-        select.classList.add('bg-slate-50', 'text-slate-500', 'cursor-not-allowed');
-        select.classList.remove('focus:border-violet-500');
-      } else {
-        select.classList.remove('bg-slate-50', 'text-slate-500', 'cursor-not-allowed');
-        select.classList.add('focus:border-violet-500');
-      }
-    }
-
-    function openSkuModal(id) {
-      editingId = id || null;
-      const err = document.getElementById('sku-form-error');
-      err.classList.add('hidden');
-      if (id) {
-        const s = products.find(x => x.id === id);
-        document.getElementById('sku-modal-title').textContent = '编辑商品';
-        document.getElementById('sku-id-block').classList.remove('hidden');
-        document.getElementById('sku-id').value = s.id;
-        document.getElementById('sku-name').value = s.name;
-        renderPayloadOptions(s.payloadId);
-        onPayloadChange();
-        setPayloadSelectDisabled(true);
-        document.getElementById('sku-min-vtpm').value = s.minVtpm;
-        document.getElementById('sku-min-cycle').value = s.minCycle;
-        document.getElementById('sku-price').value = s.price;
-        document.getElementById('sku-sell-start').value = s.sellStart;
-        document.getElementById('sku-sell-end').value = s.sellEnd;
-        document.getElementById('sku-total').value = s.total;
-        document.getElementById('sku-note').value = s.note || '';
-      } else {
-        document.getElementById('sku-modal-title').textContent = '新增商品';
-        document.getElementById('sku-id-block').classList.add('hidden');
-        document.getElementById('sku-id').value = '';
-        document.getElementById('sku-name').value = '';
-        renderPayloadOptions('');
-        setPayloadSelectDisabled(false);
-        document.getElementById('sku-model-id').value = '';
-        document.getElementById('sku-model-name').value = '';
-        document.getElementById('sku-sku-id').value = '';
-        document.getElementById('sku-sku-code').value = '';
-        document.getElementById('sku-min-vtpm').value = 10;
-        document.getElementById('sku-min-cycle').value = 30;
-        document.getElementById('sku-price').value = '';
-        document.getElementById('sku-sell-start').value = '';
-        document.getElementById('sku-sell-end').value = '';
-        document.getElementById('sku-total').value = 0;
-        document.getElementById('sku-note').value = '';
-      }
-      const modal = document.getElementById('modal-sku');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function closeSkuModal() {
-      const modal = document.getElementById('modal-sku');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    function showSkuError(msg) {
-      const err = document.getElementById('sku-form-error');
-      err.textContent = msg;
-      err.classList.remove('hidden');
-    }
-
-    function saveSku() {
-      const name = document.getElementById('sku-name').value.trim();
-      const minVtpm = parseInt(document.getElementById('sku-min-vtpm').value, 10);
-      const minCycle = parseInt(document.getElementById('sku-min-cycle').value, 10);
-      const price = parseInt(document.getElementById('sku-price').value, 10);
-      const sellStart = document.getElementById('sku-sell-start').value;
-      const sellEnd = document.getElementById('sku-sell-end').value;
-      const total = parseInt(document.getElementById('sku-total').value, 10) || 0;
-      const note = document.getElementById('sku-note').value.trim();
-
-      if (!name) return showSkuError('请填写商品名称。');
-      if (!Number.isInteger(minVtpm) || minVtpm < 1) return showSkuError('最小购买 vTPM 量必须为不小于 1 的整数（万 vTPM）。');
-      if (!Number.isInteger(minCycle) || minCycle < 1) return showSkuError('最小购买周期必须为不小于 1 的整数（天）。');
-      if (!Number.isInteger(price) || price < 0) return showSkuError('单价必须为不小于 0 的整数。');
-      if (!sellStart || !sellEnd) return showSkuError('请填写开始售卖时间与截止售卖时间。');
-      if (new Date(sellEnd + 'T00:00:00') <= new Date(sellStart + 'T00:00:00')) return showSkuError('截止售卖时间必须晚于开始售卖时间。');
-
-      if (editingId) {
-        const s = products.find(x => x.id === editingId);
-        Object.assign(s, { name, minVtpm, minCycle, price, sellStart, sellEnd, total, note });
-      } else {
-        const payloadId = document.getElementById('sku-master').value;
-        const payload = payloadMasterById(payloadId);
-        if (!payloadId) return showSkuError('请选择 vTPM Payload。');
-        if (!payload) return showSkuError('Payload 未关联模型与 SKU，请选择有效 Payload。');
-        const modelIdSafe = payload.modelId.replace(/[^a-z0-9]/gi, '').slice(0, 6).toLowerCase();
-        const nextId = 'vtpm-' + modelIdSafe + '-' + String(products.length + 1).padStart(3, '0');
-        products.push({ id: nextId, name, payloadId, minVtpm, minCycle, price, sellStart, sellEnd, total, note });
-      }
-      renderProductConfigTable(document.querySelector('#tab-product input[oninput*="renderProductConfigTable"]').value);
-      closeSkuModal();
-      alert(editingId ? '商品已更新，交付选项将同步生效。' : '商品已上架，交付选项将同步生效。');
-    }
 
     function openGrantModal() {
       document.getElementById('grant-subject').value = '';
@@ -1023,11 +699,6 @@
     function fmtDateTime(d) {
       return fmtDate(d) + ' 00:00';
     }
-
-    // 初始化
-    document.addEventListener('DOMContentLoaded', () => {
-      renderProductConfigTable();
-    });
 
     // 后台预留 vTPM 详情数据
     const detailData = {

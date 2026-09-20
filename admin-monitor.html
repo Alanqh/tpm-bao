@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>资源包监控 - 资源包管理</title>
+  <title>资源包监控 - 后台管理</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -41,7 +41,8 @@
         <a href="index.html" class="switcher-tab">官网首页</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
         <a href="packages.html" class="switcher-tab">资源包</a>
-        <a href="admin-packages.html" class="switcher-tab active">后台管理</a>
+        <a href="admin-packages.html" class="switcher-tab active">后台-预留vTPM管理</a>
+        <a href="admin-products.html" class="switcher-tab">后台-商品管理</a>
       </div>
     </div>
   </div>
@@ -71,7 +72,7 @@
   </header>
 
   <div class="flex">
-    <!-- 左侧 Sidebar：高亮保持「资源包管理」 -->
+    <!-- 左侧 Sidebar：高亮保持「预留vTPM管理」 -->
     <aside class="w-56 bg-white border-r border-slate-200 flex-shrink-0 hidden md:flex flex-col h-[calc(100vh-3.5rem-2.5rem)] sticky top-[6rem]">
       <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto text-sm">
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
@@ -90,7 +91,9 @@
         </div>
 
         <div class="pl-6 space-y-0.5">
-          <a href="admin-packages.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>资源包管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
+          <a href="admin-packages.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>预留vTPM管理</a>
         </div>
 
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
