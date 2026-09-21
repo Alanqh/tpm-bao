@@ -260,26 +260,28 @@
           <!-- 售卖计划 Tab -->
           <div id="inner-tab-plan" class="p-4 hidden">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <p class="text-xs text-slate-500">售卖计划定义购买量与周期组合；状态流转：未生成价格项 → 生成价格项 → 待发布 → 发布 → 已发布（可停用）。</p>
-              <button type="button" onclick="openPlanCreateModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
-            </div>
-            <table class="w-full text-sm">
-              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th class="text-left px-3 py-2 font-medium">购买量step（万 vTPM）</th>
-                  <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
-                  <th class="text-left px-3 py-2 font-medium">关联vTPM折算系数配置</th>
-                  <th class="text-left px-3 py-2 font-medium">SLO赔付规则(版本)</th>
-                  <th class="text-left px-3 py-2 font-medium">关联计费项</th>
-                  <th class="text-left px-3 py-2 font-medium">开始售卖周期</th>
-                  <th class="text-left px-3 py-2 font-medium">结束售卖周期</th>
-                  <th class="text-left px-3 py-2 font-medium">优先级</th>
-                  <th class="text-left px-3 py-2 font-medium">状态</th>
-                  <th class="text-left px-3 py-2 font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody id="plan-tbody" class="divide-y divide-slate-100"></tbody>
-            </table>
+             <p class="text-xs text-slate-500">售卖计划定义购买量与周期组合；状态流转：待发布 → 发布 → 已发布（可停用）。</p>
+             <button type="button" onclick="openPlanCreateModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
+           </div>
+           <table class="w-full text-sm">
+             <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
+               <tr>
+                 <th class="text-left px-3 py-2 font-medium">购买量step（万 vTPM）</th>
+                 <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
+                 <th class="text-left px-3 py-2 font-medium">关联vTPM折算系数配置</th>
+                 <th class="text-left px-3 py-2 font-medium">SLO赔付规则(版本)</th>
+                 <th class="text-left px-3 py-2 font-medium">关联计费项</th>
+                  <th class="text-right px-3 py-2 font-medium">实时价格</th>
+                  <th class="text-right px-3 py-2 font-medium">兜底价格</th>
+                 <th class="text-left px-3 py-2 font-medium">开始售卖周期</th>
+                 <th class="text-left px-3 py-2 font-medium">结束售卖周期</th>
+                 <th class="text-left px-3 py-2 font-medium">优先级</th>
+                 <th class="text-left px-3 py-2 font-medium">状态</th>
+                 <th class="text-left px-3 py-2 font-medium">操作</th>
+               </tr>
+             </thead>
+             <tbody id="plan-tbody" class="divide-y divide-slate-100"></tbody>
+           </table>
           </div>
 
           <!-- 计费项 Tab -->
@@ -300,11 +302,13 @@
                   <th class="text-left px-3 py-2 font-medium">名称</th>
                   <th class="text-right px-3 py-2 font-medium">实时价格</th>
                   <th class="text-right px-3 py-2 font-medium">兜底价格</th>
-                  <th class="text-left px-3 py-2 font-medium">计量单位</th>
-                  <th class="text-left px-3 py-2 font-medium">货币单位</th>
-                  <th class="text-left px-3 py-2 font-medium">自动绑定标签</th>
-                  <th class="text-left px-3 py-2 font-medium">状态</th>
-                  <th class="text-left px-3 py-2 font-medium">操作</th>
+                 <th class="text-left px-3 py-2 font-medium">计量单位</th>
+                 <th class="text-left px-3 py-2 font-medium">货币单位</th>
+                  <th class="text-left px-3 py-2 font-medium">function</th>
+                  <th class="text-left px-3 py-2 font-medium">dim</th>
+                 <th class="text-left px-3 py-2 font-medium">自动绑定标签</th>
+                 <th class="text-left px-3 py-2 font-medium">状态</th>
+                 <th class="text-left px-3 py-2 font-medium">操作</th>
                 </tr>
               </thead>
               <tbody id="billing-tbody" class="divide-y divide-slate-100"></tbody>
@@ -461,34 +465,6 @@
     </div>
   </div>
 
-  <!-- Modal: 生成价格项（可修改价格） -->
-  <div id="modal-price" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
-      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
-        <h3 class="text-sm font-semibold text-slate-900">生成价格项</h3>
-        <button type="button" onclick="closeModal('price')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="p-5">
-        <p class="text-xs text-slate-500 mb-3">根据关联计费项生成对应价格项，可直接修改价格后确认生成。</p>
-        <table class="w-full text-sm">
-          <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th class="text-left px-3 py-2 font-medium">计费项</th>
-              <th class="text-left px-3 py-2 font-medium">计量单位</th>
-              <th class="text-left px-3 py-2 font-medium">默认价格</th>
-              <th class="text-left px-3 py-2 font-medium">修改价格</th>
-            </tr>
-          </thead>
-          <tbody id="price-tbody" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
-        <button type="button" onclick="closeModal('price')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
-        <button type="button" onclick="confirmGeneratePrice()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">确认生成</button>
-     </div>
-   </div>
- </div>
-
   <!-- Modal: 配置创建/更新 -->
   <div id="modal-config-edit" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
@@ -591,12 +567,12 @@
     let currentProduct = null;
     // 默认售卖计划行
     const defaultPlanRows = [
-      { stepQty: '100', stepCycle: '30', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.input.2001', itemName: '输入实时价（30天）', start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 100 },
-      { stepQty: '500', stepCycle: '90', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.input.2002', itemName: '输入实时价（90天）', start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 200 },
-      { stepQty: '1000', stepCycle: '180', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.output.2003', itemName: '输出实时价（180天）', start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 300 }
+      { stepQty: '100', stepCycle: '30', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.input.2001', itemName: '输入实时价（30天）', itemPrice: 0.0084, itemFloor: 0.0079, start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 100 },
+      { stepQty: '500', stepCycle: '90', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.input.2002', itemName: '输入实时价（90天）', itemPrice: 0.0077, itemFloor: 0.0072, start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 200 },
+      { stepQty: '1000', stepCycle: '180', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.output.2003', itemName: '输出实时价（180天）', itemPrice: 0.031, itemFloor: 0.029, start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 300 }
     ];
     let planRows = JSON.parse(JSON.stringify(defaultPlanRows));
-    // 状态： pending_price(未生成价格项) / pending_publish(待发布) / published(已发布) / stopped(已停用) / expired(已过期)
+    // 状态： pending_publish(待发布) / published(已发布) / stopped(已停用) / expired(已过期)
     let planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
     // 默认计费项数据
     const defaultBillingItems = [
@@ -606,7 +582,6 @@
     ];
     let billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
     let changeMode = false;
-   let editTargetRow = -1;
     // 配置数据：按商品code存储，每个SKU最多一份配置（多版本）
     const defaultConfigs = {
       'maas-vtpm-chat-std': {
@@ -658,17 +633,14 @@
    }
     function renderPlan() {
       if (planRows.length === 0) {
-        document.getElementById('plan-tbody').innerHTML = `<tr><td colspan="10" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖计划</td></tr>`;
+        document.getElementById('plan-tbody').innerHTML = `<tr><td colspan="12" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖计划</td></tr>`;
         return;
       }
       document.getElementById('plan-tbody').innerHTML = planRows.map((r, idx) => {
         const st = planRowStatuses[idx];
         const detailBtn = `<button type="button" onclick="openPlanDetail(${idx})" class="text-violet-600 hover:underline text-xs mr-2">详情</button>`;
         let badge = '', action = '';
-        if (st === 'pending_price') {
-          badge = '<span class="badge bg-amber-50 text-amber-700">未生成价格项</span>';
-          action = `<button type="button" onclick="generatePriceItems(${idx})" class="text-violet-600 hover:underline text-xs">生成价格项</button>`;
-        } else if (st === 'pending_publish') {
+        if (st === 'pending_publish') {
           badge = '<span class="badge bg-blue-50 text-blue-700">待发布</span>';
           action = `<button type="button" onclick="publishPlanRow(${idx})" class="text-violet-600 hover:underline text-xs">发布</button>`;
         } else if (st === 'published') {
@@ -688,6 +660,8 @@
             <td class="px-3 py-2 text-xs">${r.factor}</td>
             <td class="px-3 py-2 text-xs">${r.slo}</td>
             <td class="px-3 py-2 text-xs"><div class="font-mono">${r.itemCode}</div><div class="text-slate-500 mt-0.5">${r.itemName}</div></td>
+            <td class="px-3 py-2 text-right font-mono text-xs">${(r.itemPrice || 0).toFixed(4)}</td>
+            <td class="px-3 py-2 text-right font-mono text-xs">${(r.itemFloor || 0).toFixed(4)}</td>
             <td class="px-3 py-2 text-xs">${r.start}</td>
             <td class="px-3 py-2 text-xs">${r.end}</td>
             <td class="px-3 py-2 text-xs">${r.priority}</td>
@@ -714,8 +688,10 @@
           <td class="px-3 py-2 text-right font-mono text-xs">${b.price.toFixed(4)}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${b.floor.toFixed(4)}</td>
           <td class="px-3 py-2 text-xs">${b.unit}</td>
-          <td class="px-3 py-2 text-xs">${b.currency}</td>
-          <td class="px-3 py-2 text-xs"><span class="badge bg-slate-100 text-slate-600 font-mono">${autoTag()}</span></td>
+         <td class="px-3 py-2 text-xs">${b.currency}</td>
+          <td class="px-3 py-2 text-xs text-slate-300">—</td>
+          <td class="px-3 py-2 text-xs text-slate-300">—</td>
+         <td class="px-3 py-2 text-xs"><span class="badge bg-slate-100 text-slate-600 font-mono">${autoTag()}</span></td>
           <td class="px-3 py-2"><span class="badge ${stCls}">${st}</span></td>
           <td class="px-3 py-2 whitespace-nowrap">${actionBtn || '—'}</td>
         </tr>`;
@@ -774,35 +750,7 @@
      showDetailView();
    }
 
-    // ===== 售卖计划：状态操作映射 =====
-    function generatePriceItems(idx) {
-      editTargetRow = idx;
-      const target = billingItems.find(b => b.code === planRows[idx].itemCode)
-        || pendingItems.filter(i => i.itemId === planRows[idx].itemCode).map(i => ({ code: i.itemId, name: i.skuName, price: i.price, unit: i.unit, currency: '元' }))[0];
-      document.getElementById('price-tbody').innerHTML = target ? `
-        <tr>
-          <td class="px-3 py-2 font-mono text-xs">${target.code}</td>
-          <td class="px-3 py-2 text-xs">${target.unit}</td>
-          <td class="px-3 py-2 font-mono text-xs">${(target.price).toFixed(4)}</td>
-          <td class="px-3 py-2"><input class="form-input price-edit" value="${(target.price).toFixed(4)}"></td>
-        </tr>` : `<tr><td colspan="4" class="px-3 py-4 text-center text-xs text-slate-400">未找到关联计费项</td></tr>`;
-      openModal('price');
-    }
-    function confirmGeneratePrice() {
-      const inp = document.querySelector('.price-edit');
-      if (inp) {
-        const v = parseFloat(inp.value);
-        if (!isNaN(v) && v >= 0) {
-          const code = inp.closest('tr').querySelector('td').textContent.trim();
-          const b = billingItems.find(x => x.code === code);
-          if (b) b.price = v;
-        }
-      }
-      if (editTargetRow >= 0) { planRowStatuses[editTargetRow] = 'pending_publish'; editTargetRow = -1; }
-      closeModal('price');
-      renderPlan();
-      renderBilling();
-    }
+    // ===== 售卖计划：状态操作 =====
     function publishPlanRow(idx) { planRowStatuses[idx] = 'published'; renderPlan(); }
     function stopPlanRow(idx) { planRowStatuses[idx] = 'stopped'; renderPlan(); }
 
@@ -841,13 +789,12 @@
     // ===== 售卖计划：创建入口 / 详情 =====
     function planStatusMeta(st) {
       const map = {
-        pending_price: { text: '未生成价格项', cls: 'bg-amber-50 text-amber-700' },
         pending_publish: { text: '待发布', cls: 'bg-blue-50 text-blue-700' },
         published: { text: '已发布', cls: 'bg-green-100 text-green-700' },
         stopped: { text: '已停用', cls: 'bg-slate-100 text-slate-600' },
         expired: { text: '已过期', cls: 'bg-slate-100 text-slate-600' }
       };
-      return map[st] || map.pending_price;
+      return map[st] || map.pending_publish;
     }
     function openPlanCreateModal() {
      const sel = document.getElementById('plan-item');
@@ -897,8 +844,11 @@
       const start = (document.getElementById('plan-start').value || '2026-10-01T00:00:00').replace('T', ' ');
       const end = (document.getElementById('plan-end').value || '2026-12-31T23:59:59').replace('T', ' ');
       const priority = parseInt(document.getElementById('plan-priority').value) || 0;
-      planRows.push({ stepQty: qty, stepCycle: cycle, factor, slo, itemCode, itemName, start, end, priority });
-      planRowStatuses.push('pending_price');
+      const itemObj = billingItems.find(b => b.code === itemCode) || pendingItems.find(i => i.itemId === itemCode);
+      const itemPrice = itemObj ? itemObj.price : 0;
+      const itemFloor = itemObj ? itemObj.floor : 0;
+      planRows.push({ stepQty: qty, stepCycle: cycle, factor, slo, itemCode, itemName, itemPrice, itemFloor, start, end, priority });
+      planRowStatuses.push('pending_publish');
       closeModal('plan-create');
       renderPlan();
     }
@@ -907,13 +857,15 @@
       const meta = planStatusMeta(planRowStatuses[idx]);
       document.getElementById('plan-detail-status').innerHTML = `
         <span class="badge ${meta.cls}">${meta.text}</span>
-        <span class="text-xs text-slate-400 ml-2">状态流转：未生成价格项 → 待发布 → 已发布（可停用）</span>`;
+        <span class="text-xs text-slate-400 ml-2">状态流转：待发布 → 已发布（可停用）</span>`;
       document.getElementById('plan-detail-info').innerHTML = `
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买量step</p><p class="text-slate-800 font-medium">${r.stepQty} 万 vTPM</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买周期step</p><p class="text-slate-800 font-medium">${r.stepCycle} 天</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联vTPM折算系数配置</p><p class="text-slate-800 font-medium">${r.factor}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">SLO赔付规则(版本)</p><p class="text-slate-800 font-medium">${r.slo}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联计费项</p><div><p class="font-mono text-slate-800">${r.itemCode}</p><p class="text-slate-500 text-xs mt-0.5">${r.itemName}</p></div></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">实时价格</p><p class="text-slate-800 font-mono font-medium">${(r.itemPrice || 0).toFixed(4)}</p></div>
+        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">兜底价格</p><p class="text-slate-800 font-mono font-medium">${(r.itemFloor || 0).toFixed(4)}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">开始售卖周期</p><p class="text-slate-800 font-medium">${r.start}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">结束售卖周期</p><p class="text-slate-800 font-medium">${r.end}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">优先级</p><p class="text-slate-800 font-medium">${r.priority}</p></div>
@@ -929,7 +881,7 @@
      };
       currentConfigs = JSON.parse(JSON.stringify(defaultConfigs[p.code] || {}));
       planRows = JSON.parse(JSON.stringify(defaultPlanRows));
-     planRowStatuses = ['pending_price', 'pending_price', 'pending_price'];
+     planRowStatuses = ['pending_publish', 'pending_publish', 'pending_publish'];
      billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
      showDetailView();
    }
