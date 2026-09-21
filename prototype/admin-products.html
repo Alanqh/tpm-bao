@@ -184,7 +184,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h2 class="text-lg font-semibold text-slate-900">商品管理</h2>
-            <p class="text-xs text-slate-500 mt-0.5">已上架查看售卖中的商品；待上架为尚无已生效计费项的商品，进入详情后完成上架。</p>
+            <p class="text-xs text-slate-500 mt-0.5">先创建商品（SKU）；再在详情页关联折算系数、SLO规则配置，创建售卖计划完成上架。</p>
           </div>
           <button onclick="openProductModal()" class="admin-btn-primary text-sm px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>新增商品</button>
         </div>
@@ -199,20 +199,15 @@
           <div id="top-tab-listed" class="p-4 hidden">
             <table class="w-full text-sm">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th class="text-left px-3 py-2 font-medium">商品code</th>
-                  <th class="text-left px-3 py-2 font-medium">商品名称</th>
-                  <th class="text-left px-3 py-2 font-medium">商品类型</th>
-                  <th class="text-left px-3 py-2 font-medium">购买量step（万 vTPM）</th>
-                  <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
-                  <th class="text-left px-3 py-2 font-medium">售卖周期</th>
-                  <th class="text-left px-3 py-2 font-medium">vTPM折算系数(版本)</th>
-                  <th class="text-left px-3 py-2 font-medium">SLO赔付规则(版本)</th>
-                  <th class="text-left px-3 py-2 font-medium">状态</th>
-                  <th class="text-left px-3 py-2 font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody id="listed-tbody" class="divide-y divide-slate-100"></tbody>
+               <tr>
+                 <th class="text-left px-3 py-2 font-medium">商品code</th>
+                 <th class="text-left px-3 py-2 font-medium">商品名称</th>
+                 <th class="text-left px-3 py-2 font-medium">商品类型</th>
+                 <th class="text-left px-3 py-2 font-medium">状态</th>
+                 <th class="text-left px-3 py-2 font-medium">操作</th>
+               </tr>
+             </thead>
+             <tbody id="listed-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
 
@@ -220,20 +215,15 @@
           <div id="top-tab-pending" class="p-4">
             <table class="w-full text-sm">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th class="text-left px-3 py-2 font-medium">商品code</th>
-                  <th class="text-left px-3 py-2 font-medium">商品名称</th>
-                  <th class="text-left px-3 py-2 font-medium">商品类型</th>
-                  <th class="text-left px-3 py-2 font-medium">购买量step（万 vTPM）</th>
-                  <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
-                  <th class="text-left px-3 py-2 font-medium">售卖周期</th>
-                  <th class="text-left px-3 py-2 font-medium">vTPM折算系数(版本)</th>
-                  <th class="text-left px-3 py-2 font-medium">SLO赔付规则(版本)</th>
-                  <th class="text-left px-3 py-2 font-medium">状态</th>
-                  <th class="text-left px-3 py-2 font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody id="pending-tbody" class="divide-y divide-slate-100"></tbody>
+               <tr>
+                 <th class="text-left px-3 py-2 font-medium">商品code</th>
+                 <th class="text-left px-3 py-2 font-medium">商品名称</th>
+                 <th class="text-left px-3 py-2 font-medium">商品类型</th>
+                 <th class="text-left px-3 py-2 font-medium">状态</th>
+                 <th class="text-left px-3 py-2 font-medium">操作</th>
+               </tr>
+             </thead>
+             <tbody id="pending-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
         </div>
@@ -244,7 +234,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h2 id="detail-title" class="text-lg font-semibold text-slate-900">商品详情</h2>
-            <p class="text-xs text-slate-500 mt-0.5">上半部分为创建信息；下半部分管理售卖计划与计费项。</p>
+            <p class="text-xs text-slate-500 mt-0.5">上半部分为商品创建信息；下半部分管理上架情况、售卖计划及配置（折算系数/SLO赔付规则）。</p>
           </div>
           <div class="flex items-center gap-3">
             <span id="detail-status" class="badge bg-amber-50 text-amber-700">待上架</span>
@@ -255,18 +245,20 @@
         <!-- 上半：创建信息 -->
         <div class="admin-card p-4 mb-4">
           <p class="text-sm font-medium text-slate-900 mb-3">创建信息</p>
-          <div id="detail-info" class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs"></div>
-        </div>
+          <div id="detail-info" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs"></div>
+       </div>
 
         <!-- 下半：售卖计划 / 计费项 -->
         <div class="admin-card">
           <div class="flex border-b border-slate-200 px-2">
-            <button type="button" class="admin-tab active" data-tab="plan" onclick="switchInnerTab('plan')">售卖计划</button>
-            <button type="button" class="admin-tab" data-tab="billing" onclick="switchInnerTab('billing')">商品上架情况</button>
-          </div>
+            <button type="button" class="admin-tab active" data-tab="billing" onclick="switchInnerTab('billing')">商品上架情况</button>
+            <button type="button" class="admin-tab" data-tab="plan" onclick="switchInnerTab('plan')">售卖计划</button>
+            <button type="button" class="admin-tab" data-tab="factor-config" onclick="switchInnerTab('factor-config')">vTPM折算系数配置</button>
+            <button type="button" class="admin-tab" data-tab="slo-config" onclick="switchInnerTab('slo-config')">SLO赔付规则配置</button>
+         </div>
 
           <!-- 售卖计划 Tab -->
-          <div id="inner-tab-plan" class="p-4">
+          <div id="inner-tab-plan" class="p-4 hidden">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
               <p class="text-xs text-slate-500">售卖计划定义购买量与周期组合；状态流转：未生成价格项 → 生成价格项 → 待发布 → 发布 → 已发布（可停用）。</p>
               <button type="button" onclick="openPlanCreateModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
@@ -291,7 +283,7 @@
           </div>
 
           <!-- 计费项 Tab -->
-          <div id="inner-tab-billing" class="p-4 hidden">
+          <div id="inner-tab-billing" class="p-4">
             <!-- 左上：发起变更 / 放弃变更 / 发布变更 -->
             <div class="flex items-center gap-2 mb-4">
               <button id="change-mode-btn" onclick="startChangeMode()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>发起变更</button>
@@ -318,11 +310,19 @@
               <tbody id="billing-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
             <!-- 左下：新增计费项 -->
-            <div class="flex">
-              <button id="add-item-btn" onclick="openCreateItemModal()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md hidden"><i class="fa-solid fa-plus mr-1"></i>新增计费项</button>
-            </div>
+           <div class="flex">
+             <button id="add-item-btn" onclick="openCreateItemModal()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md hidden"><i class="fa-solid fa-plus mr-1"></i>新增计费项</button>
+           </div>
+         </div>
+          <!-- vTPM折算系数配置 Tab -->
+          <div id="inner-tab-factor-config" class="p-4 hidden">
+            <div id="factor-config-container"></div>
           </div>
-        </div>
+          <!-- SLO赔付规则配置 Tab -->
+         <div id="inner-tab-slo-config" class="p-4 hidden">
+           <div id="slo-config-container"></div>
+         </div>
+      </div>
       </div>
     </main>
   </div>
@@ -344,41 +344,10 @@
           <input id="inp-code" class="form-input" placeholder="如 maas-vtpm-chat-pre">
         </div>
         <div>
-          <label class="form-label">商品名称</label>
-          <input id="inp-name" class="form-input" placeholder="如 vTPM 预留资源包（预）">
-        </div>
-        <div>
-          <label class="form-label">购买量step（万 vTPM）</label>
-          <input id="inp-step-qty" type="number" class="form-input" placeholder="如 100" value="100">
-        </div>
-        <div>
-          <label class="form-label">购买周期step（天）</label>
-          <input id="inp-step-cycle" type="number" class="form-input" placeholder="如 30" value="30">
-        </div>
-        <div>
-          <label class="form-label">售卖开始时间</label>
-          <input id="inp-start" type="datetime-local" step="1" class="form-input" value="2026-10-01T00:00:00">
-        </div>
-        <div>
-          <label class="form-label">售卖截止时间</label>
-          <input id="inp-end" type="datetime-local" step="1" class="form-input" value="2026-12-31T23:59:59">
-        </div>
-        <div>
-          <label class="form-label">关联vTPM折算系数配置（版本）</label>
-          <select class="form-input">
-            <option>vtpm-factor-deepseek v3.4（2026-08）</option>
-            <option>vtpm-factor-glm v2.1（2026-07）</option>
-            <option>vtpm-factor-kimi v1.8（2026-09）</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label">关联SLO赔付规则配置（版本）</label>
-          <select class="form-input">
-            <option>slo-rule-95 v5.2（2026-08）</option>
-            <option>slo-rule-99 v3.0（2026-07）</option>
-          </select>
-        </div>
-      </div>
+         <label class="form-label">商品名称</label>
+         <input id="inp-name" class="form-input" placeholder="如 vTPM 预留资源包（预）">
+       </div>
+     </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
         <button type="button" onclick="closeModal('product')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
         <button type="button" onclick="submitProduct()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">创建</button>
@@ -403,20 +372,13 @@
           <input id="plan-step-cycle" type="number" class="form-input" placeholder="如 30">
         </div>
         <div>
-          <label class="form-label">关联vTPM折算系数配置（版本）</label>
-          <select id="plan-factor" class="form-input">
-            <option>vtpm-factor-deepseek v3.4（2026-08）</option>
-            <option>vtpm-factor-glm v2.1（2026-07）</option>
-            <option>vtpm-factor-kimi v1.8（2026-09）</option>
-          </select>
-        </div>
-        <div>
-          <label class="form-label">关联SLO赔付规则（版本）</label>
-          <select id="plan-slo" class="form-input">
-            <option>slo-rule-95 v5.2（2026-08）</option>
-            <option>slo-rule-99 v3.0（2026-07）</option>
-          </select>
-        </div>
+         <label class="form-label">关联vTPM折算系数配置（版本）</label>
+          <div id="plan-factor-container"></div>
+       </div>
+       <div>
+         <label class="form-label">关联SLO赔付规则（版本）</label>
+          <div id="plan-slo-container"></div>
+       </div>
         <div>
           <label class="form-label">关联计费项</label>
           <select id="plan-item" class="form-input"></select>
@@ -523,11 +485,57 @@
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
         <button type="button" onclick="closeModal('price')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
         <button type="button" onclick="confirmGeneratePrice()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">确认生成</button>
+     </div>
+   </div>
+ </div>
+
+  <!-- Modal: 配置创建/更新 -->
+  <div id="modal-config-edit" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <h3 id="config-edit-title" class="text-sm font-semibold text-slate-900">创建配置</h3>
+        <button type="button" onclick="closeModal('config-edit')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 grid grid-cols-1 gap-4">
+        <div>
+          <label class="form-label">配置名称</label>
+          <input id="config-name" class="form-input" placeholder="如 vtpm-factor-deepseek">
+        </div>
+        <div>
+          <label class="form-label">关联SKU</label>
+          <input id="config-sku" class="form-input bg-slate-50 text-slate-500" readonly>
+        </div>
+        <div>
+          <label class="form-label">版本（自动生成）</label>
+          <input id="config-version" class="form-input bg-slate-50 text-slate-500" readonly>
+        </div>
+        <div>
+          <label class="form-label">YAML 配置内容</label>
+          <textarea id="config-yaml" class="form-input font-mono text-xs" rows="12" placeholder="# 在此填写 YAML 配置内容"></textarea>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
+        <button type="button" onclick="closeModal('config-edit')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
+        <button type="button" onclick="confirmConfigEdit()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">保存</button>
       </div>
     </div>
   </div>
 
-  <script>
+  <!-- Modal: 配置版本历史 -->
+  <div id="modal-config-history" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <h3 id="config-history-title" class="text-sm font-semibold text-slate-900">版本历史</h3>
+        <button type="button" onclick="closeModal('config-history')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5" id="config-history-body"></div>
+      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
+        <button type="button" onclick="closeModal('config-history')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">关闭</button>
+      </div>
+    </div>
+  </div>
+
+ <script>
     // ===== 通用 =====
     function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); document.getElementById('modal-' + id).classList.add('flex'); }
     function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); }
@@ -556,11 +564,12 @@
 
     // ===== 详情页内 Tab：售卖计划 / 计费项 =====
     function switchInnerTab(tab) {
-      document.querySelectorAll('.admin-tab[data-tab="plan"], .admin-tab[data-tab="billing"]').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#detail-view .admin-tab[data-tab]').forEach(t => t.classList.remove('active'));
       document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
-      document.getElementById('inner-tab-plan').classList.toggle('hidden', tab !== 'plan');
-      document.getElementById('inner-tab-billing').classList.toggle('hidden', tab !== 'billing');
-    }
+      ['billing', 'plan', 'factor-config', 'slo-config'].forEach(id => {
+        document.getElementById('inner-tab-' + id).classList.toggle('hidden', tab !== id);
+      });
+   }
 
     // ===== 数据 =====
     // 已上架商品
@@ -597,41 +606,56 @@
     ];
     let billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
     let changeMode = false;
-    let editTargetRow = -1;
-    // 自动标签：取当前商品code
+   let editTargetRow = -1;
+    // 配置数据：按商品code存储，每个SKU最多一份配置（多版本）
+    const defaultConfigs = {
+      'maas-vtpm-chat-std': {
+        factor: { name: 'vtpm-factor-deepseek', sku: 'maas-vtpm-chat-std', versions: [
+          { version: 'v3.3', yaml: '# vTPM 折算系数 v3.3\nmodels:\n  deepseek-chat:\n    factor: 0.8\n  deepseek-coder:\n    factor: 0.9', createdAt: '2026-07-01 10:00:00' },
+          { version: 'v3.4', yaml: '# vTPM 折算系数 v3.4\nmodels:\n  deepseek-chat:\n    factor: 0.85\n  deepseek-coder:\n    factor: 0.95\n  deepseek-reasoner:\n    factor: 1.2', createdAt: '2026-08-01 10:00:00' }
+        ]},
+        slo: { name: 'slo-rule-95', sku: 'maas-vtpm-chat-std', versions: [
+          { version: 'v5.1', yaml: '# SLO赔付规则 v5.1\nslo:\n  availability: 99.5%\n  latency_p99: 500ms\ncompensation:\n  breach_1h: 10%\n  breach_4h: 30%', createdAt: '2026-07-01 10:00:00' },
+          { version: 'v5.2', yaml: '# SLO赔付规则 v5.2\nslo:\n  availability: 99.9%\n  latency_p99: 300ms\ncompensation:\n  breach_1h: 15%\n  breach_4h: 40%\n  breach_24h: 80%', createdAt: '2026-08-01 10:00:00' }
+        ]}
+      },
+      'maas-vtpm-chat-pro': {
+        factor: { name: 'vtpm-factor-glm', sku: 'maas-vtpm-chat-pro', versions: [
+          { version: 'v2.0', yaml: '# vTPM 折算系数 v2.0\nmodels:\n  glm-4:\n    factor: 0.7\n  glm-4-plus:\n    factor: 0.8', createdAt: '2026-06-01 10:00:00' },
+          { version: 'v2.1', yaml: '# vTPM 折算系数 v2.1\nmodels:\n  glm-4:\n    factor: 0.75\n  glm-4-plus:\n    factor: 0.85\n  glm-4-flash:\n    factor: 0.3', createdAt: '2026-07-01 10:00:00' }
+        ]},
+        slo: { name: 'slo-rule-95', sku: 'maas-vtpm-chat-pro', versions: [
+          { version: 'v5.2', yaml: '# SLO赔付规则 v5.2\nslo:\n  availability: 99.9%\n  latency_p99: 300ms\ncompensation:\n  breach_1h: 15%\n  breach_4h: 40%\n  breach_24h: 80%', createdAt: '2026-08-01 10:00:00' }
+        ]}
+      }
+    };
+    let currentConfigs = {};
+    let currentConfigType = null;
+    let configEditMode = null;
+   // 自动标签：取当前商品code
     function autoTag() { return currentProduct ? currentProduct.code : '—'; }
 
     // ===== 渲染 =====
     function renderListed() {
-      document.getElementById('listed-tbody').innerHTML = listedProducts.map(p => `
-        <tr class="hover:bg-slate-50">
-          <td class="px-3 py-2 font-mono text-xs">${p.code}</td>
-          <td class="px-3 py-2">${p.name}</td>
-          <td class="px-3 py-2 text-xs text-slate-500">${p.type}</td>
-          <td class="px-3 py-2 text-xs">${p.stepQty}</td>
-          <td class="px-3 py-2 text-xs">${p.stepCycle}</td>
-          <td class="px-3 py-2 text-xs">${p.sellStart} ~ ${p.sellEnd}</td>
-          <td class="px-3 py-2 text-xs">${p.factor}</td>
-          <td class="px-3 py-2 text-xs">${p.slo}</td>
-          <td class="px-3 py-2"><span class="badge bg-green-100 text-green-700">${p.status}</span></td>
-          <td class="px-3 py-2"><button type="button" onclick="openDetailFromListed('${p.code}')" class="text-violet-600 hover:underline text-xs">详情</button></td>
-        </tr>`).join('');
-    }
+     document.getElementById('listed-tbody').innerHTML = listedProducts.map(p => `
+       <tr class="hover:bg-slate-50">
+         <td class="px-3 py-2 font-mono text-xs">${p.code}</td>
+         <td class="px-3 py-2">${p.name}</td>
+         <td class="px-3 py-2 text-xs text-slate-500">${p.type}</td>
+         <td class="px-3 py-2"><span class="badge bg-green-100 text-green-700">${p.status}</span></td>
+         <td class="px-3 py-2"><button type="button" onclick="openDetailFromListed('${p.code}')" class="text-violet-600 hover:underline text-xs">详情</button></td>
+       </tr>`).join('');
+   }
     function renderPending() {
-      document.getElementById('pending-tbody').innerHTML = pendingProducts.map((p, idx) => `
-        <tr class="hover:bg-slate-50">
-          <td class="px-3 py-2 font-mono text-xs">${p.code}</td>
-          <td class="px-3 py-2">${p.name}</td>
-          <td class="px-3 py-2 text-xs text-slate-500">${p.type}</td>
-          <td class="px-3 py-2 text-xs">${p.stepQty}</td>
-          <td class="px-3 py-2 text-xs">${p.stepCycle}</td>
-          <td class="px-3 py-2 text-xs">${p.sellStart} ~ ${p.sellEnd}</td>
-          <td class="px-3 py-2 text-xs">${p.factor}</td>
-          <td class="px-3 py-2 text-xs">${p.slo}</td>
-          <td class="px-3 py-2"><span class="badge bg-amber-50 text-amber-700">${p.status}</span></td>
-          <td class="px-3 py-2"><button type="button" onclick="openPendingDetail(${idx})" class="text-violet-600 hover:underline text-xs">详情</button></td>
-        </tr>`).join('');
-    }
+     document.getElementById('pending-tbody').innerHTML = pendingProducts.map((p, idx) => `
+       <tr class="hover:bg-slate-50">
+         <td class="px-3 py-2 font-mono text-xs">${p.code}</td>
+         <td class="px-3 py-2">${p.name}</td>
+         <td class="px-3 py-2 text-xs text-slate-500">${p.type}</td>
+         <td class="px-3 py-2"><span class="badge bg-amber-50 text-amber-700">${p.status}</span></td>
+         <td class="px-3 py-2"><button type="button" onclick="openPendingDetail(${idx})" class="text-violet-600 hover:underline text-xs">详情</button></td>
+       </tr>`).join('');
+   }
     function renderPlan() {
       if (planRows.length === 0) {
         document.getElementById('plan-tbody').innerHTML = `<tr><td colspan="10" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖计划</td></tr>`;
@@ -701,25 +725,19 @@
     // ===== 新增商品 → 创建后直接打开详情页（待上架） =====
     function openProductModal() { openModal('product'); }
     function submitProduct() {
-      currentProduct = {
-        code: (document.getElementById('inp-code').value || 'maas-vtpm-chat-pre').trim(),
-        name: (document.getElementById('inp-name').value || 'vTPM 预留资源包（预）').trim(),
-        type: 'maas-vtpm-chat',
-        stepQty: (document.getElementById('inp-step-qty').value || '100').trim(),
-        stepCycle: (document.getElementById('inp-step-cycle').value || '30').trim(),
-        start: (document.getElementById('inp-start').value || '2026-10-01T00:00:00').replace('T', ' '),
-        end: (document.getElementById('inp-end').value || '2026-12-31T23:59:59').replace('T', ' '),
-        factor: 'vtpm-factor-deepseek v3.4（2026-08）',
-        slo: 'slo-rule-95 v5.2（2026-08）',
-        lifeStatus: '待上架'
-      };
-      planRows = JSON.parse(JSON.stringify(defaultPlanRows));
-      planRows.forEach(r => { r.factor = currentProduct.factor; r.slo = currentProduct.slo; });
-      planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
-      billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
-      closeModal('product');
-      showDetailView();
-    }
+     currentProduct = {
+       code: (document.getElementById('inp-code').value || 'maas-vtpm-chat-pre').trim(),
+       name: (document.getElementById('inp-name').value || 'vTPM 预留资源包（预）').trim(),
+       type: 'maas-vtpm-chat',
+       lifeStatus: '待上架'
+     };
+      currentConfigs = {};
+      planRows = [];
+      planRowStatuses = [];
+      billingItems = [];
+     closeModal('product');
+     showDetailView();
+   }
     function showDetailView() {
       document.getElementById('list-view').classList.add('hidden');
       document.getElementById('detail-view').classList.remove('hidden');
@@ -731,33 +749,30 @@
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品类型</p><p class="text-slate-800 font-medium">${currentProduct.type}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品code</p><p class="font-mono">${currentProduct.code}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品名称</p><p class="font-medium">${currentProduct.name}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买量step</p><p>${currentProduct.stepQty} 万 vTPM</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买周期step</p><p>${currentProduct.stepCycle} 天</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">售卖开始时间</p><p>${currentProduct.start}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">售卖截止时间</p><p>${currentProduct.end}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联vTPM折算系数配置(版本)</p><p>${currentProduct.factor}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联SLO赔付规则配置(版本)</p><p>${currentProduct.slo}</p></div>`;
-      renderPlan();
-      renderBilling();
-      switchInnerTab('plan');
-    }
+      `;
+
+     renderPlan();
+     renderBilling();
+      renderConfig('factor');
+      renderConfig('slo');
+      switchInnerTab('billing');
+   }
     function backToList() {
       document.getElementById('detail-view').classList.add('hidden');
       document.getElementById('list-view').classList.remove('hidden');
     }
     function openDetailFromListed(code) {
-      const p = listedProducts.find(x => x.code === code);
-      if (!p) return;
-      currentProduct = {
-        code: p.code, name: p.name, type: p.type, stepQty: p.stepQty, stepCycle: p.stepCycle, start: p.sellStart, end: p.sellEnd,
-        factor: p.factor + '（2026-08）', slo: p.slo + '（2026-08）', lifeStatus: '售卖中'
-      };
+     const p = listedProducts.find(x => x.code === code);
+     if (!p) return;
+     currentProduct = {
+        code: p.code, name: p.name, type: p.type, lifeStatus: '售卖中'
+     };
+      currentConfigs = JSON.parse(JSON.stringify(defaultConfigs[code] || {}));
       planRows = JSON.parse(JSON.stringify(defaultPlanRows));
-      planRows.forEach(r => { r.factor = currentProduct.factor; r.slo = currentProduct.slo; });
-      planRowStatuses = ['published', 'expired', 'stopped'];
-      billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
-      showDetailView();
-    }
+     planRowStatuses = ['published', 'expired', 'stopped'];
+     billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
+     showDetailView();
+   }
 
     // ===== 售卖计划：状态操作映射 =====
     function generatePriceItems(idx) {
@@ -835,22 +850,48 @@
       return map[st] || map.pending_price;
     }
     function openPlanCreateModal() {
-      const sel = document.getElementById('plan-item');
-      const items = [...new Map([
-        ...billingItems.map(b => [b.code, b.name]),
-        ...pendingItems.map(i => [i.itemId, i.skuName])
-      ]).entries()];
-      sel.innerHTML = items.map(([c, n]) => `<option value="${c}">${c} - ${n}</option>`).join('');
-      document.getElementById('plan-step-qty').value = '';
-      document.getElementById('plan-step-cycle').value = '';
-      openModal('plan-create');
+     const sel = document.getElementById('plan-item');
+     const items = [...new Map([
+       ...billingItems.map(b => [b.code, b.name]),
+       ...pendingItems.map(i => [i.itemId, i.skuName])
+     ]).entries()];
+     sel.innerHTML = items.map(([c, n]) => `<option value="${c}">${c} - ${n}</option>`).join('');
+     document.getElementById('plan-step-qty').value = '';
+     document.getElementById('plan-step-cycle').value = '';
+      renderPlanConfigSelector('factor');
+      renderPlanConfigSelector('slo');
+     openModal('plan-create');
+   }
+
+    function renderPlanConfigSelector(type) {
+      const container = document.getElementById('plan-' + type + '-container');
+      const config = currentConfigs[type];
+      const configTab = type === 'factor' ? 'factor-config' : 'slo-config';
+      const label = type === 'factor' ? 'vTPM折算系数' : 'SLO赔付规则';
+      if (!config || !config.versions || config.versions.length === 0) {
+        container.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-amber-600"><i class="fa-solid fa-triangle-exclamation mr-1"></i>尚未创建${label}配置</span>
+            <button type="button" onclick="closeModal('plan-create'); switchInnerTab('${configTab}')" class="text-violet-600 hover:underline text-xs font-medium">去创建</button>
+          </div>`;
+      } else {
+        container.innerHTML = `
+          <div class="flex items-center gap-2">
+            <select id="plan-${type}" class="form-input flex-1">
+              ${config.versions.map(v => `<option value="${config.name} ${v.version}">${config.name} ${v.version}（${v.createdAt}）</option>`).join('')}
+            </select>
+            <button type="button" onclick="closeModal('plan-create'); switchInnerTab('${configTab}')" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap">去更新</button>
+          </div>`;
+      }
     }
     function confirmPlanCreate() {
-      const qty = (document.getElementById('plan-step-qty').value || '100').trim();
-      const cycle = (document.getElementById('plan-step-cycle').value || '30').trim();
-      const factor = document.getElementById('plan-factor').value;
-      const slo = document.getElementById('plan-slo').value;
-      const itemSel = document.getElementById('plan-item');
+     const qty = (document.getElementById('plan-step-qty').value || '100').trim();
+     const cycle = (document.getElementById('plan-step-cycle').value || '30').trim();
+      const factorEl = document.getElementById('plan-factor');
+      const sloEl = document.getElementById('plan-slo');
+      const factor = factorEl ? factorEl.value : '未关联';
+      const slo = sloEl ? sloEl.value : '未关联';
+     const itemSel = document.getElementById('plan-item');
       const itemCode = itemSel.value || '未选择';
       const itemName = itemSel.selectedIndex >= 0 ? (itemSel.options[itemSel.selectedIndex].text.split(' - ')[1] || itemCode) : itemCode;
       const start = (document.getElementById('plan-start').value || '2026-10-01T00:00:00').replace('T', ' ');
@@ -882,17 +923,16 @@
 
     // ===== 待上架：商品详情 → 进入相同详情页（待上架） =====
     function openPendingDetail(idx) {
-      const p = pendingProducts[idx];
-      currentProduct = {
-        code: p.code, name: p.name, type: p.type, stepQty: p.stepQty, stepCycle: p.stepCycle, start: p.sellStart, end: p.sellEnd,
-        factor: p.factor + '（2026-08）', slo: p.slo + '（2026-08）', lifeStatus: '待上架'
-      };
+     const p = pendingProducts[idx];
+     currentProduct = {
+        code: p.code, name: p.name, type: p.type, lifeStatus: '待上架'
+     };
+      currentConfigs = JSON.parse(JSON.stringify(defaultConfigs[p.code] || {}));
       planRows = JSON.parse(JSON.stringify(defaultPlanRows));
-      planRows.forEach(r => { r.factor = currentProduct.factor; r.slo = currentProduct.slo; });
-      planRowStatuses = ['pending_price', 'pending_price', 'pending_price'];
-      billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
-      showDetailView();
-    }
+     planRowStatuses = ['pending_price', 'pending_price', 'pending_price'];
+     billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
+     showDetailView();
+   }
 
     // ===== 计费项创建弹窗（新增计费项即新增上架，标签自动关联） =====
     function openCreateItemModal() {
@@ -912,7 +952,113 @@
       renderPending();
     }
 
-    // ===== 初始化 =====
+    // ===== 配置管理（折算系数 / SLO赔付规则） =====
+    function renderConfig(type) {
+      const containerId = type === 'factor' ? 'factor-config-container' : 'slo-config-container';
+      const container = document.getElementById(containerId);
+      const config = currentConfigs[type];
+      const label = type === 'factor' ? 'vTPM折算系数配置' : 'SLO赔付规则配置';
+      if (!config || !config.versions || config.versions.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12">
+            <i class="fa-solid fa-file-circle-plus text-3xl text-slate-300 mb-3"></i>
+            <p class="text-sm text-slate-500 mb-4">尚未创建${label}</p>
+            <button type="button" onclick="openConfigCreate('${type}')" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>创建配置</button>
+          </div>`;
+        return;
+      }
+      const latest = config.versions[config.versions.length - 1];
+      container.innerHTML = `
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div>
+              <p class="text-sm font-medium text-slate-900">${config.name}</p>
+              <p class="text-xs text-slate-500 mt-0.5">关联SKU: <span class="font-mono">${config.sku}</span></p>
+            </div>
+            <span class="badge bg-violet-50 text-violet-700">${latest.version}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="openConfigHistory('${type}')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-clock-rotate-left mr-1"></i>版本历史</button>
+            <button type="button" onclick="openConfigUpdate('${type}')" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>更新配置</button>
+          </div>
+        </div>
+        <pre class="bg-slate-900 text-slate-100 rounded-lg p-4 text-xs font-mono overflow-x-auto whitespace-pre-wrap">${escapeHtml(latest.yaml)}</pre>`;
+    }
+    function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+    function incrementVersion(ver) {
+      const match = ver.match(/^v(\d+)\.(\d+)$/);
+      if (match) return 'v' + match[1] + '.' + (parseInt(match[2]) + 1);
+      return 'v1.1';
+    }
+    function openConfigCreate(type) {
+      currentConfigType = type;
+      configEditMode = 'create';
+      document.getElementById('config-edit-title').textContent = type === 'factor' ? '创建 vTPM折算系数配置' : '创建 SLO赔付规则配置';
+      document.getElementById('config-name').value = '';
+      document.getElementById('config-name').readOnly = false;
+      document.getElementById('config-sku').value = currentProduct ? currentProduct.code : '';
+      document.getElementById('config-version').value = 'v1.0（初始版本）';
+      document.getElementById('config-yaml').value = '';
+      openModal('config-edit');
+    }
+    function openConfigUpdate(type) {
+      currentConfigType = type;
+      configEditMode = 'update';
+      const config = currentConfigs[type];
+      if (!config) { openConfigCreate(type); return; }
+      const latest = config.versions[config.versions.length - 1];
+      const newVersion = incrementVersion(latest.version);
+      document.getElementById('config-edit-title').textContent = type === 'factor' ? '更新 vTPM折算系数配置' : '更新 SLO赔付规则配置';
+      document.getElementById('config-name').value = config.name;
+      document.getElementById('config-name').readOnly = true;
+      document.getElementById('config-sku').value = config.sku;
+      document.getElementById('config-version').value = newVersion + '（基于 ' + latest.version + '）';
+      document.getElementById('config-yaml').value = latest.yaml;
+      openModal('config-edit');
+    }
+    function confirmConfigEdit() {
+      const name = document.getElementById('config-name').value.trim();
+      const yaml = document.getElementById('config-yaml').value;
+      const sku = currentProduct ? currentProduct.code : '';
+      const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      if (configEditMode === 'create') {
+        currentConfigs[currentConfigType] = {
+          name: name, sku: sku,
+          versions: [{ version: 'v1.0', yaml: yaml, createdAt: now }]
+        };
+      } else {
+        const config = currentConfigs[currentConfigType];
+        if (config) {
+          const latest = config.versions[config.versions.length - 1];
+          config.versions.push({ version: incrementVersion(latest.version), yaml: yaml, createdAt: now });
+        }
+      }
+      closeModal('config-edit');
+      renderConfig(currentConfigType);
+    }
+    function openConfigHistory(type) {
+      const config = currentConfigs[type];
+      if (!config) return;
+      const label = type === 'factor' ? 'vTPM折算系数配置' : 'SLO赔付规则配置';
+      document.getElementById('config-history-title').textContent = label + ' - 版本历史';
+      document.getElementById('config-history-body').innerHTML = config.versions.slice().reverse().map((v, idx) => {
+        const isLatest = idx === 0;
+        return `
+          <div class="border border-slate-200 rounded-md p-3 mb-3 ${isLatest ? 'border-violet-300 bg-violet-50' : ''}">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="badge ${isLatest ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-600'}">${v.version}</span>
+                ${isLatest ? '<span class="text-xs text-violet-600 font-medium">当前版本</span>' : ''}
+              </div>
+              <span class="text-xs text-slate-400">${v.createdAt}</span>
+            </div>
+            <pre class="bg-slate-900 text-slate-100 rounded-md p-3 text-xs font-mono overflow-x-auto whitespace-pre-wrap">${escapeHtml(v.yaml)}</pre>
+          </div>`;
+      }).join('');
+      openModal('config-history');
+    }
+
+   // ===== 初始化 =====
     renderListed();
     renderPending();
   </script>
