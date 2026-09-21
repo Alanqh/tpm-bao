@@ -407,24 +407,6 @@
     </div>
   </div>
 
-  <!-- Modal: 售卖计划详情 -->
-  <div id="modal-plan-detail" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
-      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
-        <h3 class="text-sm font-semibold text-slate-900">售卖计划详情</h3>
-        <button type="button" onclick="closeModal('plan-detail')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="p-5">
-        <div id="plan-detail-status" class="mb-4"></div>
-        <div id="plan-detail-info" class="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs"></div>
-      </div>
-      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
-        <button type="button" onclick="openPlanCreateModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
-        <button type="button" onclick="closeModal('plan-detail')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">关闭</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Modal: 创建计费项 -->
   <div id="modal-create-item" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-900/50 p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
@@ -638,7 +620,6 @@
       }
       document.getElementById('plan-tbody').innerHTML = planRows.map((r, idx) => {
         const st = planRowStatuses[idx];
-        const detailBtn = `<button type="button" onclick="openPlanDetail(${idx})" class="text-violet-600 hover:underline text-xs mr-2">详情</button>`;
         let badge = '', action = '';
         if (st === 'pending_publish') {
           badge = '<span class="badge bg-blue-50 text-blue-700">待发布</span>';
@@ -666,7 +647,7 @@
             <td class="px-3 py-2 text-xs">${r.end}</td>
             <td class="px-3 py-2 text-xs">${r.priority}</td>
             <td class="px-3 py-2">${badge}</td>
-            <td class="px-3 py-2 whitespace-nowrap">${detailBtn}${action}</td>
+            <td class="px-3 py-2 whitespace-nowrap">${action}</td>
           </tr>`;
       }).join('');
     }
@@ -851,26 +832,6 @@
       planRowStatuses.push('pending_publish');
       closeModal('plan-create');
       renderPlan();
-    }
-    function openPlanDetail(idx) {
-      const r = planRows[idx];
-      const meta = planStatusMeta(planRowStatuses[idx]);
-      document.getElementById('plan-detail-status').innerHTML = `
-        <span class="badge ${meta.cls}">${meta.text}</span>
-        <span class="text-xs text-slate-400 ml-2">状态流转：待发布 → 已发布（可停用）</span>`;
-      document.getElementById('plan-detail-info').innerHTML = `
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买量step</p><p class="text-slate-800 font-medium">${r.stepQty} 万 vTPM</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">购买周期step</p><p class="text-slate-800 font-medium">${r.stepCycle} 天</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联vTPM折算系数配置</p><p class="text-slate-800 font-medium">${r.factor}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">SLO赔付规则(版本)</p><p class="text-slate-800 font-medium">${r.slo}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联计费项</p><div><p class="font-mono text-slate-800">${r.itemCode}</p><p class="text-slate-500 text-xs mt-0.5">${r.itemName}</p></div></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">实时价格</p><p class="text-slate-800 font-mono font-medium">${(r.itemPrice || 0).toFixed(4)}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">兜底价格</p><p class="text-slate-800 font-mono font-medium">${(r.itemFloor || 0).toFixed(4)}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">开始售卖周期</p><p class="text-slate-800 font-medium">${r.start}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">结束售卖周期</p><p class="text-slate-800 font-medium">${r.end}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">优先级</p><p class="text-slate-800 font-medium">${r.priority}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">所属商品</p><p class="text-slate-800 font-medium">${currentProduct ? currentProduct.name : '—'}</p></div>`;
-      openModal('plan-detail');
     }
 
     // ===== 待上架：商品详情 → 进入相同详情页（待上架） =====
