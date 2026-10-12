@@ -27,13 +27,14 @@ python3 -m http.server 8080
 
 - `prototype/`：所有原型页面
   - `index.html`：官网首页
-  - `purchase.html`：购买意向问卷
   - `terms.html`：购买须知文档
-  - `dashboard.html`：前台资源包管理
-  - `usage.html`：前台资源包监控
-  - `admin-inventory.html`：后台资源包管理
-  - `admin-usage.html`：后台资源包监控
-  - `admin-records.html`：后台记录（已不在导航中）
+  - `packages.html`：前台资源包
+  - `wallet.html`：余额充值入口
+  - `monitor.html`：前台资源包监控
+  - `monitor-component.html`：前台/后台监控共用组件
+  - `admin-packages.html`：后台预留 vTPM 管理
+  - `admin-monitor.html`：后台资源包监控
+  - `admin-products.html`：后台商品管理
 
 ## 部署到 GitHub Pages
 
