@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>后台-预留vTPM管理 - 预留vTPM管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .switcher-tab {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+    .switcher-tab.active { background: #6e29f6; color: white; }
+
+    .admin-sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      color: #374151;
+      font-size: 0.8125rem;
+      transition: all 0.15s;
+    }
+    .admin-sidebar-link:hover { background: #F3F4F6; color: #7C3AED; }
+    .admin-sidebar-link.active { background: #F5F3FF; color: #7C3AED; font-weight: 500; }
+
+    .admin-card {
+      background: #fff;
+      border: 1px solid #E5E7EB;
+      border-radius: 0.5rem;
+    }
+    .admin-tab {
+      padding: 0.5rem 1rem;
+      border-bottom: 2px solid transparent;
+      color: #6B7280;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .admin-tab:hover { color: #374151; }
+    .admin-tab.active { color: #7C3AED; border-bottom-color: #7C3AED; }
+    .admin-btn-primary {
+      background: #7C3AED;
+      color: white;
+      border: 1px solid #7C3AED;
+    }
+    .admin-btn-primary:hover { background: #6D28D9; }
+    .admin-btn-disabled {
+      background: #F3F4F6;
+      color: #9CA3AF;
+      border: 1px solid #E5E7EB;
+      cursor: not-allowed;
+    }
+    .admin-btn-default {
+      background: #fff;
+      color: #374151;
+      border: 1px solid #D1D5DB;
+    }
+    .admin-btn-default:hover { background: #F9FAFB; }
+  </style>
+</head>
+<body class="bg-[#F3F4F6] text-slate-800">
+  <!-- 原型切换栏 -->
+  <div class="sticky top-0 z-[100] bg-slate-900 text-white text-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-10 gap-1 overflow-x-auto">
+        <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
+        <a href="index.html" class="switcher-tab">官网首页</a>
+        <a href="terms.html" class="switcher-tab">购买须知</a>
+        <a href="packages.html" class="switcher-tab">资源包</a>
+        <a href="admin-packages.html" class="switcher-tab active">后台-预留vTPM管理</a>
+        <a href="admin-products.html" class="switcher-tab">后台-商品管理</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 顶部 Header -->
+  <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-10 z-50">
+    <div class="flex items-center gap-4">
+      <button class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md">
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">SF</div>
+        <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
+      </div>
+      <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">预留vTPM管理</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+        <i class="fa-regular fa-moon"></i>
+      </button>
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+        <i class="fa-regular fa-bell"></i>
+      </button>
+      <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-medium">吕</div>
+    </div>
+  </header>
+
+  <div class="flex">
+    <!-- 左侧 Sidebar -->
+    <aside class="w-56 bg-white border-r border-slate-200 flex-shrink-0 hidden md:flex flex-col h-[calc(100vh-3.5rem-2.5rem)] sticky top-[6rem]">
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto text-sm">
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>管理后台</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>账户中心</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>活动运营</span>
+        </div>
+
+        <div class="pl-6 space-y-0.5">
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
+          <a href="admin-packages.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>预留vTPM管理</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
+          <i class="fa-solid fa-chevron-right text-xs transition-transform"></i>
+          <span>MaaS 运营管理</span>
+        </div>
+
+        <div id="maas-menu" class="pl-6 space-y-0.5 hidden">
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-server w-4 text-center"></i>客户任务/数据</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-layer-group w-4 text-center"></i>Serverless 管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-link w-4 text-center"></i>MaaS 专属端点</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-brain w-4 text-center"></i>推理服务</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-flask w-4 text-center"></i>Playground</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>弹性 GPU 运营管理</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>商品定价中心</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>平台管理</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 p-4 min-w-0">
+      <!-- 面包屑 -->
+      <nav class="text-xs text-slate-500 mb-4">
+        <span class="text-slate-700">活动运营</span>
+        <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
+        <span class="text-slate-700">预留vTPM管理</span>
+      </nav>
+
+      <!-- 标题 -->
+      <div class="mb-4">
+        <h2 class="text-lg font-semibold text-slate-900">预留vTPM管理</h2>
+        <p class="text-xs text-slate-500 mt-0.5">管理预留 vTPM 资源包的发放与回收。</p>
+      </div>
+
+      <!-- 操作按钮行 -->
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <button onclick="openGrantModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
+          <i class="fa-solid fa-gift text-[10px]"></i>手动交付资源包
+        </button>
+      </div>
+
+      <!-- Tab 切换 -->
+      <div class="admin-card">
+        <div class="flex border-b border-slate-200 px-2">
+          <button type="button" class="admin-tab active" data-tab="sold" onclick="switchTab('sold')">已发放资源包</button>
+          <button type="button" class="admin-tab" data-tab="logs" onclick="switchTab('logs')">操作记录</button>
+          <button type="button" class="admin-tab" data-tab="inventory" onclick="switchTab('inventory')">库存看板</button>
+        </div>
+
+        <!-- 库存看板（后续内嵌 BI 看板） -->
+        <div id="tab-inventory" class="p-4 hidden">
+          <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
+              <i class="fa-solid fa-chart-pie text-2xl"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-900 mb-1">后续内嵌 BI 看板</h3>
+            <p class="text-xs text-slate-500 max-w-md leading-relaxed">本模块正式内容后续以内嵌 BI 看板提供。</p>
+          </div>
+        </div>
+
+        <!-- 已发放资源包 -->
+        <div id="tab-sold" class="p-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-semibold text-slate-900">已发放资源包</h3>
+            <div class="flex gap-2">
+              <input type="text" placeholder="搜索用户 / 企业" class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
+              <select class="text-xs border-slate-300 border rounded px-2 py-1 outline-none focus:border-violet-500">
+                <option>全部状态</option>
+                <option>生效中</option>
+                <option>已过期</option>
+                <option>已回收</option>
+              </select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">资源包 ID</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">subject_id</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">商品ID</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">商品名称</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">数量</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">有效期</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">最终 model_name</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">状态</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <tr>
+                  <td class="px-3 py-3 font-mono text-[11px]">P001</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">sub_3x9a2b1c</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">001</td>
+                  <td class="px-3 py-3">Deepseek V4 Flash 0731 预留 vTPM</td>
+                  <td class="px-3 py-3">300 万 vTPM</td>
+                  <td class="px-3 py-3">2026-08-01 ~ 2026-08-30</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">/proj-alpha/deepseek-v4-flash-0731</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
+                  <td class="px-3 py-3">
+                    <a href="admin-monitor.html?pkg=P001" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
+                    <button onclick="showDetail('P001')" class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">详情</button>
+                    <button class="text-red-600 hover:text-red-700 text-[11px]">回收</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-3 font-mono text-[11px]">P002</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">sub_7k2m5n8p</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">002</td>
+                  <td class="px-3 py-3">GLM 5.2 预留 vTPM</td>
+                  <td class="px-3 py-3">200 万 vTPM</td>
+                  <td class="px-3 py-3">2026-09-01 ~ 2026-09-30</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">/proj-gamma/glm-5.2</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
+                  <td class="px-3 py-3">
+                    <a href="admin-monitor.html?pkg=P002" class="text-blue-600 hover:text-blue-700 text-[11px] mr-2">监控</a>
+                    <button onclick="showDetail('P002')" class="text-violet-600 hover:text-violet-700 text-[11px] mr-2">详情</button>
+                    <button class="text-red-600 hover:text-red-700 text-[11px]">回收</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-3 font-mono text-[11px]">P004</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">sub_2q4r6s7t</td>
+                  <td class="px-3 py-3 font-mono text-[11px]">004</td>
+                  <td class="px-3 py-3">通用 Tokens 包</td>
+                  <td class="px-3 py-3">1,000 万 tokens</td>
+                  <td class="px-3 py-3">2026-05-01 ~ 2026-07-31</td>
+                  <td class="px-3 py-3 text-slate-400">-</td>
+                  <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-medium">已用完</span></td>
+                  <td class="px-3 py-3">
+                    <button class="text-slate-400 cursor-not-allowed text-[11px]">监控</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 操作记录（后续内嵌 BI 看板） -->
+        <div id="tab-logs" class="p-4 hidden">
+          <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
+              <i class="fa-solid fa-chart-column text-2xl"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-900 mb-1">后续内嵌 BI 看板</h3>
+            <p class="text-xs text-slate-500 max-w-md leading-relaxed">本模块正式内容后续以内嵌 BI 看板提供。</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: 资源包详情 -->
+  <div id="modal-detail" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-4xl mx-4 p-5 border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900" id="detail-title">资源包详情</h3>
+        <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="detail-body" class="space-y-4 text-xs">
+        <!-- JS 填充 -->
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeDetailModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 手动交付预留 vTPM 资源包 -->
+  <div id="modal-grant" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-2xl mx-4 p-5 border border-slate-200 max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">手动交付预留 vTPM 资源包</h3>
+        <button onclick="closeModal('grant')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Step 1: 确定 subject_id 和 pool -->
+      <div class="border border-slate-200 rounded-lg p-3 mb-3">
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">1</span>确定 subject_id 和 pool</p>
+        <div class="flex gap-2">
+          <input id="grant-subject" type="text" list="grant-subject-list" placeholder="输入 subject_id，如 sub_3x9a2b1c" class="flex-1 rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+          <datalist id="grant-subject-list">
+            <option value="sub_3x9a2b1c">智象科技</option>
+            <option value="sub_7k2m5n8p">星河互娱</option>
+          </datalist>
+          <button type="button" onclick="loadPools()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium whitespace-nowrap">查询 Pool</button>
+        </div>
+        <p id="grant-pool-hint" class="text-[11px] text-slate-400 mt-1.5">可选择多个 Pool 同时交付。</p>
+        <div class="mt-3 hidden" id="grant-pool-block">
+          <label class="block text-xs font-medium text-slate-700 mb-1">选择 Pool</label>
+          <div id="grant-pool-list" class="space-y-2 mb-2">
+            <!-- JS 填充 checkbox -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: 商品信息 + Payload -->
+      <div class="border border-slate-200 rounded-lg p-3 mb-3">
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择预留 vTPM 商品（SKU）及 Payload</p>
+        <div id="grant-sku-block" class="hidden space-y-2">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU 商品</label>
+            <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+          </div>
+          <div id="grant-sku-info" class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600 space-y-1.5">
+            <!-- JS 填充 -->
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="showFactorPreview()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
+              <i class="fa-solid fa-table text-[10px]"></i>vTPM 折算系数预览
+            </button>
+            <button type="button" onclick="showSloPreview()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
+              <i class="fa-solid fa-shield-halved text-[10px]"></i>SLO 赔付规则预览
+            </button>
+          </div>
+          <div id="grant-payload-block" class="hidden">
+            <label class="block text-xs font-medium text-slate-700 mb-1">选择关联 Payload</label>
+            <select id="grant-payload" onchange="onPayloadChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+          </div>
+        </div>
+        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择商品及 Payload 后进行交付配置。</p>
+      </div>
+
+      <!-- Step 3: 交付配置 -->
+      <div class="border border-slate-200 rounded-lg p-3 mb-3">
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">3</span>交付配置</p>
+        <div id="grant-config" class="hidden space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">购买量</label>
+              <select id="grant-multiplier" onchange="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+              <p id="grant-total-preview" class="text-[11px] text-violet-600 font-medium mt-1"></p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">购买周期</label>
+              <select id="grant-cycle" onchange="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">开始时间</label>
+              <input id="grant-start" type="text" readonly class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 cursor-not-allowed">
+              <p class="text-[11px] text-slate-400 mt-1">操作日当天 0 点 0 分 0 秒</p>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">结束时间</label>
+              <input id="grant-end" type="text" readonly class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 cursor-not-allowed">
+              <p class="text-[11px] text-slate-400 mt-1">开始时间 + 购买周期 + 1 天</p>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">超量路由配置</label>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+                <input type="radio" name="grant-serverless" value="off" checked onchange="renderGrantSummary()" class="mt-0.5">
+                <span>
+                  <span class="block text-xs font-medium text-slate-800">超量限流</span>
+                  <span class="block text-[11px] text-slate-400">超出预留 vTPM 时返回 429</span>
+                </span>
+              </label>
+              <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+                <input type="radio" name="grant-serverless" value="on" onchange="renderGrantSummary()" class="mt-0.5">
+                <span>
+                  <span class="block text-xs font-medium text-slate-800">超量路由 Serverless</span>
+                  <span class="block text-[11px] text-slate-400">路由至相同模型，按量计费</span>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
+            <textarea id="grant-note" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="2" placeholder="填写交付原因或其他说明"></textarea>
+          </div>
+        </div>
+        <p id="grant-config-hint" class="text-[11px] text-slate-400">选择商品及 Payload 后进行交付配置。</p>
+      </div>
+
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeModal('grant')" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
+        <button onclick="confirmGrant()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">确认交付</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 折算系数预览 -->
+  <div id="modal-preview-factor" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg w-full max-w-3xl mx-4 p-5 border border-slate-200 max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">vTPM 折算系数预览</h3>
+        <button onclick="closeFactorPreview()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="preview-factor-body" class="text-xs">
+        <!-- JS 填充 -->
+      </div>
+      <div class="mt-5 flex justify-end">
+        <button onclick="closeFactorPreview()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: SLO 赔付规则预览 -->
+  <div id="modal-preview-slo" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg w-full max-w-2xl mx-4 p-5 border border-slate-200 max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">SLO 赔付规则预览</h3>
+        <button onclick="closeSloPreview()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="preview-slo-body" class="text-xs">
+        <!-- JS 填充 -->
+      </div>
+      <div class="mt-5 flex justify-end">
+        <button onclick="closeSloPreview()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 创建新 Pool -->
+  <div id="modal-create-pool" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5 border border-slate-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">创建新 Pool</h3>
+        <button onclick="closeCreatePoolModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-600 mb-1">Pool 名称 <span class="text-red-500">*</span></label>
+          <input id="create-pool-name" type="text" placeholder="如 proj-delta" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+        </div>
+        <p id="create-pool-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2"></p>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeCreatePoolModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
+        <button onclick="confirmCreatePool()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); document.getElementById('modal-' + id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
+      ['inventory', 'sold', 'logs'].forEach(t => document.getElementById('tab-' + t).classList.add('hidden'));
+      document.getElementById('tab-' + tab).classList.remove('hidden');
+    }
+
+    function toggleMenu(id, el) {
+      const menu = document.getElementById(id);
+      const icon = el.querySelector('i');
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-down');
+      } else {
+        menu.classList.add('hidden');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-right');
+      }
+    }
+
+    // ===== 手动交付：数据与联动 =====
+    const subjectPools = {
+      'sub_3x9a2b1c': {
+        name: '智象科技',
+        pools: [
+          { id: 'pool_3x9_alpha', name: 'proj-alpha' },
+          { id: 'pool_3x9_beta', name: 'proj-beta' }
+        ]
+      },
+      'sub_7k2m5n8p': {
+        name: '星河互娱',
+        pools: [
+          { id: 'pool_7k2_gamma', name: 'proj-gamma' }
+        ]
+      }
+    };
+
+    // vTPM Payload 主数据（Payload 关联 playground 模型、SKU、折算系数与 SLO 规则）
+    const payloadMaster = [
+      { id: 'payload-dsv4f', name: 'Deepseek V4 Flash 0731 预留 vTPM', modelId: 'playground-dsv4f', modelName: 'Deepseek V4 Flash 0731', skuId: '23456', skuCode: 'DSV4F-VTPM',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.05, outputF: 2.00 },
+          { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
+          { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
+        ],
+        sloRules: [
+          { metric: '可用性', target: '≥ 99.9%', penalty: '按未达标时长比例退还对应周期费用' },
+          { metric: '首 Token 延迟 P99', target: '≤ 500ms', penalty: '延迟超标的请求按 50% 计费' },
+          { metric: '吞吐量（vTPM）', target: '≥ 承诺值', penalty: '未达标的分钟数按分钟费用 2 倍赔付' }
+        ]
+      },
+      { id: 'payload-glm52', name: 'GLM 5.2 预留 vTPM', modelId: 'playground-glm52', modelName: 'GLM 5.2', skuId: '34567', skuCode: 'GLM52-VTPM',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
+        ],
+        sloRules: [
+          { metric: '可用性', target: '≥ 99.9%', penalty: '按未达标时长比例退还对应周期费用' },
+          { metric: '首 Token 延迟 P99', target: '≤ 600ms', penalty: '延迟超标的请求按 50% 计费' }
+        ]
+      },
+      { id: 'payload-kimik2', name: 'Kimi K2 预留 vTPM', modelId: 'playground-kimik2', modelName: 'Kimi K2', skuId: '45678', skuCode: 'KIMIK2-VTPM',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.30, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.08, outputF: 1.00 }
+        ],
+        sloRules: [
+          { metric: '可用性', target: '≥ 99.5%', penalty: '按未达标时长比例退还对应周期费用' },
+          { metric: '首 Token 延迟 P99', target: '≤ 800ms', penalty: '延迟超标的请求按 50% 计费' }
+        ]
+      }
+    ];
+
+    // 商品列表（SKU 级别：基础参数与定价）
+    const products = [
+      { id: '001', name: 'Deepseek V4 Flash 0731 预留 vTPM', skuId: '23456', minVtpm: 100, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31', total: 30000, price: 99000, note: '主力售卖批次' },
+      { id: '002', name: 'GLM 5.2 预留 vTPM', skuId: '34567', minVtpm: 100, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30', total: 20000, price: 198000, note: 'Q4 活动批次' },
+      { id: '003', name: 'Kimi K2 预留 vTPM', skuId: '45678', minVtpm: 100, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31', total: 0, price: 148500, note: '新模型预售批次' }
+    ];
+
+    function payloadMasterById(id) { return payloadMaster.find(s => s.id === id); }
+    function productById(id) { return products.find(s => s.id === id); }
+    function payloadsBySkuId(skuId) { return payloadMaster.filter(s => s.skuId === skuId); }
+    function currentPayload() {
+      const pid = document.getElementById('grant-payload').value;
+      return payloadMasterById(pid);
+    }
+
+    function openGrantModal() {
+      document.getElementById('grant-subject').value = '';
+      document.getElementById('grant-pool-block').classList.add('hidden');
+      document.getElementById('grant-pool-list').innerHTML = '';
+      document.getElementById('grant-sku-block').classList.add('hidden');
+      document.getElementById('grant-config').classList.add('hidden');
+      document.getElementById('grant-config-hint').classList.remove('hidden');
+      document.getElementById('grant-sku-hint').classList.remove('hidden');
+      document.getElementById('grant-note').value = '';
+      document.getElementById('grant-payload-block').classList.add('hidden');
+      openModal('grant');
+    }
+
+    function openCreatePoolModal() {
+      document.getElementById('create-pool-name').value = '';
+      document.getElementById('create-pool-error').classList.add('hidden');
+      const modal = document.getElementById('modal-create-pool');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeCreatePoolModal() {
+      const modal = document.getElementById('modal-create-pool');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function confirmCreatePool() {
+      const sid = document.getElementById('grant-subject').value.trim();
+      const customer = subjectPools[sid];
+      if (!customer) return;
+      const name = document.getElementById('create-pool-name').value.trim();
+      const err = document.getElementById('create-pool-error');
+
+      if (!name) {
+        err.textContent = '请填写 Pool 名称。';
+        err.classList.remove('hidden');
+        return;
+      }
+      if (customer.pools.some(p => p.name === name)) {
+        err.textContent = '该 Pool 名称已存在。';
+        err.classList.remove('hidden');
+        return;
+      }
+
+      const safe = name.replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 8);
+      const newId = 'pool_' + sid.replace(/[^a-z0-9]/gi, '').slice(0, 6) + '_' + (safe || String(Date.now()).slice(-6));
+      customer.pools.push({ id: newId, name });
+      renderPoolList(customer);
+      closeCreatePoolModal();
+      document.getElementById('grant-pool-hint').textContent = `已创建 Pool「${name}」，请勾选后交付。`;
+    }
+
+    function loadPools() {
+      const sid = document.getElementById('grant-subject').value.trim();
+      const poolBlock = document.getElementById('grant-pool-block');
+      const customer = subjectPools[sid];
+      if (!customer) {
+        poolBlock.classList.add('hidden');
+        document.getElementById('grant-pool-list').innerHTML = '';
+        document.getElementById('grant-pool-hint').innerHTML = `<span class="text-red-500">未找到该客户的 Pool。</span>`;
+        return;
+      }
+      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，共 ${customer.pools.length} 个 Pool：可勾选关联，也可不勾选`;
+      renderPoolList(customer);
+      poolBlock.classList.remove('hidden');
+      // Pool 为可选项，不阻塞后续步骤展示
+      initSkuSelection();
+    }
+
+    function renderPoolList(customer) {
+      const list = document.getElementById('grant-pool-list');
+      list.innerHTML = customer.pools.map((p, idx) => `
+        <label class="flex items-center gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+          <input type="checkbox" name="grant-pool" value="${p.id}" ${idx === 0 ? 'checked' : ''} onchange="onPoolChange()" class="mt-0.5">
+          <span class="text-xs font-medium text-slate-800">${p.name}</span>
+        </label>
+      `).join('') + `
+        <button type="button" onclick="openCreatePoolModal()" class="flex items-center justify-center gap-1.5 border border-dashed border-slate-300 rounded-lg p-2.5 text-xs text-slate-500 hover:border-violet-400 hover:text-violet-600 transition-colors">
+          <i class="fa-solid fa-plus"></i>创建新 Pool
+        </button>
+      `;
+    }
+
+    function getSelectedPools() {
+      const sid = document.getElementById('grant-subject').value.trim();
+      const customer = subjectPools[sid];
+      if (!customer) return [];
+      const checked = Array.from(document.querySelectorAll('input[name="grant-pool"]:checked')).map(cb => cb.value);
+      return customer.pools.filter(p => checked.includes(p.id));
+    }
+
+    function onPoolChange() {
+      const selectedPools = getSelectedPools();
+      document.getElementById('grant-sku-hint').textContent = selectedPools.length > 0
+        ? `已选 ${selectedPools.length} 个 Pool`
+        : '未勾选任何 Pool（可选）';
+      renderGrantSummary();
+    }
+
+    function initSkuSelection() {
+      document.getElementById('grant-sku').innerHTML = products.map(s =>
+        `<option value="${s.id}">${s.name}（${s.id}）</option>`
+      ).join('');
+      document.getElementById('grant-sku-block').classList.remove('hidden');
+      onSkuChange();
+    }
+
+    function onSkuChange() {
+      const product = productById(document.getElementById('grant-sku').value);
+      const config = document.getElementById('grant-config');
+      const payloadBlock = document.getElementById('grant-payload-block');
+      if (!product) { config.classList.add('hidden'); payloadBlock.classList.add('hidden'); return; }
+
+      // SKU 基本信息展示
+      document.getElementById('grant-sku-info').innerHTML = `
+        <div class="flex items-center gap-4 flex-wrap">
+          <div><span class="text-slate-400">售卖窗口：</span><span class="font-semibold text-slate-800">${product.sellStart} ~ ${product.sellEnd}</span></div>
+          <div><span class="text-slate-400">最小购买量 / 最小购买周期：</span><span class="font-semibold text-slate-800">${product.minVtpm} 万 vTPM / ${product.minCycle} 天</span></div>
+          <div><span class="text-slate-400">单价：</span><span class="font-semibold text-slate-800">¥${product.price.toLocaleString()}</span></div>
+        </div>
+      `;
+
+      // 填充关联 Payload 下拉
+      const payloads = payloadsBySkuId(product.skuId);
+      const payloadSelect = document.getElementById('grant-payload');
+      payloadSelect.innerHTML = payloads.map(p =>
+        `<option value="${p.id}">${p.name}（${p.id}）</option>`
+      ).join('');
+      payloadBlock.classList.remove('hidden');
+
+      // Step 3 预填充
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      document.getElementById('grant-start').value = fmtDateTime(start);
+
+      // 购买量：最小购买量的 1~10 倍，直接展示 vTPM 值
+      const multiplierSelect = document.getElementById('grant-multiplier');
+      let multiplierOpts = '';
+      for (let m = 1; m <= 10; m++) {
+        const total = m * product.minVtpm;
+        multiplierOpts += `<option value="${m}">${total} 万 vTPM</option>`;
+      }
+      multiplierSelect.innerHTML = multiplierOpts;
+
+      // 购买周期：最小购买周期整数倍，在售卖窗口内，简化为仅展示天数
+      const sellEnd = new Date(product.sellEnd + 'T00:00:00');
+      const cycleOptions = [];
+      for (let k = 1; k <= 24; k++) {
+        const probe = new Date(start);
+        probe.setDate(probe.getDate() + k * product.minCycle);
+        if (probe > sellEnd) break;
+        cycleOptions.push({ k, days: k * product.minCycle });
+      }
+      document.getElementById('grant-cycle').innerHTML = cycleOptions.map(o =>
+        `<option value="${o.k}">${o.days} 天</option>`
+      ).join('') || '<option value="" disabled>无可选周期（已超出截止售卖时间）</option>';
+
+      // 选择 SKU 后直接展示配置区（Pool 为可选项，Payload 默认选中第一项）
+      config.classList.remove('hidden');
+      document.getElementById('grant-config-hint').classList.add('hidden');
+      renderGrantSummary();
+    }
+
+    function onPayloadChange() {
+      // Payload 选择仅影响预览数据，无需额外展示信息
+      renderGrantSummary();
+    }
+
+    function renderGrantSummary() {
+      const product = productById(document.getElementById('grant-sku').value);
+      if (!product) return;
+
+      const multi = parseInt(document.getElementById('grant-multiplier').value || '1', 10) || 1;
+      const cycle = parseInt(document.getElementById('grant-cycle').value || '1', 10) || 1;
+      const totalVtpm = multi * product.minVtpm;
+      const totalPrice = multi * cycle * product.price;
+      document.getElementById('grant-total-preview').textContent = `合计：${totalVtpm.toLocaleString()} 万 vTPM，¥${totalPrice.toLocaleString()}`;
+
+      const k = cycle;
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setDate(end.getDate() + k * product.minCycle + 1);
+      document.getElementById('grant-end').value = fmtDateTime(end);
+    }
+
+    function confirmGrant() {
+      const selectedPools = getSelectedPools();
+      const product = productById(document.getElementById('grant-sku').value);
+      const payload = currentPayload();
+      const multiplier = document.getElementById('grant-multiplier').value;
+      const cycle = document.getElementById('grant-cycle').value;
+      const serverlessOn = document.querySelector('input[name="grant-serverless"]:checked').value === 'on';
+      const note = document.getElementById('grant-note').value.trim();
+      const totalPrice = (parseInt(multiplier, 10) || 1) * (parseInt(cycle, 10) || 1) * (product ? product.price : 0);
+      closeModal('grant');
+      alert(`已交付：关联 ${selectedPools.length} 个 Pool 的预留 vTPM 包。\n商品：${product ? product.name : '-'}\nPayload：${payload ? payload.id : '-'}\n购买量：${multiplier} × ${product ? product.minVtpm : '-'} 万 vTPM\n购买周期：${cycle} × ${product ? product.minCycle : '-'} 天\n费用：¥${totalPrice.toLocaleString()}\n超量路由：${serverlessOn ? '自动降级到 Serverless' : '超量限流（返回 429）'}\n备注：${note || '无'}`);
+    }
+
+    function fmtDate(d) {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function fmtDateTime(d) {
+      return fmtDate(d) + ' 00:00';
+    }
+
+    // 后台预留 vTPM 详情数据
+    const detailData = {
+      'P001': {
+        model: 'Deepseek V4 Flash 0731', sku: '23456', amount: 300, unit: '万 vTPM',
+        status: '生效中', statusCls: 'bg-green-100 text-green-700',
+        period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理',
+        bind: '/proj-alpha/deepseek-v4-flash-0731', pool: 'proj-alpha',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.05, outputF: 2.00 },
+          { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
+          { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
+        ]
+      },
+      'P002': {
+        model: 'GLM 5.2', sku: '34567', amount: 200, unit: '万 vTPM',
+        status: '生效中', statusCls: 'bg-green-100 text-green-700',
+        period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理',
+        bind: '/proj-gamma/glm-5.2', pool: 'proj-gamma',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
+        ]
+      }
+    };
+
+    function showDetail(id) {
+      const d = detailData[id];
+      if (!d) return;
+      document.getElementById('detail-title').textContent = `${d.model} 资源包详情`;
+      const factorsRows = d.factors.map(f => `
+        <tr>
+          <td class="px-3 py-2">${f.input}</td>
+          <td class="px-3 py-2">${f.cache}</td>
+          <td class="px-3 py-2">${f.output}</td>
+          <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
+          <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
+          <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
+        </tr>
+      `).join('');
+      document.getElementById('detail-body').innerHTML = `
+        <div class="grid grid-cols-2 gap-3">
+          <div><span class="text-slate-500">资源包 ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${id}</p></div>
+          <div><span class="text-slate-500">商品 ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.sku}</p></div>
+          <div><span class="text-slate-500">购买量</span><p class="font-medium text-slate-900 mt-0.5">${d.amount} ${d.unit}</p></div>
+          <div><span class="text-slate-500">状态</span><p class="mt-0.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${d.statusCls}">${d.status}</span></p></div>
+          <div><span class="text-slate-500">有效期</span><p class="font-medium text-slate-900 mt-0.5">${d.period}</p></div>
+          <div><span class="text-slate-500">可用范围</span><p class="font-medium text-slate-900 mt-0.5">${d.scope}</p></div>
+          <div><span class="text-slate-500">Pool 对象（payload）</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.pool}</p></div>
+          <div><span class="text-slate-500">最终 model_name</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.bind}</p></div>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-slate-900 mb-2">折算系数</p>
+          <p class="text-xs text-slate-500 mb-2">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
+                  <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
+                  <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
+                  <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
+                  <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
+                  <th class="px-3 py-2 text-left font-medium">输出系数</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">${factorsRows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+      const modal = document.getElementById('modal-detail');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeDetailModal() {
+      const modal = document.getElementById('modal-detail');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function showFactorPreview() {
+      const payload = currentPayload();
+      if (!payload || !payload.factors) return;
+      const rows = payload.factors.map(f => `
+        <tr>
+          <td class="px-3 py-2">${f.input}</td>
+          <td class="px-3 py-2">${f.cache}</td>
+          <td class="px-3 py-2">${f.output}</td>
+          <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
+          <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
+          <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
+        </tr>
+      `).join('');
+      document.getElementById('preview-factor-body').innerHTML = `
+        <p class="text-xs font-medium text-slate-700 mb-2">${payload.modelName} — vTPM 折算系数</p>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
+                <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
+                <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
+                <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
+                <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
+                <th class="px-3 py-2 text-left font-medium">输出系数</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">${rows}</tbody>
+          </table>
+        </div>
+      `;
+      const modal = document.getElementById('modal-preview-factor');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeFactorPreview() {
+      const modal = document.getElementById('modal-preview-factor');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function showSloPreview() {
+      const payload = currentPayload();
+      if (!payload || !payload.sloRules) return;
+      const rows = payload.sloRules.map(r => `
+        <tr>
+          <td class="px-3 py-2 font-medium">${r.metric}</td>
+          <td class="px-3 py-2">${r.target}</td>
+          <td class="px-3 py-2">${r.penalty}</td>
+        </tr>
+      `).join('');
+      document.getElementById('preview-slo-body').innerHTML = `
+        <p class="text-xs font-medium text-slate-700 mb-2">${payload.modelName} — SLO 赔付规则</p>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="px-3 py-2 text-left font-medium">指标</th>
+                <th class="px-3 py-2 text-left font-medium">目标值</th>
+                <th class="px-3 py-2 text-left font-medium">赔付规则</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">${rows}</tbody>
+          </table>
+        </div>
+      `;
+      const modal = document.getElementById('modal-preview-slo');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSloPreview() {
+      const modal = document.getElementById('modal-preview-slo');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+  </script>
+</body>
+</html>
