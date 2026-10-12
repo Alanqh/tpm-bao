@@ -329,23 +329,30 @@
           </datalist>
           <button type="button" onclick="loadPools()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium whitespace-nowrap">查询 Pool</button>
         </div>
-        <p id="grant-pool-hint" class="text-[11px] text-slate-400 mt-1.5">可选择 1~3 个 Pool 同时交付。</p>
+        <p id="grant-pool-hint" class="text-[11px] text-slate-400 mt-1.5">可选择多个 Pool 同时交付。</p>
         <div class="mt-3 hidden" id="grant-pool-block">
-          <label class="block text-xs font-medium text-slate-700 mb-1">选择 Pool（最多 3 个）</label>
+          <label class="block text-xs font-medium text-slate-700 mb-1">选择 Pool</label>
           <div id="grant-pool-list" class="space-y-2 mb-2">
             <!-- JS 填充 checkbox -->
           </div>
-          <p id="grant-pool-max" class="hidden text-[11px] text-orange-500">最多只能选择 3 个 Pool 对象</p>
         </div>
       </div>
 
       <!-- Step 2: 商品信息 -->
       <div class="border border-slate-200 rounded-lg p-3 mb-3">
-        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择本次交付关联的商品</p>
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择预留 vTPM 商品（SKU）</p>
         <div id="grant-sku-block" class="hidden">
           <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500 mb-2"></select>
-          <div id="grant-sku-info" class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600 grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div id="grant-sku-info" class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600 grid grid-cols-2 sm:grid-cols-3 gap-2">
             <!-- JS 填充 -->
+          </div>
+          <div class="mt-2 flex gap-2">
+            <button type="button" onclick="showFactorPreview()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
+              <i class="fa-solid fa-table text-[10px]"></i>vTPM 折算系数预览
+            </button>
+            <button type="button" onclick="showSloPreview()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
+              <i class="fa-solid fa-shield-halved text-[10px]"></i>SLO 赔付规则预览
+            </button>
           </div>
         </div>
         <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择 Pool 后选择商品。</p>
@@ -357,8 +364,8 @@
         <div id="grant-config" class="hidden space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-700 mb-1">交付份数</label>
-              <input id="grant-multiplier" type="number" min="1" max="20" step="1" value="1" onchange="renderGrantSummary()" oninput="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+              <label class="block text-xs font-medium text-slate-700 mb-1">购买量</label>
+              <select id="grant-multiplier" onchange="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
               <p id="grant-total-preview" class="text-[11px] text-violet-600 font-medium mt-1"></p>
             </div>
             <div>
@@ -369,31 +376,22 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-medium text-slate-700 mb-1">开始时间</label>
-              <input id="grant-start" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
+              <input id="grant-start" type="text" readonly class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 cursor-not-allowed">
+              <p class="text-[11px] text-slate-400 mt-1">操作日当天 0 点 0 分 0 秒</p>
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-700 mb-1">结束时间</label>
-              <input id="grant-end" type="text" disabled class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500">
+              <input id="grant-end" type="text" readonly class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 cursor-not-allowed">
+              <p class="text-[11px] text-slate-400 mt-1">开始时间 + 购买周期 + 1 天</p>
             </div>
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-700 mb-1">超量路由配置</label>
-            <div class="grid grid-cols-2 gap-2">
-              <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
-                <input type="radio" name="grant-serverless" value="off" checked onchange="renderGrantSummary()" class="mt-0.5">
-                <span>
-                  <span class="block text-xs font-medium text-slate-800">超量限流</span>
-                  <span class="block text-[11px] text-slate-400">超出预留 vTPM 时返回 429</span>
-                </span>
-              </label>
-              <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
-                <input type="radio" name="grant-serverless" value="on" onchange="renderGrantSummary()" class="mt-0.5">
-                <span>
-                  <span class="block text-xs font-medium text-slate-800">超量路由 Serverless</span>
-                  <span class="block text-[11px] text-slate-400">路由至相同模型，按量计费</span>
-                </span>
-              </label>
-            </div>
+            <select id="grant-overflow-route" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+              <option value="reject">拒绝服务（直接返回 429）</option>
+              <option value="serverless">自动降级到 Serverless</option>
+              <option value="elastic">自动降级到弹性 GPU</option>
+            </select>
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-700 mb-1">最终 model_name 预览</label>
@@ -412,6 +410,38 @@
       <div class="mt-5 flex justify-end gap-2">
         <button onclick="closeModal('grant')" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
         <button onclick="confirmGrant()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">确认交付</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 折算系数预览 -->
+  <div id="modal-preview-factor" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg w-full max-w-3xl mx-4 p-5 border border-slate-200 max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">vTPM 折算系数预览</h3>
+        <button onclick="closeFactorPreview()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="preview-factor-body" class="text-xs">
+        <!-- JS 填充 -->
+      </div>
+      <div class="mt-5 flex justify-end">
+        <button onclick="closeFactorPreview()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: SLO 赔付规则预览 -->
+  <div id="modal-preview-slo" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg w-full max-w-2xl mx-4 p-5 border border-slate-200 max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">SLO 赔付规则预览</h3>
+        <button onclick="closeSloPreview()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="preview-slo-body" class="text-xs">
+        <!-- JS 填充 -->
+      </div>
+      <div class="mt-5 flex justify-end">
+        <button onclick="closeSloPreview()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">关闭</button>
       </div>
     </div>
   </div>
@@ -488,9 +518,41 @@
 
     // 商品列表（由 Payload 带出 playground 模型与 SKU）
     const products = [
-      { id: '001', name: 'Deepseek V4 Flash 0731 预留 vTPM', payloadId: 'payload-dsv4f', minVtpm: 10, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31', total: 30000, price: 99000, note: '主力售卖批次' },
-      { id: '002', name: 'GLM 5.2 预留 vTPM', payloadId: 'payload-glm52', minVtpm: 20, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30', total: 20000, price: 198000, note: 'Q4 活动批次' },
-      { id: '003', name: 'Kimi K2 预留 vTPM', payloadId: 'payload-kimik2', minVtpm: 15, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31', total: 0, price: 148500, note: '新模型预售批次' }
+      { id: '001', name: 'Deepseek V4 Flash 0731 预留 vTPM', payloadId: 'payload-dsv4f', minVtpm: 10, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31', total: 30000, price: 99000, note: '主力售卖批次',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.05, outputF: 2.00 },
+          { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
+          { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
+        ],
+        sloRules: [
+          { metric: '可用性', target: '≥ 99.9%', penalty: '按未达标时长比例退还对应周期费用' },
+          { metric: '首 Token 延迟 P99', target: '≤ 500ms', penalty: '延迟超标的请求按 50% 计费' },
+          { metric: '吞吐量（vTPM）', target: '≥ 承诺值', penalty: '未达标的分钟数按分钟费用 2 倍赔付' }
+        ]
+      },
+      { id: '002', name: 'GLM 5.2 预留 vTPM', payloadId: 'payload-glm52', minVtpm: 20, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30', total: 20000, price: 198000, note: 'Q4 活动批次',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
+        ],
+        sloRules: [
+          { metric: '可用性', target: '≥ 99.9%', penalty: '按未达标时长比例退还对应周期费用' },
+          { metric: '首 Token 延迟 P99', target: '≤ 600ms', penalty: '延迟超标的请求按 50% 计费' }
+        ]
+      },
+      { id: '003', name: 'Kimi K2 预留 vTPM', payloadId: 'payload-kimik2', minVtpm: 15, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31', total: 0, price: 148500, note: '新模型预售批次',
+        factors: [
+          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.30, outputF: 1.00 },
+          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.08, outputF: 1.00 }
+        ],
+        sloRules: [
+          { metric: '可用性', target: '≥ 99.5%', penalty: '按未达标时长比例退还对应周期费用' },
+          { metric: '首 Token 延迟 P99', target: '≤ 800ms', penalty: '延迟超标的请求按 50% 计费' }
+        ]
+      }
     ];
 
     function payloadMasterById(id) { return payloadMaster.find(s => s.id === id); }
@@ -501,11 +563,12 @@
       document.getElementById('grant-subject').value = '';
       document.getElementById('grant-pool-block').classList.add('hidden');
       document.getElementById('grant-pool-list').innerHTML = '';
-      document.getElementById('grant-pool-max').classList.add('hidden');
       document.getElementById('grant-sku-block').classList.add('hidden');
       document.getElementById('grant-config').classList.add('hidden');
       document.getElementById('grant-config-hint').classList.remove('hidden');
       document.getElementById('grant-sku-hint').classList.remove('hidden');
+      document.getElementById('grant-note').value = '';
+      document.getElementById('grant-overflow-route').value = 'reject';
       openModal('grant');
     }
 
@@ -558,14 +621,13 @@
       skuBlock.classList.add('hidden');
       config.classList.add('hidden');
       document.getElementById('grant-config-hint').classList.remove('hidden');
-      document.getElementById('grant-pool-max').classList.add('hidden');
       if (!customer) {
         poolBlock.classList.add('hidden');
         document.getElementById('grant-pool-list').innerHTML = '';
         document.getElementById('grant-pool-hint').innerHTML = `<span class="text-red-500">未找到该客户的 Pool。</span>`;
         return;
       }
-      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，共 ${customer.pools.length} 个 Pool，可选 1~3 个：`;
+      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，共 ${customer.pools.length} 个 Pool：`;
       renderPoolList(customer);
       poolBlock.classList.remove('hidden');
       onPoolChange();
@@ -595,16 +657,6 @@
 
     function onPoolChange() {
       const selectedPools = getSelectedPools();
-      const maxHint = document.getElementById('grant-pool-max');
-      const checkedBoxes = document.querySelectorAll('input[name="grant-pool"]:checked');
-
-      if (checkedBoxes.length > 3) {
-        event && event.target && (event.target.checked = false);
-        maxHint.classList.remove('hidden');
-      } else {
-        maxHint.classList.add('hidden');
-      }
-
       const config = document.getElementById('grant-config');
       config.classList.add('hidden');
       document.getElementById('grant-config-hint').classList.remove('hidden');
@@ -632,15 +684,26 @@
       if (!product) { config.classList.add('hidden'); return; }
 
       document.getElementById('grant-sku-info').innerHTML = `
-        <div><p class="text-slate-400 mb-0.5">最小购买 vTPM 量</p><p class="font-semibold text-slate-800">${product.minVtpm} 万 vTPM</p></div>
+        <div><p class="text-slate-400 mb-0.5">最小购买量</p><p class="font-semibold text-slate-800">${product.minVtpm} 万 vTPM</p></div>
         <div><p class="text-slate-400 mb-0.5">最小购买周期</p><p class="font-semibold text-slate-800">${product.minCycle} 天（约 1 个月）</p></div>
-        <div><p class="text-slate-400 mb-0.5">开始售卖时间</p><p class="font-semibold text-slate-800">${product.sellStart} 00:00</p></div>
-        <div><p class="text-slate-400 mb-0.5">截止售卖时间</p><p class="font-semibold text-slate-800">${product.sellEnd} 24:00</p></div>
+        <div><p class="text-slate-400 mb-0.5">售卖时间窗口</p><p class="font-semibold text-slate-800">${product.sellStart} ~ ${product.sellEnd}</p></div>
+        <div><p class="text-slate-400 mb-0.5">单价</p><p class="font-semibold text-slate-800">¥${product.price.toLocaleString()} / 份</p></div>
+        <div><p class="text-slate-400 mb-0.5">vTPM 折算系数</p><p class="font-semibold text-slate-800">${product.factors.length} 条规则</p></div>
+        <div><p class="text-slate-400 mb-0.5">SLO 赔付规则</p><p class="font-semibold text-slate-800">${product.sloRules.length} 条规则</p></div>
       `;
 
       const start = new Date();
       start.setHours(0, 0, 0, 0);
-      document.getElementById('grant-start').value = fmtDateTime(start) + '（操作当天 0 点，固定）';
+      document.getElementById('grant-start').value = fmtDateTime(start);
+
+      // 购买量下拉选项（1~20 份）
+      const multiplierSelect = document.getElementById('grant-multiplier');
+      let multiplierOpts = '';
+      for (let m = 1; m <= 20; m++) {
+        const total = m * product.minVtpm;
+        multiplierOpts += `<option value="${m}">${m} 份（${total} 万 vTPM）</option>`;
+      }
+      multiplierSelect.innerHTML = multiplierOpts;
 
       const sellEnd = new Date(product.sellEnd + 'T00:00:00');
       const options = [];
@@ -668,16 +731,16 @@
       const product = productById(document.getElementById('grant-sku').value);
       if (selectedPools.length === 0 || !product) return;
 
-      const multi = Math.max(1, Math.min(20, parseInt(document.getElementById('grant-multiplier').value || '1', 10) || 1));
-      document.getElementById('grant-multiplier').value = multi;
+      const multi = parseInt(document.getElementById('grant-multiplier').value || '1', 10) || 1;
       const totalVtpm = multi * product.minVtpm;
-      document.getElementById('grant-total-preview').textContent = `合计交付：${multi} × ${product.minVtpm} 万 vTPM = ${totalVtpm.toLocaleString()} 万 vTPM`;
+      const totalPrice = multi * product.price;
+      document.getElementById('grant-total-preview').textContent = `合计：${multi} 份 × ${product.minVtpm} 万 vTPM = ${totalVtpm.toLocaleString()} 万 vTPM，¥${totalPrice.toLocaleString()}`;
 
       const k = parseInt(document.getElementById('grant-cycle').value || '1', 10) || 1;
       const start = new Date(); start.setHours(0, 0, 0, 0);
       const end = new Date(start);
       end.setDate(end.getDate() + k * product.minCycle + 1);
-      document.getElementById('grant-end').value = fmtDateTime(end) + '（开始时间 + ' + (k * product.minCycle) + ' 天 + 1 天，自动计算）';
+      document.getElementById('grant-end').value = fmtDateTime(end);
 
       const model = productModelName(product);
       const finalModels = selectedPools.map(p => `/${p.name}/${model}`);
@@ -686,8 +749,14 @@
 
     function confirmGrant() {
       const selectedPools = getSelectedPools();
+      const product = productById(document.getElementById('grant-sku').value);
+      const multiplier = document.getElementById('grant-multiplier').value;
+      const cycle = document.getElementById('grant-cycle').value;
+      const overflowRoute = document.getElementById('grant-overflow-route').value;
+      const note = document.getElementById('grant-note').value.trim();
+      const routeText = document.getElementById('grant-overflow-route').options[document.getElementById('grant-overflow-route').selectedIndex].text;
       closeModal('grant');
-      alert(`已交付：关联 ${selectedPools.length} 个 Pool 的预留 vTPM 包。`);
+      alert(`已交付：关联 ${selectedPools.length} 个 Pool 的预留 vTPM 包。\n商品：${product ? product.name : '-'}\n购买量：${multiplier} 份\n购买周期：${cycle} × ${product ? product.minCycle : '-'} 天\n超量路由：${routeText}\n备注：${note || '无'}`);
     }
 
     function fmtDate(d) {
@@ -780,6 +849,84 @@
 
     function closeDetailModal() {
       const modal = document.getElementById('modal-detail');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function showFactorPreview() {
+      const product = productById(document.getElementById('grant-sku').value);
+      if (!product || !product.factors) return;
+      const rows = product.factors.map(f => `
+        <tr>
+          <td class="px-3 py-2">${f.input}</td>
+          <td class="px-3 py-2">${f.cache}</td>
+          <td class="px-3 py-2">${f.output}</td>
+          <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
+          <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
+          <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
+        </tr>
+      `).join('');
+      document.getElementById('preview-factor-body').innerHTML = `
+        <p class="text-xs font-medium text-slate-700 mb-2">${product.name} — vTPM 折算系数</p>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
+                <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
+                <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
+                <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
+                <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
+                <th class="px-3 py-2 text-left font-medium">输出系数</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">${rows}</tbody>
+          </table>
+        </div>
+      `;
+      const modal = document.getElementById('modal-preview-factor');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeFactorPreview() {
+      const modal = document.getElementById('modal-preview-factor');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function showSloPreview() {
+      const product = productById(document.getElementById('grant-sku').value);
+      if (!product || !product.sloRules) return;
+      const rows = product.sloRules.map(r => `
+        <tr>
+          <td class="px-3 py-2 font-medium">${r.metric}</td>
+          <td class="px-3 py-2">${r.target}</td>
+          <td class="px-3 py-2">${r.penalty}</td>
+        </tr>
+      `).join('');
+      document.getElementById('preview-slo-body').innerHTML = `
+        <p class="text-xs font-medium text-slate-700 mb-2">${product.name} — SLO 赔付规则</p>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="px-3 py-2 text-left font-medium">指标</th>
+                <th class="px-3 py-2 text-left font-medium">目标值</th>
+                <th class="px-3 py-2 text-left font-medium">赔付规则</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">${rows}</tbody>
+          </table>
+        </div>
+      `;
+      const modal = document.getElementById('modal-preview-slo');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSloPreview() {
+      const modal = document.getElementById('modal-preview-slo');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     }
