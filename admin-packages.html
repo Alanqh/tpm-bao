@@ -844,25 +844,6 @@
       const pools = d.pools.length
         ? d.pools.map(p => `<span class="inline-flex items-center px-2 py-0.5 rounded bg-violet-50 text-violet-700 text-[11px] font-medium">${p.name}</span>`).join(' ')
         : '<span class="text-slate-400">未关联</span>';
-      const factors = payload ? payload.factors : [];
-      const sloRules = payload ? payload.sloRules : [];
-      const factorRows = factors.map(f => `
-        <tr>
-          <td class="px-3 py-2">${f.input}</td>
-          <td class="px-3 py-2">${f.cache}</td>
-          <td class="px-3 py-2">${f.output}</td>
-          <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
-          <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
-          <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
-        </tr>
-      `).join('');
-      const sloRows = sloRules.map(r => `
-        <tr>
-          <td class="px-3 py-2">${r.metric}</td>
-          <td class="px-3 py-2">${r.target}</td>
-          <td class="px-3 py-2">${r.penalty}</td>
-        </tr>
-      `).join('');
       document.getElementById('detail-body').innerHTML = `
         <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
@@ -872,77 +853,24 @@
           <span class="px-2 py-0.5 rounded text-[11px] font-medium ${d.statusCls}">${d.status}</span>
         </div>
 
-        <section>
-          <p class="text-[11px] font-semibold text-slate-500 mb-2">交付对象</p>
-          <div class="grid grid-cols-3 gap-3">
-            <div><span class="text-slate-500">subject_id</span><p class="font-medium text-slate-900 mt-0.5">${d.subject}</p></div>
-            <div><span class="text-slate-500">Pool 关联</span><p class="mt-1 flex flex-wrap gap-1.5">${pools}</p></div>
-            <div><span class="text-slate-500">Payload</span><p class="font-medium text-slate-900 mt-0.5">${d.payloadName}（${d.payloadId}）</p></div>
-          </div>
-        </section>
-
-        <section>
-          <p class="text-[11px] font-semibold text-slate-500 mb-2">商品与价格</p>
-          <div class="grid grid-cols-2 gap-3">
-            <div><span class="text-slate-500">SKU 商品</span><p class="font-medium text-slate-900 mt-0.5">${d.productName}</p></div>
-            <div><span class="text-slate-500">SKU ID / 商品 ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.skuId} / ${d.productId}</p></div>
-            <div><span class="text-slate-500">售卖窗口</span><p class="font-medium text-slate-900 mt-0.5">${d.sellStart} ~ ${d.sellEnd}</p></div>
-            <div><span class="text-slate-500">基础单价</span><p class="font-medium text-slate-900 mt-0.5">¥${d.basePrice.toLocaleString()} / 100 万 vTPM / 30 天</p></div>
-          </div>
-        </section>
-
-        <section>
-          <p class="text-[11px] font-semibold text-slate-500 mb-2">购买与有效期</p>
-          <div class="grid grid-cols-3 gap-3">
-            <div><span class="text-slate-500">购买量</span><p class="font-medium text-slate-900 mt-0.5">${d.amount} ${d.unit}</p></div>
-            <div><span class="text-slate-500">购买周期</span><p class="font-medium text-slate-900 mt-0.5">${d.cycle} 天</p></div>
-            <div><span class="text-slate-500">订单价格</span><p class="font-medium text-slate-900 mt-0.5">¥${d.totalPrice.toLocaleString()}</p></div>
-            <div><span class="text-slate-500">开始时间</span><p class="font-medium text-slate-900 mt-0.5">${d.startTime}</p></div>
-            <div><span class="text-slate-500">结束时间</span><p class="font-medium text-slate-900 mt-0.5">${d.endTime}</p></div>
-            <div><span class="text-slate-500">超量路由</span><p class="font-medium text-slate-900 mt-0.5">${d.overflowRoute}</p></div>
-          </div>
-        </section>
-
-        <section>
-          <p class="text-[11px] font-semibold text-slate-500 mb-2">备注</p>
-          <p class="text-slate-700 leading-6">${d.note}</p>
-        </section>
-
-        <section>
-          <p class="text-[11px] font-semibold text-slate-500 mb-2">折算系数</p>
-          <p class="text-xs text-slate-500 mb-2">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-xs border border-slate-200 rounded-lg">
-              <thead class="bg-slate-50 text-slate-600">
-                <tr>
-                  <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
-                  <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
-                  <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
-                  <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
-                  <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
-                  <th class="px-3 py-2 text-left font-medium">输出系数</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 text-slate-700">${factorRows}</tbody>
-            </table>
-          </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div><span class="text-slate-500">subject_id</span><p class="font-medium text-slate-900 mt-0.5">${d.subject}</p></div>
+          <div><span class="text-slate-500">Pool</span><p class="mt-1 flex flex-wrap gap-1.5">${pools}</p></div>
+          <div><span class="text-slate-500">Payload</span><p class="font-medium text-slate-900 mt-0.5">${d.payloadName}（${d.payloadId}）</p></div>
+          <div><span class="text-slate-500">购买量 / 周期</span><p class="font-medium text-slate-900 mt-0.5">${d.amount} ${d.unit} / ${d.cycle} 天</p></div>
+          <div><span class="text-slate-500">超量路由</span><p class="font-medium text-slate-900 mt-0.5">${d.overflowRoute}</p></div>
+          <div><span class="text-slate-500">有效期</span><p class="font-medium text-slate-900 mt-0.5">${d.startTime} ~ ${d.endTime}</p></div>
+          <div><span class="text-slate-500">备注</span><p class="font-medium text-slate-900 mt-0.5">${d.note}</p></div>
         </div>
 
-        <section>
-          <p class="text-[11px] font-semibold text-slate-500 mb-2">SLO 赔付规则</p>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-xs border border-slate-200 rounded-lg">
-              <thead class="bg-slate-50 text-slate-600">
-                <tr>
-                  <th class="px-3 py-2 text-left font-medium">指标</th>
-                  <th class="px-3 py-2 text-left font-medium">目标</th>
-                  <th class="px-3 py-2 text-left font-medium">赔付</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 text-slate-700">${sloRows}</tbody>
-            </table>
-          </div>
-        </section>
+        <div class="flex gap-2">
+          <button type="button" onclick="showFactorPreview('${d.payloadId}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
+            <i class="fa-solid fa-table text-[10px]"></i>折算系数预览
+          </button>
+          <button type="button" onclick="showSloPreview('${d.payloadId}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
+            <i class="fa-solid fa-shield-halved text-[10px]"></i>SLO 赔付预览
+          </button>
+        </div>
       `;
       const modal = document.getElementById('modal-detail');
       modal.classList.remove('hidden');
@@ -955,8 +883,8 @@
       modal.classList.remove('flex');
     }
 
-    function showFactorPreview() {
-      const payload = currentPayload();
+    function showFactorPreview(payloadId) {
+      const payload = payloadId ? payloadMasterById(payloadId) : currentPayload();
       if (!payload || !payload.factors) return;
       const rows = payload.factors.map(f => `
         <tr>
@@ -997,8 +925,8 @@
       modal.classList.remove('flex');
     }
 
-    function showSloPreview() {
-      const payload = currentPayload();
+    function showSloPreview(payloadId) {
+      const payload = payloadId ? payloadMasterById(payloadId) : currentPayload();
       if (!payload || !payload.sloRules) return;
       const rows = payload.sloRules.map(r => `
         <tr>
