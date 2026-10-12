@@ -341,33 +341,28 @@
       <!-- Step 2: 商品信息 + Payload -->
       <div class="border border-slate-200 rounded-lg p-3 mb-3">
         <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择预留 vTPM 商品（SKU）及 Payload</p>
-        <div id="grant-sku-block" class="hidden">
-          <div class="space-y-2">
-            <div>
-              <label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU 商品</label>
-              <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
-            </div>
-            <div id="grant-sku-info" class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600 space-y-1.5">
-              <!-- JS 填充 -->
-            </div>
-            <div id="grant-payload-block" class="hidden">
-              <label class="block text-xs font-medium text-slate-700 mb-1">选择关联 Payload</label>
-              <select id="grant-payload" onchange="onPayloadChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500 mb-1.5"></select>
-              <div id="grant-payload-info" class="bg-slate-50 rounded p-2.5 text-[11px] text-slate-600 flex items-center justify-between">
-                <!-- JS 填充 -->
-              </div>
-              <div class="mt-2 flex gap-2">
-                <button type="button" onclick="showFactorPreview()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
-                  <i class="fa-solid fa-table text-[10px]"></i>vTPM 折算系数预览
-                </button>
-                <button type="button" onclick="showSloPreview()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
-                  <i class="fa-solid fa-shield-halved text-[10px]"></i>SLO 赔付规则预览
-                </button>
-              </div>
-            </div>
+        <div id="grant-sku-block" class="hidden space-y-2">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU 商品</label>
+            <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+          </div>
+          <div id="grant-sku-info" class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600 space-y-1.5">
+            <!-- JS 填充 -->
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="showFactorPreview()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
+              <i class="fa-solid fa-table text-[10px]"></i>vTPM 折算系数预览
+            </button>
+            <button type="button" onclick="showSloPreview()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
+              <i class="fa-solid fa-shield-halved text-[10px]"></i>SLO 赔付规则预览
+            </button>
+          </div>
+          <div id="grant-payload-block" class="hidden">
+            <label class="block text-xs font-medium text-slate-700 mb-1">选择关联 Payload</label>
+            <select id="grant-payload" onchange="onPayloadChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
           </div>
         </div>
-        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择 Pool 后选择商品。</p>
+        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择商品及 Payload 后进行交付配置。</p>
       </div>
 
       <!-- Step 3: 交付配置 -->
@@ -399,16 +394,21 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-700 mb-1">超量路由配置</label>
-            <select id="grant-overflow-route" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-              <option value="reject">拒绝服务（直接返回 429）</option>
-              <option value="serverless">自动降级到 Serverless</option>
-              <option value="elastic">自动降级到弹性 GPU</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">最终 model_name 预览</label>
-            <div class="bg-slate-900 rounded-lg px-3 py-2.5">
-              <p id="grant-model-preview" class="font-mono text-xs text-violet-300 break-all">-</p>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+                <input type="radio" name="grant-serverless" value="off" checked onchange="renderGrantSummary()" class="mt-0.5">
+                <span>
+                  <span class="block text-xs font-medium text-slate-800">超量限流</span>
+                  <span class="block text-[11px] text-slate-400">超出预留 vTPM 时返回 429</span>
+                </span>
+              </label>
+              <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+                <input type="radio" name="grant-serverless" value="on" onchange="renderGrantSummary()" class="mt-0.5">
+                <span>
+                  <span class="block text-xs font-medium text-slate-800">超量路由 Serverless</span>
+                  <span class="block text-[11px] text-slate-400">路由至相同模型，按量计费</span>
+                </span>
+              </label>
             </div>
           </div>
           <div>
@@ -416,7 +416,7 @@
             <textarea id="grant-note" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="2" placeholder="填写交付原因或其他说明"></textarea>
           </div>
         </div>
-        <p id="grant-config-hint" class="text-[11px] text-slate-400">选择 Payload 后进行交付配置。</p>
+        <p id="grant-config-hint" class="text-[11px] text-slate-400">选择商品及 Payload 后进行交付配置。</p>
       </div>
 
       <div class="mt-5 flex justify-end gap-2">
@@ -632,22 +632,18 @@
     function loadPools() {
       const sid = document.getElementById('grant-subject').value.trim();
       const poolBlock = document.getElementById('grant-pool-block');
-      const skuBlock = document.getElementById('grant-sku-block');
-      const config = document.getElementById('grant-config');
       const customer = subjectPools[sid];
-      skuBlock.classList.add('hidden');
-      config.classList.add('hidden');
-      document.getElementById('grant-config-hint').classList.remove('hidden');
       if (!customer) {
         poolBlock.classList.add('hidden');
         document.getElementById('grant-pool-list').innerHTML = '';
         document.getElementById('grant-pool-hint').innerHTML = `<span class="text-red-500">未找到该客户的 Pool。</span>`;
         return;
       }
-      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，共 ${customer.pools.length} 个 Pool：`;
+      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，共 ${customer.pools.length} 个 Pool：可勾选关联，也可不勾选`;
       renderPoolList(customer);
       poolBlock.classList.remove('hidden');
-      onPoolChange();
+      // Pool 为可选项，不阻塞后续步骤展示
+      initSkuSelection();
     }
 
     function renderPoolList(customer) {
@@ -674,24 +670,17 @@
 
     function onPoolChange() {
       const selectedPools = getSelectedPools();
-      const config = document.getElementById('grant-config');
-      config.classList.add('hidden');
-      document.getElementById('grant-config-hint').classList.remove('hidden');
+      document.getElementById('grant-sku-hint').textContent = selectedPools.length > 0
+        ? `已选 ${selectedPools.length} 个 Pool`
+        : '未勾选任何 Pool（可选）';
+      renderGrantSummary();
+    }
 
-      if (selectedPools.length === 0) {
-        document.getElementById('grant-sku-block').classList.add('hidden');
-        document.getElementById('grant-sku-hint').textContent = '请至少选择 1 个 Pool 对象。';
-        document.getElementById('grant-sku-hint').classList.remove('hidden');
-        return;
-      }
-
+    function initSkuSelection() {
       document.getElementById('grant-sku').innerHTML = products.map(s =>
         `<option value="${s.id}">${s.name}（${s.id}）</option>`
       ).join('');
       document.getElementById('grant-sku-block').classList.remove('hidden');
-      document.getElementById('grant-sku-hint').textContent = `已选 ${selectedPools.length} 个 Pool，选择商品及 Payload 关联到该资源包。`;
-      document.getElementById('grant-sku-hint').classList.remove('hidden');
-
       onSkuChange();
     }
 
@@ -716,10 +705,9 @@
       payloadSelect.innerHTML = payloads.map(p =>
         `<option value="${p.id}">${p.name}（${p.id}）</option>`
       ).join('');
-      document.getElementById('grant-payload-info').innerHTML = '';
       payloadBlock.classList.remove('hidden');
 
-      // 预填充 Step 3 的购买量 / 周期选项（不显示配置区，payload 选择后再显示）
+      // Step 3 预填充
       const start = new Date();
       start.setHours(0, 0, 0, 0);
       document.getElementById('grant-start').value = fmtDateTime(start);
@@ -733,49 +721,33 @@
       }
       multiplierSelect.innerHTML = multiplierOpts;
 
-      // 购买周期：最小购买周期整数倍，在售卖窗口内
+      // 购买周期：最小购买周期整数倍，在售卖窗口内，简化为仅展示天数
       const sellEnd = new Date(product.sellEnd + 'T00:00:00');
       const cycleOptions = [];
       for (let k = 1; k <= 24; k++) {
         const probe = new Date(start);
         probe.setDate(probe.getDate() + k * product.minCycle);
         if (probe > sellEnd) break;
-        const endDate = new Date(probe);
-        endDate.setDate(endDate.getDate() + 1);
-        cycleOptions.push({ k, days: k * product.minCycle, end: endDate });
+        cycleOptions.push({ k, days: k * product.minCycle });
       }
-      document.getElementById('grant-cycle').innerHTML = cycleOptions.map(o => {
-        const endLabel = fmtDate(o.end);
-        return `<option value="${o.k}">${o.days} 天（结束至 ${endLabel} 00:00）</option>`;
-      }).join('') || '<option value="" disabled>无可选周期（已超出截止售卖时间）</option>';
+      document.getElementById('grant-cycle').innerHTML = cycleOptions.map(o =>
+        `<option value="${o.k}">${o.days} 天</option>`
+      ).join('') || '<option value="" disabled>无可选周期（已超出截止售卖时间）</option>';
 
-      config.classList.add('hidden');
-      document.getElementById('grant-config-hint').classList.remove('hidden');
-
-      // 触发一次 payload 变更以刷新相关数据
-      onPayloadChange();
-    }
-
-    function onPayloadChange() {
-      const payload = currentPayload();
-      if (!payload) return;
-
-      document.getElementById('grant-payload-info').innerHTML = `
-        <div><span class="text-slate-400">Payload ID：</span><span class="font-mono font-semibold text-slate-800">${payload.id}</span></div>
-        <div><span class="text-slate-400">关联模型：</span><span class="font-semibold text-slate-800">${payload.modelName}</span></div>
-      `;
-
-      // 选定 payload 后展示配置区
-      const config = document.getElementById('grant-config');
+      // 选择 SKU 后直接展示配置区（Pool 为可选项，Payload 默认选中第一项）
       config.classList.remove('hidden');
       document.getElementById('grant-config-hint').classList.add('hidden');
       renderGrantSummary();
     }
 
+    function onPayloadChange() {
+      // Payload 选择仅影响预览数据，无需额外展示信息
+      renderGrantSummary();
+    }
+
     function renderGrantSummary() {
-      const selectedPools = getSelectedPools();
       const product = productById(document.getElementById('grant-sku').value);
-      if (selectedPools.length === 0 || !product) return;
+      if (!product) return;
 
       const multi = parseInt(document.getElementById('grant-multiplier').value || '1', 10) || 1;
       const totalVtpm = multi * product.minVtpm;
@@ -787,11 +759,6 @@
       const end = new Date(start);
       end.setDate(end.getDate() + k * product.minCycle + 1);
       document.getElementById('grant-end').value = fmtDateTime(end);
-
-      const payload = currentPayload();
-      const model = payload ? payload.modelName : '-';
-      const finalModels = selectedPools.map(p => `/${p.name}/${model}`);
-      document.getElementById('grant-model-preview').innerHTML = finalModels.map(m => `<p class="font-mono text-xs text-violet-300 break-all">${m}</p>`).join('');
     }
 
     function confirmGrant() {
@@ -800,12 +767,11 @@
       const payload = currentPayload();
       const multiplier = document.getElementById('grant-multiplier').value;
       const cycle = document.getElementById('grant-cycle').value;
-      const overflowRoute = document.getElementById('grant-overflow-route').value;
+      const serverlessOn = document.querySelector('input[name="grant-serverless"]:checked').value === 'on';
       const note = document.getElementById('grant-note').value.trim();
-      const routeText = document.getElementById('grant-overflow-route').options[document.getElementById('grant-overflow-route').selectedIndex].text;
       const totalPrice = (parseInt(multiplier, 10) || 1) * (product ? product.price : 0);
       closeModal('grant');
-      alert(`已交付：关联 ${selectedPools.length} 个 Pool 的预留 vTPM 包。\n商品：${product ? product.name : '-'}\nPayload：${payload ? payload.id : '-'}\n购买量：${multiplier} × ${product ? product.minVtpm : '-'} 万 vTPM\n购买周期：${cycle} × ${product ? product.minCycle : '-'} 天\n费用：¥${totalPrice.toLocaleString()}\n超量路由：${routeText}\n备注：${note || '无'}`);
+      alert(`已交付：关联 ${selectedPools.length} 个 Pool 的预留 vTPM 包。\n商品：${product ? product.name : '-'}\nPayload：${payload ? payload.id : '-'}\n购买量：${multiplier} × ${product ? product.minVtpm : '-'} 万 vTPM\n购买周期：${cycle} × ${product ? product.minCycle : '-'} 天\n费用：¥${totalPrice.toLocaleString()}\n超量路由：${serverlessOn ? '自动降级到 Serverless' : '超量限流（返回 429）'}\n备注：${note || '无'}`);
     }
 
     function fmtDate(d) {
