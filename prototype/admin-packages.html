@@ -238,7 +238,7 @@
                   <td class="px-3 py-3 font-mono text-[11px]">001</td>
                   <td class="px-3 py-3">Deepseek V4 Flash 0731 预留 vTPM</td>
                   <td class="px-3 py-3">300 万 vTPM</td>
-                  <td class="px-3 py-3">2026-08-01 ~ 2026-08-30</td>
+                  <td class="px-3 py-3">2026-08-01 ~ 2026-09-01</td>
                   <td class="px-3 py-3 font-mono text-[11px]">/proj-alpha/deepseek-v4-flash-0731</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
                   <td class="px-3 py-3">
@@ -253,7 +253,7 @@
                   <td class="px-3 py-3 font-mono text-[11px]">002</td>
                   <td class="px-3 py-3">GLM 5.2 预留 vTPM</td>
                   <td class="px-3 py-3">200 万 vTPM</td>
-                  <td class="px-3 py-3">2026-09-01 ~ 2026-09-30</td>
+                  <td class="px-3 py-3">2026-09-01 ~ 2026-10-02</td>
                   <td class="px-3 py-3 font-mono text-[11px]">/proj-gamma/glm-5.2</td>
                   <td class="px-3 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-medium">生效中</span></td>
                   <td class="px-3 py-3">
@@ -809,36 +809,44 @@
     // 后台预留 vTPM 详情数据
     const detailData = {
       'P001': {
-        model: 'Deepseek V4 Flash 0731', sku: '23456', amount: 300, unit: '万 vTPM',
+        subject: 'sub_3x9a2b1c', subjectName: '智象科技',
+        pools: [{ id: 'pool_3x9_alpha', name: 'proj-alpha' }],
+        productId: '001', productName: 'Deepseek V4 Flash 0731 预留 vTPM', skuId: '23456',
+        payloadId: 'payload-dsv4f', payloadName: 'Deepseek V4 Flash 0731 预留 vTPM',
+        amount: 300, unit: '万 vTPM', cycle: 30,
         status: '生效中', statusCls: 'bg-green-100 text-green-700',
-        period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理',
-        bind: '/proj-alpha/deepseek-v4-flash-0731', pool: 'proj-alpha',
-        factors: [
-          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
-          { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
-          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
-          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.05, outputF: 2.00 },
-          { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
-          { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
-        ]
+        sellStart: '2026-08-01', sellEnd: '2026-12-31',
+        startTime: '2026-08-01 00:00', endTime: '2026-09-01 00:00',
+        basePrice: 99000, totalPrice: 297000,
+        overflowRoute: '超量限流（返回 429）',
+        note: '重点客户首批交付，需保留完整折算系数。'
       },
       'P002': {
-        model: 'GLM 5.2', sku: '34567', amount: 200, unit: '万 vTPM',
+        subject: 'sub_7k2m5n8p', subjectName: '星河互娱',
+        pools: [{ id: 'pool_7k2_gamma', name: 'proj-gamma' }],
+        productId: '002', productName: 'GLM 5.2 预留 vTPM', skuId: '34567',
+        payloadId: 'payload-glm52', payloadName: 'GLM 5.2 预留 vTPM',
+        amount: 200, unit: '万 vTPM', cycle: 30,
         status: '生效中', statusCls: 'bg-green-100 text-green-700',
-        period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理',
-        bind: '/proj-gamma/glm-5.2', pool: 'proj-gamma',
-        factors: [
-          { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
-          { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
-        ]
+        sellStart: '2026-09-01', sellEnd: '2026-11-30',
+        startTime: '2026-09-01 00:00', endTime: '2026-10-02 00:00',
+        basePrice: 198000, totalPrice: 198000,
+        overflowRoute: '超量路由 Serverless（按量计费）',
+        note: '活动客户补偿交付，关联默认 Pool。'
       }
     };
 
     function showDetail(id) {
       const d = detailData[id];
       if (!d) return;
-      document.getElementById('detail-title').textContent = `${d.model} 资源包详情`;
-      const factorsRows = d.factors.map(f => `
+      const payload = payloadMasterById(d.payloadId);
+      document.getElementById('detail-title').textContent = `${d.subjectName} 预留 vTPM 资源包详情`;
+      const pools = d.pools.length
+        ? d.pools.map(p => `<span class="inline-flex items-center px-2 py-0.5 rounded bg-violet-50 text-violet-700 text-[11px] font-medium">${p.name}</span>`).join(' ')
+        : '<span class="text-slate-400">未关联</span>';
+      const factors = payload ? payload.factors : [];
+      const sloRules = payload ? payload.sloRules : [];
+      const factorRows = factors.map(f => `
         <tr>
           <td class="px-3 py-2">${f.input}</td>
           <td class="px-3 py-2">${f.cache}</td>
@@ -848,19 +856,60 @@
           <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
         </tr>
       `).join('');
+      const sloRows = sloRules.map(r => `
+        <tr>
+          <td class="px-3 py-2">${r.metric}</td>
+          <td class="px-3 py-2">${r.target}</td>
+          <td class="px-3 py-2">${r.penalty}</td>
+        </tr>
+      `).join('');
       document.getElementById('detail-body').innerHTML = `
-        <div class="grid grid-cols-2 gap-3">
-          <div><span class="text-slate-500">资源包 ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${id}</p></div>
-          <div><span class="text-slate-500">商品 ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.sku}</p></div>
-          <div><span class="text-slate-500">购买量</span><p class="font-medium text-slate-900 mt-0.5">${d.amount} ${d.unit}</p></div>
-          <div><span class="text-slate-500">状态</span><p class="mt-0.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${d.statusCls}">${d.status}</span></p></div>
-          <div><span class="text-slate-500">有效期</span><p class="font-medium text-slate-900 mt-0.5">${d.period}</p></div>
-          <div><span class="text-slate-500">可用范围</span><p class="font-medium text-slate-900 mt-0.5">${d.scope}</p></div>
-          <div><span class="text-slate-500">Pool 对象（payload）</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.pool}</p></div>
-          <div><span class="text-slate-500">最终 model_name</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.bind}</p></div>
+        <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <p class="text-[11px] text-slate-500">资源包 ID</p>
+            <p class="text-sm font-semibold text-slate-900 font-mono mt-0.5">${id}</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-medium ${d.statusCls}">${d.status}</span>
         </div>
-        <div>
-          <p class="text-sm font-medium text-slate-900 mb-2">折算系数</p>
+
+        <section>
+          <p class="text-[11px] font-semibold text-slate-500 mb-2">交付对象</p>
+          <div class="grid grid-cols-3 gap-3">
+            <div><span class="text-slate-500">subject_id</span><p class="font-medium text-slate-900 mt-0.5">${d.subject}</p></div>
+            <div><span class="text-slate-500">Pool 关联</span><p class="mt-1 flex flex-wrap gap-1.5">${pools}</p></div>
+            <div><span class="text-slate-500">Payload</span><p class="font-medium text-slate-900 mt-0.5">${d.payloadName}（${d.payloadId}）</p></div>
+          </div>
+        </section>
+
+        <section>
+          <p class="text-[11px] font-semibold text-slate-500 mb-2">商品与价格</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div><span class="text-slate-500">SKU 商品</span><p class="font-medium text-slate-900 mt-0.5">${d.productName}</p></div>
+            <div><span class="text-slate-500">SKU ID / 商品 ID</span><p class="font-medium text-slate-900 font-mono mt-0.5">${d.skuId} / ${d.productId}</p></div>
+            <div><span class="text-slate-500">售卖窗口</span><p class="font-medium text-slate-900 mt-0.5">${d.sellStart} ~ ${d.sellEnd}</p></div>
+            <div><span class="text-slate-500">基础单价</span><p class="font-medium text-slate-900 mt-0.5">¥${d.basePrice.toLocaleString()} / 100 万 vTPM / 30 天</p></div>
+          </div>
+        </section>
+
+        <section>
+          <p class="text-[11px] font-semibold text-slate-500 mb-2">购买与有效期</p>
+          <div class="grid grid-cols-3 gap-3">
+            <div><span class="text-slate-500">购买量</span><p class="font-medium text-slate-900 mt-0.5">${d.amount} ${d.unit}</p></div>
+            <div><span class="text-slate-500">购买周期</span><p class="font-medium text-slate-900 mt-0.5">${d.cycle} 天</p></div>
+            <div><span class="text-slate-500">订单价格</span><p class="font-medium text-slate-900 mt-0.5">¥${d.totalPrice.toLocaleString()}</p></div>
+            <div><span class="text-slate-500">开始时间</span><p class="font-medium text-slate-900 mt-0.5">${d.startTime}</p></div>
+            <div><span class="text-slate-500">结束时间</span><p class="font-medium text-slate-900 mt-0.5">${d.endTime}</p></div>
+            <div><span class="text-slate-500">超量路由</span><p class="font-medium text-slate-900 mt-0.5">${d.overflowRoute}</p></div>
+          </div>
+        </section>
+
+        <section>
+          <p class="text-[11px] font-semibold text-slate-500 mb-2">备注</p>
+          <p class="text-slate-700 leading-6">${d.note}</p>
+        </section>
+
+        <section>
+          <p class="text-[11px] font-semibold text-slate-500 mb-2">折算系数</p>
           <p class="text-xs text-slate-500 mb-2">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
           <div class="overflow-x-auto">
             <table class="min-w-full text-xs border border-slate-200 rounded-lg">
@@ -874,10 +923,26 @@
                   <th class="px-3 py-2 text-left font-medium">输出系数</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100 text-slate-700">${factorsRows}</tbody>
+              <tbody class="divide-y divide-slate-100 text-slate-700">${factorRows}</tbody>
             </table>
           </div>
         </div>
+
+        <section>
+          <p class="text-[11px] font-semibold text-slate-500 mb-2">SLO 赔付规则</p>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium">指标</th>
+                  <th class="px-3 py-2 text-left font-medium">目标</th>
+                  <th class="px-3 py-2 text-left font-medium">赔付</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">${sloRows}</tbody>
+            </table>
+          </div>
+        </section>
       `;
       const modal = document.getElementById('modal-detail');
       modal.classList.remove('hidden');
