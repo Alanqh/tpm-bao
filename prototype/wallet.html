@@ -62,7 +62,7 @@
         <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
         <a href="index.html" class="switcher-tab">官网首页</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
-        <a href="packages.html" class="switcher-tab active">资源包</a>
+        <a href="wallet.html?tab=package" class="switcher-tab active">资源包</a>
         <a href="admin-packages.html" class="switcher-tab">后台-预留vTPM管理</a>
         <a href="admin-products.html" class="switcher-tab">后台-商品管理</a>
       </div>
@@ -178,9 +178,8 @@
               <button type="button" class="filter-btn" data-filter-status="expired">已过期</button>
               <span class="text-xs text-slate-400 mx-2 hidden sm:inline">|</span>
               <span class="text-xs text-slate-400 mr-1">类型</span>
-              <button type="button" class="filter-btn active" data-filter-type="all">全部</button>
-              <button type="button" class="filter-btn" data-filter-type="tokens">Tokens 包</button>
-              <button type="button" class="filter-btn" data-filter-type="vtpm">预留 vTPM 包</button>
+              <button type="button" class="filter-btn active" data-filter-type="deduction">额度抵扣包</button>
+              <button type="button" class="filter-btn" data-filter-type="reserved">吞吐保障包</button>
             </div>
             <a href="https://siliconflow.feishu.cn/share/base/form/shrcnfZ74tmCteZScSOLZOAsMs0" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg sf-btn-primary text-sm font-medium whitespace-nowrap"><i class="fa-solid fa-plus"></i>购买预留 vTPM</a>
           </div>
@@ -226,28 +225,18 @@
             <p class="flex justify-between"><span class="text-slate-400">状态</span><span id="modal-status"></span></p>
             <p class="flex justify-between"><span class="text-slate-400">有效期</span><span id="modal-period"></span></p>
             <p class="flex justify-between"><span class="text-slate-400">可用范围</span><span id="modal-scope" class="text-right max-w-[60%]"></span></p>
+            <p class="flex justify-between" id="modal-pool-row"><span class="text-slate-400">Pool</span><span id="modal-pool" class="font-mono text-xs text-slate-700"></span></p>
+            <p class="flex justify-between" id="modal-serverless-row"><span class="text-slate-400">超量策略</span><span id="modal-serverless" class="text-xs text-slate-700"></span></p>
             <p class="flex justify-between"><span class="text-slate-400">资源包 ID</span><span id="modal-id" class="font-mono text-xs"></span></p>
           </div>
 
-          <!-- 折算系数 -->
-          <div id="modal-factor-row" class="hidden">
-            <p class="text-sm font-medium text-slate-900 mb-2">折算系数</p>
-            <p class="text-xs text-slate-500 mb-2">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
-            <div class="overflow-x-auto">
-              <table class="min-w-full text-xs border border-slate-200 rounded-lg">
-                <thead class="bg-slate-50 text-slate-600">
-                  <tr>
-                    <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
-                    <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
-                    <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
-                    <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
-                    <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
-                    <th class="px-3 py-2 text-left font-medium">输出系数</th>
-                  </tr>
-                </thead>
-                <tbody id="modal-factor-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
-              </table>
-            </div>
+          <div id="modal-rule-actions" class="hidden flex flex-wrap gap-2">
+            <button type="button" onclick="openRulePreview('factors')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-200 text-blue-700 text-xs hover:bg-blue-50">
+              <i class="fa-solid fa-table-cells"></i>折算系数预览
+            </button>
+            <button type="button" onclick="openRulePreview('slo')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-violet-200 text-violet-700 text-xs hover:bg-violet-50">
+              <i class="fa-solid fa-shield-halved"></i>SLO 赔付预览
+            </button>
           </div>
 
           <div class="bg-slate-50 rounded-xl p-4 text-xs text-slate-500 space-y-1">
@@ -260,6 +249,26 @@
         <div class="mt-6 flex gap-3 justify-end" id="modal-actions">
           <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
           <a id="modal-action" href="monitor.html" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium hidden">查看监控</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 规则预览弹窗 -->
+  <div id="rule-modal" class="fixed inset-0 z-[220] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeRulePreview()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[88vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 id="rule-title" class="text-xl font-bold text-slate-900"></h3>
+            <p id="rule-subtitle" class="text-sm text-slate-500 mt-1"></p>
+          </div>
+          <button type="button" onclick="closeRulePreview()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <div id="rule-body" class="space-y-4"></div>
+        <div class="mt-6 flex justify-end">
+          <button type="button" onclick="closeRulePreview()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
         </div>
       </div>
     </div>
@@ -281,7 +290,7 @@
         <div class="space-y-4">
           <!-- 最终 model_name -->
           <div class="bg-gradient-to-br from-violet-600 to-violet-800 rounded-xl p-5 text-white">
-            <p class="text-xs opacity-80 mb-2">最终 model_name（任一均可路由到预留算力）</p>
+            <p class="text-xs opacity-80 mb-2">接入 model_name（任一均可路由到预留算力）</p>
             <div class="flex items-center justify-between gap-3">
               <p id="delivery-final" class="text-xl sm:text-2xl font-mono font-bold break-all"></p>
               <button type="button" onclick="copyFinalModel()" class="shrink-0 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-medium"><i class="fa-regular fa-copy mr-1"></i>复制</button>
@@ -312,7 +321,7 @@
 
   <script>
     const packages = [
-      { id: 'P001', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 30, unit: '万 vTPM', used: 0, status: 'active', period: '2026-08-01 ~ 2026-08-30', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-alpha', 'proj-beta'], serverless: true, bind: ['/proj-alpha/deepseek-v4-flash-0731', '/proj-beta/deepseek-v4-flash-0731'], factors: [
+      { id: 'P001', type: 'reserved', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 30, unit: '万 vTPM', used: 0, status: 'active', period: '2026-08-01 ~ 2026-09-01', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-alpha', 'proj-beta'], serverless: true, bind: ['/proj-alpha/deepseek-v4-flash-0731', '/proj-beta/deepseek-v4-flash-0731'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 },
@@ -320,24 +329,24 @@
         { input: '128K ~ 256K', cache: '0%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.24, outputF: 1.00 },
         { input: '128K ~ 256K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.20, cacheF: 0.06, outputF: 1.00 }
       ]},
-      { id: 'P002', type: 'vtpm', name: '预留 vTPM', model: 'GLM 5.2', amount: 20, unit: '万 vTPM', used: 0, status: 'active', period: '2026-09-01 ~ 2026-09-30', scope: 'GLM 5.2 推理', pools: ['proj-gamma'], serverless: false, bind: ['/proj-gamma/glm-5.2'], factors: [
+      { id: 'P002', type: 'reserved', name: '预留 vTPM', model: 'GLM 5.2', amount: 20, unit: '万 vTPM', used: 0, status: 'active', period: '2026-09-01 ~ 2026-10-02', scope: 'GLM 5.2 推理', pools: ['proj-gamma'], serverless: false, bind: ['/proj-gamma/glm-5.2'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
       ]},
-      { id: 'P003', type: 'tokens', name: 'Tokens 包', model: '通用 Tokens', amount: 1200, unit: '万 tokens', remain: 850, status: 'active', period: '2026-06-15 ~ 2026-12-15', scope: '平台按 tokens 计量计费的模型服务', bind: null },
-      { id: 'P004', type: 'tokens', name: 'Tokens 包', model: '通用 Tokens', amount: 1000, unit: '万 tokens', remain: 0, status: 'used', period: '2026-05-01 ~ 2026-07-31', scope: '平台按 tokens 计量计费的模型服务', bind: null },
-      { id: 'P005', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'expired', period: '2026-07-01 ~ 2026-07-31', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-beta'], serverless: false, bind: ['/proj-beta/deepseek-v4-flash-0731'], factors: [
+      { id: 'P003', type: 'deduction', name: 'Tokens 包', model: '通用 Tokens', amount: 1200, unit: '万 tokens', remain: 850, status: 'active', period: '2026-06-15 ~ 2026-12-15', scope: '平台按 tokens 计量计费的模型服务', bind: null },
+      { id: 'P004', type: 'deduction', name: 'Tokens 包', model: '通用 Tokens', amount: 1000, unit: '万 tokens', remain: 0, status: 'used', period: '2026-05-01 ~ 2026-07-31', scope: '平台按 tokens 计量计费的模型服务', bind: null },
+      { id: 'P005', type: 'reserved', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'expired', period: '2026-07-01 ~ 2026-08-01', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-beta'], serverless: false, bind: ['/proj-beta/deepseek-v4-flash-0731'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 }
       ]},
-      { id: 'P006', type: 'vtpm', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'cancelled', period: '2026-06-01 ~ 2026-06-30', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-beta'], serverless: false, bind: ['/proj-beta/deepseek-v4-flash-0731'], factors: [
+      { id: 'P006', type: 'reserved', name: '预留 vTPM', model: 'Deepseek V4 Flash 0731', amount: 10, unit: '万 vTPM', used: 0, status: 'cancelled', period: '2026-06-01 ~ 2026-07-02', scope: 'Deepseek V4 Flash 0731 推理', pools: ['proj-beta'], serverless: false, bind: ['/proj-beta/deepseek-v4-flash-0731'], factors: [
         { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
         { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.05, outputF: 1.00 }
       ]}
     ];
 
     let currentStatus = 'all';
-    let currentType = 'all';
+    let currentType = 'deduction';
 
     const statusMap = {
       active: { label: '生效中', cls: 'bg-green-100 text-green-700' },
@@ -347,7 +356,7 @@
     };
 
     function getUsedPercent(p) {
-      if (p.type === 'tokens') {
+      if (p.type === 'deduction') {
         return Math.min(100, Math.round(((p.amount - (p.remain || 0)) / p.amount) * 100));
       }
       return Math.min(100, Math.round((p.used || 0) / p.amount * 100));
@@ -363,7 +372,7 @@
       const filtered = packages.filter(p => {
         if (p.status === 'cancelled') return false;
         const statusMatch = currentStatus === 'all' || p.status === currentStatus;
-        const typeMatch = currentType === 'all' || p.type === currentType;
+        const typeMatch = p.type === currentType;
         return statusMatch && typeMatch;
       });
 
@@ -376,13 +385,13 @@
         const s = statusMap[p.status];
         const isGray = p.status !== 'active';
         const usedPct = getUsedPercent(p);
-        const isVtpm = p.type === 'vtpm';
+        const isVtpm = p.type === 'reserved';
         const icon = isVtpm ? 'fa-microchip' : 'fa-coins';
         const iconBg = isVtpm ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600';
         const grayIconBg = isGray ? 'bg-slate-100 text-slate-400' : iconBg;
         const textColor = isGray ? 'text-slate-500' : 'text-slate-900';
         const amountColor = isGray ? 'text-slate-400' : 'text-slate-900';
-        const typeLabel = isVtpm ? '预留 vTPM' : 'Tokens 包';
+        const typeLabel = isVtpm ? '吞吐保障包' : '额度抵扣包';
         const typeBadgeCls = isVtpm ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700';
         const grayBadgeCls = isGray ? 'bg-slate-100 text-slate-400' : typeBadgeCls;
 
@@ -403,7 +412,7 @@
                 ${isVtpm ? p.amount : (p.remain ?? p.amount).toLocaleString()}
                 <span class="text-base font-normal ${isGray ? 'text-slate-400' : 'text-slate-500'}">${p.unit}</span>
               </p>
-              ${!isVtpm && p.status === 'active' ? `<p class="text-xs text-slate-400 mt-1">剩余 ${p.remain} 万 / 共 ${p.amount} 万 tokens</p>` : ''}
+              ${!isVtpm && p.status === 'active' ? `<p class="text-xs text-slate-400 mt-1">剩余 ${p.remain} ${p.unit} / 共 ${p.amount} ${p.unit}</p>` : ''}
             </div>
             <div class="border-t border-slate-100 pt-3 space-y-1 text-xs ${isGray ? 'text-slate-400' : 'text-slate-500'} mb-4">
               <p>可用范围：${p.scope}</p>
@@ -418,22 +427,40 @@
       }).join('');
     }
 
+    let rulePackage = null;
+
     function openDetail(id) {
       const p = packages.find(x => x.id === id);
       if (!p) return;
       const s = statusMap[p.status];
-      const isVtpm = p.type === 'vtpm';
+      const isVtpm = p.type === 'reserved';
 
-      document.getElementById('modal-type').textContent = isVtpm ? '预留 vTPM' : 'Tokens 包';
+      document.getElementById('modal-type').textContent = isVtpm ? '吞吐保障包' : '额度抵扣包';
       document.getElementById('modal-type').className = `inline-block px-2 py-0.5 rounded text-xs font-medium mt-1.5 ${isVtpm ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`;
       document.getElementById('modal-title').textContent = p.model;
-      document.getElementById('modal-amount-label').textContent = isVtpm ? '预留算力' : '剩余资源';
+      document.getElementById('modal-amount-label').textContent = isVtpm ? '预留吞吐' : '剩余额度';
       document.getElementById('modal-amount').textContent = `${isVtpm ? p.amount : (p.remain ?? p.amount).toLocaleString()} ${p.unit}`;
       document.getElementById('modal-status').innerHTML = `<span class="px-2 py-0.5 rounded-full text-xs font-medium ${s.cls}">${s.label}</span>`;
       document.getElementById('modal-period').textContent = p.period;
       document.getElementById('modal-scope').textContent = p.scope;
 
       document.getElementById('modal-id').textContent = p.id;
+      const poolRow = document.getElementById('modal-pool-row');
+      const serverlessRow = document.getElementById('modal-serverless-row');
+      if (isVtpm && p.pools) {
+        poolRow.classList.remove('hidden');
+        document.getElementById('modal-pool').textContent = p.pools.join('、');
+      } else {
+        poolRow.classList.add('hidden');
+      }
+      if (isVtpm) {
+        serverlessRow.classList.remove('hidden');
+        document.getElementById('modal-serverless').innerHTML = p.serverless
+          ? '<span class="text-blue-700">超量路由 Serverless，按量计费</span>'
+          : '<span class="text-slate-500">超量限流 429</span>';
+      } else {
+        serverlessRow.classList.add('hidden');
+      }
 
       const progressWrap = document.getElementById('modal-progress-wrap');
       if (!isVtpm) {
@@ -445,28 +472,17 @@
         progressWrap.classList.add('hidden');
       }
 
-      const factorRow = document.getElementById('modal-factor-row');
-      if (isVtpm && p.factors) {
-        factorRow.classList.remove('hidden');
-        document.getElementById('modal-factor-body').innerHTML = p.factors.map(f => `
-          <tr>
-            <td class="px-3 py-2">${f.input}</td>
-            <td class="px-3 py-2">${f.cache}</td>
-            <td class="px-3 py-2">${f.output}</td>
-            <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
-            <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
-            <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
-          </tr>
-        `).join('');
-      } else {
-        factorRow.classList.add('hidden');
-      }
+      const ruleActions = document.getElementById('modal-rule-actions');
+      ruleActions.classList.toggle('hidden', !isVtpm);
+      ruleActions.classList.toggle('flex', isVtpm);
+      rulePackage = p;
 
       const actionsBox = document.getElementById('modal-actions');
       if (isVtpm) {
         actionsBox.innerHTML = `
           <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">关闭</button>
           <a href="monitor.html?pkg=${p.id}" class="px-4 py-2 rounded-lg sf-btn-primary text-white text-sm font-medium">查看监控</a>
+          <button type="button" onclick="openDelivery('${p.id}')" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm hover:bg-slate-50">交付详情</button>
         `;
       } else {
         actionsBox.innerHTML = `
@@ -484,9 +500,83 @@
       modal.classList.remove('flex');
     }
 
+    function openRulePreview(kind) {
+      if (!rulePackage) return;
+      const title = document.getElementById('rule-title');
+      const subtitle = document.getElementById('rule-subtitle');
+      const body = document.getElementById('rule-body');
+
+      if (kind === 'factors') {
+        title.textContent = '折算系数';
+        subtitle.textContent = `${rulePackage.model} · ${rulePackage.id}`;
+        body.innerHTML = `
+          <p class="text-xs text-slate-500">预留 vTPM 一经售出，其上的折算系数直接绑定，订单生效后保持不变。</p>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium">输入长度区间</th>
+                  <th class="px-3 py-2 text-left font-medium">Cache 命中区间</th>
+                  <th class="px-3 py-2 text-left font-medium">输出长度区间</th>
+                  <th class="px-3 py-2 text-left font-medium">输入未命中系数</th>
+                  <th class="px-3 py-2 text-left font-medium">输入命中系数</th>
+                  <th class="px-3 py-2 text-left font-medium">输出系数</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">
+                ${rulePackage.factors.map(f => `
+                  <tr>
+                    <td class="px-3 py-2">${f.input}</td>
+                    <td class="px-3 py-2">${f.cache}</td>
+                    <td class="px-3 py-2">${f.output}</td>
+                    <td class="px-3 py-2 font-mono">${f.inputF.toFixed(2)}</td>
+                    <td class="px-3 py-2 font-mono">${f.cacheF.toFixed(2)}</td>
+                    <td class="px-3 py-2 font-mono">${f.outputF.toFixed(2)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        title.textContent = 'SLO 赔付规则';
+        subtitle.textContent = `${rulePackage.model} · ${rulePackage.id}`;
+        body.innerHTML = `
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-slate-200 rounded-lg">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium">指标</th>
+                  <th class="px-3 py-2 text-left font-medium">目标</th>
+                  <th class="px-3 py-2 text-left font-medium">赔付</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">
+                <tr><td class="px-3 py-2">可用性</td><td class="px-3 py-2">≥ 99.5%</td><td class="px-3 py-2">按当月资源包费用比例赔付</td></tr>
+                <tr><td class="px-3 py-2">P95 TTFT</td><td class="px-3 py-2">≤ 500ms</td><td class="px-3 py-2">按当月资源包费用比例赔付</td></tr>
+                <tr><td class="px-3 py-2">P95 TPOT</td><td class="px-3 py-2">≤ 80ms</td><td class="px-3 py-2">按当月资源包费用比例赔付</td></tr>
+                <tr><td class="px-3 py-2">吞吐保障</td><td class="px-3 py-2">≥ 购买 vTPM</td><td class="px-3 py-2">按当月资源包费用比例赔付</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-xs text-slate-500">同一自然分钟内多类违约只计 1 个违约分钟；赔付详情以正式服务条款为准。</p>
+        `;
+      }
+
+      const modal = document.getElementById('rule-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeRulePreview() {
+      const modal = document.getElementById('rule-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
     function openDelivery(id) {
       const p = packages.find(x => x.id === id);
-      if (!p || p.type !== 'vtpm' || !p.bind) return;
+      if (!p || p.type !== 'reserved' || !p.bind) return;
       const finalModels = Array.isArray(p.bind) ? p.bind : [p.bind];
       const primaryModel = finalModels[0];
       const pools = Array.isArray(p.pools) ? p.pools : (p.pool ? [p.pool] : []);
@@ -497,10 +587,10 @@
       document.getElementById('delivery-usage-link').href = `monitor.html?pkg=${p.id}`;
 
       document.getElementById('delivery-grid').innerHTML = `
-        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">Pool 对象（${pools.length} 个）</p><p class="font-mono text-sm text-slate-800">${poolText}</p></div>
-        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">预留算力</p><p class="text-sm text-slate-800">${p.amount} ${p.unit}</p></div>
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">接入 Pool</p><p class="font-mono text-sm text-slate-800">${poolText}</p></div>
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">预留吞吐</p><p class="text-sm text-slate-800">${p.amount} ${p.unit}</p></div>
         <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">有效期</p><p class="text-sm text-slate-800">${p.period}</p></div>
-        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">超量路由</p><p class="text-sm">${p.serverless ? '<span class="text-blue-700">Serverless 按量计费</span>' : '<span class="text-slate-500">限流 429</span>'}</p></div>
+        <div class="sf-card p-3"><p class="text-xs text-slate-400 mb-1">超量策略</p><p class="text-sm">${p.serverless ? '<span class="text-blue-700">超量路由 Serverless，按量计费</span>' : '<span class="text-slate-500">超量限流 429</span>'}</p></div>
       `;
 
       document.getElementById('delivery-curl').textContent =
