@@ -296,29 +296,43 @@
             <div id="billing-mode-tip" class="hidden mb-4 text-xs bg-violet-50 border border-violet-200 text-violet-700 rounded-md px-3 py-2">
               <i class="fa-solid fa-circle-info mr-1"></i>变更编辑台中：可对已上架的上架项进行禁用；点击左下角「新增上架项」可新增；完成后「发布变更」生效，或「放弃变更」退出。
             </div>
-            <table class="w-full text-sm mb-4">
+            <!-- 小节标题 + 右上角时间筛选器（查询指定时间的售卖参数） -->
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <p class="text-sm font-semibold text-slate-900">计费项</p>
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间（默认在售）</span>
+                <input id="tf-start" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-52">
+                <span class="text-slate-400">~</span>
+                <input id="tf-end" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-52">
+                <button type="button" onclick="querySaleParams()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-magnifying-glass mr-1"></i>查询</button>
+                <button type="button" onclick="resetSaleParams()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">重置</button>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm mb-4 min-w-[1400px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th class="text-left px-3 py-2 font-medium">function</th>
+                  <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">售卖维度</th>
-                  <th class="text-left px-3 py-2 font-medium">计费项code</th>
-                  <th class="text-left px-3 py-2 font-medium">名称</th>
+                  <th class="text-left px-3 py-2 font-medium">计费项(name(code))</th>
+                  <th class="text-left px-3 py-2 font-medium">ID</th>
+                  <th class="text-left px-3 py-2 font-medium">Tags</th>
                   <th class="text-right px-3 py-2 font-medium">刊例价</th>
-                  <th class="text-right px-3 py-2 font-medium">兜底价格</th>
-                  <th class="text-left px-3 py-2 font-medium">计费项单位</th>
-                  <th class="text-left px-3 py-2 font-medium">货币单位</th>
+                  <th class="text-right px-3 py-2 font-medium">所选时间刊例价</th>
+                  <th class="text-right px-3 py-2 font-medium">所选时间段执行价</th>
+                  <th class="text-left px-3 py-2 font-medium">单位</th>
                   <th class="text-left px-3 py-2 font-medium">关联vTPM折算系数配置</th>
                   <th class="text-left px-3 py-2 font-medium">关联SLO配置</th>
                   <th class="text-left px-3 py-2 font-medium">关联payloadId</th>
                   <th class="text-right px-3 py-2 font-medium">最小购买量</th>
                   <th class="text-right px-3 py-2 font-medium">购买量step</th>
-                  <th class="text-left px-3 py-2 font-medium">自动绑定标签</th>
                   <th class="text-left px-3 py-2 font-medium">状态</th>
                   <th class="text-left px-3 py-2 font-medium">操作</th>
                 </tr>
               </thead>
               <tbody id="billing-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
+            </div>
             <!-- 左下：新增计费项 -->
            <div class="flex">
              <button id="add-item-btn" onclick="openCreateItemModal()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md hidden"><i class="fa-solid fa-plus mr-1"></i>新增上架项</button>
@@ -655,9 +669,9 @@
     let planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
     // 计费项池（由「创建计费项」弹窗维护，上架项关联引用）
     const defaultChargeItems = [
-      { code: 'maas-product-vtpm-pre.30d', name: 'maas-product-vtpm-pre.30d', price: 0.0084, floor: 0.0079, unit: '万 vTPM', currency: '元' },
-      { code: 'maas-product-vtpm-pre.60d', name: 'maas-product-vtpm-pre.60d', price: 0.0077, floor: 0.0072, unit: '万 vTPM', currency: '元' },
-      { code: 'maas-product-vtpm-pre.90d', name: 'maas-product-vtpm-pre.90d', price: 0.0075, floor: 0.0071, unit: '万 vTPM', currency: '美元' }
+      { id: 27291, code: 'maas-product-vtpm-pre.30d', name: 'maas-product-vtpm-pre.30d', price: 0.0084, floor: 0.0079, unit: '万 vTPM', currency: '元' },
+      { id: 27292, code: 'maas-product-vtpm-pre.60d', name: 'maas-product-vtpm-pre.60d', price: 0.0077, floor: 0.0072, unit: '万 vTPM', currency: '元' },
+      { id: 27293, code: 'maas-product-vtpm-pre.90d', name: 'maas-product-vtpm-pre.90d', price: 0.0075, floor: 0.0071, unit: '万 vTPM', currency: '美元' }
     ];
     let chargeItems = JSON.parse(JSON.stringify(defaultChargeItems));
     // 默认上架项数据（售卖维度单选；关联计费项；function 一期为 null，展示为 —）
@@ -768,6 +782,36 @@
       const isPublished = currentProduct && currentProduct.lifeStatus === '售卖中';
       return b.itemStatus || (isPublished ? '已上架' : '待上架');
     }
+    // ===== 时间筛选器：查询指定时间的售卖参数 =====
+    let timeFilter = null; // { start, end } 或 null（默认：展示在售价格，与刊例价一致）
+    function querySaleParams() {
+      const s = (document.getElementById('tf-start').value || '').replace('T', ' ');
+      const e = (document.getElementById('tf-end').value || '').replace('T', ' ');
+      if (!s && !e) { alert('请先选择开始或结束时间'); return; }
+      timeFilter = { start: s, end: e };
+      renderBilling();
+    }
+    function resetSaleParams() {
+      timeFilter = null;
+      document.getElementById('tf-start').value = '';
+      document.getElementById('tf-end').value = '';
+      renderBilling();
+    }
+    // 上架项的售卖期：取关联售卖计划的售卖时间；无计划时用默认 mock 期
+    function saleWindowOf(b) {
+      const plan = planRows.find(p => (p.items || []).includes(b.itemCode));
+      if (plan && plan.sellStart && plan.sellEnd) return { start: plan.sellStart, end: plan.sellEnd };
+      return { start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59' };
+    }
+    function copyChargeCode(code, btn) {
+      const done = () => {
+        const icon = btn.querySelector('i');
+        icon.className = 'fa-solid fa-check text-green-500';
+        setTimeout(() => { icon.className = 'fa-solid fa-copy'; }, 1200);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done).catch(done);
+      else done();
+    }
     function renderBilling() {
       const isPublished = currentProduct && currentProduct.lifeStatus === '售卖中';
       if (billingItems.length === 0) {
@@ -778,6 +822,17 @@
         const st = itemStatusOf(b);
         const stCls = st === '已上架' ? 'bg-green-100 text-green-700' : st === '已禁用' ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-700';
         const charge = chargeItems.find(c => c.code === b.itemCode) || {};
+        // 时间筛选：默认（未筛选）展示在售价格（=刊例价）；筛选后仅售卖期覆盖所选时间的上架项显示价格
+        let tfPrice = (charge.price || 0).toFixed(4);
+        let tfExec = (charge.price || 0).toFixed(4);
+        if (timeFilter) {
+          const w = saleWindowOf(b);
+          const s = timeFilter.start || w.start;
+          const e = timeFilter.end || w.end;
+          const onSale = s <= w.end && e >= w.start; // 时间段与售卖期有交集即在售
+          tfPrice = onSale ? (charge.price || 0).toFixed(4) : '—';
+          tfExec = onSale ? (charge.price || 0).toFixed(4) : '—';
+        }
         // 编辑状态下，已上架的上架项可禁用；已禁用的可启用
         let actionBtn = '';
         if (changeMode && isPublished) {
@@ -788,18 +843,18 @@
         <tr class="hover:bg-slate-50 ${st === '已禁用' ? 'opacity-50' : ''}">
           <td class="px-3 py-2 text-xs text-slate-300">${b.fn || '—'}</td>
           <td class="px-3 py-2 text-xs whitespace-nowrap">${b.dim ? `<span class="badge bg-violet-50 text-violet-700">${b.dim}</span>` : '—'}</td>
-          <td class="px-3 py-2 font-mono text-xs">${charge.code || b.itemCode}</td>
-          <td class="px-3 py-2 text-xs">${charge.name || '—'}</td>
+          <td class="px-3 py-2 font-mono text-xs whitespace-nowrap">${charge.code || b.itemCode}<button type="button" onclick="copyChargeCode('${charge.code || b.itemCode}', this)" class="ml-1 text-slate-400 hover:text-slate-600" title="复制code"><i class="fa-solid fa-copy"></i></button></td>
+          <td class="px-3 py-2 text-xs font-mono">${charge.id || '—'}</td>
+          <td class="px-3 py-2 text-xs"><div class="flex flex-wrap gap-1">${(b.tags || []).map(t => `<span class="badge bg-slate-100 text-slate-600 font-mono">${t}</span>`).join('')}</div></td>
           <td class="px-3 py-2 text-right font-mono text-xs">${(charge.price || 0).toFixed(4)}</td>
-          <td class="px-3 py-2 text-right font-mono text-xs">${(charge.floor || 0).toFixed(4)}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs">${tfPrice}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs" title="预留资源包售卖期内按刊例价执行">${tfExec}</td>
           <td class="px-3 py-2 text-xs">${charge.unit || '万 vTPM'}</td>
-         <td class="px-3 py-2 text-xs">${charge.currency || '—'}</td>
           <td class="px-3 py-2 text-xs">${b.factor}</td>
           <td class="px-3 py-2 text-xs">${b.slo}</td>
           <td class="px-3 py-2 text-xs font-mono">${b.payloadId}</td>
           <td class="px-3 py-2 text-xs">${b.minQty}</td>
           <td class="px-3 py-2 text-xs">${b.stepQty}</td>
-          <td class="px-3 py-2 text-xs"><div class="flex flex-wrap gap-1">${(b.tags || []).map(t => `<span class="badge bg-slate-100 text-slate-600 font-mono">${t}</span>`).join('')}</div></td>
           <td class="px-3 py-2"><span class="badge ${stCls}">${st}</span></td>
           <td class="px-3 py-2 whitespace-nowrap">${actionBtn || '—'}</td>
         </tr>`;
@@ -1094,7 +1149,8 @@
       if (chargeItems.some(c => c.code === code)) { alert('计费项code已存在：' + code); return; }
       const floor = +(price * 0.95).toFixed(4);
       const tags = buildItemTags(selectedCycle(), { currency, unit });
-      chargeItems.push({ code, name, price, floor, unit, currency, tags });
+      const id = chargeItems.reduce((m, c) => Math.max(m, c.id || 0), 27290) + 1;
+      chargeItems.push({ id, code, name, price, floor, unit, currency, tags });
       closeModal('create-billing');
       // 创建后自动选中新计费项，并联动标签
       refreshItemBillingSelect(code);
