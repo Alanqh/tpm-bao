@@ -184,7 +184,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h2 class="text-lg font-semibold text-slate-900">商品管理</h2>
-            <p class="text-xs text-slate-500 mt-0.5">先创建商品（SKU）；再在详情页关联折算系数、SLO规则配置，创建售卖计划完成上架。</p>
+            <p class="text-xs text-slate-500 mt-0.5">先创建商品（SKU）；再在详情页创建上架项（关联计费项、折算系数、SLO 配置），创建售卖计划完成上架。</p>
           </div>
           <button onclick="openProductModal()" class="admin-btn-primary text-sm px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>新增商品</button>
         </div>
@@ -260,21 +260,22 @@
           <!-- 售卖计划 Tab -->
           <div id="inner-tab-plan" class="p-4 hidden">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-             <p class="text-xs text-slate-500">售卖计划定义购买量与周期组合；状态流转：待发布 → 发布 → 已发布（可停用）。</p>
+             <p class="text-xs text-slate-500">售卖计划选择 SKU 的上架项（默认全部已上架状态）并关联配置版本与售卖/生效时间；状态流转：待发布 → 发布 → 已发布（可停用）。</p>
              <button type="button" onclick="openPlanCreateModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
            </div>
            <table class="w-full text-sm">
              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                <tr>
-                 <th class="text-left px-3 py-2 font-medium">购买量step（万 vTPM）</th>
-                 <th class="text-left px-3 py-2 font-medium">购买周期step（天）</th>
-                 <th class="text-left px-3 py-2 font-medium">关联vTPM折算系数配置</th>
-                 <th class="text-left px-3 py-2 font-medium">SLO赔付规则(版本)</th>
-                 <th class="text-left px-3 py-2 font-medium">关联计费项</th>
-                  <th class="text-right px-3 py-2 font-medium">实时价格</th>
-                  <th class="text-right px-3 py-2 font-medium">兜底价格</th>
-                 <th class="text-left px-3 py-2 font-medium">开始售卖周期</th>
-                 <th class="text-left px-3 py-2 font-medium">结束售卖周期</th>
+                 <th class="text-left px-3 py-2 font-medium">上架项</th>
+                 <th class="text-left px-3 py-2 font-medium">关联vTPM折算系数配置（版本）</th>
+                 <th class="text-left px-3 py-2 font-medium">关联SLO赔付规则（版本）</th>
+                 <th class="text-left px-3 py-2 font-medium">关联payloadId</th>
+                 <th class="text-right px-3 py-2 font-medium">最小购买量</th>
+                 <th class="text-right px-3 py-2 font-medium">购买量step</th>
+                 <th class="text-left px-3 py-2 font-medium">开始售卖时间</th>
+                 <th class="text-left px-3 py-2 font-medium">结束售卖时间</th>
+                 <th class="text-left px-3 py-2 font-medium">开始生效时间</th>
+                 <th class="text-left px-3 py-2 font-medium">结束生效时间</th>
                  <th class="text-left px-3 py-2 font-medium">优先级</th>
                  <th class="text-left px-3 py-2 font-medium">状态</th>
                  <th class="text-left px-3 py-2 font-medium">操作</th>
@@ -293,29 +294,34 @@
               <button id="publish-change-btn" onclick="publishChange()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md hidden"><i class="fa-solid fa-paper-plane mr-1"></i>发布变更</button>
             </div>
             <div id="billing-mode-tip" class="hidden mb-4 text-xs bg-violet-50 border border-violet-200 text-violet-700 rounded-md px-3 py-2">
-              <i class="fa-solid fa-circle-info mr-1"></i>变更编辑台中：可对生效中的计费项进行禁用；点击左下角「新增计费项」可新增上架；完成后「发布变更」生效，或「放弃变更」退出。
+              <i class="fa-solid fa-circle-info mr-1"></i>变更编辑台中：可对已上架的上架项进行禁用；点击左下角「新增上架项」可新增；完成后「发布变更」生效，或「放弃变更」退出。
             </div>
             <table class="w-full text-sm mb-4">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
+                  <th class="text-left px-3 py-2 font-medium">function</th>
+                  <th class="text-left px-3 py-2 font-medium">售卖维度</th>
                   <th class="text-left px-3 py-2 font-medium">计费项code</th>
                   <th class="text-left px-3 py-2 font-medium">名称</th>
-                  <th class="text-right px-3 py-2 font-medium">实时价格</th>
+                  <th class="text-right px-3 py-2 font-medium">刊例价</th>
                   <th class="text-right px-3 py-2 font-medium">兜底价格</th>
-                 <th class="text-left px-3 py-2 font-medium">计量单位</th>
-                 <th class="text-left px-3 py-2 font-medium">货币单位</th>
-                  <th class="text-left px-3 py-2 font-medium">function</th>
-                  <th class="text-left px-3 py-2 font-medium">dim</th>
-                 <th class="text-left px-3 py-2 font-medium">自动绑定标签</th>
-                 <th class="text-left px-3 py-2 font-medium">状态</th>
-                 <th class="text-left px-3 py-2 font-medium">操作</th>
+                  <th class="text-left px-3 py-2 font-medium">计费项单位</th>
+                  <th class="text-left px-3 py-2 font-medium">货币单位</th>
+                  <th class="text-left px-3 py-2 font-medium">关联vTPM折算系数配置</th>
+                  <th class="text-left px-3 py-2 font-medium">关联SLO配置</th>
+                  <th class="text-left px-3 py-2 font-medium">关联payloadId</th>
+                  <th class="text-right px-3 py-2 font-medium">最小购买量</th>
+                  <th class="text-right px-3 py-2 font-medium">购买量step</th>
+                  <th class="text-left px-3 py-2 font-medium">自动绑定标签</th>
+                  <th class="text-left px-3 py-2 font-medium">状态</th>
+                  <th class="text-left px-3 py-2 font-medium">操作</th>
                 </tr>
               </thead>
               <tbody id="billing-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
             <!-- 左下：新增计费项 -->
            <div class="flex">
-             <button id="add-item-btn" onclick="openCreateItemModal()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md hidden"><i class="fa-solid fa-plus mr-1"></i>新增计费项</button>
+             <button id="add-item-btn" onclick="openCreateItemModal()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md hidden"><i class="fa-solid fa-plus mr-1"></i>新增上架项</button>
            </div>
          </div>
           <!-- vTPM折算系数配置 Tab -->
@@ -341,11 +347,11 @@
       <div class="p-5 grid grid-cols-1 gap-4">
         <div>
           <label class="form-label">商品类型</label>
-          <select class="form-input"><option>maas-vtpm-chat</option></select>
+          <select class="form-input"><option>maas-product-vtpm</option></select>
         </div>
         <div>
           <label class="form-label">商品code</label>
-          <input id="inp-code" class="form-input" placeholder="如 maas-vtpm-chat-pre">
+          <input id="inp-code" class="form-input" placeholder="如 maas-product-vtpm-pre">
         </div>
         <div>
          <label class="form-label">商品名称</label>
@@ -361,43 +367,63 @@
 
   <!-- Modal: 创建售卖计划 -->
   <div id="modal-plan-create" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[85vh] overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
         <h3 class="text-sm font-semibold text-slate-900">创建售卖计划</h3>
         <button type="button" onclick="closeModal('plan-create')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 grid grid-cols-1 gap-4">
         <div>
-          <label class="form-label">购买量step（万 vTPM）</label>
-          <input id="plan-step-qty" type="number" class="form-input" placeholder="如 100">
-        </div>
-        <div>
-          <label class="form-label">购买周期step（天）</label>
-          <input id="plan-step-cycle" type="number" class="form-input" placeholder="如 30">
+          <label class="form-label">选择上架项（默认勾选全部已上架状态）</label>
+          <div id="plan-items-container" class="border border-slate-200 rounded-md p-2.5 max-h-44 overflow-y-auto space-y-1.5"></div>
         </div>
         <div>
          <label class="form-label">关联vTPM折算系数配置（版本）</label>
           <div id="plan-factor-container"></div>
        </div>
        <div>
-         <label class="form-label">关联SLO赔付规则（版本）</label>
+         <label class="form-label">关联SLO赔付规则配置（版本）</label>
           <div id="plan-slo-container"></div>
        </div>
-        <div>
-          <label class="form-label">关联计费项</label>
-          <select id="plan-item" class="form-input"></select>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">关联payloadId</label>
+            <select id="plan-payload" class="form-input"><option>payload-vtpm-001</option><option>payload-vtpm-002</option><option>payload-vtpm-003</option></select>
+          </div>
+          <div>
+            <label class="form-label">优先级（0-1000，整百）</label>
+            <select id="plan-priority" class="form-input"><option value="0">0</option><option value="100">100</option><option value="200">200</option><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option><option value="900">900</option><option value="1000">1000</option></select>
+          </div>
         </div>
-        <div>
-          <label class="form-label">优先级（0-1000，整百）</label>
-          <select id="plan-priority" class="form-input"><option value="0">0</option><option value="100">100</option><option value="200">200</option><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option><option value="900">900</option><option value="1000">1000</option></select>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">最小购买量（万 vTPM）</label>
+            <input id="plan-min-qty" type="number" class="form-input" placeholder="如 100">
+          </div>
+          <div>
+            <label class="form-label">购买量step（万 vTPM）</label>
+            <input id="plan-step-qty" type="number" class="form-input" placeholder="如 100">
+          </div>
         </div>
-        <div>
-          <label class="form-label">开始售卖周期</label>
-          <input id="plan-start" type="datetime-local" step="1" class="form-input" value="2026-10-01T00:00:00">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">开始售卖时间</label>
+            <input id="plan-sell-start" type="datetime-local" step="1" class="form-input" value="2026-10-01T00:00:00">
+          </div>
+          <div>
+            <label class="form-label">结束售卖时间</label>
+            <input id="plan-sell-end" type="datetime-local" step="1" class="form-input" value="2026-12-31T23:59:59">
+          </div>
         </div>
-        <div>
-          <label class="form-label">结束售卖周期</label>
-          <input id="plan-end" type="datetime-local" step="1" class="form-input" value="2026-12-31T23:59:59">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">开始生效时间</label>
+            <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00">
+          </div>
+          <div>
+            <label class="form-label">结束生效时间</label>
+            <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" value="2027-11-01T00:00:00">
+          </div>
         </div>
       </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
@@ -407,37 +433,89 @@
     </div>
   </div>
 
-  <!-- Modal: 创建计费项 -->
+  <!-- Modal: 创建上架项（维度组合 + 关联计费项创建） -->
   <div id="modal-create-item" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-900/50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
-        <h3 class="text-sm font-semibold text-slate-900">创建计费项</h3>
+        <h3 class="text-sm font-semibold text-slate-900">创建上架项</h3>
         <button type="button" onclick="closeModal('create-item')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 grid grid-cols-1 gap-4">
+        <!-- 售卖维度 -->
         <div>
-          <label class="form-label">code</label>
-          <input id="item-code" class="form-input" placeholder="如 vtpm.input">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">售卖维度（多维度值组合）</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="form-label">维度1：购买量区间（一期不配置）</label>
+              <select class="form-input bg-slate-50 text-slate-500" disabled>
+                <option>一期不配置（未来可配置：购买量落在不同区间，单价不同）</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">维度2：购买周期（时长不同，单价不同）</label>
+              <div class="flex items-center gap-4 pt-1.5">
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="checkbox" class="dim-cycle" value="30天" checked onchange="updateItemAutogen()" style="accent-color:#7C3AED"> 30天</label>
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="checkbox" class="dim-cycle" value="60天" onchange="updateItemAutogen()" style="accent-color:#7C3AED"> 60天</label>
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="checkbox" class="dim-cycle" value="90天" onchange="updateItemAutogen()" style="accent-color:#7C3AED"> 90天</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 关联计费项（创建） -->
+        <div>
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">关联计费项（创建）</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="form-label">计费项code（自动根据 SKU 名称 + 维度生成默认code）</label>
+              <input id="item-code" class="form-input font-mono" placeholder="根据 SKU + 维度自动生成">
+            </div>
+            <div>
+              <label class="form-label">名称（默认与code一致）</label>
+              <input id="item-name" class="form-input">
+            </div>
+            <div>
+              <label class="form-label">刊例价（指定购买量区间、购买周期下 1 个计费项单位的价格）</label>
+              <input id="item-price" type="number" step="0.0001" class="form-input" placeholder="0.008">
+            </div>
+            <div>
+              <label class="form-label">计费项单位（与 vTPM 换算比例 1:10000）</label>
+              <select id="item-unit" class="form-input" onchange="updateItemAutogen()"><option>万 vTPM</option></select>
+            </div>
+            <div>
+              <label class="form-label">货币单位</label>
+              <select id="item-currency" class="form-input" onchange="updateItemAutogen()"><option>元</option><option>美元</option></select>
+            </div>
+          </div>
+        </div>
+        <!-- 关联配置 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">关联vTPM折算系数配置</label>
+            <div id="item-factor-container"></div>
+          </div>
+          <div>
+            <label class="form-label">关联SLO配置</label>
+            <div id="item-slo-container"></div>
+          </div>
+          <div>
+            <label class="form-label">关联payloadId</label>
+            <select id="item-payload" class="form-input"><option>payload-vtpm-001</option><option>payload-vtpm-002</option><option>payload-vtpm-003</option></select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="form-label">最小购买量（万 vTPM）</label>
+              <input id="item-min-qty" type="number" class="form-input" placeholder="如 100">
+            </div>
+            <div>
+              <label class="form-label">购买量step（万 vTPM）</label>
+              <input id="item-step-qty" type="number" class="form-input" placeholder="如 100">
+            </div>
+          </div>
         </div>
         <div>
-          <label class="form-label">名称</label>
-          <input id="item-name" class="form-input" placeholder="如 输入实时价">
-        </div>
-        <div>
-          <label class="form-label">刊例价</label>
-          <input id="item-price" type="number" step="0.0001" class="form-input" placeholder="0.008">
-        </div>
-        <div>
-          <label class="form-label">计量单位</label>
-          <select class="form-input"><option>份</option></select>
-        </div>
-        <div>
-          <label class="form-label">货币单位</label>
-          <select id="item-currency" class="form-input"><option>元</option><option>美元</option></select>
-        </div>
-        <div>
-          <label class="form-label">自动绑定标签</label>
-          <input id="item-tag" class="form-input bg-slate-50 text-slate-500" readonly placeholder="自动关联当前商品code">
+          <label class="form-label">标签（自动关联）</label>
+          <div id="item-tags-preview" class="border border-slate-200 rounded-md p-2 bg-slate-50 min-h-[2.5rem] flex flex-wrap gap-1 items-center"></div>
+          <p class="text-[10px] text-slate-400 mt-1">自动包含：SKU 类型标签、维度标签、「计费项」标签、货币单位、计费项单位</p>
         </div>
       </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
@@ -532,56 +610,52 @@
     // ===== 数据 =====
     // 已上架商品
     const listedProducts = [
-      { code: 'maas-vtpm-chat-std', name: 'vTPM 预留资源包（标准）', type: 'maas-vtpm-chat', stepQty: '100', stepCycle: '30', sellStart: '2026-06-01 00:00:00', sellEnd: '2026-12-31 23:59:59', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', status: '售卖中' },
-      { code: 'maas-vtpm-chat-pro', name: 'vTPM 预留资源包（专业）', type: 'maas-vtpm-chat', stepQty: '500', stepCycle: '90', sellStart: '2026-05-01 00:00:00', sellEnd: '2026-11-30 23:59:59', factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', status: '售卖中' }
+      { code: 'maas-product-vtpm-std', name: 'vTPM 预留资源包（标准）', type: 'maas-product-vtpm', stepQty: '100', stepCycle: '30', sellStart: '2026-06-01 00:00:00', sellEnd: '2026-12-31 23:59:59', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', status: '售卖中' },
+      { code: 'maas-product-vtpm-pro', name: 'vTPM 预留资源包（专业）', type: 'maas-product-vtpm', stepQty: '500', stepCycle: '90', sellStart: '2026-05-01 00:00:00', sellEnd: '2026-11-30 23:59:59', factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', status: '售卖中' }
     ];
     // 待上架商品（尚无已生效的计费项）
     const pendingProducts = [
-      { code: 'maas-vtpm-chat-pre', name: 'vTPM 预留资源包（预）', type: 'maas-vtpm-chat', stepQty: '100', stepCycle: '30', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', status: '待上架' }
+      { code: 'maas-product-vtpm-pre', name: 'vTPM 预留资源包（预）', type: 'maas-product-vtpm', stepQty: '100', stepCycle: '30', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', status: '待上架' }
     ];
-    // 可选计费项（供售卖计划下拉选择）
-    const pendingItems = [
-      { skuid: 'SKU-2001', skuName: 'vTPM 预留资源包（预）-100', fn: 'chat', dim: 'vtpm', itemId: 'vtpm.input.2001', unit: '份', price: 0.0084, floor: 0.0079, def: '100份 × 30天' },
-      { skuid: 'SKU-2002', skuName: 'vTPM 预留资源包（预）-500', fn: 'chat', dim: 'vtpm', itemId: 'vtpm.input.2002', unit: '份', price: 0.0077, floor: 0.0072, def: '500份 × 90天' },
-      { skuid: 'SKU-2003', skuName: 'vTPM 预留资源包（预）-1000', fn: 'chat', dim: 'vtpm', itemId: 'vtpm.output.2003', unit: '份', price: 0.031, floor: 0.029, def: '1000份 × 180天' }
-    ];
+    // 可选 payloadId（交付配置模板）
+    const payloadOptions = ['payload-vtpm-001', 'payload-vtpm-002', 'payload-vtpm-003'];
     // 当前详情商品占位（新增商品后填充）
     let currentProduct = null;
-    // 默认售卖计划行
+    // 默认售卖计划行（items 为选中上架项 code 列表）
     const defaultPlanRows = [
-      { stepQty: '100', stepCycle: '30', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.input.2001', itemName: '输入实时价（30天）', itemPrice: 0.0084, itemFloor: 0.0079, start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 100 },
-      { stepQty: '500', stepCycle: '90', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.input.2002', itemName: '输入实时价（90天）', itemPrice: 0.0077, itemFloor: 0.0072, start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 200 },
-      { stepQty: '1000', stepCycle: '180', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', itemCode: 'vtpm.output.2003', itemName: '输出实时价（180天）', itemPrice: 0.031, itemFloor: 0.029, start: '2026-10-01 00:00:00', end: '2026-12-31 23:59:59', priority: 300 }
+      { items: ['maas-product-vtpm-pre.30d'], factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-001', minQty: '100', stepQty: '100', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00', priority: 100 },
+      { items: ['maas-product-vtpm-pre.60d-90d'], factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-002', minQty: '500', stepQty: '500', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00', priority: 200 },
+      { items: ['maas-product-vtpm-pre.range100-1000w.90d', 'maas-product-vtpm-pre.30d'], factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-003', minQty: '1000', stepQty: '1000', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', effStart: '2026-11-01 00:00:00', effEnd: '2028-05-01 00:00:00', priority: 300 }
     ];
     let planRows = JSON.parse(JSON.stringify(defaultPlanRows));
     // 状态： pending_publish(待发布) / published(已发布) / stopped(已停用) / expired(已过期)
     let planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
-    // 默认计费项数据
+    // 默认上架项数据（含关联计费项；售卖维度支持多维度值组合）
     const defaultBillingItems = [
-      { code: 'vtpm.input.2001', name: '输入实时价（30天）', price: 0.0084, floor: 0.0079, unit: '份', currency: '元' },
-      { code: 'vtpm.input.2002', name: '输入实时价（90天）', price: 0.0077, floor: 0.0072, unit: '份', currency: '元' },
-      { code: 'vtpm.output.2003', name: '输出实时价（180天）', price: 0.031, floor: 0.029, unit: '份', currency: '美元' }
+      { fn: 'chat', dims: ['购买周期:30天'], code: 'maas-product-vtpm-pre.30d', name: 'maas-product-vtpm-pre.30d', price: 0.0084, floor: 0.0079, unit: '万 vTPM', currency: '元', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-001', minQty: 100, stepQty: 100, tags: ['maas-product-vtpm', 'chat', '购买周期:30天', '计费项', '元', '万 vTPM'] },
+      { fn: 'chat', dims: ['购买周期:60天', '购买周期:90天'], code: 'maas-product-vtpm-pre.60d-90d', name: 'maas-product-vtpm-pre.60d-90d', price: 0.0077, floor: 0.0072, unit: '万 vTPM', currency: '元', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-002', minQty: 100, stepQty: 500, tags: ['maas-product-vtpm', 'chat', '购买周期:60天', '购买周期:90天', '计费项', '元', '万 vTPM'] },
+      { fn: 'chat', dims: ['购买量区间:100-1000万', '购买周期:90天'], code: 'maas-product-vtpm-pre.range100-1000w.90d', name: 'maas-product-vtpm-pre.range100-1000w.90d', price: 0.031, floor: 0.029, unit: '万 vTPM', currency: '美元', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-003', minQty: 1000, stepQty: 1000, tags: ['maas-product-vtpm', 'chat', '购买量区间:100-1000万', '购买周期:90天', '计费项', '美元', '万 vTPM'] }
     ];
     let billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
     let changeMode = false;
     // 配置数据：按商品code存储，每个SKU最多一份配置（多版本）
     const defaultConfigs = {
-      'maas-vtpm-chat-std': {
-        factor: { name: 'vtpm-factor-deepseek', sku: 'maas-vtpm-chat-std', versions: [
+      'maas-product-vtpm-std': {
+        factor: { name: 'vtpm-factor-deepseek', sku: 'maas-product-vtpm-std', versions: [
           { version: 'v3.3', yaml: '# vTPM 折算系数 v3.3\nmodels:\n  deepseek-chat:\n    factor: 0.8\n  deepseek-coder:\n    factor: 0.9', createdAt: '2026-07-01 10:00:00' },
           { version: 'v3.4', yaml: '# vTPM 折算系数 v3.4\nmodels:\n  deepseek-chat:\n    factor: 0.85\n  deepseek-coder:\n    factor: 0.95\n  deepseek-reasoner:\n    factor: 1.2', createdAt: '2026-08-01 10:00:00' }
         ]},
-        slo: { name: 'slo-rule-95', sku: 'maas-vtpm-chat-std', versions: [
+        slo: { name: 'slo-rule-95', sku: 'maas-product-vtpm-std', versions: [
           { version: 'v5.1', yaml: '# SLO赔付规则 v5.1\nslo:\n  availability: 99.5%\n  latency_p99: 500ms\ncompensation:\n  breach_1h: 10%\n  breach_4h: 30%', createdAt: '2026-07-01 10:00:00' },
           { version: 'v5.2', yaml: '# SLO赔付规则 v5.2\nslo:\n  availability: 99.9%\n  latency_p99: 300ms\ncompensation:\n  breach_1h: 15%\n  breach_4h: 40%\n  breach_24h: 80%', createdAt: '2026-08-01 10:00:00' }
         ]}
       },
-      'maas-vtpm-chat-pro': {
-        factor: { name: 'vtpm-factor-glm', sku: 'maas-vtpm-chat-pro', versions: [
+      'maas-product-vtpm-pro': {
+        factor: { name: 'vtpm-factor-glm', sku: 'maas-product-vtpm-pro', versions: [
           { version: 'v2.0', yaml: '# vTPM 折算系数 v2.0\nmodels:\n  glm-4:\n    factor: 0.7\n  glm-4-plus:\n    factor: 0.8', createdAt: '2026-06-01 10:00:00' },
           { version: 'v2.1', yaml: '# vTPM 折算系数 v2.1\nmodels:\n  glm-4:\n    factor: 0.75\n  glm-4-plus:\n    factor: 0.85\n  glm-4-flash:\n    factor: 0.3', createdAt: '2026-07-01 10:00:00' }
         ]},
-        slo: { name: 'slo-rule-95', sku: 'maas-vtpm-chat-pro', versions: [
+        slo: { name: 'slo-rule-95', sku: 'maas-product-vtpm-pro', versions: [
           { version: 'v5.2', yaml: '# SLO赔付规则 v5.2\nslo:\n  availability: 99.9%\n  latency_p99: 300ms\ncompensation:\n  breach_1h: 15%\n  breach_4h: 40%\n  breach_24h: 80%', createdAt: '2026-08-01 10:00:00' }
         ]}
       }
@@ -589,8 +663,16 @@
     let currentConfigs = {};
     let currentConfigType = null;
     let configEditMode = null;
-   // 自动标签：取当前商品code
-    function autoTag() { return currentProduct ? currentProduct.code : '—'; }
+   // 自动标签：SKU 类型 + 维度 + 计费项 + 货币单位 + 计费项单位
+    function buildItemTags(cycles, currency, unit) {
+      const tags = [];
+      if (currentProduct) tags.push(currentProduct.type);
+      cycles.forEach(c => tags.push('购买周期:' + c));
+      tags.push('计费项');
+      tags.push(currency);
+      tags.push(unit);
+      return tags;
+    }
 
     // ===== 渲染 =====
     function renderListed() {
@@ -615,7 +697,7 @@
    }
     function renderPlan() {
       if (planRows.length === 0) {
-        document.getElementById('plan-tbody').innerHTML = `<tr><td colspan="12" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖计划</td></tr>`;
+        document.getElementById('plan-tbody').innerHTML = `<tr><td colspan="13" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖计划</td></tr>`;
         return;
       }
       document.getElementById('plan-tbody').innerHTML = planRows.map((r, idx) => {
@@ -636,43 +718,58 @@
         }
         return `
           <tr class="hover:bg-slate-50">
-            <td class="px-3 py-2 text-xs">${r.stepQty}</td>
-            <td class="px-3 py-2 text-xs">${r.stepCycle} 天</td>
+            <td class="px-3 py-2 text-xs">${(r.items || []).map(c => `<div class="font-mono">${c}</div>`).join('')}</td>
             <td class="px-3 py-2 text-xs">${r.factor}</td>
             <td class="px-3 py-2 text-xs">${r.slo}</td>
-            <td class="px-3 py-2 text-xs"><div class="font-mono">${r.itemCode}</div><div class="text-slate-500 mt-0.5">${r.itemName}</div></td>
-            <td class="px-3 py-2 text-right font-mono text-xs">${(r.itemPrice || 0).toFixed(4)}</td>
-            <td class="px-3 py-2 text-right font-mono text-xs">${(r.itemFloor || 0).toFixed(4)}</td>
-            <td class="px-3 py-2 text-xs">${r.start}</td>
-            <td class="px-3 py-2 text-xs">${r.end}</td>
+            <td class="px-3 py-2 text-xs font-mono">${r.payloadId}</td>
+            <td class="px-3 py-2 text-xs">${r.minQty}</td>
+            <td class="px-3 py-2 text-xs">${r.stepQty}</td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap">${r.sellStart}</td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap">${r.sellEnd}</td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap">${r.effStart}</td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap">${r.effEnd}</td>
             <td class="px-3 py-2 text-xs">${r.priority}</td>
             <td class="px-3 py-2">${badge}</td>
             <td class="px-3 py-2 whitespace-nowrap">${action}</td>
           </tr>`;
       }).join('');
     }
+    // 上架项状态：未显式标记时，跟随商品生命周期
+    function itemStatusOf(b) {
+      const isPublished = currentProduct && currentProduct.lifeStatus === '售卖中';
+      return b.itemStatus || (isPublished ? '已上架' : '待上架');
+    }
     function renderBilling() {
       const isPublished = currentProduct && currentProduct.lifeStatus === '售卖中';
+      if (billingItems.length === 0) {
+        document.getElementById('billing-tbody').innerHTML = `<tr><td colspan="16" class="px-3 py-8 text-center text-xs text-slate-400">暂无上架项，可发起变更后点击「新增上架项」创建</td></tr>`;
+        return;
+      }
       document.getElementById('billing-tbody').innerHTML = billingItems.map(b => {
-        const st = b.itemStatus || (isPublished ? '生效中' : '待上架');
-        const stCls = st === '生效中' ? 'bg-green-100 text-green-700' : st === '已禁用' ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-700';
-        // 编辑状态下，生效中的计费项可禁用；已禁用的可启用
+        const st = itemStatusOf(b);
+        const stCls = st === '已上架' ? 'bg-green-100 text-green-700' : st === '已禁用' ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-700';
+        // 编辑状态下，已上架的上架项可禁用；已禁用的可启用
         let actionBtn = '';
         if (changeMode && isPublished) {
-          if (st === '生效中') actionBtn = `<button onclick="disableItem('${b.code}')" class="text-red-600 hover:underline text-xs">禁用</button>`;
+          if (st === '已上架') actionBtn = `<button onclick="disableItem('${b.code}')" class="text-red-600 hover:underline text-xs">禁用</button>`;
           else if (st === '已禁用') actionBtn = `<button onclick="enableItem('${b.code}')" class="text-green-600 hover:underline text-xs">启用</button>`;
         }
         return `
         <tr class="hover:bg-slate-50 ${st === '已禁用' ? 'opacity-50' : ''}">
+          <td class="px-3 py-2 text-xs font-mono">${b.fn}</td>
+          <td class="px-3 py-2 text-xs whitespace-nowrap">${(b.dims || []).map(d => `<span class="badge bg-violet-50 text-violet-700 mr-1 mb-0.5">${d}</span>`).join('')}</td>
           <td class="px-3 py-2 font-mono text-xs">${b.code}</td>
-          <td class="px-3 py-2">${b.name}</td>
+          <td class="px-3 py-2 text-xs">${b.name}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${b.price.toFixed(4)}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${b.floor.toFixed(4)}</td>
           <td class="px-3 py-2 text-xs">${b.unit}</td>
          <td class="px-3 py-2 text-xs">${b.currency}</td>
-          <td class="px-3 py-2 text-xs text-slate-300">—</td>
-          <td class="px-3 py-2 text-xs text-slate-300">—</td>
-         <td class="px-3 py-2 text-xs"><span class="badge bg-slate-100 text-slate-600 font-mono">${autoTag()}</span></td>
+          <td class="px-3 py-2 text-xs">${b.factor}</td>
+          <td class="px-3 py-2 text-xs">${b.slo}</td>
+          <td class="px-3 py-2 text-xs font-mono">${b.payloadId}</td>
+          <td class="px-3 py-2 text-xs">${b.minQty}</td>
+          <td class="px-3 py-2 text-xs">${b.stepQty}</td>
+          <td class="px-3 py-2 text-xs"><div class="flex flex-wrap gap-1">${(b.tags || []).map(t => `<span class="badge bg-slate-100 text-slate-600 font-mono">${t}</span>`).join('')}</div></td>
           <td class="px-3 py-2"><span class="badge ${stCls}">${st}</span></td>
           <td class="px-3 py-2 whitespace-nowrap">${actionBtn || '—'}</td>
         </tr>`;
@@ -683,9 +780,9 @@
     function openProductModal() { openModal('product'); }
     function submitProduct() {
      currentProduct = {
-       code: (document.getElementById('inp-code').value || 'maas-vtpm-chat-pre').trim(),
+       code: (document.getElementById('inp-code').value || 'maas-product-vtpm-pre').trim(),
        name: (document.getElementById('inp-name').value || 'vTPM 预留资源包（预）').trim(),
-       type: 'maas-vtpm-chat',
+       type: 'maas-product-vtpm',
        lifeStatus: '待上架'
      };
       currentConfigs = {};
@@ -763,7 +860,7 @@
     }
     function enableItem(code) {
       const b = billingItems.find(x => x.code === code);
-      if (b) b.itemStatus = '生效中';
+      if (b) b.itemStatus = '已上架';
       renderBilling();
     }
 
@@ -778,18 +875,35 @@
       return map[st] || map.pending_publish;
     }
     function openPlanCreateModal() {
-     const sel = document.getElementById('plan-item');
-     const items = [...new Map([
-       ...billingItems.map(b => [b.code, b.name]),
-       ...pendingItems.map(i => [i.itemId, i.skuName])
-     ]).entries()];
-     sel.innerHTML = items.map(([c, n]) => `<option value="${c}">${c} - ${n}</option>`).join('');
-     document.getElementById('plan-step-qty').value = '';
-     document.getElementById('plan-step-cycle').value = '';
+      renderPlanItemCheckboxes();
       renderPlanConfigSelector('factor');
       renderPlanConfigSelector('slo');
-     openModal('plan-create');
-   }
+      document.getElementById('plan-min-qty').value = '';
+      document.getElementById('plan-step-qty').value = '';
+      openModal('plan-create');
+    }
+    // 售卖计划：上架项多选（默认勾选全部已上架状态）
+    function renderPlanItemCheckboxes() {
+      const box = document.getElementById('plan-items-container');
+      if (billingItems.length === 0) {
+        box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>暂无上架项，请先在「商品上架情况」中创建</p>';
+        return;
+      }
+      box.innerHTML = billingItems.map((b, idx) => {
+        const st = itemStatusOf(b);
+        const checked = st === '已上架' ? 'checked' : '';
+        const disabled = st === '已禁用' ? 'disabled' : '';
+        return `
+          <label class="flex items-start gap-2 text-xs ${st === '已禁用' ? 'opacity-50' : ''}">
+            <input type="checkbox" class="plan-item-check mt-0.5" value="${idx}" ${checked} ${disabled} style="accent-color:#7C3AED">
+            <span>
+              <span class="font-mono">${b.code}</span>
+              <span class="text-slate-400 mx-1">·</span><span class="text-slate-600">${(b.dims || []).join(' + ')}</span>
+              <span class="badge bg-slate-100 text-slate-500 ml-1">${st}</span>
+            </span>
+          </label>`;
+      }).join('');
+    }
 
     function renderPlanConfigSelector(type) {
       const container = document.getElementById('plan-' + type + '-container');
@@ -812,23 +926,24 @@
           </div>`;
       }
     }
+    function fmtDt(id, def) { return (document.getElementById(id).value || def).replace('T', ' '); }
     function confirmPlanCreate() {
-     const qty = (document.getElementById('plan-step-qty').value || '100').trim();
-     const cycle = (document.getElementById('plan-step-cycle').value || '30').trim();
+      const checkedIdx = Array.from(document.querySelectorAll('.plan-item-check')).filter(c => c.checked).map(c => parseInt(c.value));
+      const items = checkedIdx.map(i => billingItems[i]).filter(Boolean).map(b => b.code);
+      if (items.length === 0) { alert('请至少选择一个上架项'); return; }
       const factorEl = document.getElementById('plan-factor');
       const sloEl = document.getElementById('plan-slo');
       const factor = factorEl ? factorEl.value : '未关联';
       const slo = sloEl ? sloEl.value : '未关联';
-     const itemSel = document.getElementById('plan-item');
-      const itemCode = itemSel.value || '未选择';
-      const itemName = itemSel.selectedIndex >= 0 ? (itemSel.options[itemSel.selectedIndex].text.split(' - ')[1] || itemCode) : itemCode;
-      const start = (document.getElementById('plan-start').value || '2026-10-01T00:00:00').replace('T', ' ');
-      const end = (document.getElementById('plan-end').value || '2026-12-31T23:59:59').replace('T', ' ');
+      const payloadId = document.getElementById('plan-payload').value;
+      const minQty = (document.getElementById('plan-min-qty').value || '100').trim();
+      const stepQty = (document.getElementById('plan-step-qty').value || '100').trim();
+      const sellStart = fmtDt('plan-sell-start', '2026-10-01T00:00:00');
+      const sellEnd = fmtDt('plan-sell-end', '2026-12-31T23:59:59');
+      const effStart = fmtDt('plan-eff-start', '2026-11-01T00:00:00');
+      const effEnd = fmtDt('plan-eff-end', '2027-11-01T00:00:00');
       const priority = parseInt(document.getElementById('plan-priority').value) || 0;
-      const itemObj = billingItems.find(b => b.code === itemCode) || pendingItems.find(i => i.itemId === itemCode);
-      const itemPrice = itemObj ? itemObj.price : 0;
-      const itemFloor = itemObj ? itemObj.floor : 0;
-      planRows.push({ stepQty: qty, stepCycle: cycle, factor, slo, itemCode, itemName, itemPrice, itemFloor, start, end, priority });
+      planRows.push({ items, factor, slo, payloadId, minQty, stepQty, sellStart, sellEnd, effStart, effEnd, priority });
       planRowStatuses.push('pending_publish');
       closeModal('plan-create');
       renderPlan();
@@ -847,22 +962,70 @@
      showDetailView();
    }
 
-    // ===== 计费项创建弹窗（新增计费项即新增上架，标签自动关联） =====
+    // ===== 创建上架项弹窗（维度组合 + 关联计费项创建 + 配置关联，标签自动关联） =====
+    function selectedCycles() {
+      return Array.from(document.querySelectorAll('.dim-cycle')).filter(c => c.checked).map(c => c.value);
+    }
+    // 自动生成：计费项code（SKU + 维度）、名称（默认与code一致）、标签
+    function updateItemAutogen() {
+      const cycles = selectedCycles();
+      const suffix = cycles.length ? '.' + cycles.map(c => c.replace('天', 'd')).join('-') : '';
+      const skuSlug = currentProduct ? currentProduct.code : 'maas-product-vtpm';
+      const code = skuSlug + suffix;
+      document.getElementById('item-code').value = code;
+      document.getElementById('item-name').value = code;
+      const currency = document.getElementById('item-currency').value;
+      const unit = document.getElementById('item-unit').value;
+      document.getElementById('item-tags-preview').innerHTML = buildItemTags(cycles, currency, unit)
+        .map(t => `<span class="badge bg-slate-100 text-slate-600 font-mono">${t}</span>`).join('');
+    }
+    function renderItemConfigSelector(type) {
+      const container = document.getElementById('item-' + type + '-container');
+      const config = currentConfigs[type];
+      const label = type === 'factor' ? 'vTPM折算系数' : 'SLO赔付规则';
+      if (!config || !config.versions || config.versions.length === 0) {
+        container.innerHTML = `<select id="item-${type}" class="form-input" disabled><option>尚未创建${label}配置</option></select>`;
+      } else {
+        container.innerHTML = `<select id="item-${type}" class="form-input">${config.versions.map(v => `<option value="${config.name} ${v.version}">${config.name} ${v.version}</option>`).join('')}</select>`;
+      }
+    }
     function openCreateItemModal() {
-      document.getElementById('item-tag').value = autoTag();
+      document.querySelectorAll('.dim-cycle').forEach(c => c.checked = c.value === '30天');
+      document.getElementById('item-price').value = '';
+      document.getElementById('item-min-qty').value = '';
+      document.getElementById('item-step-qty').value = '';
+      document.getElementById('item-payload').innerHTML = payloadOptions.map(p => `<option>${p}</option>`).join('');
+      renderItemConfigSelector('factor');
+      renderItemConfigSelector('slo');
+      updateItemAutogen();
       openModal('create-item');
     }
     function confirmCreateItem() {
-      const code = (document.getElementById('item-code').value || 'vtpm.input.new').trim();
-      const name = (document.getElementById('item-name').value || '输入实时价（新）').trim();
+      const cycles = selectedCycles();
+      if (cycles.length === 0) { alert('请至少勾选一个购买周期维度'); return; }
+      const code = (document.getElementById('item-code').value || '').trim() || 'maas-product-vtpm.new';
+      const name = (document.getElementById('item-name').value || code).trim();
       const price = parseFloat(document.getElementById('item-price').value) || 0.008;
+      const unit = document.getElementById('item-unit').value;
       const currency = document.getElementById('item-currency').value;
+      const factorEl = document.getElementById('item-factor');
+      const sloEl = document.getElementById('item-slo');
+      const factor = (factorEl && !factorEl.disabled) ? factorEl.value : '未关联';
+      const slo = (sloEl && !sloEl.disabled) ? sloEl.value : '未关联';
+      const payloadId = document.getElementById('item-payload').value;
+      const minQty = parseInt(document.getElementById('item-min-qty').value) || 100;
+      const stepQty = parseInt(document.getElementById('item-step-qty').value) || 100;
       const floor = +(price * 0.95).toFixed(4);
-      billingItems.push({ code, name, price, floor, unit: '份', currency });
-      pendingItems.push({ skuid: 'SKU-' + (2000 + pendingItems.length + 1), skuName: name, fn: 'chat', dim: 'vtpm', itemId: code, unit: '份', price, floor, def: '新增计费项' });
+      billingItems.push({
+        fn: 'chat',
+        dims: cycles.map(c => '购买周期:' + c),
+        code, name, price, floor, unit, currency,
+        factor, slo, payloadId, minQty, stepQty,
+        tags: buildItemTags(cycles, currency, unit),
+        itemStatus: '待上架'
+      });
       closeModal('create-item');
       renderBilling();
-      renderPending();
     }
 
     // ===== 配置管理（折算系数 / SLO赔付规则） =====
