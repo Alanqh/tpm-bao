@@ -301,9 +301,7 @@
               <p class="text-sm font-semibold text-slate-900">计费项</p>
               <div class="flex flex-wrap items-center gap-2 text-xs">
                 <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间（默认在售）</span>
-                <input id="tf-start" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-52">
-                <span class="text-slate-400">~</span>
-                <input id="tf-end" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-52">
+                <input id="tf-point" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-56">
                 <button type="button" onclick="querySaleParams()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-magnifying-glass mr-1"></i>查询</button>
                 <button type="button" onclick="resetSaleParams()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">重置</button>
               </div>
@@ -475,38 +473,14 @@
             </div>
           </div>
         </div>
-        <!-- 关联计费项（单选 + 去创建） -->
+        <!-- 关联计费项（单选 + 去创建）：折算系数/SLO/payloadId/最小购买量/购买量step 均在创建计费项时完成，上架项经引用计费项继承 -->
         <div>
           <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">关联计费项（单选）</p>
           <div class="flex items-center gap-2">
             <select id="item-billing" class="form-input flex-1" onchange="updateItemAutogen()"></select>
             <button type="button" onclick="openCreateBillingModal()" class="admin-btn-primary text-xs px-3 py-2 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
           </div>
-        </div>
-        <!-- 关联配置 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label class="form-label">关联vTPM折算系数配置</label>
-            <div id="item-factor-container"></div>
-          </div>
-          <div>
-            <label class="form-label">关联SLO配置</label>
-            <div id="item-slo-container"></div>
-          </div>
-          <div>
-            <label class="form-label">关联payloadId</label>
-            <select id="item-payload" class="form-input"><option>payload-vtpm-001</option><option>payload-vtpm-002</option><option>payload-vtpm-003</option></select>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="form-label">最小购买量（万 vTPM）</label>
-              <input id="item-min-qty" type="number" class="form-input" placeholder="如 100">
-            </div>
-            <div>
-              <label class="form-label">购买量step（万 vTPM）</label>
-              <input id="item-step-qty" type="number" class="form-input" placeholder="如 100">
-            </div>
-          </div>
+          <p class="text-[10px] text-slate-400 mt-1">折算系数 / SLO / payloadId / 最小购买量 / 购买量step 在创建计费项时配置，上架项引用计费项后自动继承。</p>
         </div>
         <div>
           <label class="form-label">标签（自动关联）</label>
@@ -548,6 +522,31 @@
         <div>
           <label class="form-label">货币单位</label>
           <select id="billing-currency" class="form-input" onchange="updateBillingAutogen()"><option>元</option><option>美元</option></select>
+        </div>
+        <!-- 售卖参数配置（在创建计费项时完成） -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">关联vTPM折算系数配置（版本）</label>
+            <div id="billing-factor-container"></div>
+          </div>
+          <div>
+            <label class="form-label">关联SLO配置（版本）</label>
+            <div id="billing-slo-container"></div>
+          </div>
+          <div>
+            <label class="form-label">关联payloadId</label>
+            <select id="billing-payload" class="form-input"><option>payload-vtpm-001</option><option>payload-vtpm-002</option><option>payload-vtpm-003</option></select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="form-label">最小购买量（万 vTPM）</label>
+              <input id="billing-min-qty" type="number" class="form-input" placeholder="如 100">
+            </div>
+            <div>
+              <label class="form-label">购买量step（万 vTPM）</label>
+              <input id="billing-step-qty" type="number" class="form-input" placeholder="如 100">
+            </div>
+          </div>
         </div>
         <div>
           <label class="form-label">标签（自动关联）</label>
@@ -669,16 +668,16 @@
     let planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
     // 计费项池（由「创建计费项」弹窗维护，上架项关联引用）
     const defaultChargeItems = [
-      { id: 27291, code: 'maas-product-vtpm-pre.30d', name: 'maas-product-vtpm-pre.30d', price: 0.0084, floor: 0.0079, unit: '万 vTPM', currency: '元' },
-      { id: 27292, code: 'maas-product-vtpm-pre.60d', name: 'maas-product-vtpm-pre.60d', price: 0.0077, floor: 0.0072, unit: '万 vTPM', currency: '元' },
-      { id: 27293, code: 'maas-product-vtpm-pre.90d', name: 'maas-product-vtpm-pre.90d', price: 0.0075, floor: 0.0071, unit: '万 vTPM', currency: '美元' }
+      { id: 27291, code: 'maas-product-vtpm-pre.30d', name: 'maas-product-vtpm-pre.30d', price: 0.0084, floor: 0.0079, unit: '万 vTPM', currency: '元', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-001', minQty: 100, stepQty: 100 },
+      { id: 27292, code: 'maas-product-vtpm-pre.60d', name: 'maas-product-vtpm-pre.60d', price: 0.0077, floor: 0.0072, unit: '万 vTPM', currency: '元', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-002', minQty: 100, stepQty: 500 },
+      { id: 27293, code: 'maas-product-vtpm-pre.90d', name: 'maas-product-vtpm-pre.90d', price: 0.0075, floor: 0.0071, unit: '万 vTPM', currency: '美元', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-003', minQty: 1000, stepQty: 1000 }
     ];
     let chargeItems = JSON.parse(JSON.stringify(defaultChargeItems));
-    // 默认上架项数据（售卖维度单选；关联计费项；function 一期为 null，展示为 —）
+    // 默认上架项数据（售卖维度单选；引用计费项继承折算系数/SLO/payloadId/最小购买量/购买量step；function 一期为 null，展示为 —）
     const defaultBillingItems = [
-      { fn: null, dim: '购买周期:30天', itemCode: 'maas-product-vtpm-pre.30d', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-001', minQty: 100, stepQty: 100, tags: ['maas-product-vtpm', '购买周期:30天', '计费项', '元', '万 vTPM'] },
-      { fn: null, dim: '购买周期:60天', itemCode: 'maas-product-vtpm-pre.60d', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-002', minQty: 100, stepQty: 500, tags: ['maas-product-vtpm', '购买周期:60天', '计费项', '元', '万 vTPM'] },
-      { fn: null, dim: '购买周期:90天', itemCode: 'maas-product-vtpm-pre.90d', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-003', minQty: 1000, stepQty: 1000, tags: ['maas-product-vtpm', '购买周期:90天', '计费项', '美元', '万 vTPM'] }
+      { fn: null, dim: '购买周期:30天', itemCode: 'maas-product-vtpm-pre.30d', tags: ['maas-product-vtpm', '购买周期:30天', '计费项', '元', '万 vTPM'] },
+      { fn: null, dim: '购买周期:60天', itemCode: 'maas-product-vtpm-pre.60d', tags: ['maas-product-vtpm', '购买周期:60天', '计费项', '元', '万 vTPM'] },
+      { fn: null, dim: '购买周期:90天', itemCode: 'maas-product-vtpm-pre.90d', tags: ['maas-product-vtpm', '购买周期:90天', '计费项', '美元', '万 vTPM'] }
     ];
     let billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
     let changeMode = false;
@@ -785,16 +784,14 @@
     // ===== 时间筛选器：查询指定时间的售卖参数 =====
     let timeFilter = null; // { start, end } 或 null（默认：展示在售价格，与刊例价一致）
     function querySaleParams() {
-      const s = (document.getElementById('tf-start').value || '').replace('T', ' ');
-      const e = (document.getElementById('tf-end').value || '').replace('T', ' ');
-      if (!s && !e) { alert('请先选择开始或结束时间'); return; }
-      timeFilter = { start: s, end: e };
+      const p = (document.getElementById('tf-point').value || '').replace('T', ' ');
+      if (!p) { alert('请先选择一个时间节点'); return; }
+      timeFilter = { point: p };
       renderBilling();
     }
     function resetSaleParams() {
       timeFilter = null;
-      document.getElementById('tf-start').value = '';
-      document.getElementById('tf-end').value = '';
+      document.getElementById('tf-point').value = '';
       renderBilling();
     }
     // 上架项的售卖期：取关联售卖计划的售卖时间；无计划时用默认 mock 期
@@ -822,14 +819,12 @@
         const st = itemStatusOf(b);
         const stCls = st === '已上架' ? 'bg-green-100 text-green-700' : st === '已禁用' ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-700';
         const charge = chargeItems.find(c => c.code === b.itemCode) || {};
-        // 时间筛选：默认（未筛选）展示在售价格（=刊例价）；筛选后仅售卖期覆盖所选时间的上架项显示价格
+        // 时间筛选：默认（未筛选）展示在售价格（=刊例价）；筛选后仅当所选时间节点落在售卖期内时显示价格
         let tfPrice = (charge.price || 0).toFixed(4);
         let tfExec = (charge.price || 0).toFixed(4);
         if (timeFilter) {
           const w = saleWindowOf(b);
-          const s = timeFilter.start || w.start;
-          const e = timeFilter.end || w.end;
-          const onSale = s <= w.end && e >= w.start; // 时间段与售卖期有交集即在售
+          const onSale = timeFilter.point >= w.start && timeFilter.point <= w.end;
           tfPrice = onSale ? (charge.price || 0).toFixed(4) : '—';
           tfExec = onSale ? (charge.price || 0).toFixed(4) : '—';
         }
@@ -850,11 +845,11 @@
           <td class="px-3 py-2 text-right font-mono text-xs">${tfPrice}</td>
           <td class="px-3 py-2 text-right font-mono text-xs" title="预留资源包售卖期内按刊例价执行">${tfExec}</td>
           <td class="px-3 py-2 text-xs">${charge.unit || '万 vTPM'}</td>
-          <td class="px-3 py-2 text-xs">${b.factor}</td>
-          <td class="px-3 py-2 text-xs">${b.slo}</td>
-          <td class="px-3 py-2 text-xs font-mono">${b.payloadId}</td>
-          <td class="px-3 py-2 text-xs">${b.minQty}</td>
-          <td class="px-3 py-2 text-xs">${b.stepQty}</td>
+          <td class="px-3 py-2 text-xs">${charge.factor || '—'}</td>
+          <td class="px-3 py-2 text-xs">${charge.slo || '—'}</td>
+          <td class="px-3 py-2 text-xs font-mono">${charge.payloadId || '—'}</td>
+          <td class="px-3 py-2 text-xs">${charge.minQty || '—'}</td>
+          <td class="px-3 py-2 text-xs">${charge.stepQty || '—'}</td>
           <td class="px-3 py-2"><span class="badge ${stCls}">${st}</span></td>
           <td class="px-3 py-2 whitespace-nowrap">${actionBtn || '—'}</td>
         </tr>`;
@@ -1060,14 +1055,16 @@
       document.getElementById('item-tags-preview').innerHTML = buildItemTags(cycle, charge)
         .map(t => `<span class="badge bg-slate-100 text-slate-600 font-mono">${t}</span>`).join('');
     }
-    function renderItemConfigSelector(type) {
-      const container = document.getElementById('item-' + type + '-container');
+    // prefix: 'item'（上架项，已弃用配置项）或 'billing'（计费项）
+    function renderItemConfigSelector(type, prefix) {
+      const container = document.getElementById(prefix + '-' + type + '-container');
+      if (!container) return;
       const config = currentConfigs[type];
       const label = type === 'factor' ? 'vTPM折算系数' : 'SLO赔付规则';
       if (!config || !config.versions || config.versions.length === 0) {
-        container.innerHTML = `<select id="item-${type}" class="form-input" disabled><option>尚未创建${label}配置</option></select>`;
+        container.innerHTML = `<select id="${prefix}-${type}" class="form-input" disabled><option>尚未创建${label}配置</option></select>`;
       } else {
-        container.innerHTML = `<select id="item-${type}" class="form-input">${config.versions.map(v => `<option value="${config.name} ${v.version}">${config.name} ${v.version}</option>`).join('')}</select>`;
+        container.innerHTML = `<select id="${prefix}-${type}" class="form-input">${config.versions.map(v => `<option value="${config.name} ${v.version}">${config.name} ${v.version}</option>`).join('')}</select>`;
       }
     }
     // 关联计费项下拉：单选；无计费项时提示去创建
@@ -1085,12 +1082,7 @@
     }
     function openCreateItemModal() {
       document.querySelectorAll('.dim-cycle').forEach(r => r.checked = r.value === '30天');
-      document.getElementById('item-min-qty').value = '';
-      document.getElementById('item-step-qty').value = '';
-      document.getElementById('item-payload').innerHTML = payloadOptions.map(p => `<option>${p}</option>`).join('');
       refreshItemBillingSelect();
-      renderItemConfigSelector('factor');
-      renderItemConfigSelector('slo');
       updateItemAutogen();
       openModal('create-item');
     }
@@ -1100,19 +1092,12 @@
       const sel = document.getElementById('item-billing');
       const itemCode = sel && sel.value ? sel.value : '';
       if (!itemCode || !chargeItems.some(c => c.code === itemCode)) { alert('请先关联一个计费项（可点击「去创建」新建）'); return; }
-      const factorEl = document.getElementById('item-factor');
-      const sloEl = document.getElementById('item-slo');
-      const factor = (factorEl && !factorEl.disabled) ? factorEl.value : '未关联';
-      const slo = (sloEl && !sloEl.disabled) ? sloEl.value : '未关联';
-      const payloadId = document.getElementById('item-payload').value;
-      const minQty = parseInt(document.getElementById('item-min-qty').value) || 100;
-      const stepQty = parseInt(document.getElementById('item-step-qty').value) || 100;
       const charge = chargeItems.find(c => c.code === itemCode);
+      // 折算系数/SLO/payloadId/最小购买量/购买量step 均在创建计费项时配置，上架项引用计费项后继承
       billingItems.push({
         fn: null,
         dim: '购买周期:' + cycle,
         itemCode,
-        factor, slo, payloadId, minQty, stepQty,
         tags: buildItemTags(cycle, charge),
         itemStatus: '待上架'
       });
@@ -1137,6 +1122,11 @@
       document.getElementById('billing-code').value = code;
       document.getElementById('billing-name').value = code;
       document.getElementById('billing-price').value = '';
+      document.getElementById('billing-min-qty').value = '';
+      document.getElementById('billing-step-qty').value = '';
+      document.getElementById('billing-payload').innerHTML = payloadOptions.map(p => `<option>${p}</option>`).join('');
+      renderItemConfigSelector('factor', 'billing');
+      renderItemConfigSelector('slo', 'billing');
       updateBillingAutogen();
       openModal('create-billing');
     }
@@ -1147,10 +1137,17 @@
       const unit = document.getElementById('billing-unit').value;
       const currency = document.getElementById('billing-currency').value;
       if (chargeItems.some(c => c.code === code)) { alert('计费项code已存在：' + code); return; }
+      const factorEl = document.getElementById('billing-factor');
+      const sloEl = document.getElementById('billing-slo');
+      const factor = (factorEl && !factorEl.disabled) ? factorEl.value : '未关联';
+      const slo = (sloEl && !sloEl.disabled) ? sloEl.value : '未关联';
+      const payloadId = document.getElementById('billing-payload').value;
+      const minQty = parseInt(document.getElementById('billing-min-qty').value) || 100;
+      const stepQty = parseInt(document.getElementById('billing-step-qty').value) || 100;
       const floor = +(price * 0.95).toFixed(4);
       const tags = buildItemTags(selectedCycle(), { currency, unit });
       const id = chargeItems.reduce((m, c) => Math.max(m, c.id || 0), 27290) + 1;
-      chargeItems.push({ id, code, name, price, floor, unit, currency, tags });
+      chargeItems.push({ id, code, name, price, floor, unit, currency, factor, slo, payloadId, minQty, stepQty, tags });
       closeModal('create-billing');
       // 创建后自动选中新计费项，并联动标签
       refreshItemBillingSelect(code);
