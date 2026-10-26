@@ -397,7 +397,7 @@
          <label class="form-label">关联SLO赔付规则配置（版本）</label>
           <div id="plan-slo-container"></div>
        </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 gap-3">
           <div>
             <label class="form-label">关联payloadId</label>
             <select id="plan-payload" class="form-input"><option>payload-vtpm-001</option><option>payload-vtpm-002</option><option>payload-vtpm-003</option></select>
@@ -407,7 +407,7 @@
             <select id="plan-priority" class="form-input"><option value="0">0</option><option value="100">100</option><option value="200">200</option><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option><option value="900">900</option><option value="1000">1000</option></select>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 gap-3">
           <div>
             <label class="form-label">最小购买量（万 vTPM）</label>
             <input id="plan-min-qty" type="number" class="form-input" placeholder="如 100">
@@ -417,7 +417,7 @@
             <input id="plan-step-qty" type="number" class="form-input" placeholder="如 100">
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 gap-3">
           <div>
             <label class="form-label">开始售卖时间</label>
             <input id="plan-sell-start" type="datetime-local" step="1" class="form-input" value="2026-10-01T00:00:00">
@@ -427,7 +427,7 @@
             <input id="plan-sell-end" type="datetime-local" step="1" class="form-input" value="2026-12-31T23:59:59">
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 gap-3">
           <div>
             <label class="form-label">开始生效时间</label>
             <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00">
@@ -456,7 +456,7 @@
         <!-- 售卖维度（单选） -->
         <div>
           <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">售卖维度（单选）</p>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 gap-3">
             <div>
               <label class="form-label">维度1：购买量区间（一期不配置）</label>
               <select class="form-input bg-slate-50 text-slate-500" disabled>
@@ -524,7 +524,7 @@
           <select id="billing-currency" class="form-input" onchange="updateBillingAutogen()"><option>元</option><option>美元</option></select>
         </div>
         <!-- 售卖参数配置（在创建计费项时完成） -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 gap-3">
           <div>
             <label class="form-label">关联vTPM折算系数配置（版本）</label>
             <div id="billing-factor-container"></div>
@@ -537,7 +537,7 @@
             <label class="form-label">关联payloadId</label>
             <select id="billing-payload" class="form-input"><option>payload-vtpm-001</option><option>payload-vtpm-002</option><option>payload-vtpm-003</option></select>
           </div>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 gap-3">
             <div>
               <label class="form-label">最小购买量（万 vTPM）</label>
               <input id="billing-min-qty" type="number" class="form-input" placeholder="如 100">
