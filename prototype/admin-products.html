@@ -433,7 +433,7 @@
     </div>
   </div>
 
-  <!-- Modal: 创建上架项（维度组合 + 关联计费项创建） -->
+  <!-- Modal: 创建上架项（维度单选 + 关联计费项单选/去创建） -->
   <div id="modal-create-item" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-900/50 p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
@@ -441,9 +441,9 @@
         <button type="button" onclick="closeModal('create-item')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 grid grid-cols-1 gap-4">
-        <!-- 售卖维度 -->
+        <!-- 售卖维度（单选） -->
         <div>
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">售卖维度（多维度值组合）</p>
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">售卖维度（单选）</p>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label class="form-label">维度1：购买量区间（一期不配置）</label>
@@ -454,37 +454,19 @@
             <div>
               <label class="form-label">维度2：购买周期（时长不同，单价不同）</label>
               <div class="flex items-center gap-4 pt-1.5">
-                <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="checkbox" class="dim-cycle" value="30天" checked onchange="updateItemAutogen()" style="accent-color:#7C3AED"> 30天</label>
-                <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="checkbox" class="dim-cycle" value="60天" onchange="updateItemAutogen()" style="accent-color:#7C3AED"> 60天</label>
-                <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="checkbox" class="dim-cycle" value="90天" onchange="updateItemAutogen()" style="accent-color:#7C3AED"> 90天</label>
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="dim-cycle" class="dim-cycle" value="30天" checked onchange="updateItemAutogen()" style="accent-color:#7C3AED"> 30天</label>
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="dim-cycle" class="dim-cycle" value="60天" onchange="updateItemAutogen()" style="accent-color:#7C3AED"> 60天</label>
+                <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="radio" name="dim-cycle" class="dim-cycle" value="90天" onchange="updateItemAutogen()" style="accent-color:#7C3AED"> 90天</label>
               </div>
             </div>
           </div>
         </div>
-        <!-- 关联计费项（创建） -->
+        <!-- 关联计费项（单选 + 去创建） -->
         <div>
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">关联计费项（创建）</p>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="form-label">计费项code（自动根据 SKU 名称 + 维度生成默认code）</label>
-              <input id="item-code" class="form-input font-mono" placeholder="根据 SKU + 维度自动生成">
-            </div>
-            <div>
-              <label class="form-label">名称（默认与code一致）</label>
-              <input id="item-name" class="form-input">
-            </div>
-            <div>
-              <label class="form-label">刊例价（指定购买量区间、购买周期下 1 个计费项单位的价格）</label>
-              <input id="item-price" type="number" step="0.0001" class="form-input" placeholder="0.008">
-            </div>
-            <div>
-              <label class="form-label">计费项单位（与 vTPM 换算比例 1:10000）</label>
-              <select id="item-unit" class="form-input" onchange="updateItemAutogen()"><option>万 vTPM</option></select>
-            </div>
-            <div>
-              <label class="form-label">货币单位</label>
-              <select id="item-currency" class="form-input" onchange="updateItemAutogen()"><option>元</option><option>美元</option></select>
-            </div>
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">关联计费项（单选）</p>
+          <div class="flex items-center gap-2">
+            <select id="item-billing" class="form-input flex-1" onchange="updateItemAutogen()"></select>
+            <button type="button" onclick="openCreateBillingModal()" class="admin-btn-primary text-xs px-3 py-2 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
           </div>
         </div>
         <!-- 关联配置 -->
@@ -515,12 +497,53 @@
         <div>
           <label class="form-label">标签（自动关联）</label>
           <div id="item-tags-preview" class="border border-slate-200 rounded-md p-2 bg-slate-50 min-h-[2.5rem] flex flex-wrap gap-1 items-center"></div>
-          <p class="text-[10px] text-slate-400 mt-1">自动包含：SKU 类型标签、维度标签、「计费项」标签、货币单位、计费项单位</p>
+          <p class="text-[10px] text-slate-400 mt-1">自动包含：SKU 类型标签、维度标签、「计费项」标签、货币单位、计费项单位（取自关联计费项）</p>
         </div>
       </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
         <button type="button" onclick="closeModal('create-item')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
         <button type="button" onclick="confirmCreateItem()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: 创建计费项（由创建上架项的「去创建」快捷按钮打开） -->
+  <div id="modal-create-billing" class="hidden fixed inset-0 z-[70] items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <h3 class="text-sm font-semibold text-slate-900">创建计费项</h3>
+        <button type="button" onclick="closeModal('create-billing')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5 grid grid-cols-1 gap-4">
+        <div>
+          <label class="form-label">计费项code（自动根据选中 SKU 名称 + 维度生成默认code）</label>
+          <input id="billing-code" class="form-input font-mono" placeholder="根据 SKU + 当前选中维度自动生成">
+        </div>
+        <div>
+          <label class="form-label">名称（默认与code一致）</label>
+          <input id="billing-name" class="form-input">
+        </div>
+        <div>
+          <label class="form-label">刊例价（指定购买量区间、购买周期下 1 个计费项单位的价格）</label>
+          <input id="billing-price" type="number" step="0.0001" class="form-input" placeholder="0.008">
+        </div>
+        <div>
+          <label class="form-label">计费项单位（与 vTPM 换算比例 1:10000）</label>
+          <select id="billing-unit" class="form-input" onchange="updateBillingAutogen()"><option>万 vTPM</option></select>
+        </div>
+        <div>
+          <label class="form-label">货币单位</label>
+          <select id="billing-currency" class="form-input" onchange="updateBillingAutogen()"><option>元</option><option>美元</option></select>
+        </div>
+        <div>
+          <label class="form-label">标签（自动关联）</label>
+          <div id="billing-tags-preview" class="flex flex-wrap gap-1 p-2 bg-slate-50 rounded-md min-h-[36px]"></div>
+          <p class="text-[10px] text-slate-400 mt-1">自动包含：SKU 类型标签、维度标签、「计费项」标签、货币单位、计费项单位</p>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
+        <button type="button" onclick="closeModal('create-billing')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
+        <button type="button" onclick="confirmCreateBilling()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">创建</button>
       </div>
     </div>
   </div>
@@ -621,20 +644,27 @@
     const payloadOptions = ['payload-vtpm-001', 'payload-vtpm-002', 'payload-vtpm-003'];
     // 当前详情商品占位（新增商品后填充）
     let currentProduct = null;
-    // 默认售卖计划行（items 为选中上架项 code 列表）
+    // 默认售卖计划行（items 为选中上架项关联的计费项code列表）
     const defaultPlanRows = [
       { items: ['maas-product-vtpm-pre.30d'], factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-001', minQty: '100', stepQty: '100', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00', priority: 100 },
-      { items: ['maas-product-vtpm-pre.60d-90d'], factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-002', minQty: '500', stepQty: '500', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00', priority: 200 },
-      { items: ['maas-product-vtpm-pre.range100-1000w.90d', 'maas-product-vtpm-pre.30d'], factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-003', minQty: '1000', stepQty: '1000', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', effStart: '2026-11-01 00:00:00', effEnd: '2028-05-01 00:00:00', priority: 300 }
+      { items: ['maas-product-vtpm-pre.60d'], factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-002', minQty: '500', stepQty: '500', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00', priority: 200 },
+      { items: ['maas-product-vtpm-pre.90d', 'maas-product-vtpm-pre.30d'], factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-003', minQty: '1000', stepQty: '1000', sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', effStart: '2026-11-01 00:00:00', effEnd: '2028-05-01 00:00:00', priority: 300 }
     ];
     let planRows = JSON.parse(JSON.stringify(defaultPlanRows));
     // 状态： pending_publish(待发布) / published(已发布) / stopped(已停用) / expired(已过期)
     let planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
-    // 默认上架项数据（含关联计费项；售卖维度支持多维度值组合）
+    // 计费项池（由「创建计费项」弹窗维护，上架项关联引用）
+    const defaultChargeItems = [
+      { code: 'maas-product-vtpm-pre.30d', name: 'maas-product-vtpm-pre.30d', price: 0.0084, floor: 0.0079, unit: '万 vTPM', currency: '元' },
+      { code: 'maas-product-vtpm-pre.60d', name: 'maas-product-vtpm-pre.60d', price: 0.0077, floor: 0.0072, unit: '万 vTPM', currency: '元' },
+      { code: 'maas-product-vtpm-pre.90d', name: 'maas-product-vtpm-pre.90d', price: 0.0075, floor: 0.0071, unit: '万 vTPM', currency: '美元' }
+    ];
+    let chargeItems = JSON.parse(JSON.stringify(defaultChargeItems));
+    // 默认上架项数据（售卖维度单选；关联计费项；function 一期为 null，展示为 —）
     const defaultBillingItems = [
-      { fn: 'chat', dims: ['购买周期:30天'], code: 'maas-product-vtpm-pre.30d', name: 'maas-product-vtpm-pre.30d', price: 0.0084, floor: 0.0079, unit: '万 vTPM', currency: '元', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-001', minQty: 100, stepQty: 100, tags: ['maas-product-vtpm', 'chat', '购买周期:30天', '计费项', '元', '万 vTPM'] },
-      { fn: 'chat', dims: ['购买周期:60天', '购买周期:90天'], code: 'maas-product-vtpm-pre.60d-90d', name: 'maas-product-vtpm-pre.60d-90d', price: 0.0077, floor: 0.0072, unit: '万 vTPM', currency: '元', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-002', minQty: 100, stepQty: 500, tags: ['maas-product-vtpm', 'chat', '购买周期:60天', '购买周期:90天', '计费项', '元', '万 vTPM'] },
-      { fn: 'chat', dims: ['购买量区间:100-1000万', '购买周期:90天'], code: 'maas-product-vtpm-pre.range100-1000w.90d', name: 'maas-product-vtpm-pre.range100-1000w.90d', price: 0.031, floor: 0.029, unit: '万 vTPM', currency: '美元', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-003', minQty: 1000, stepQty: 1000, tags: ['maas-product-vtpm', 'chat', '购买量区间:100-1000万', '购买周期:90天', '计费项', '美元', '万 vTPM'] }
+      { fn: null, dim: '购买周期:30天', itemCode: 'maas-product-vtpm-pre.30d', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-001', minQty: 100, stepQty: 100, tags: ['maas-product-vtpm', '购买周期:30天', '计费项', '元', '万 vTPM'] },
+      { fn: null, dim: '购买周期:60天', itemCode: 'maas-product-vtpm-pre.60d', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-002', minQty: 100, stepQty: 500, tags: ['maas-product-vtpm', '购买周期:60天', '计费项', '元', '万 vTPM'] },
+      { fn: null, dim: '购买周期:90天', itemCode: 'maas-product-vtpm-pre.90d', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', payloadId: 'payload-vtpm-003', minQty: 1000, stepQty: 1000, tags: ['maas-product-vtpm', '购买周期:90天', '计费项', '美元', '万 vTPM'] }
     ];
     let billingItems = JSON.parse(JSON.stringify(defaultBillingItems));
     let changeMode = false;
@@ -663,14 +693,13 @@
     let currentConfigs = {};
     let currentConfigType = null;
     let configEditMode = null;
-   // 自动标签：SKU 类型 + 维度 + 计费项 + 货币单位 + 计费项单位
-    function buildItemTags(cycles, currency, unit) {
+   // 自动标签：SKU 类型 + 维度 + 计费项 + 货币单位 + 计费项单位（后两项取自关联计费项）
+    function buildItemTags(cycle, charge) {
       const tags = [];
       if (currentProduct) tags.push(currentProduct.type);
-      cycles.forEach(c => tags.push('购买周期:' + c));
+      if (cycle) tags.push('购买周期:' + cycle);
       tags.push('计费项');
-      tags.push(currency);
-      tags.push(unit);
+      if (charge) { tags.push(charge.currency); tags.push(charge.unit); }
       return tags;
     }
 
@@ -745,25 +774,26 @@
         document.getElementById('billing-tbody').innerHTML = `<tr><td colspan="16" class="px-3 py-8 text-center text-xs text-slate-400">暂无上架项，可发起变更后点击「新增上架项」创建</td></tr>`;
         return;
       }
-      document.getElementById('billing-tbody').innerHTML = billingItems.map(b => {
+      document.getElementById('billing-tbody').innerHTML = billingItems.map((b, idx) => {
         const st = itemStatusOf(b);
         const stCls = st === '已上架' ? 'bg-green-100 text-green-700' : st === '已禁用' ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-700';
+        const charge = chargeItems.find(c => c.code === b.itemCode) || {};
         // 编辑状态下，已上架的上架项可禁用；已禁用的可启用
         let actionBtn = '';
         if (changeMode && isPublished) {
-          if (st === '已上架') actionBtn = `<button onclick="disableItem('${b.code}')" class="text-red-600 hover:underline text-xs">禁用</button>`;
-          else if (st === '已禁用') actionBtn = `<button onclick="enableItem('${b.code}')" class="text-green-600 hover:underline text-xs">启用</button>`;
+          if (st === '已上架') actionBtn = `<button onclick="disableItem(${idx})" class="text-red-600 hover:underline text-xs">禁用</button>`;
+          else if (st === '已禁用') actionBtn = `<button onclick="enableItem(${idx})" class="text-green-600 hover:underline text-xs">启用</button>`;
         }
         return `
         <tr class="hover:bg-slate-50 ${st === '已禁用' ? 'opacity-50' : ''}">
-          <td class="px-3 py-2 text-xs font-mono">${b.fn}</td>
-          <td class="px-3 py-2 text-xs whitespace-nowrap">${(b.dims || []).map(d => `<span class="badge bg-violet-50 text-violet-700 mr-1 mb-0.5">${d}</span>`).join('')}</td>
-          <td class="px-3 py-2 font-mono text-xs">${b.code}</td>
-          <td class="px-3 py-2 text-xs">${b.name}</td>
-          <td class="px-3 py-2 text-right font-mono text-xs">${b.price.toFixed(4)}</td>
-          <td class="px-3 py-2 text-right font-mono text-xs">${b.floor.toFixed(4)}</td>
-          <td class="px-3 py-2 text-xs">${b.unit}</td>
-         <td class="px-3 py-2 text-xs">${b.currency}</td>
+          <td class="px-3 py-2 text-xs text-slate-300">${b.fn || '—'}</td>
+          <td class="px-3 py-2 text-xs whitespace-nowrap">${b.dim ? `<span class="badge bg-violet-50 text-violet-700">${b.dim}</span>` : '—'}</td>
+          <td class="px-3 py-2 font-mono text-xs">${charge.code || b.itemCode}</td>
+          <td class="px-3 py-2 text-xs">${charge.name || '—'}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs">${(charge.price || 0).toFixed(4)}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs">${(charge.floor || 0).toFixed(4)}</td>
+          <td class="px-3 py-2 text-xs">${charge.unit || '万 vTPM'}</td>
+         <td class="px-3 py-2 text-xs">${charge.currency || '—'}</td>
           <td class="px-3 py-2 text-xs">${b.factor}</td>
           <td class="px-3 py-2 text-xs">${b.slo}</td>
           <td class="px-3 py-2 text-xs font-mono">${b.payloadId}</td>
@@ -853,13 +883,13 @@
       document.getElementById('add-item-btn').classList.add('hidden');
       renderBilling();
     }
-    function disableItem(code) {
-      const b = billingItems.find(x => x.code === code);
+    function disableItem(idx) {
+      const b = billingItems[idx];
       if (b) b.itemStatus = '已禁用';
       renderBilling();
     }
-    function enableItem(code) {
-      const b = billingItems.find(x => x.code === code);
+    function enableItem(idx) {
+      const b = billingItems[idx];
       if (b) b.itemStatus = '已上架';
       renderBilling();
     }
@@ -897,8 +927,8 @@
           <label class="flex items-start gap-2 text-xs ${st === '已禁用' ? 'opacity-50' : ''}">
             <input type="checkbox" class="plan-item-check mt-0.5" value="${idx}" ${checked} ${disabled} style="accent-color:#7C3AED">
             <span>
-              <span class="font-mono">${b.code}</span>
-              <span class="text-slate-400 mx-1">·</span><span class="text-slate-600">${(b.dims || []).join(' + ')}</span>
+              <span class="font-mono">${b.itemCode}</span>
+              <span class="text-slate-400 mx-1">·</span><span class="text-slate-600">${b.dim || ''}</span>
               <span class="badge bg-slate-100 text-slate-500 ml-1">${st}</span>
             </span>
           </label>`;
@@ -929,7 +959,7 @@
     function fmtDt(id, def) { return (document.getElementById(id).value || def).replace('T', ' '); }
     function confirmPlanCreate() {
       const checkedIdx = Array.from(document.querySelectorAll('.plan-item-check')).filter(c => c.checked).map(c => parseInt(c.value));
-      const items = checkedIdx.map(i => billingItems[i]).filter(Boolean).map(b => b.code);
+      const items = checkedIdx.map(i => billingItems[i]).filter(Boolean).map(b => b.itemCode);
       if (items.length === 0) { alert('请至少选择一个上架项'); return; }
       const factorEl = document.getElementById('plan-factor');
       const sloEl = document.getElementById('plan-slo');
@@ -962,21 +992,17 @@
      showDetailView();
    }
 
-    // ===== 创建上架项弹窗（维度组合 + 关联计费项创建 + 配置关联，标签自动关联） =====
-    function selectedCycles() {
-      return Array.from(document.querySelectorAll('.dim-cycle')).filter(c => c.checked).map(c => c.value);
+    // ===== 创建上架项弹窗（维度单选 + 关联计费项单选/去创建，标签自动关联） =====
+    function selectedCycle() {
+      const el = document.querySelector('.dim-cycle:checked');
+      return el ? el.value : '';
     }
-    // 自动生成：计费项code（SKU + 维度）、名称（默认与code一致）、标签
+    // 标签自动关联：随维度与关联计费项联动
     function updateItemAutogen() {
-      const cycles = selectedCycles();
-      const suffix = cycles.length ? '.' + cycles.map(c => c.replace('天', 'd')).join('-') : '';
-      const skuSlug = currentProduct ? currentProduct.code : 'maas-product-vtpm';
-      const code = skuSlug + suffix;
-      document.getElementById('item-code').value = code;
-      document.getElementById('item-name').value = code;
-      const currency = document.getElementById('item-currency').value;
-      const unit = document.getElementById('item-unit').value;
-      document.getElementById('item-tags-preview').innerHTML = buildItemTags(cycles, currency, unit)
+      const cycle = selectedCycle();
+      const sel = document.getElementById('item-billing');
+      const charge = sel && sel.value ? chargeItems.find(c => c.code === sel.value) : null;
+      document.getElementById('item-tags-preview').innerHTML = buildItemTags(cycle, charge)
         .map(t => `<span class="badge bg-slate-100 text-slate-600 font-mono">${t}</span>`).join('');
     }
     function renderItemConfigSelector(type) {
@@ -989,25 +1015,36 @@
         container.innerHTML = `<select id="item-${type}" class="form-input">${config.versions.map(v => `<option value="${config.name} ${v.version}">${config.name} ${v.version}</option>`).join('')}</select>`;
       }
     }
+    // 关联计费项下拉：单选；无计费项时提示去创建
+    function refreshItemBillingSelect(selectCode) {
+      const sel = document.getElementById('item-billing');
+      if (!sel) return;
+      if (chargeItems.length === 0) {
+        sel.innerHTML = '<option value="">暂无计费项，请点击「去创建」</option>';
+        sel.disabled = true;
+      } else {
+        sel.disabled = false;
+        sel.innerHTML = chargeItems.map(c => `<option value="${c.code}">${c.code} · ${c.name}（${c.currency}，刊例价 ${c.price.toFixed(4)}/${c.unit}）</option>`).join('');
+        if (selectCode && chargeItems.some(c => c.code === selectCode)) sel.value = selectCode;
+      }
+    }
     function openCreateItemModal() {
-      document.querySelectorAll('.dim-cycle').forEach(c => c.checked = c.value === '30天');
-      document.getElementById('item-price').value = '';
+      document.querySelectorAll('.dim-cycle').forEach(r => r.checked = r.value === '30天');
       document.getElementById('item-min-qty').value = '';
       document.getElementById('item-step-qty').value = '';
       document.getElementById('item-payload').innerHTML = payloadOptions.map(p => `<option>${p}</option>`).join('');
+      refreshItemBillingSelect();
       renderItemConfigSelector('factor');
       renderItemConfigSelector('slo');
       updateItemAutogen();
       openModal('create-item');
     }
     function confirmCreateItem() {
-      const cycles = selectedCycles();
-      if (cycles.length === 0) { alert('请至少勾选一个购买周期维度'); return; }
-      const code = (document.getElementById('item-code').value || '').trim() || 'maas-product-vtpm.new';
-      const name = (document.getElementById('item-name').value || code).trim();
-      const price = parseFloat(document.getElementById('item-price').value) || 0.008;
-      const unit = document.getElementById('item-unit').value;
-      const currency = document.getElementById('item-currency').value;
+      const cycle = selectedCycle();
+      if (!cycle) { alert('请选择一个购买周期维度'); return; }
+      const sel = document.getElementById('item-billing');
+      const itemCode = sel && sel.value ? sel.value : '';
+      if (!itemCode || !chargeItems.some(c => c.code === itemCode)) { alert('请先关联一个计费项（可点击「去创建」新建）'); return; }
       const factorEl = document.getElementById('item-factor');
       const sloEl = document.getElementById('item-slo');
       const factor = (factorEl && !factorEl.disabled) ? factorEl.value : '未关联';
@@ -1015,17 +1052,53 @@
       const payloadId = document.getElementById('item-payload').value;
       const minQty = parseInt(document.getElementById('item-min-qty').value) || 100;
       const stepQty = parseInt(document.getElementById('item-step-qty').value) || 100;
-      const floor = +(price * 0.95).toFixed(4);
+      const charge = chargeItems.find(c => c.code === itemCode);
       billingItems.push({
-        fn: 'chat',
-        dims: cycles.map(c => '购买周期:' + c),
-        code, name, price, floor, unit, currency,
+        fn: null,
+        dim: '购买周期:' + cycle,
+        itemCode,
         factor, slo, payloadId, minQty, stepQty,
-        tags: buildItemTags(cycles, currency, unit),
+        tags: buildItemTags(cycle, charge),
         itemStatus: '待上架'
       });
       closeModal('create-item');
       renderBilling();
+    }
+
+    // ===== 创建计费项弹窗（由「去创建」快捷按钮打开；code 根据 SKU + 当前选中维度生成默认值） =====
+    // 标签自动关联：随维度、货币单位、计费项单位联动
+    function updateBillingAutogen() {
+      const cycle = selectedCycle();
+      const currency = document.getElementById('billing-currency').value;
+      const unit = document.getElementById('billing-unit').value;
+      document.getElementById('billing-tags-preview').innerHTML = buildItemTags(cycle, { currency, unit })
+        .map(t => `<span class="badge bg-slate-100 text-slate-600 font-mono">${t}</span>`).join('');
+    }
+    function openCreateBillingModal() {
+      const cycle = selectedCycle();
+      const suffix = cycle ? '.' + cycle.replace('天', 'd') : '';
+      const skuSlug = currentProduct ? currentProduct.code : 'maas-product-vtpm';
+      const code = skuSlug + suffix;
+      document.getElementById('billing-code').value = code;
+      document.getElementById('billing-name').value = code;
+      document.getElementById('billing-price').value = '';
+      updateBillingAutogen();
+      openModal('create-billing');
+    }
+    function confirmCreateBilling() {
+      const code = (document.getElementById('billing-code').value || '').trim() || 'maas-product-vtpm.new';
+      const name = (document.getElementById('billing-name').value || code).trim();
+      const price = parseFloat(document.getElementById('billing-price').value) || 0.008;
+      const unit = document.getElementById('billing-unit').value;
+      const currency = document.getElementById('billing-currency').value;
+      if (chargeItems.some(c => c.code === code)) { alert('计费项code已存在：' + code); return; }
+      const floor = +(price * 0.95).toFixed(4);
+      const tags = buildItemTags(selectedCycle(), { currency, unit });
+      chargeItems.push({ code, name, price, floor, unit, currency, tags });
+      closeModal('create-billing');
+      // 创建后自动选中新计费项，并联动标签
+      refreshItemBillingSelect(code);
+      updateItemAutogen();
     }
 
     // ===== 配置管理（折算系数 / SLO赔付规则） =====
