@@ -263,28 +263,22 @@
           <div id="inner-tab-saleunit" class="p-4">
             <!-- 顶部：小按钮「确认售卖单元」打开弹窗（只增不减） -->
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <p class="text-xs text-slate-500">勾选各维度下的度量（度量是维度下的元素，如购买周期下的 30/60/90 天），确认后将生成全部维度组合的售卖单元。<span class="text-amber-600">已勾选的度量不可取消，只增不减。</span></p>
               <button type="button" onclick="openSuConfirmModal()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>确认售卖单元</button>
-            </div>
-            <!-- 时间筛选器：查询指定时间节点的售卖单元配置与状态 -->
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <p class="text-sm font-semibold text-slate-900">售卖单元配置查询</p>
               <div class="flex flex-wrap items-center gap-2 text-xs">
-                <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间（默认当前在售）</span>
+                <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间</span>
                 <input id="tf-point" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-56">
                 <button type="button" onclick="querySaleParams()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-magnifying-glass mr-1"></i>查询</button>
                 <button type="button" onclick="resetSaleParams()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">重置</button>
               </div>
             </div>
-            <p class="text-[11px] text-slate-400 mb-3">状态口径：在售=查询点落在售卖期 [开始售卖,结束售卖] 内；待生效=查询点早于开始售卖；已停售=查询点晚于结束售卖；未配置=该售卖单元无任何已发布售卖计划。</p>
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[1500px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th class="text-left px-3 py-2 font-medium">售卖单元</th>
+                  <th class="text-left px-3 py-2 font-medium">状态</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
-                  <th class="text-left px-3 py-2 font-medium">维度</th>
-                  <th class="text-left px-3 py-2 font-medium">度量</th>
+                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">关联计费项</th>
                   <th class="text-right px-3 py-2 font-medium">刊例价</th>
                   <th class="text-left px-3 py-2 font-medium">折算系数</th>
@@ -295,7 +289,6 @@
                   <th class="text-right px-3 py-2 font-medium">购买量step</th>
                   <th class="text-left px-3 py-2 font-medium">售卖起止</th>
                   <th class="text-left px-3 py-2 font-medium">生效起止</th>
-                  <th class="text-left px-3 py-2 font-medium">状态</th>
                 </tr>
               </thead>
               <tbody id="saleunit-tbody" class="divide-y divide-slate-100"></tbody>
@@ -306,13 +299,14 @@
           <!-- 售卖计划 Tab -->
           <div id="inner-tab-plan" class="p-4 hidden">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <p class="text-xs text-slate-500">售卖计划关联售卖单元（默认全选），为每个选中售卖单元各自关联/创建计费项；状态流转：待发布 → 发布 → 已发布（可停用）。</p>
+              <p class="text-xs text-slate-500">&nbsp;</p>
               <button type="button" onclick="openPlanCreateModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
             </div>
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[1600px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
+                  <th class="text-left px-3 py-2 font-medium">名称</th>
                   <th class="text-left px-3 py-2 font-medium">关联售卖单元（各自计费项）</th>
                   <th class="text-left px-3 py-2 font-medium">关联配额项</th>
                   <th class="text-left px-3 py-2 font-medium">关联折算系数</th>
@@ -369,7 +363,7 @@
          <input id="inp-name" class="form-input" placeholder="如 vTPM 预留资源包（预）">
        </div>
         <div>
-          <label class="form-label">关联 Playground（建立 SKU 与 Playground 关系，类似 maas-online；payload 将从该 Playground 下选取）</label>
+          <label class="form-label">关联 Playground</label>
           <select id="inp-playground" class="form-input"></select>
         </div>
      </div>
@@ -388,75 +382,79 @@
         <button type="button" onclick="closeModal('plan-create')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 grid grid-cols-1 gap-4">
-        <!-- 1. 关联售卖单元（默认全选） -->
+        <!-- 1. 售卖计划名称 -->
         <div>
-          <label class="form-label">1. 关联售卖单元（默认勾选全部售卖单元）</label>
+          <label class="form-label">1. 售卖计划名称</label>
+          <input id="plan-name" class="form-input" placeholder="如 vTPM 预留·标准·30天">
+        </div>
+        <!-- 2. 关联售卖单元（默认全选） -->
+        <div>
+          <label class="form-label">2. 关联售卖单元（默认勾选全部售卖单元）</label>
           <div id="plan-units-container" class="border border-slate-200 rounded-md p-2.5 max-h-44 overflow-y-auto space-y-1.5"></div>
         </div>
-        <!-- 2. 为每个选中售卖单元各自创建或关联计费项 -->
+        <!-- 3. 为每个选中售卖单元各自创建或关联计费项 -->
         <div>
-          <label class="form-label">2. 为每个选中售卖单元各自创建或关联计费项</label>
+          <label class="form-label">3. 为每个选中售卖单元各自创建或关联计费项</label>
           <div id="plan-charge-list" class="space-y-2"></div>
-          <p class="text-[10px] text-slate-400 mt-1">计费项字段：code/名称/刊例价/计费项单位/货币单位/标签。</p>
         </div>
-        <!-- 3. 关联配额项（暂时用不到） -->
+        <!-- 4. 关联配额项（暂时用不到） -->
         <div>
-          <label class="form-label">3. 关联配额项（暂时用不到）</label>
+          <label class="form-label">4. 关联配额项（暂时用不到）</label>
           <select id="plan-quota" class="form-input bg-slate-50 text-slate-400" disabled><option>暂未启用（占位）</option></select>
         </div>
-        <!-- 4. 关联折算系数 -->
+        <!-- 5. 关联折算系数 -->
         <div>
-          <label class="form-label">4. 关联vTPM折算系数配置（版本）</label>
+          <label class="form-label">5. 关联vTPM折算系数配置（版本）</label>
           <div id="plan-factor-container"></div>
         </div>
-        <!-- 5. 关联SLO -->
+        <!-- 6. 关联SLO -->
         <div>
-          <label class="form-label">5. 关联SLO赔付规则配置（版本）</label>
+          <label class="form-label">6. 关联SLO赔付规则配置（版本）</label>
           <div id="plan-slo-container"></div>
         </div>
-        <!-- 6. 最小购买量 -->
+        <!-- 7. 最小购买量 -->
         <div>
-          <label class="form-label">6. 最小购买量（万 vTPM）</label>
+          <label class="form-label">7. 最小购买量（万 vTPM）</label>
           <input id="plan-min-qty" type="number" class="form-input" placeholder="如 100">
         </div>
-        <!-- 7. 最大购买量 -->
+        <!-- 8. 最大购买量 -->
         <div>
-          <label class="form-label">7. 最大购买量（万 vTPM）</label>
+          <label class="form-label">8. 最大购买量（万 vTPM）</label>
           <input id="plan-max-qty" type="number" class="form-input" placeholder="如 10000">
         </div>
-        <!-- 8. 购买量step -->
+        <!-- 9. 购买量step -->
         <div>
-          <label class="form-label">8. 购买量step（万 vTPM）</label>
+          <label class="form-label">9. 购买量step（万 vTPM）</label>
           <input id="plan-step-qty" type="number" class="form-input" placeholder="如 100">
         </div>
-        <!-- 9. 开始售卖时间 -->
+        <!-- 10. 开始售卖时间 -->
         <div>
-          <label class="form-label">9. 开始售卖时间</label>
+          <label class="form-label">10. 开始售卖时间</label>
           <input id="plan-sell-start" type="datetime-local" step="1" class="form-input" value="2026-10-01T00:00:00">
         </div>
-        <!-- 10. 结束售卖时间 -->
+        <!-- 11. 结束售卖时间 -->
         <div>
-          <label class="form-label">10. 结束售卖时间</label>
+          <label class="form-label">11. 结束售卖时间</label>
           <input id="plan-sell-end" type="datetime-local" step="1" class="form-input" value="2026-12-31T23:59:59">
         </div>
-        <!-- 11. 关联payload（来自 SKU 关联的 playground） -->
+        <!-- 12. 关联payload（来自 SKU 关联的 playground） -->
         <div>
-          <label class="form-label">11. 关联payload（根据 SKU 关联的 playground 选取）</label>
+          <label class="form-label">12. 关联payload（根据 SKU 关联的 playground 选取）</label>
           <select id="plan-payload" class="form-input"></select>
         </div>
-        <!-- 12. 优先级 -->
+        <!-- 13. 优先级 -->
         <div>
-          <label class="form-label">12. 优先级（0-1000，整百）</label>
-          <select id="plan-priority" class="form-input"><option value="0">0</option><option value="100">100</option><option value="200">200</option><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option><option value="900">900</option><option value="1000">1000</option></select>
+          <label class="form-label">13. 优先级（数字，越大越优先）</label>
+          <input id="plan-priority" type="number" class="form-input" placeholder="如 100">
         </div>
-        <!-- 13. 售卖计划开始生效时间 -->
+        <!-- 14. 售卖计划开始生效时间 -->
         <div>
-          <label class="form-label">13. 售卖计划开始生效时间</label>
+          <label class="form-label">14. 售卖计划开始生效时间</label>
           <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00">
         </div>
-        <!-- 14. 售卖计划结束生效时间 -->
+        <!-- 15. 售卖计划结束生效时间 -->
         <div>
-          <label class="form-label">14. 售卖计划结束生效时间</label>
+          <label class="form-label">15. 售卖计划结束生效时间</label>
           <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" value="2027-11-01T00:00:00">
         </div>
       </div>
@@ -476,30 +474,28 @@
       </div>
       <div class="p-5 grid grid-cols-1 gap-4">
         <div>
-          <label class="form-label">计费项code（自动根据选中 SKU 名称 + 维度生成默认code）</label>
-          <input id="billing-code" class="form-input font-mono" placeholder="根据 SKU + 当前选中维度自动生成">
+          <label class="form-label">计费项code</label>
+          <input id="billing-code" class="form-input font-mono" placeholder="根据 SKU + 触发售卖单元维度:度量自动生成">
         </div>
         <div>
-          <label class="form-label">名称（默认与code一致）</label>
-          <input id="billing-name" class="form-input">
+          <label class="form-label">名称</label>
+          <input id="billing-name" class="form-input" placeholder="默认与code一致">
         </div>
         <div>
-          <label class="form-label">刊例价（指定购买量区间、购买周期下 1 个计费项单位的价格）</label>
+          <label class="form-label">刊例价</label>
           <input id="billing-price" type="number" step="0.0001" class="form-input" placeholder="0.008">
         </div>
         <div>
-          <label class="form-label">计费项单位（与 vTPM 换算比例 1:10000）</label>
+          <label class="form-label">计费项单位</label>
           <select id="billing-unit" class="form-input" onchange="updateBillingAutogen()"><option>万 vTPM</option></select>
         </div>
         <div>
           <label class="form-label">货币单位</label>
           <select id="billing-currency" class="form-input" onchange="updateBillingAutogen()"><option>元</option><option>美元</option></select>
         </div>
-        <!-- 折算/SLO/payload/最小/最大/step 已移至售卖计划层；计费项仅保留前5项（code/名称/刊例价/计费项单位/货币单位）+ 标签 -->
         <div>
-          <label class="form-label">标签（自动关联）</label>
+          <label class="form-label">标签</label>
           <div id="billing-tags-preview" class="flex flex-wrap gap-1 p-2 bg-slate-50 rounded-md min-h-[36px]"></div>
-          <p class="text-[10px] text-slate-400 mt-1">自动包含：SKU 类型标签、维度标签、「计费项」标签、货币单位、计费项单位</p>
         </div>
       </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
@@ -517,7 +513,6 @@
         <button type="button" onclick="closeModal('su-confirm')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5">
-        <p class="text-xs text-slate-500 mb-3">勾选每个维度下的度量（度量是维度下的元素），确认后将生成全部维度组合的售卖单元。<span class="text-amber-600">已勾选的度量不可取消（只增不减）。</span></p>
         <div id="su-confirm-body" class="space-y-3"></div>
       </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
@@ -527,8 +522,8 @@
     </div>
   </div>
 
-  <!-- Modal: 配置创建/更新 -->
-  <div id="modal-config-edit" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
+  <!-- Modal: 配置创建/更新（z-80：可从售卖计划弹窗 z-50 之上叠层打开） -->
+  <div id="modal-config-edit" class="hidden fixed inset-0 z-[80] items-center justify-center bg-slate-900/50 p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
         <h3 id="config-edit-title" class="text-sm font-semibold text-slate-900">创建配置</h3>
@@ -628,33 +623,32 @@
     ];
     // 当前详情商品占位
     let currentProduct = null;
-    // 售卖单元选项：function × 维度 × 度量（度量是维度下的元素，如购买周期下的 30天/60天/90天）
-    const functionOptions = ['chat', 'completion'];
-    const dimensionOptions = ['购买周期'];
-    const measureOptions = { '购买周期': ['30天', '60天', '90天'] };
-    // 售卖单元（按 SKU code 存储；function 暂不考虑，统一显示 — ；维度 + 度量；确认后只增不减）
+    // 售卖单元选项：维度 × 度量（度量是维度下的元素，如购买周期下的 30/60/90 天，购买量区间下的 1～100/100～500/500+）
+    const dimensionOptions = ['购买量区间', '购买周期'];
+    const measureOptions = { '购买量区间': ['1～100', '100～500', '500+'], '购买周期': ['30天', '60天', '90天'] };
+    // 售卖单元（按 SKU code 存储；function 暂不考虑，统一显示 — ；维度+度量，多维度笛卡尔积；确认后只增不减）
     const defaultSaleUnits = {
       'maas-product-vtpm-std': [
-        { id: 'su-1', fn: '', dim: '购买周期', measure: '30天' },
-        { id: 'su-2', fn: '', dim: '购买周期', measure: '60天' },
-        { id: 'su-3', fn: '', dim: '购买周期', measure: '90天' }
+        { id: 'su-1', fn: '', dim: '购买量区间 + 购买周期', measure: '1～100 + 30天' },
+        { id: 'su-2', fn: '', dim: '购买量区间 + 购买周期', measure: '1～100 + 60天' },
+        { id: 'su-3', fn: '', dim: '购买量区间 + 购买周期', measure: '1～100 + 90天' }
       ],
       'maas-product-vtpm-pro': [
-        { id: 'su-1', fn: '', dim: '购买周期', measure: '30天' },
-        { id: 'su-2', fn: '', dim: '购买周期', measure: '90天' }
+        { id: 'su-1', fn: '', dim: '购买量区间 + 购买周期', measure: '1～100 + 30天' },
+        { id: 'su-2', fn: '', dim: '购买量区间 + 购买周期', measure: '500+ + 90天' }
       ],
       'maas-product-vtpm-pre': [
-        { id: 'su-1', fn: '', dim: '购买周期', measure: '30天' },
-        { id: 'su-2', fn: '', dim: '购买周期', measure: '60天' },
-        { id: 'su-3', fn: '', dim: '购买周期', measure: '90天' }
+        { id: 'su-1', fn: '', dim: '购买量区间 + 购买周期', measure: '1～100 + 30天' },
+        { id: 'su-2', fn: '', dim: '购买量区间 + 购买周期', measure: '100～500 + 60天' },
+        { id: 'su-3', fn: '', dim: '购买量区间 + 购买周期', measure: '500+ + 90天' }
       ]
     };
     let saleUnits = [];
     // 默认售卖计划行（units 关联售卖单元；chargeCodes 为每个售卖单元各自关联的计费项；其余字段统一）
     const defaultPlanRows = [
-      { units: ['su-1'], chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
-      { units: ['su-2'], chargeCodes: { 'su-2': 'maas-product-vtpm-pre.60d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00' },
-      { units: ['su-1','su-3'], chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d', 'su-3': 'maas-product-vtpm-pre.90d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-003', priority: 300, effStart: '2026-11-01 00:00:00', effEnd: '2028-05-01 00:00:00' }
+      { name: 'vTPM 预留·标准·30天', units: ['su-1'], chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+      { name: 'vTPM 预留·标准·60天', units: ['su-2'], chargeCodes: { 'su-2': 'maas-product-vtpm-pre.60d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00' },
+      { name: 'vTPM 预留·标准·90天', units: ['su-1','su-3'], chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d', 'su-3': 'maas-product-vtpm-pre.90d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-003', priority: 300, effStart: '2026-11-01 00:00:00', effEnd: '2028-05-01 00:00:00' }
     ];
     let planRows = JSON.parse(JSON.stringify(defaultPlanRows));
     // 状态： pending_publish(待发布) / published(已发布) / stopped(已停用) / expired(已过期)
@@ -724,10 +718,24 @@
          <td class="px-3 py-2"><button type="button" onclick="openPendingDetail(${idx})" class="text-violet-600 hover:underline text-xs">详情</button></td>
        </tr>`).join('');
    }
-    // 售卖单元渲染（合并：售卖单元 + 配置查询 + 状态）
+    // 售卖单元渲染（合并：售卖单元 + 配置查询 + 状态；状态第二列；维度:度量合并展示）
+    // 把 saleUnit 的 dim/measure（可能多维度拼接 "购买量区间 + 购买周期" / "1～100 + 30天"）拆解为维度:度量对
+    function formatDimMeasure(u) {
+      if (!u || !u.dim) return '—';
+      const dims = u.dim.split(' + ');
+      const measures = (u.measure || '').split(' + ');
+      return dims.map((d, i) => `<div class="text-xs"><span class="text-slate-500">${d}:</span><span class="text-slate-800 font-medium ml-1">${measures[i] || ''}</span></div>`).join('');
+    }
+    // 纯文本版（用于弹窗等紧凑展示场景）
+    function formatDimMeasureText(u) {
+      if (!u || !u.dim) return '—';
+      const dims = u.dim.split(' + ');
+      const measures = (u.measure || '').split(' + ');
+      return dims.map((d, i) => `${d}:${measures[i] || ''}`).join(' / ');
+    }
     function renderSaleUnits() {
       if (saleUnits.length === 0) {
-        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="15" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元，请先在上方「确认售卖单元」</td></tr>`;
+        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元，请先点击「确认售卖单元」</td></tr>`;
         return;
       }
       document.getElementById('saleunit-tbody').innerHTML = saleUnits.map(u => {
@@ -739,9 +747,9 @@
         return `
         <tr class="hover:bg-slate-50">
           <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
+          <td class="px-3 py-2"><span class="badge ${st.cls}">${st.text}</span></td>
           <td class="px-3 py-2 text-xs">${u.fn || '—'}</td>
-          <td class="px-3 py-2 text-xs"><span class="badge bg-violet-50 text-violet-700">${u.dim}</span></td>
-          <td class="px-3 py-2 text-xs">${u.measure}</td>
+          <td class="px-3 py-2">${formatDimMeasure(u)}</td>
           <td class="px-3 py-2 font-mono text-xs">${charge.code || '—'}${charge.code ? '<button type="button" onclick="copyChargeCode(\'' + charge.code + '\', this)" class="ml-1 text-slate-400 hover:text-slate-600" title="复制code"><i class="fa-solid fa-copy"></i></button>' : ''}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${(charge.price || 0).toFixed(4)}</td>
           <td class="px-3 py-2 text-xs">${plan ? plan.factor : '—'}</td>
@@ -752,13 +760,12 @@
           <td class="px-3 py-2 text-right text-xs">${plan ? plan.stepQty : '—'}</td>
           <td class="px-3 py-2 text-xs whitespace-nowrap">${sellSpan}</td>
           <td class="px-3 py-2 text-xs whitespace-nowrap">${effSpan}</td>
-          <td class="px-3 py-2"><span class="badge ${st.cls}">${st.text}</span></td>
         </tr>`;
       }).join('');
     }
     function renderPlan() {
       if (planRows.length === 0) {
-        document.getElementById('plan-tbody').innerHTML = `<tr><td colspan="15" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖计划</td></tr>`;
+        document.getElementById('plan-tbody').innerHTML = `<tr><td colspan="16" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖计划</td></tr>`;
         return;
       }
       document.getElementById('plan-tbody').innerHTML = planRows.map((r, idx) => {
@@ -777,6 +784,7 @@
         }).join('') || '—';
         return `
           <tr class="hover:bg-slate-50">
+            <td class="px-3 py-2 text-xs font-medium text-slate-800">${r.name || '—'}</td>
             <td class="px-3 py-2 text-xs">${unitsTxt}</td>
             <td class="px-3 py-2 text-xs text-slate-400">${r.quotaItem || '—'}</td>
             <td class="px-3 py-2 text-xs">${r.factor}</td>
@@ -915,9 +923,16 @@
       openModal('su-confirm');
     }
     // 渲染弹窗内每个维度下的度量复选框；已勾选的设为 disabled（只增不减）
+    // 判断依据：把 saleUnit 的多维度 dim/measure 拆解回单维度对，任一命中即视为已确认
     function renderSuConfirmModalBody() {
       const box = document.getElementById('su-confirm-body');
-      const checkedSet = new Set(saleUnits.map(u => saleUnitKey(u.dim, u.measure)));
+      const confirmedPairs = new Set();
+      saleUnits.forEach(u => {
+        if (!u.dim) return;
+        const dims = u.dim.split(' + ');
+        const measures = (u.measure || '').split(' + ');
+        dims.forEach((d, i) => { confirmedPairs.add(saleUnitKey(d, measures[i] || '')); });
+      });
       box.innerHTML = dimensionOptions.map(dim => {
         const measures = measureOptions[dim] || [];
         return `
@@ -926,7 +941,7 @@
           <div class="ml-4 flex flex-wrap gap-x-4 gap-y-1.5">
             ${measures.map(m => {
               const k = saleUnitKey(dim, m);
-              const isChecked = checkedSet.has(k);
+              const isChecked = confirmedPairs.has(k);
               return `<label class="flex items-center gap-1 text-xs ${isChecked ? 'cursor-not-allowed text-slate-500' : 'cursor-pointer text-slate-700'}">
                 <input type="checkbox" class="su-leaf" data-dim="${dim}" data-measure="${m}" ${isChecked ? 'checked disabled' : ''} style="accent-color:#7C3AED">
                 <span>${m}</span>
@@ -980,6 +995,7 @@
       return Array.from(document.querySelectorAll('.plan-unit-check')).filter(c => c.checked).map(c => c.value);
     }
     function openPlanCreateModal() {
+      document.getElementById('plan-name').value = '';
       renderPlanUnitCheckboxes();
       renderPlanConfigSelector('factor');
       renderPlanConfigSelector('slo');
@@ -988,6 +1004,7 @@
       document.getElementById('plan-min-qty').value = '';
       document.getElementById('plan-max-qty').value = '';
       document.getElementById('plan-step-qty').value = '';
+      document.getElementById('plan-priority').value = '';
       openModal('plan-create');
     }
     // 售卖计划：关联售卖单元多选（默认全选）；勾选变化时联动重渲计费项行
@@ -1000,7 +1017,7 @@
       box.innerHTML = saleUnits.map(u => `
         <label class="flex items-start gap-2 text-xs">
           <input type="checkbox" class="plan-unit-check mt-0.5" value="${u.id}" checked style="accent-color:#7C3AED" onchange="renderPlanChargeList()">
-          <span><span class="font-mono">${u.id}</span><span class="text-slate-400 mx-1">·</span><span class="text-slate-600">${u.fn} / ${u.dim} / ${u.measure}</span></span>
+          <span><span class="font-mono">${u.id}</span><span class="text-slate-400 mx-1">·</span><span class="text-slate-600">${formatDimMeasureText(u)}</span></span>
         </label>`).join('');
     }
     // 售卖计划：为每个选中售卖单元各自渲染计费项行（下拉 + 去创建按钮）
@@ -1022,10 +1039,10 @@
         const selVal = hasPrev ? prev : (chargeItems[0] ? chargeItems[0].code : '');
         return `
         <div class="flex items-center gap-2 p-2 bg-slate-50 rounded-md">
-          <div class="text-xs text-slate-600 w-44 shrink-0">
+          <div class="text-xs text-slate-600 w-48 shrink-0">
             <span class="font-mono">${uid}</span>
             <span class="text-slate-400 mx-1">·</span>
-            <span>${u.fn || '—'} / ${u.dim || '—'} / ${u.measure || '—'}</span>
+            <span>${formatDimMeasureText(u)}</span>
           </div>
           <select class="plan-charge-select form-input flex-1 text-xs" data-unit="${uid}" ${chargeItems.length ? '' : 'disabled'}>${opts}</select>
           <button type="button" onclick="openCreateBillingModal('${uid}')" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
@@ -1053,13 +1070,12 @@
     function renderPlanConfigSelector(type) {
       const container = document.getElementById('plan-' + type + '-container');
       const config = currentConfigs[type];
-      const configTab = type === 'factor' ? 'factor-config' : 'slo-config';
       const label = type === 'factor' ? 'vTPM折算系数' : 'SLO赔付规则';
       if (!config || !config.versions || config.versions.length === 0) {
         container.innerHTML = `
           <div class="flex items-center gap-2">
             <span class="text-xs text-amber-600"><i class="fa-solid fa-triangle-exclamation mr-1"></i>尚未创建${label}配置</span>
-            <button type="button" onclick="closeModal('plan-create'); switchInnerTab('${configTab}')" class="text-violet-600 hover:underline text-xs font-medium">去创建</button>
+            <button type="button" onclick="openConfigCreate('${type}')" class="text-violet-600 hover:underline text-xs font-medium">去创建</button>
           </div>`;
       } else {
         container.innerHTML = `
@@ -1067,12 +1083,14 @@
             <select id="plan-${type}" class="form-input flex-1">
               ${config.versions.map(v => `<option value="${config.name} ${v.version}">${config.name} ${v.version}（${v.createdAt}）</option>`).join('')}
             </select>
-            <button type="button" onclick="closeModal('plan-create'); switchInnerTab('${configTab}')" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap">去更新</button>
+            <button type="button" onclick="openConfigUpdate('${type}')" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap">去更新</button>
           </div>`;
       }
     }
     function fmtDt(id, def) { return (document.getElementById(id).value || def).replace('T', ' '); }
     function confirmPlanCreate() {
+      const name = (document.getElementById('plan-name').value || '').trim();
+      if (!name) { alert('请填写售卖计划名称'); return; }
       const units = selectedPlanUnits();
       if (units.length === 0) { alert('请至少选择一个售卖单元'); return; }
       // 每个选中售卖单元各自关联一个计费项
@@ -1096,7 +1114,7 @@
       const effStart = fmtDt('plan-eff-start', '2026-11-01T00:00:00');
       const effEnd = fmtDt('plan-eff-end', '2027-11-01T00:00:00');
       const priority = parseInt(document.getElementById('plan-priority').value) || 0;
-      planRows.push({ units, chargeCodes, quotaItem: '—（暂未启用）', factor, slo, minQty, maxQty, stepQty, sellStart, sellEnd, payloadId, priority, effStart, effEnd });
+      planRows.push({ name, units, chargeCodes, quotaItem: '—（暂未启用）', factor, slo, minQty, maxQty, stepQty, sellStart, sellEnd, payloadId, priority, effStart, effEnd });
       planRowStatuses.push('pending_publish');
       closeModal('plan-create');
       renderPlan();
@@ -1251,6 +1269,12 @@
       }
       closeModal('config-edit');
       renderConfig(currentConfigType);
+      // 若售卖计划弹窗打开着，同步重渲折算/SLO 选择器以反映新版本
+      const planModal = document.getElementById('modal-plan-create');
+      if (planModal && !planModal.classList.contains('hidden')) {
+        renderPlanConfigSelector('factor');
+        renderPlanConfigSelector('slo');
+      }
     }
     function openConfigHistory(type) {
       const config = currentConfigs[type];
