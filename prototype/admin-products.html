@@ -330,28 +330,11 @@
             </div>
           </div>
 
-          <!-- 定价计划 Tab：占位（沿用旧版定价计划展示） -->
+          <!-- 定价计划 Tab：占位（沿用旧版定价计划，不在本原型展示） -->
           <div id="inner-tab-pricing" class="p-4 hidden">
-            <div class="text-center py-10">
+            <div class="text-center py-16">
               <i class="fa-solid fa-tags text-3xl text-slate-300 mb-3"></i>
-              <p class="text-sm text-slate-500 mb-4">定价计划沿用旧版展示</p>
-            </div>
-            <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[1200px]">
-              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th class="text-left px-3 py-2 font-medium">定价计划</th>
-                  <th class="text-left px-3 py-2 font-medium">计费项</th>
-                  <th class="text-right px-3 py-2 font-medium">刊例价</th>
-                  <th class="text-right px-3 py-2 font-medium">所选时间刊例价</th>
-                  <th class="text-right px-3 py-2 font-medium">所选时间段执行价</th>
-                  <th class="text-left px-3 py-2 font-medium">单位</th>
-                  <th class="text-left px-3 py-2 font-medium">生效时间</th>
-                  <th class="text-left px-3 py-2 font-medium">状态</th>
-                </tr>
-              </thead>
-              <tbody id="pricing-tbody" class="divide-y divide-slate-100"></tbody>
-            </table>
+              <p class="text-sm text-slate-500">定价计划沿用旧版展示，此处为占位页面</p>
             </div>
           </div>
 
@@ -364,25 +347,29 @@
             <div id="slo-config-container"></div>
           </div>
         </div>
+      </div>
 
-        <!-- 售卖计划详情（从计划单元「所属售卖计划」进入；隐藏 tabs 卡片切换显示） -->
-        <div id="plan-detail-view" class="admin-card p-4 hidden">
-          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <div>
-              <h3 id="plan-detail-title" class="text-base font-semibold text-slate-900">售卖计划详情</h3>
-              <p class="text-xs text-slate-500 mt-0.5">售卖计划全部字段与状态操作</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <span id="plan-detail-status" class="badge bg-blue-50 text-blue-700">待发布</span>
-              <button type="button" onclick="closePlanDetail()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回</button>
-            </div>
+      <!-- 售卖计划详情（独立页面，从计划单元「所属售卖计划」进入） -->
+      <div id="plan-detail-view" class="hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 id="plan-detail-title" class="text-lg font-semibold text-slate-900">售卖计划详情</h3>
+            <p class="text-xs text-slate-500 mt-0.5">售卖计划全部字段与状态操作</p>
           </div>
+          <div class="flex items-center gap-2">
+            <span id="plan-detail-status" class="badge bg-blue-50 text-blue-700">待发布</span>
+            <button type="button" onclick="closePlanDetail()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回商品详情</button>
+          </div>
+        </div>
+        <div class="admin-card p-4 mb-4">
           <!-- 操作区 -->
-          <div id="plan-detail-actions" class="flex flex-wrap items-center gap-2 mb-4"></div>
+          <div id="plan-detail-actions" class="flex flex-wrap items-center gap-2"></div>
           <!-- 字段区 -->
           <div id="plan-detail-fields" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs"></div>
+        </div>
+        <div class="admin-card p-4">
           <!-- 计划单元区 -->
-          <p class="text-sm font-medium text-slate-900 mt-5 mb-3">计划单元</p>
+          <p class="text-sm font-medium text-slate-900 mb-3">计划单元</p>
           <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[900px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
@@ -447,75 +434,72 @@
           <label class="form-label">1. 售卖计划名称</label>
           <input id="plan-name" class="form-input" placeholder="如 vTPM 预留·标准·30天">
         </div>
-        <!-- 2. 关联售卖单元（默认全选） -->
+        <!-- 2. 关联售卖单元及各自计费项（默认勾选全部售卖单元） -->
         <div>
-          <label class="form-label">2. 关联售卖单元（默认勾选全部售卖单元）</label>
-          <div id="plan-units-container" class="border border-slate-200 rounded-md p-2.5 max-h-44 overflow-y-auto space-y-1.5"></div>
+          <label class="form-label">2. 关联售卖单元及各自计费项（默认勾选全部售卖单元；每个售卖单元各自创建或关联一个计费项）</label>
+          <div id="plan-units-charge-container" class="border border-slate-200 rounded-md p-2.5 max-h-60 overflow-y-auto space-y-2"></div>
         </div>
-        <!-- 3. 为每个选中售卖单元各自创建或关联计费项 -->
+        <!-- 3. 关联配额项（暂时用不到） -->
         <div>
-          <label class="form-label">3. 为每个选中售卖单元各自创建或关联计费项</label>
-          <div id="plan-charge-list" class="space-y-2"></div>
-        </div>
-        <!-- 4. 关联配额项（暂时用不到） -->
-        <div>
-          <label class="form-label">4. 关联配额项（暂时用不到）</label>
+          <label class="form-label">3. 关联配额项（暂时用不到）</label>
           <select id="plan-quota" class="form-input bg-slate-50 text-slate-400" disabled><option>暂未启用（占位）</option></select>
         </div>
-        <!-- 5. 关联折算系数 -->
+        <!-- 4. 关联折算系数 -->
         <div>
-          <label class="form-label">5. 关联vTPM折算系数配置（版本）</label>
+          <label class="form-label">4. 关联vTPM折算系数配置（版本）</label>
           <div id="plan-factor-container"></div>
         </div>
-        <!-- 6. 关联SLO -->
+        <!-- 5. 关联SLO -->
         <div>
-          <label class="form-label">6. 关联SLO赔付规则配置（版本）</label>
+          <label class="form-label">5. 关联SLO赔付规则配置（版本）</label>
           <div id="plan-slo-container"></div>
         </div>
-        <!-- 7. 最小购买量 -->
-        <div>
-          <label class="form-label">7. 最小购买量（万 vTPM）</label>
-          <input id="plan-min-qty" type="number" class="form-input" placeholder="如 100">
+        <!-- 6. 最小/最大购买量、购买量step（一排三列） -->
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="form-label">6. 最小购买量（万 vTPM）</label>
+            <input id="plan-min-qty" type="number" class="form-input" placeholder="如 100">
+          </div>
+          <div>
+            <label class="form-label">7. 最大购买量（万 vTPM）</label>
+            <input id="plan-max-qty" type="number" class="form-input" placeholder="如 10000">
+          </div>
+          <div>
+            <label class="form-label">8. 购买量step（万 vTPM）</label>
+            <input id="plan-step-qty" type="number" class="form-input" placeholder="如 100">
+          </div>
         </div>
-        <!-- 8. 最大购买量 -->
-        <div>
-          <label class="form-label">8. 最大购买量（万 vTPM）</label>
-          <input id="plan-max-qty" type="number" class="form-input" placeholder="如 10000">
+        <!-- 开始/结束售卖时间（一排两列） -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">9. 开始售卖时间</label>
+            <input id="plan-sell-start" type="datetime-local" step="1" class="form-input" value="2026-10-01T00:00:00">
+          </div>
+          <div>
+            <label class="form-label">10. 结束售卖时间</label>
+            <input id="plan-sell-end" type="datetime-local" step="1" class="form-input" value="2026-12-31T23:59:59">
+          </div>
         </div>
-        <!-- 9. 购买量step -->
+        <!-- 11. 关联payload（来自 SKU 关联的 playground） -->
         <div>
-          <label class="form-label">9. 购买量step（万 vTPM）</label>
-          <input id="plan-step-qty" type="number" class="form-input" placeholder="如 100">
-        </div>
-        <!-- 10. 开始售卖时间 -->
-        <div>
-          <label class="form-label">10. 开始售卖时间</label>
-          <input id="plan-sell-start" type="datetime-local" step="1" class="form-input" value="2026-10-01T00:00:00">
-        </div>
-        <!-- 11. 结束售卖时间 -->
-        <div>
-          <label class="form-label">11. 结束售卖时间</label>
-          <input id="plan-sell-end" type="datetime-local" step="1" class="form-input" value="2026-12-31T23:59:59">
-        </div>
-        <!-- 12. 关联payload（来自 SKU 关联的 playground） -->
-        <div>
-          <label class="form-label">12. 关联payload（根据 SKU 关联的 playground 选取）</label>
+          <label class="form-label">11. 关联payload（根据 SKU 关联的 playground 选取）</label>
           <select id="plan-payload" class="form-input"></select>
         </div>
-        <!-- 13. 优先级 -->
+        <!-- 12. 优先级 -->
         <div>
-          <label class="form-label">13. 优先级（数字，越大越优先）</label>
+          <label class="form-label">12. 优先级（数字，越大越优先）</label>
           <input id="plan-priority" type="number" class="form-input" placeholder="如 100">
         </div>
-        <!-- 14. 售卖计划开始生效时间 -->
-        <div>
-          <label class="form-label">14. 售卖计划开始生效时间</label>
-          <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00">
-        </div>
-        <!-- 15. 售卖计划结束生效时间 -->
-        <div>
-          <label class="form-label">15. 售卖计划结束生效时间</label>
-          <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" value="2027-11-01T00:00:00">
+        <!-- 开始/结束生效时间（一排两列） -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">13. 售卖计划开始生效时间</label>
+            <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00">
+          </div>
+          <div>
+            <label class="form-label">14. 售卖计划结束生效时间</label>
+            <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" value="2027-11-01T00:00:00">
+          </div>
         </div>
       </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
@@ -847,26 +831,6 @@
       saleUnits = saleUnits.filter(u => u.id !== unitId);
       renderSaleUnits();
     }
-    // ===== 定价计划占位渲染（沿用旧版：按计费项展示刊例价/执行价） =====
-    function renderPricing() {
-      const tbody = document.getElementById('pricing-tbody');
-      if (!tbody) return;
-      if (chargeItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-3 py-8 text-center text-xs text-slate-400">暂无定价计划数据</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = chargeItems.map((c, idx) => `
-        <tr class="hover:bg-slate-50">
-          <td class="px-3 py-2 text-xs">旧版定价计划 #${idx + 1}</td>
-          <td class="px-3 py-2 font-mono text-xs">${c.code}</td>
-          <td class="px-3 py-2 text-right font-mono text-xs">${c.price.toFixed(4)}</td>
-          <td class="px-3 py-2 text-right font-mono text-xs">${c.price.toFixed(4)}</td>
-          <td class="px-3 py-2 text-right font-mono text-xs">${(c.price * 0.95).toFixed(4)}</td>
-          <td class="px-3 py-2 text-xs">${c.unit} / ${c.currency}</td>
-          <td class="px-3 py-2 text-xs whitespace-nowrap">2026-10-01 ~ 2026-12-31</td>
-          <td class="px-3 py-2"><span class="badge bg-green-100 text-green-700">生效中</span></td>
-        </tr>`).join('');
-    }
     // ===== 售卖计划 Tab：计划单元列表（每个售卖计划为其包含的每个售卖单元生成一个计划单元） =====
     // 计划单元 = 售卖计划 × 售卖单元；状态跟随所属售卖计划
     function planUnitId(planIdx, unitId) { return 'pu-' + (planIdx + 1) + '-' + unitId; }
@@ -987,13 +951,11 @@
       `;
       renderSaleUnits();
       renderPlan();
-      renderPricing();
       renderConfig('factor');
       renderConfig('slo');
-      // 复位售卖计划详情视图
+      // 复位售卖计划详情独立页面
       currentPlanDetailIdx = -1;
       document.getElementById('plan-detail-view').classList.add('hidden');
-      document.getElementById('plan-tabs-card').classList.remove('hidden');
       switchInnerTab('saleunit');
    }
     function backToList() {
@@ -1026,26 +988,26 @@
       if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
     }
 
-    // ===== 售卖计划详情页：从计划单元「所属售卖计划」进入；发布/停用/修改 =====
+    // ===== 售卖计划详情页（独立页面）：从计划单元「所属售卖计划」进入；发布/停用/修改 =====
     let currentPlanDetailIdx = -1;
     function openPlanDetail(idx) {
       currentPlanDetailIdx = idx;
-      // 隐藏 tabs 卡片，显示计划详情
+      // 隐藏商品详情页，切换到独立的售卖计划详情页面
+      document.getElementById('detail-view').classList.add('hidden');
       document.getElementById('plan-detail-view').classList.remove('hidden');
-      document.getElementById('plan-tabs-card').classList.add('hidden');
       renderPlanDetail(idx);
     }
     function closePlanDetail() {
       currentPlanDetailIdx = -1;
       document.getElementById('plan-detail-view').classList.add('hidden');
-      document.getElementById('plan-tabs-card').classList.remove('hidden');
+      document.getElementById('detail-view').classList.remove('hidden');
     }
     function renderPlanDetail(idx) {
       const r = planRows[idx];
       if (!r) return;
       const st = planRowStatuses[idx];
       const meta = planStatusMeta(st);
-      document.getElementById('plan-detail-title').textContent = '售卖计划详情：' + (r.name || '—');
+      document.getElementById('plan-detail-title').textContent = `售卖计划详情：${r.name || '—'}（${currentProduct.name}）`;
       const stEl = document.getElementById('plan-detail-status');
       stEl.className = 'badge ' + meta.cls;
       stEl.textContent = meta.text;
@@ -1104,10 +1066,12 @@
       editingPlanIdx = idx;
       const r = planRows[idx];
       document.getElementById('plan-name').value = r.name || '';
-      renderPlanUnitCheckboxes();
-      // 回填勾选 = r.units
-      document.querySelectorAll('.plan-unit-check').forEach(c => { c.checked = (r.units || []).includes(c.value); });
-      renderPlanChargeList();
+      renderPlanUnitsCharge();
+      // 回填勾选 = r.units；未勾选行禁用其计费项下拉
+      document.querySelectorAll('.plan-unit-check').forEach(c => {
+        if ((r.units || []).includes(c.value)) { c.checked = true; const sel = document.querySelector(`select.plan-charge-select[data-unit="${c.value}"]`); if (sel) { sel.disabled = false; sel.closest('div.flex').classList.remove('opacity-60'); } }
+        else { c.checked = false; const sel = document.querySelector(`select.plan-charge-select[data-unit="${c.value}"]`); if (sel) sel.disabled = true; }
+      });
       // 回填每个 unit 的计费项
       Object.entries(r.chargeCodes || {}).forEach(([uid, code]) => {
         const sel = document.querySelector(`select.plan-charge-select[data-unit="${uid}"]`);
@@ -1228,10 +1192,9 @@
       editingPlanIdx = -1;
       document.getElementById('plan-create-title').textContent = '创建售卖计划';
       document.getElementById('plan-name').value = '';
-      renderPlanUnitCheckboxes();
+      renderPlanUnitsCharge();
       renderPlanConfigSelector('factor');
       renderPlanConfigSelector('slo');
-      renderPlanChargeList();
       refreshPlanPayloadSelect();
       document.getElementById('plan-min-qty').value = '';
       document.getElementById('plan-max-qty').value = '';
@@ -1239,56 +1202,47 @@
       document.getElementById('plan-priority').value = '';
       openModal('plan-create');
     }
-    // 售卖计划：关联售卖单元多选（默认全选）；勾选变化时联动重渲计费项行
-    function renderPlanUnitCheckboxes() {
-      const box = document.getElementById('plan-units-container');
+    // 售卖计划：关联售卖单元及各自计费项（合并区块；每行 = 勾选框 + 售卖单元 + 计费项下拉 + 去创建按钮；默认全选）
+    // 勾选/取消勾选时重渲整块，保留已有勾选状态与各行计费项已选值
+    function renderPlanUnitsCharge() {
+      const box = document.getElementById('plan-units-charge-container');
+      if (!box) return;
       if (saleUnits.length === 0) {
         box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>暂无售卖单元，请先在「售卖单元」Tab 确认</p>';
         return;
       }
-      box.innerHTML = saleUnits.map(u => `
-        <label class="flex items-start gap-2 text-xs">
-          <input type="checkbox" class="plan-unit-check mt-0.5" value="${u.id}" checked style="accent-color:#7C3AED" onchange="renderPlanChargeList()">
-          <span><span class="font-mono">${u.id}</span><span class="text-slate-400 mx-1">·</span><span class="text-slate-600">${formatDimMeasureText(u)}</span></span>
-        </label>`).join('');
-    }
-    // 售卖计划：为每个选中售卖单元各自渲染计费项行（下拉 + 去创建按钮）
-    function renderPlanChargeList() {
-      const box = document.getElementById('plan-charge-list');
-      const unitIds = selectedPlanUnits();
-      if (unitIds.length === 0) {
-        box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>请先在上方勾选至少一个售卖单元</p>';
-        return;
-      }
-      // 记录重渲前每个 unit 已选 chargeCode，重渲后还原
-      const prevSelected = {};
-      box.querySelectorAll('select.plan-charge-select').forEach(sel => { prevSelected[sel.dataset.unit] = sel.value; });
-      box.innerHTML = unitIds.map(uid => {
-        const u = saleUnits.find(x => x.id === uid) || {};
+      // 记录重渲前的勾选状态与每个 unit 的计费项选择
+      const prevStates = {};
+      const hasPrev = box.querySelectorAll('.plan-unit-check').length > 0;
+      box.querySelectorAll('.plan-unit-check').forEach(c => { prevStates[c.value] = c.checked; });
+      const prevCharges = {};
+      box.querySelectorAll('select.plan-charge-select').forEach(sel => { prevCharges[sel.dataset.unit] = sel.value; });
+      box.innerHTML = saleUnits.map(u => {
+        const checked = hasPrev ? (prevStates[u.id] !== undefined ? prevStates[u.id] : false) : true;
         const opts = chargeItems.length ? chargeItems.map(c => `<option value="${c.code}">${c.code} · ${c.name}（${c.currency}，刊例价 ${c.price.toFixed(4)}/${c.unit}）</option>`).join('') : '<option value="">暂无计费项，请点击「去创建」</option>';
-        const prev = prevSelected[uid];
-        const hasPrev = prev && chargeItems.some(c => c.code === prev);
-        const selVal = hasPrev ? prev : (chargeItems[0] ? chargeItems[0].code : '');
+        const prev = prevCharges[u.id];
+        const selVal = (prev && chargeItems.some(c => c.code === prev)) ? prev : (chargeItems[0] ? chargeItems[0].code : '');
         return `
-        <div class="flex items-center gap-2 p-2 bg-slate-50 rounded-md">
-          <div class="text-xs text-slate-600 w-48 shrink-0">
-            <span class="font-mono">${uid}</span>
+        <div class="flex items-center gap-2 p-2 bg-slate-50 rounded-md ${checked ? '' : 'opacity-60'}">
+          <input type="checkbox" class="plan-unit-check mt-0" value="${u.id}" ${checked ? 'checked' : ''} style="accent-color:#7C3AED" onchange="renderPlanUnitsCharge()">
+          <div class="text-xs text-slate-600 w-52 shrink-0">
+            <span class="font-mono">${u.id}</span>
             <span class="text-slate-400 mx-1">·</span>
             <span>${formatDimMeasureText(u)}</span>
           </div>
-          <select class="plan-charge-select form-input flex-1 text-xs" data-unit="${uid}" ${chargeItems.length ? '' : 'disabled'}>${opts}</select>
-          <button type="button" onclick="openCreateBillingModal('${uid}')" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
+          <select class="plan-charge-select form-input flex-1 text-xs" data-unit="${u.id}" ${checked ? '' : 'disabled'} ${chargeItems.length ? '' : 'disabled'}>${opts}</select>
+          <button type="button" onclick="openCreateBillingModal('${u.id}')" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
         </div>`;
       }).join('');
-      // 还原已选 chargeCode
+      // 还原已选 chargeCode（模板内 selVal 已处理默认值，此处兜底重渲后还原）
       box.querySelectorAll('select.plan-charge-select').forEach(sel => {
-        const v = prevSelected[sel.dataset.unit];
+        const v = prevCharges[sel.dataset.unit];
         if (v && chargeItems.some(c => c.code === v)) sel.value = v;
       });
     }
-    // 创建计费项后回填到指定售卖单元行（重渲计费项行以让新 code 进入 options，再回填触发 unit）
+    // 创建计费项后回填到指定售卖单元行（重渲合并区块以让新 code 进入 options，再回填触发 unit）
     function applyNewChargeToUnit(uid, code) {
-      renderPlanChargeList();
+      renderPlanUnitsCharge();
       const sel = document.querySelector(`select.plan-charge-select[data-unit="${uid}"]`);
       if (sel && chargeItems.some(c => c.code === code)) sel.value = code;
     }
