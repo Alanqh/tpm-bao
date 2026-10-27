@@ -133,10 +133,10 @@ ok(np.inventoryCodes['su-1'] === 'inv-vtpm-custom', 'inventoryCodes 保存自定
 ok(document.getElementById('plan-create-view').classList.contains('hidden'), '保存后页面关闭返回列表');
 
 // ================= 售卖计划 Tab 17 列 + 详情 =================
-section('售卖计划 Tab（16 列）+ 详情页');
+section('售卖计划 Tab（17 列，含类型列）+ 详情页');
 const headCells = Array.from(document.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(headCells.length === 16, '表头 16 列（已去售卖起止）: ' + headCells.length);
-ok(!headCells.includes('售卖起止'), '表头无售卖起止列');
+ok(headCells.length === 17, '表头 17 列（含类型列）: ' + headCells.length);
+ok(headCells[2] === '类型', '第 3 列 = 类型');
 ok(headCells.includes('库存项'), '表头含库存项列');
 // 详情页：新计划（待发布）
 window.openPlanDetail(3);
@@ -155,6 +155,7 @@ ok(evalInPage('selectedPlanUnits().length') === 3, '回填勾选 3 个');
 ok(evalInPage('onSalePlanUnits().join(",")') === 'su-1,su-2', '回填 su-3 下架');
 ok(document.getElementById('plan-mode-factor').checked === true, '回填 factor 开关 = perUnit');
 const fSel2 = document.querySelector('#plan-factor-perunit select[data-unit="su-2"]');
+ok(!!fSel2, '回填渲染 su-2 下拉');
 ok(fSel2 && fSel2.value === 'vtpm-factor-deepseek v3.4', '回填 factors[su-2] = v3.4: ' + (fSel2 && fSel2.value));
 window.confirmPlanCreate();
 const np2 = evalInPage('planRows[3]');
