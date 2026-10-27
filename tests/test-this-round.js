@@ -37,12 +37,12 @@ ok(firstDetail.textContent.includes('单位：'), '详情行含 单位 字段');
 ok(firstDetail.textContent.includes('货币单位：'), '详情行含 货币单位 字段');
 ok(firstDetail.textContent.includes('标签：'), '详情行含 标签 字段');
 const chargeText = firstDetail.textContent;
-ok(chargeText.includes('maas-product-vtpm-pre.30d'), '详情行展示所选计费项 code');
+ok(chargeText.includes('maas-product-vtpm-std.30d'), '详情行展示所选计费项 code');
 // 切换下拉 → 详情行实时刷新（su-1 从 .30d 换到 .60d）
 const sel1 = merged.querySelector('select.plan-charge-select[data-unit="su-1"]');
-sel1.value = 'maas-product-vtpm-pre.60d';
+sel1.value = 'maas-product-vtpm-std.60d';
 window.renderChargeDetail('su-1');
-ok(document.getElementById('plan-charge-detail-su-1').textContent.includes('maas-product-vtpm-pre.60d'), '切换下拉后详情行实时刷新为 .60d');
+ok(document.getElementById('plan-charge-detail-su-1').textContent.includes('maas-product-vtpm-std.60d'), '切换下拉后详情行实时刷新为 .60d');
 // 取消勾选 → 重渲后下拉禁用，详情行保留
 const cb = merged.querySelector('.plan-unit-check');
 const cbVal = cb.value;
@@ -50,16 +50,16 @@ cb.checked = false;
 cb.dispatchEvent(new window.Event('change', { bubbles: true }));
 ok(document.querySelector('select.plan-charge-select[data-unit="' + cbVal + '"]').disabled, '取消勾选后下拉禁用');
 ok(!!document.getElementById('plan-charge-detail-' + cbVal), '取消勾选后详情行保留');
-// 去创建计费项后回填 → 详情行展示新计费项
+// 去创建计费项后回填 → 详情行展示新计费项（code 前缀须为当前商品 std）
 window.closeModal('plan-create');
 window.openPlanCreateModal();
 window.openCreateBillingModal('su-1');
-document.getElementById('billing-code').value = 'maas-product-vtpm-smoke.30d';
+document.getElementById('billing-code').value = 'maas-product-vtpm-std.smoke';
 document.getElementById('billing-price').value = '0.0099';
 window.confirmCreateBilling();
 const afterSel = merged.querySelector('select.plan-charge-select[data-unit="su-1"]');
-ok(afterSel.value === 'maas-product-vtpm-smoke.30d', '去创建后回填新计费项到该行');
-ok(document.getElementById('plan-charge-detail-su-1').textContent.includes('maas-product-vtpm-smoke.30d'), '回填后详情行展示新计费项');
+ok(afterSel.value === 'maas-product-vtpm-std.smoke', '去创建后回填新计费项到该行');
+ok(document.getElementById('plan-charge-detail-su-1').textContent.includes('maas-product-vtpm-std.smoke'), '回填后详情行展示新计费项');
 ok(document.getElementById('plan-charge-detail-su-1').textContent.includes('0.0099'), '详情行展示新计费项刊例价');
 window.closeModal('plan-create');
 
