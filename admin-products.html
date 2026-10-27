@@ -437,10 +437,10 @@
           <label class="form-label">1. 售卖计划名称</label>
           <input id="plan-name" class="form-input" placeholder="如 vTPM 预留·标准·30天">
         </div>
-        <!-- 2. 关联售卖单元及各自计费项/配额项（与售卖单元一一对应） -->
+        <!-- 2. 关联售卖单元及各自计费项（与售卖单元一一对应） -->
         <div>
           <div class="flex items-end justify-between gap-2">
-            <label class="form-label">2. 关联售卖单元及各自计费项/配额项（默认勾选全部；每个售卖单元各自关联一个计费项与一个配额项）</label>
+            <label class="form-label">2. 关联售卖单元及各自计费项（每个售卖单元各自关联一个计费项；此处勾选的售卖单元同步用于下方配额项）</label>
             <div class="flex items-center gap-1.5 pb-1.5 shrink-0">
               <button type="button" onclick="smartMatchCharges()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>按周期智能匹配</button>
               <button type="button" onclick="toggleAllPlanUnits()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-regular fa-square-check mr-1"></i>全选/全不选</button>
@@ -448,60 +448,65 @@
           </div>
           <div id="plan-units-charge-container" class="border border-slate-200 rounded-md p-2.5 max-h-72 overflow-y-auto space-y-2"></div>
         </div>
-        <!-- 3. 关联折算系数 -->
+        <!-- 3. 关联售卖单元及各自配额项（与售卖单元一一对应；跟随第2项勾选的售卖单元） -->
         <div>
-          <label class="form-label">3. 关联vTPM折算系数配置（版本）</label>
+          <label class="form-label">3. 关联售卖单元及各自配额项（每个售卖单元各自关联一个配额项；售卖单元跟随第2项勾选结果）</label>
+          <div id="plan-units-quota-container" class="border border-slate-200 rounded-md p-2.5 max-h-72 overflow-y-auto space-y-2"></div>
+        </div>
+        <!-- 4. 关联折算系数 -->
+        <div>
+          <label class="form-label">4. 关联vTPM折算系数配置（版本）</label>
           <div id="plan-factor-container"></div>
         </div>
-        <!-- 4. 关联SLO -->
+        <!-- 5. 关联SLO -->
         <div>
-          <label class="form-label">4. 关联SLO赔付规则配置（版本）</label>
+          <label class="form-label">5. 关联SLO赔付规则配置（版本）</label>
           <div id="plan-slo-container"></div>
         </div>
-        <!-- 5. 最小/最大购买量、购买量step（一排三列） -->
+        <!-- 6. 最小/最大购买量、购买量step（一排三列） -->
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <label class="form-label">5. 最小购买量（万 vTPM）</label>
+            <label class="form-label">6. 最小购买量（万 vTPM）</label>
             <input id="plan-min-qty" type="number" class="form-input" placeholder="如 100">
           </div>
           <div>
-            <label class="form-label">6. 最大购买量（万 vTPM）</label>
+            <label class="form-label">7. 最大购买量（万 vTPM）</label>
             <input id="plan-max-qty" type="number" class="form-input" placeholder="如 10000">
           </div>
           <div>
-            <label class="form-label">7. 购买量step（万 vTPM）</label>
+            <label class="form-label">8. 购买量step（万 vTPM）</label>
             <input id="plan-step-qty" type="number" class="form-input" placeholder="如 100">
           </div>
         </div>
         <!-- 开始/结束售卖时间（一排两列） -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="form-label">8. 开始售卖时间</label>
+            <label class="form-label">9. 开始售卖时间</label>
             <input id="plan-sell-start" type="datetime-local" step="1" class="form-input" value="2026-10-01T00:00:00">
           </div>
           <div>
-            <label class="form-label">9. 结束售卖时间</label>
+            <label class="form-label">10. 结束售卖时间</label>
             <input id="plan-sell-end" type="datetime-local" step="1" class="form-input" value="2026-12-31T23:59:59">
           </div>
         </div>
-        <!-- 10. 关联payload（来自 SKU 关联的 playground） -->
+        <!-- 11. 关联payload（来自 SKU 关联的 playground） -->
         <div>
-          <label class="form-label">10. 关联payload（根据 SKU 关联的 playground 选取）</label>
+          <label class="form-label">11. 关联payload（根据 SKU 关联的 playground 选取）</label>
           <select id="plan-payload" class="form-input"></select>
         </div>
-        <!-- 11. 优先级 -->
+        <!-- 12. 优先级 -->
         <div>
-          <label class="form-label">11. 优先级（数字，越大越优先）</label>
+          <label class="form-label">12. 优先级（数字，越大越优先）</label>
           <input id="plan-priority" type="number" class="form-input" placeholder="如 100">
         </div>
         <!-- 开始/结束生效时间（一排两列） -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="form-label">12. 售卖计划开始生效时间</label>
+            <label class="form-label">13. 售卖计划开始生效时间</label>
             <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00">
           </div>
           <div>
-            <label class="form-label">13. 售卖计划结束生效时间</label>
+            <label class="form-label">14. 售卖计划结束生效时间</label>
             <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" value="2027-11-01T00:00:00">
           </div>
         </div>
@@ -1143,27 +1148,16 @@
       const r = planRows[idx];
       document.getElementById('plan-name').value = r.name || '';
       renderPlanUnitsCharge();
-      // 回填勾选 = r.units；未勾选行禁用其计费项/配额项下拉
-      document.querySelectorAll('.plan-unit-check').forEach(c => {
-        const sel = document.querySelector(`select.plan-charge-select[data-unit="${c.value}"]`);
-        const qsel = document.querySelector(`select.plan-quota-select[data-unit="${c.value}"]`);
-        if ((r.units || []).includes(c.value)) {
-          c.checked = true;
-          if (sel) { sel.disabled = false; sel.closest('div.flex').classList.remove('opacity-60'); }
-          if (qsel) qsel.disabled = false;
-        } else {
-          c.checked = false;
-          if (sel) sel.disabled = true;
-          if (qsel) qsel.disabled = true;
-        }
-      });
+      // 回填勾选 = r.units（写 DOM 后整体重渲，字段2 计费项区与字段3 配额项区联动）
+      document.querySelectorAll('.plan-unit-check').forEach(c => { c.checked = (r.units || []).includes(c.value); });
+      renderPlanUnitsCharge();
       // 回填每个 unit 的计费项/配额项
       Object.entries(r.chargeCodes || {}).forEach(([uid, code]) => {
-        const sel = document.querySelector(`select.plan-charge-select[data-unit="${uid}"]`);
+        const sel = document.querySelector(`#plan-units-charge-container select.plan-charge-select[data-unit="${uid}"]`);
         if (sel && chargeItems.some(c => c.code === code)) sel.value = code;
       });
       Object.entries(r.quotaCodes || {}).forEach(([uid, qid]) => {
-        const qsel = document.querySelector(`select.plan-quota-select[data-unit="${uid}"]`);
+        const qsel = document.querySelector(`#plan-units-quota-container select.plan-quota-select[data-unit="${uid}"]`);
         if (qsel && quotaItems.some(q => q.id === qid)) qsel.value = qid;
       });
       document.querySelectorAll('#plan-units-charge-container select.plan-charge-select').forEach(sel => renderChargeDetail(sel.dataset.unit));
@@ -1292,24 +1286,23 @@
       document.getElementById('plan-priority').value = '';
       openModal('plan-create');
     }
-    // 售卖计划：关联售卖单元及各自计费项/配额项（合并区块；每行 = 勾选框 + 售卖单元 + 计费项下拉 + 配额项下拉 + 去创建按钮；默认全选）
+    // 售卖计划字段2：关联售卖单元及各自计费项（每行 = 勾选框 + 售卖单元 + 计费项下拉 + 去创建按钮；默认全选）
     // 选中计费项后，该行下方换行展示计费项详情（code/名称/刊例价/单位/货币单位/标签）
-    // 勾选/取消勾选时重渲整块，保留已有勾选状态与各行计费项/配额项已选值
+    // 勾选/取消勾选时重渲两个区块，保留已有勾选状态与各行计费项/配额项已选值
     function renderPlanUnitsCharge() {
       const box = document.getElementById('plan-units-charge-container');
       if (!box) return;
       if (saleUnits.length === 0) {
         box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>暂无售卖单元，请先在「售卖单元」Tab 确认</p>';
+        document.getElementById('plan-units-quota-container').innerHTML = '<p class="text-xs text-slate-400 py-2">暂无售卖单元</p>';
         return;
       }
-      // 记录重渲前的勾选状态与每个 unit 的计费项/配额项选择
+      // 记录重渲前的勾选状态与每个 unit 的计费项选择
       const prevStates = {};
       const hasPrev = box.querySelectorAll('.plan-unit-check').length > 0;
       box.querySelectorAll('.plan-unit-check').forEach(c => { prevStates[c.value] = c.checked; });
       const prevCharges = {};
       box.querySelectorAll('select.plan-charge-select').forEach(sel => { prevCharges[sel.dataset.unit] = sel.value; });
-      const prevQuotas = {};
-      box.querySelectorAll('select.plan-quota-select').forEach(sel => { prevQuotas[sel.dataset.unit] = sel.value; });
       // 计费项候选：按当前商品 code 前缀过滤（跨商品不互选）；无匹配时提示去创建
       const skuPrefix = currentProduct ? currentProduct.code : '';
       const myCharges = skuPrefix ? chargeItems.filter(c => c.code.startsWith(skuPrefix + '.')) : chargeItems;
@@ -1317,7 +1310,6 @@
         <div class="flex items-center gap-2 pl-6 pr-2 pb-1 text-[10px] text-slate-400 select-none">
           <div class="w-52 shrink-0">售卖单元</div>
           <div class="flex-1">计费项</div>
-          <div class="w-64 shrink-0">配额项</div>
           <div class="w-[74px] shrink-0"></div>
         </div>`;
       box.innerHTML = header + saleUnits.map(u => {
@@ -1325,9 +1317,6 @@
         const opts = myCharges.length ? myCharges.map(c => `<option value="${c.code}">${c.code} · ${c.name}（${c.currency}，刊例价 ${c.price.toFixed(4)}/${c.unit}）</option>`).join('') : '<option value="">暂无计费项，请点击「去创建」</option>';
         const prev = prevCharges[u.id];
         const selVal = (prev && myCharges.some(c => c.code === prev)) ? prev : (myCharges[0] ? myCharges[0].code : '');
-        const prevQ = prevQuotas[u.id];
-        const quotaVal = (prevQ && quotaItems.some(q => q.id === prevQ)) ? prevQ : (quotaItems[0] ? quotaItems[0].id : '');
-        const quotaOpts = quotaItems.length ? quotaItems.map(q => `<option value="${q.id}" ${q.id === quotaVal ? 'selected' : ''}>${q.id} · ${q.name}</option>`).join('') : '<option value="">暂无配额项</option>';
         return `
         <div class="p-2 bg-slate-50 rounded-md ${checked ? '' : 'opacity-60'}">
           <div class="flex items-center gap-2">
@@ -1338,23 +1327,55 @@
               <span>${formatDimMeasureText(u)}</span>
             </div>
             <select class="plan-charge-select form-input flex-1 text-xs" data-unit="${u.id}" ${checked ? '' : 'disabled'} ${myCharges.length ? '' : 'disabled'} onchange="renderChargeDetail('${u.id}')">${opts}</select>
-            <select class="plan-quota-select form-input w-64 shrink-0 text-xs" data-unit="${u.id}" ${checked ? '' : 'disabled'} ${quotaItems.length ? '' : 'disabled'}>${quotaOpts}</select>
             <button type="button" onclick="openCreateBillingModal('${u.id}')" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
           </div>
           <div id="plan-charge-detail-${u.id}" class="charge-detail-row"></div>
         </div>`;
       }).join('');
-      // 还原已选 chargeCode / quotaCode（未指定默认取第一项 = options 默认选中）
+      // 还原已选 chargeCode（未指定默认取第一项 = options 默认选中）
       box.querySelectorAll('select.plan-charge-select').forEach(sel => {
         const v = prevCharges[sel.dataset.unit];
         if (v && myCharges.some(c => c.code === v)) sel.value = v;
       });
-      box.querySelectorAll('select.plan-quota-select').forEach(sel => {
-        const v = prevQuotas[sel.dataset.unit];
-        if (v && quotaItems.some(q => q.id === v)) sel.value = v;
-      });
-      // 渲染每个选中售卖单元的计费项详情行
+      // 渲染选中售卖单元的计费项详情行
       box.querySelectorAll('select.plan-charge-select').forEach(sel => renderChargeDetail(sel.dataset.unit));
+      // 同步重渲字段3：配额项区块（跟随此处勾选的售卖单元）
+      renderPlanQuotaRows();
+    }
+    // 售卖计划字段3：关联售卖单元及各自配额项（与字段2操作类似；售卖单元勾选跟随字段2，此处不可改勾选只展示，每行 = 售卖单元 + 配额项下拉）
+    function renderPlanQuotaRows() {
+      const box = document.getElementById('plan-units-quota-container');
+      if (!box) return;
+      // 已勾选的售卖单元（来自字段2）
+      const units = selectedPlanUnits();
+      if (saleUnits.length === 0) { box.innerHTML = '<p class="text-xs text-slate-400 py-2">暂无售卖单元</p>'; return; }
+      if (units.length === 0) { box.innerHTML = '<p class="text-xs text-slate-400 py-2">尚未勾选售卖单元，请先在第 2 项勾选</p>'; return; }
+      // 记录重渲前每个 unit 的配额项选择
+      const prevQuotas = {};
+      box.querySelectorAll('select.plan-quota-select').forEach(sel => { prevQuotas[sel.dataset.unit] = sel.value; });
+      const header = `
+        <div class="flex items-center gap-2 pl-6 pr-2 pb-1 text-[10px] text-slate-400 select-none">
+          <div class="w-52 shrink-0">售卖单元</div>
+          <div class="flex-1">配额项</div>
+        </div>`;
+      box.innerHTML = header + units.map(uid => {
+        const u = saleUnits.find(x => x.id === uid) || {};
+        const prevQ = prevQuotas[uid];
+        const quotaVal = (prevQ && quotaItems.some(q => q.id === prevQ)) ? prevQ : (quotaItems[0] ? quotaItems[0].id : '');
+        const quotaOpts = quotaItems.length ? quotaItems.map(q => `<option value="${q.id}" ${q.id === quotaVal ? 'selected' : ''}>${q.id} · ${q.name}</option>`).join('') : '<option value="">暂无配额项</option>';
+        return `
+        <div class="p-2 bg-slate-50 rounded-md">
+          <div class="flex items-center gap-2">
+            <div class="w-5 shrink-0 flex items-center justify-center"><i class="fa-solid fa-check text-violet-500 text-xs"></i></div>
+            <div class="text-xs text-slate-600 w-52 shrink-0">
+              <span class="font-mono">${u.id || uid}</span>
+              <span class="text-slate-400 mx-1">·</span>
+              <span>${u.id ? formatDimMeasureText(u) : ''}</span>
+            </div>
+            <select class="plan-quota-select form-input flex-1 text-xs" data-unit="${uid}" ${quotaItems.length ? '' : 'disabled'}>${quotaOpts}</select>
+          </div>
+        </div>`;
+      }).join('');
     }
     // 按周期智能匹配：按勾选售卖单元的购买周期（30天/60天/90天）自动匹配计费项（code 后缀 .30d/.60d/.90d）与配额项（id 后缀对应周期）
     function smartMatchCharges() {
@@ -1374,7 +1395,7 @@
         const charge = myCharges.find(c => c.code.endsWith(suffix));
         const quota = quotaItems.find(q => q.id.endsWith('-' + days + 'd'));
         const chargeSel = document.querySelector(`#plan-units-charge-container select.plan-charge-select[data-unit="${uid}"]`);
-        const quotaSel = document.querySelector(`#plan-units-charge-container select.plan-quota-select[data-unit="${uid}"]`);
+        const quotaSel = document.querySelector(`#plan-units-quota-container select.plan-quota-select[data-unit="${uid}"]`);
         if (charge && chargeSel) { chargeSel.value = charge.code; ok++; }
         if (quota && quotaSel) quotaSel.value = quota.id;
         if (!charge) miss.push(uid);
@@ -1451,15 +1472,15 @@
       if (!name) { alert('请填写售卖计划名称'); return; }
       const units = selectedPlanUnits();
       if (units.length === 0) { alert('请至少选择一个售卖单元'); return; }
-      // 每个选中售卖单元各自关联一个计费项与一个配额项
+      // 每个选中售卖单元各自关联一个计费项与一个配额项（计费项在字段2、配额项在字段3）
       const chargeCodes = {};
       const quotaCodes = {};
       for (const uid of units) {
-        const sel = document.querySelector(`select.plan-charge-select[data-unit="${uid}"]`);
+        const sel = document.querySelector(`#plan-units-charge-container select.plan-charge-select[data-unit="${uid}"]`);
         const code = sel && sel.value ? sel.value : '';
         if (!code) { alert('请为售卖单元 ' + uid + ' 创建或关联一个计费项'); return; }
         chargeCodes[uid] = code;
-        const qsel = document.querySelector(`select.plan-quota-select[data-unit="${uid}"]`);
+        const qsel = document.querySelector(`#plan-units-quota-container select.plan-quota-select[data-unit="${uid}"]`);
         const qid = qsel && qsel.value ? qsel.value : '';
         if (!qid) { alert('请为售卖单元 ' + uid + ' 关联一个配额项'); return; }
         quotaCodes[uid] = qid;
