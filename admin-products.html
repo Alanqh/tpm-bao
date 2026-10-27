@@ -518,6 +518,28 @@
     </div>
   </div>
 
+  <!-- Modal: 创建配额项（占位：配额项管理页面暂未开放；z-70：可从售卖计划弹窗 z-50 之上叠层打开） -->
+  <div id="modal-quota-create" class="hidden fixed inset-0 z-[70] items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <h3 class="text-sm font-semibold text-slate-900">创建配额项</h3>
+        <button type="button" onclick="closeModal('quota-create')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5">
+        <div class="flex items-start gap-3 p-4 bg-slate-50 border border-dashed border-slate-300 rounded-md">
+          <i class="fa-solid fa-circle-info text-slate-400 mt-0.5"></i>
+          <div class="text-xs text-slate-500 leading-relaxed">
+            <p class="text-slate-700 font-medium mb-1">配额项创建页面暂未开放（占位）</p>
+            <p>配额项包含名称、描述、额度定义等信息。当前版本请从下拉中选择已有配额项（如 quota-vtpm-30d / 60d / 90d），配额项的独立创建与管理页面将在后续版本提供。</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
+        <button type="button" onclick="closeModal('quota-create')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">知道了</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: 创建计费项（由创建上架项的「去创建」快捷按钮打开） -->
   <div id="modal-create-billing" class="hidden fixed inset-0 z-[70] items-center justify-center bg-slate-900/50 p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
@@ -1357,6 +1379,7 @@
         <div class="flex items-center gap-2 pl-6 pr-2 pb-1 text-[10px] text-slate-400 select-none">
           <div class="w-52 shrink-0">售卖单元</div>
           <div class="flex-1">配额项</div>
+          <div class="w-[74px] shrink-0"></div>
         </div>`;
       box.innerHTML = header + units.map(uid => {
         const u = saleUnits.find(x => x.id === uid) || {};
@@ -1373,9 +1396,14 @@
               <span>${u.id ? formatDimMeasureText(u) : ''}</span>
             </div>
             <select class="plan-quota-select form-input flex-1 text-xs" data-unit="${uid}" ${quotaItems.length ? '' : 'disabled'}>${quotaOpts}</select>
+            <button type="button" onclick="openQuotaCreatePlaceholder()" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
           </div>
         </div>`;
       }).join('');
+    }
+    // 配额项「去创建」：配额项管理页面暂未开放，弹占位提示（不关闭 plan-create）
+    function openQuotaCreatePlaceholder() {
+      openModal('quota-create');
     }
     // 按周期智能匹配：按勾选售卖单元的购买周期（30天/60天/90天）自动匹配计费项（code 后缀 .30d/.60d/.90d）与配额项（id 后缀对应周期）
     function smartMatchCharges() {
