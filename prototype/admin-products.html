@@ -390,6 +390,177 @@
           </div>
         </div>
       </div>
+      <!-- 售卖计划创建/修改（独立页面，从「创建售卖计划」按钮/修改进入） -->
+      <div id="plan-create-view" class="hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 id="plan-create-page-title" class="text-lg font-semibold text-slate-900">创建售卖计划</h3>
+            <p class="text-xs text-slate-500 mt-0.5">按区块填写：基础信息 → 生效售卖单元 → 生效时间 → 各字段组（全部一致 / 按售卖单元配置）</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closePlanCreatePage()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回商品详情</button>
+            <button type="button" onclick="confirmPlanCreate()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>保存售卖计划</button>
+          </div>
+        </div>
+
+        <!-- 区块1：基础信息（名称 + 优先级） -->
+        <div class="admin-card p-4 mb-4">
+          <p class="text-sm font-medium text-slate-900 mb-3">1. 基础信息</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="form-label">售卖计划名称</label>
+              <input id="plan-name" class="form-input" placeholder="如 vTPM 预留·标准·30天">
+            </div>
+            <div>
+              <label class="form-label">优先级（数字，越大越优先）</label>
+              <input id="plan-priority" type="number" class="form-input" placeholder="如 100">
+            </div>
+          </div>
+        </div>
+
+        <!-- 区块2：生效售卖单元（勾选 + 在售/禁售） -->
+        <div class="admin-card p-4 mb-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <p class="text-sm font-medium text-slate-900">2. 本售卖计划对哪些售卖单元生效（勾选后选择在售 / 禁售）</p>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="toggleAllPlanUnits()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-regular fa-square-check mr-1"></i>全选/全不选</button>
+            </div>
+          </div>
+          <div id="plan-units-charge-container" class="border border-slate-200 rounded-md p-2.5 space-y-2"></div>
+        </div>
+
+        <!-- 区块3：生效时间 -->
+        <div class="admin-card p-4 mb-4">
+          <p class="text-sm font-medium text-slate-900 mb-3">3. 售卖计划生效时间</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="form-label">开始生效时间</label>
+              <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00">
+            </div>
+            <div>
+              <label class="form-label">结束生效时间</label>
+              <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" value="2027-11-01T00:00:00">
+            </div>
+          </div>
+        </div>
+
+        <!-- 区块4：各字段组（每个都带「全部一致 / 按售卖单元配置」开关） -->
+        <div class="admin-card p-4">
+          <p class="text-sm font-medium text-slate-900 mb-1">4. 计划字段配置</p>
+          <p class="text-xs text-slate-500 mb-3">每组字段可用开关选择「全部售卖单元一致」或「按售卖单元配置」（只为在售售卖单元逐个配置）</p>
+          <div class="grid grid-cols-1 gap-5">
+
+            <!-- 4.1 计费项 -->
+            <div class="border border-slate-200 rounded-md p-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <p class="text-xs font-semibold text-slate-700">4.1 关联计费项</p>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="smartMatchCharges()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>按周期智能匹配</button>
+                  <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                    <input type="checkbox" id="plan-mode-charge" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
+                    按售卖单元配置
+                  </label>
+                </div>
+              </div>
+              <div id="plan-charge-unified" class="flex items-center gap-2"></div>
+              <div id="plan-charge-perunit" class="hidden"></div>
+            </div>
+
+            <!-- 4.2 配额项 -->
+            <div class="border border-slate-200 rounded-md p-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <p class="text-xs font-semibold text-slate-700">4.2 关联配额项</p>
+                <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                  <input type="checkbox" id="plan-mode-quota" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
+                  按售卖单元配置
+                </label>
+              </div>
+              <div id="plan-quota-unified" class="flex items-center gap-2"></div>
+              <div id="plan-quota-perunit" class="hidden"></div>
+            </div>
+
+            <!-- 4.3 库存项 -->
+            <div class="border border-slate-200 rounded-md p-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <p class="text-xs font-semibold text-slate-700">4.3 关联库存项</p>
+                <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                  <input type="checkbox" id="plan-mode-inventory" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
+                  按售卖单元配置
+                </label>
+              </div>
+              <div id="plan-inventory-unified" class="flex items-center gap-2"></div>
+              <div id="plan-inventory-perunit" class="hidden"></div>
+            </div>
+
+            <!-- 4.4 折算系数 / SLO -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="border border-slate-200 rounded-md p-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <p class="text-xs font-semibold text-slate-700">4.4 关联vTPM折算系数配置（版本）</p>
+                  <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                    <input type="checkbox" id="plan-mode-factor" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
+                    按售卖单元配置
+                  </label>
+                </div>
+                <div id="plan-factor-unified"></div>
+                <div id="plan-factor-perunit" class="hidden"></div>
+              </div>
+              <div class="border border-slate-200 rounded-md p-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <p class="text-xs font-semibold text-slate-700">4.5 关联SLO赔付规则配置（版本）</p>
+                  <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                    <input type="checkbox" id="plan-mode-slo" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
+                    按售卖单元配置
+                  </label>
+                </div>
+                <div id="plan-slo-unified"></div>
+                <div id="plan-slo-perunit" class="hidden"></div>
+              </div>
+            </div>
+
+            <!-- 4.6 payload -->
+            <div class="border border-slate-200 rounded-md p-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <p class="text-xs font-semibold text-slate-700">4.6 关联payload（根据 SKU 关联的 playground 选取）</p>
+                <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                  <input type="checkbox" id="plan-mode-payload" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
+                  按售卖单元配置
+                </label>
+              </div>
+              <div id="plan-payload-unified" class="flex items-center gap-2"></div>
+              <div id="plan-payload-perunit" class="hidden"></div>
+            </div>
+
+            <!-- 4.7 购买量 -->
+            <div class="border border-slate-200 rounded-md p-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <p class="text-xs font-semibold text-slate-700">4.7 购买量（最小 / 最大 / step，万 vTPM）</p>
+                <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                  <input type="checkbox" id="plan-mode-qty" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
+                  按售卖单元配置
+                </label>
+              </div>
+              <div id="plan-qty-unified" class="grid grid-cols-3 gap-3"></div>
+              <div id="plan-qty-perunit" class="hidden"></div>
+            </div>
+
+            <!-- 4.8 售卖时间 -->
+            <div class="border border-slate-200 rounded-md p-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <p class="text-xs font-semibold text-slate-700">4.8 售卖起止时间</p>
+                <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                  <input type="checkbox" id="plan-mode-sell" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
+                  按售卖单元配置
+                </label>
+              </div>
+              <div id="plan-sell-unified" class="grid grid-cols-2 gap-3"></div>
+              <div id="plan-sell-perunit" class="hidden"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -427,175 +598,6 @@
   </div>
 
   <!-- 售卖计划创建/修改（独立页面，从「创建售卖计划」按钮/修改进入） -->
-  <div id="plan-create-view" class="hidden">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <div>
-        <h3 id="plan-create-page-title" class="text-lg font-semibold text-slate-900">创建售卖计划</h3>
-        <p class="text-xs text-slate-500 mt-0.5">按区块填写：基础信息 → 生效售卖单元 → 生效时间 → 各字段组（全部一致 / 按售卖单元配置）</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <button type="button" onclick="closePlanCreatePage()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回商品详情</button>
-        <button type="button" onclick="confirmPlanCreate()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>保存售卖计划</button>
-      </div>
-    </div>
-
-    <!-- 区块1：基础信息（名称 + 优先级） -->
-    <div class="admin-card p-4 mb-4">
-      <p class="text-sm font-medium text-slate-900 mb-3">1. 基础信息</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="form-label">售卖计划名称</label>
-          <input id="plan-name" class="form-input" placeholder="如 vTPM 预留·标准·30天">
-        </div>
-        <div>
-          <label class="form-label">优先级（数字，越大越优先）</label>
-          <input id="plan-priority" type="number" class="form-input" placeholder="如 100">
-        </div>
-      </div>
-    </div>
-
-    <!-- 区块2：生效售卖单元（勾选 + 在售/禁售） -->
-    <div class="admin-card p-4 mb-4">
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <p class="text-sm font-medium text-slate-900">2. 本售卖计划对哪些售卖单元生效（勾选后选择在售 / 禁售）</p>
-        <div class="flex items-center gap-1.5">
-          <button type="button" onclick="toggleAllPlanUnits()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-regular fa-square-check mr-1"></i>全选/全不选</button>
-        </div>
-      </div>
-      <div id="plan-units-charge-container" class="border border-slate-200 rounded-md p-2.5 space-y-2"></div>
-    </div>
-
-    <!-- 区块3：生效时间 -->
-    <div class="admin-card p-4 mb-4">
-      <p class="text-sm font-medium text-slate-900 mb-3">3. 售卖计划生效时间</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="form-label">开始生效时间</label>
-          <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00">
-        </div>
-        <div>
-          <label class="form-label">结束生效时间</label>
-          <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" value="2027-11-01T00:00:00">
-        </div>
-      </div>
-    </div>
-
-    <!-- 区块4：各字段组（每个都带「全部一致 / 按售卖单元配置」开关） -->
-    <div class="admin-card p-4">
-      <p class="text-sm font-medium text-slate-900 mb-1">4. 计划字段配置</p>
-      <p class="text-xs text-slate-500 mb-3">每组字段可用开关选择「全部售卖单元一致」或「按售卖单元配置」（只为在售售卖单元逐个配置）</p>
-      <div class="grid grid-cols-1 gap-5">
-
-        <!-- 4.1 计费项 -->
-        <div class="border border-slate-200 rounded-md p-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <p class="text-xs font-semibold text-slate-700">4.1 关联计费项</p>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="smartMatchCharges()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>按周期智能匹配</button>
-              <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-                <input type="checkbox" id="plan-mode-charge" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
-                按售卖单元配置
-              </label>
-            </div>
-          </div>
-          <div id="plan-charge-unified" class="flex items-center gap-2"></div>
-          <div id="plan-charge-perunit" class="hidden"></div>
-        </div>
-
-        <!-- 4.2 配额项 -->
-        <div class="border border-slate-200 rounded-md p-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <p class="text-xs font-semibold text-slate-700">4.2 关联配额项</p>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="plan-mode-quota" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
-              按售卖单元配置
-            </label>
-          </div>
-          <div id="plan-quota-unified" class="flex items-center gap-2"></div>
-          <div id="plan-quota-perunit" class="hidden"></div>
-        </div>
-
-        <!-- 4.3 库存项 -->
-        <div class="border border-slate-200 rounded-md p-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <p class="text-xs font-semibold text-slate-700">4.3 关联库存项</p>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="plan-mode-inventory" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
-              按售卖单元配置
-            </label>
-          </div>
-          <div id="plan-inventory-unified" class="flex items-center gap-2"></div>
-          <div id="plan-inventory-perunit" class="hidden"></div>
-        </div>
-
-        <!-- 4.4 折算系数 / SLO -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div class="border border-slate-200 rounded-md p-3">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <p class="text-xs font-semibold text-slate-700">4.4 关联vTPM折算系数配置（版本）</p>
-              <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-                <input type="checkbox" id="plan-mode-factor" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
-                按售卖单元配置
-              </label>
-            </div>
-            <div id="plan-factor-unified"></div>
-            <div id="plan-factor-perunit" class="hidden"></div>
-          </div>
-          <div class="border border-slate-200 rounded-md p-3">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <p class="text-xs font-semibold text-slate-700">4.5 关联SLO赔付规则配置（版本）</p>
-              <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-                <input type="checkbox" id="plan-mode-slo" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
-                按售卖单元配置
-              </label>
-            </div>
-            <div id="plan-slo-unified"></div>
-            <div id="plan-slo-perunit" class="hidden"></div>
-          </div>
-        </div>
-
-        <!-- 4.6 payload -->
-        <div class="border border-slate-200 rounded-md p-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <p class="text-xs font-semibold text-slate-700">4.6 关联payload（根据 SKU 关联的 playground 选取）</p>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="plan-mode-payload" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
-              按售卖单元配置
-            </label>
-          </div>
-          <div id="plan-payload-unified" class="flex items-center gap-2"></div>
-          <div id="plan-payload-perunit" class="hidden"></div>
-        </div>
-
-        <!-- 4.7 购买量 -->
-        <div class="border border-slate-200 rounded-md p-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <p class="text-xs font-semibold text-slate-700">4.7 购买量（最小 / 最大 / step，万 vTPM）</p>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="plan-mode-qty" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
-              按售卖单元配置
-            </label>
-          </div>
-          <div id="plan-qty-unified" class="grid grid-cols-3 gap-3"></div>
-          <div id="plan-qty-perunit" class="hidden"></div>
-        </div>
-
-        <!-- 4.8 售卖时间 -->
-        <div class="border border-slate-200 rounded-md p-3">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <p class="text-xs font-semibold text-slate-700">4.8 售卖起止时间</p>
-            <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-              <input type="checkbox" id="plan-mode-sell" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
-              按售卖单元配置
-            </label>
-          </div>
-          <div id="plan-sell-unified" class="grid grid-cols-2 gap-3"></div>
-          <div id="plan-sell-perunit" class="hidden"></div>
-        </div>
-
-      </div>
-    </div>
-  </div>
 
   <!-- Modal: 创建配额项（数量值；由售卖计划页面配额项行的「去创建」打开，z-70 叠层） -->
   <div id="modal-quota-create" class="hidden fixed inset-0 z-[70] items-center justify-center bg-slate-900/50 p-4">
