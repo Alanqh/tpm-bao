@@ -259,15 +259,12 @@
             <button type="button" class="admin-tab" data-tab="slo-config" onclick="switchInnerTab('slo-config')">SLO赔付规则配置</button>
           </div>
 
-          <!-- 售卖单元 Tab：确认（树形复选框）+ 配置查询（时间筛选 + 状态） -->
+          <!-- 售卖单元 Tab：按钮（弹窗确认）+ 配置查询（时间筛选 + 状态） -->
           <div id="inner-tab-saleunit" class="p-4">
-            <!-- 确认售卖单元：function × 维度 × 度量 树形复选框 -->
-            <div class="mb-4">
-              <p class="text-xs text-slate-500 mb-2">确认本 SKU 的售卖单元：勾选每个 function 下、每类维度下的度量（度量是维度下的元素）。确认后可用于售卖计划。</p>
-              <div id="su-confirm-container" class="border border-slate-200 rounded-md p-3 bg-slate-50"></div>
-              <div class="mt-2">
-                <button type="button" onclick="confirmSaleUnits()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>确认售卖单元</button>
-              </div>
+            <!-- 顶部：小按钮「确认售卖单元」打开弹窗（只增不减） -->
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <p class="text-xs text-slate-500">勾选各维度下的度量（度量是维度下的元素，如购买周期下的 30/60/90 天），确认后将生成全部维度组合的售卖单元。<span class="text-amber-600">已勾选的度量不可取消，只增不减。</span></p>
+              <button type="button" onclick="openSuConfirmModal()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>确认售卖单元</button>
             </div>
             <!-- 时间筛选器：查询指定时间节点的售卖单元配置与状态 -->
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -512,6 +509,24 @@
     </div>
   </div>
 
+  <!-- Modal: 确认售卖单元（维度 × 度量 复选框；只增不减） -->
+  <div id="modal-su-confirm" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-900/50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
+        <h3 class="text-sm font-semibold text-slate-900">确认售卖单元</h3>
+        <button type="button" onclick="closeModal('su-confirm')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5">
+        <p class="text-xs text-slate-500 mb-3">勾选每个维度下的度量（度量是维度下的元素），确认后将生成全部维度组合的售卖单元。<span class="text-amber-600">已勾选的度量不可取消（只增不减）。</span></p>
+        <div id="su-confirm-body" class="space-y-3"></div>
+      </div>
+      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
+        <button type="button" onclick="closeModal('su-confirm')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
+        <button type="button" onclick="confirmSaleUnits()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>确认</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: 配置创建/更新 -->
   <div id="modal-config-edit" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
@@ -592,7 +607,6 @@
       ['saleunit', 'plan', 'factor-config', 'slo-config'].forEach(id => {
         document.getElementById('inner-tab-' + id).classList.toggle('hidden', tab !== id);
       });
-      if (tab === 'saleunit') renderSuConfirmContainer();
    }
 
     // ===== 数据 =====
@@ -618,21 +632,21 @@
     const functionOptions = ['chat', 'completion'];
     const dimensionOptions = ['购买周期'];
     const measureOptions = { '购买周期': ['30天', '60天', '90天'] };
-    // 售卖单元（按 SKU code 存储；function + 维度 + 度量；确认后可修改）
+    // 售卖单元（按 SKU code 存储；function 暂不考虑，统一显示 — ；维度 + 度量；确认后只增不减）
     const defaultSaleUnits = {
       'maas-product-vtpm-std': [
-        { id: 'su-1', fn: 'chat', dim: '购买周期', measure: '30天' },
-        { id: 'su-2', fn: 'chat', dim: '购买周期', measure: '60天' },
-        { id: 'su-3', fn: 'chat', dim: '购买周期', measure: '90天' }
+        { id: 'su-1', fn: '', dim: '购买周期', measure: '30天' },
+        { id: 'su-2', fn: '', dim: '购买周期', measure: '60天' },
+        { id: 'su-3', fn: '', dim: '购买周期', measure: '90天' }
       ],
       'maas-product-vtpm-pro': [
-        { id: 'su-1', fn: 'chat', dim: '购买周期', measure: '30天' },
-        { id: 'su-2', fn: 'chat', dim: '购买周期', measure: '90天' }
+        { id: 'su-1', fn: '', dim: '购买周期', measure: '30天' },
+        { id: 'su-2', fn: '', dim: '购买周期', measure: '90天' }
       ],
       'maas-product-vtpm-pre': [
-        { id: 'su-1', fn: 'chat', dim: '购买周期', measure: '30天' },
-        { id: 'su-2', fn: 'chat', dim: '购买周期', measure: '60天' },
-        { id: 'su-3', fn: 'chat', dim: '购买周期', measure: '90天' }
+        { id: 'su-1', fn: '', dim: '购买周期', measure: '30天' },
+        { id: 'su-2', fn: '', dim: '购买周期', measure: '60天' },
+        { id: 'su-3', fn: '', dim: '购买周期', measure: '90天' }
       ]
     };
     let saleUnits = [];
@@ -855,7 +869,6 @@
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品名称</p><p class="font-medium">${currentProduct.name}</p></div>
         <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联 Playground</p><p class="font-mono">${currentProduct.playground || '—'}</p></div>
       `;
-      renderSuConfirmContainer();
       renderSaleUnits();
       renderPlan();
       renderConfig('factor');
@@ -894,67 +907,73 @@
       return map[st] || map.pending_publish;
     }
 
-    // ===== 售卖单元：树形复选框确认（function × 维度 × 度量，度量是维度下的元素） =====
-    function saleUnitKey(fn, dim, measure) { return fn + '|' + dim + '|' + measure; }
-    function renderSuConfirmContainer() {
-      const box = document.getElementById('su-confirm-container');
-      // 已勾选的 key 集合（来自当前 saleUnits）
-      const checkedSet = new Set(saleUnits.map(u => saleUnitKey(u.fn, u.dim, u.measure)));
-      box.innerHTML = functionOptions.map(fn => `
-        <div class="mb-2 last:mb-0">
-          <p class="text-xs font-semibold text-slate-700 mb-1.5"><i class="fa-solid fa-cube mr-1 text-violet-500"></i>${fn}</p>
-          <div class="ml-4 space-y-2">
-            ${dimensionOptions.map(dim => {
-              const measures = measureOptions[dim] || [];
-              const allChecked = measures.every(m => checkedSet.has(saleUnitKey(fn, dim, m)));
-              const someChecked = measures.some(m => checkedSet.has(saleUnitKey(fn, dim, m)));
-              return `
-              <div>
-                <label class="flex items-center gap-1.5 text-xs text-slate-600 mb-1">
-                  <input type="checkbox" class="su-dim-all" data-fn="${fn}" data-dim="${dim}" ${allChecked ? 'checked' : ''} style="accent-color:#7C3AED" onchange="toggleDimAll(this)">
-                  <span class="font-medium">${dim}</span>
-                  ${someChecked && !allChecked ? '<span class="text-[10px] text-slate-400">（部分）</span>' : ''}
-                </label>
-                <div class="ml-6 flex flex-wrap gap-x-4 gap-y-1">
-                  ${measures.map(m => {
-                    const k = saleUnitKey(fn, dim, m);
-                    return `<label class="flex items-center gap-1 text-xs text-slate-700 cursor-pointer">
-                      <input type="checkbox" class="su-leaf" data-fn="${fn}" data-dim="${dim}" data-measure="${m}" ${checkedSet.has(k) ? 'checked' : ''} style="accent-color:#7C3AED">
-                      <span>${m}</span>
-                    </label>`;
-                  }).join('')}
-                </div>
-              </div>`;
+    // ===== 售卖单元：弹窗确认（维度 × 度量，只增不减） =====
+    // function 暂不考虑，统一显示 —；按维度勾选度量，确认后生成全部维度组合的售卖单元
+    function saleUnitKey(dim, measure) { return dim + '|' + measure; }
+    function openSuConfirmModal() {
+      renderSuConfirmModalBody();
+      openModal('su-confirm');
+    }
+    // 渲染弹窗内每个维度下的度量复选框；已勾选的设为 disabled（只增不减）
+    function renderSuConfirmModalBody() {
+      const box = document.getElementById('su-confirm-body');
+      const checkedSet = new Set(saleUnits.map(u => saleUnitKey(u.dim, u.measure)));
+      box.innerHTML = dimensionOptions.map(dim => {
+        const measures = measureOptions[dim] || [];
+        return `
+        <div class="border border-slate-200 rounded-md p-3 bg-slate-50">
+          <p class="text-xs font-semibold text-slate-700 mb-2"><i class="fa-solid fa-cube mr-1 text-violet-500"></i>${dim}</p>
+          <div class="ml-4 flex flex-wrap gap-x-4 gap-y-1.5">
+            ${measures.map(m => {
+              const k = saleUnitKey(dim, m);
+              const isChecked = checkedSet.has(k);
+              return `<label class="flex items-center gap-1 text-xs ${isChecked ? 'cursor-not-allowed text-slate-500' : 'cursor-pointer text-slate-700'}">
+                <input type="checkbox" class="su-leaf" data-dim="${dim}" data-measure="${m}" ${isChecked ? 'checked disabled' : ''} style="accent-color:#7C3AED">
+                <span>${m}</span>
+                ${isChecked ? '<span class="text-[10px] text-amber-600 ml-0.5">已确认</span>' : ''}
+              </label>`;
             }).join('')}
           </div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
     }
-    // 维度下"全选/反选"切换
-    function toggleDimAll(el) {
-      const fn = el.dataset.fn, dim = el.dataset.dim;
-      document.querySelectorAll(`.su-leaf[data-fn="${fn}"][data-dim="${dim}"]`).forEach(c => { c.checked = el.checked; });
-    }
-    // 确认售卖单元：收集勾选项 → 重建 saleUnits（保留已有 id 以维持售卖计划关联）
+    // 确认售卖单元：收集勾选项 → 多维度笛卡尔积 → 生成售卖单元（fn='', 保留已有 id）
     function confirmSaleUnits() {
-      const next = [];
-      const idMap = {}; // key → id（保留已存在的 id）
-      saleUnits.forEach(u => { idMap[saleUnitKey(u.fn, u.dim, u.measure)] = u.id; });
-      let seq = saleUnits.reduce((m, u) => {
-        const n = parseInt((u.id || '').replace('su-', '')) || 0;
-        return Math.max(m, n);
-      }, 0);
-      document.querySelectorAll('.su-leaf:checked').forEach(c => {
-        const fn = c.dataset.fn, dim = c.dataset.dim, measure = c.dataset.measure;
-        const k = saleUnitKey(fn, dim, measure);
-        const id = idMap[k] || ('su-' + (++seq));
-        next.push({ id, fn, dim, measure });
+      const checked = Array.from(document.querySelectorAll('.su-leaf:checked')).map(c => ({ dim: c.dataset.dim, measure: c.dataset.measure }));
+      if (checked.length === 0) { alert('请至少勾选一个度量'); return; }
+      // 按维度分组
+      const byDim = {};
+      checked.forEach(({ dim, measure }) => {
+        if (!byDim[dim]) byDim[dim] = [];
+        byDim[dim].push(measure);
       });
-      const before = saleUnits.length, after = next.length;
+      const dims = Object.keys(byDim);
+      // 笛卡尔积（单维度时退化为枚举）
+      let combos = [[]];
+      dims.forEach(dim => {
+        const next = [];
+        combos.forEach(c => byDim[dim].forEach(m => next.push([...c, { dim, measure: m }])));
+        combos = next;
+      });
+      // 已有 id 查找表（key = 拼接后的 dim|measure）
+      const idMap = {};
+      saleUnits.forEach(u => { idMap[saleUnitKey(u.dim, u.measure)] = u.id; });
+      let seq = saleUnits.reduce((m, u) => Math.max(m, parseInt((u.id || '').replace('su-', '')) || 0), 0);
+      const before = saleUnits.length;
+      const next = combos.map(combo => {
+        // 单维度：dim/measure 直接取；多维度：用 " + " 拼接
+        const dim = combo.map(c => c.dim).join(' + ');
+        const measure = combo.map(c => c.measure).join(' + ');
+        const k = saleUnitKey(dim, measure);
+        const id = idMap[k] || ('su-' + (++seq));
+        return { id, fn: '', dim, measure };
+      });
       saleUnits = next;
-      renderSuConfirmContainer();
+      closeModal('su-confirm');
       renderSaleUnits();
       renderPlan();
-      alert('已确认售卖单元：' + after + ' 个' + (before !== after ? '（原 ' + before + ' 个）' : ''));
+      const added = next.length - before;
+      alert('已确认售卖单元：' + next.length + ' 个' + (added > 0 ? '（新增 ' + added + ' 个，已确认项不可取消）' : '（无新增）'));
     }
     // 售卖计划弹窗：当前选中的售卖单元 id 列表
     function selectedPlanUnits() {
