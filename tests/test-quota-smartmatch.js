@@ -121,6 +121,21 @@ window.openPlanCreateModal();
 ok(chargeBox().querySelectorAll('select.plan-charge-select').length === 3, '重开弹窗默认全选 3 行');
 window.closeModal('plan-create');
 
+// ================= 配额项「去创建」占位弹窗 =================
+section('配额项去创建（占位弹窗）');
+ok(!!document.getElementById('modal-quota-create'), '存在占位弹窗 #modal-quota-create');
+window.openPlanCreateModal(); // 上一节末尾已关闭 plan-create，此处重开验证叠层
+const quotaRow1 = quotaBox().querySelector('select.plan-quota-select[data-unit="su-1"]').closest('div.flex');
+ok(quotaRow1.textContent.includes('去创建'), '字段3 每行有「去创建」按钮');
+ok(!document.getElementById('modal-quota-create').classList.contains('flex'), '占位弹窗初始隐藏');
+quotaRow1.querySelector('button').click();
+ok(document.getElementById('modal-quota-create').classList.contains('flex'), '点击去创建后弹窗打开');
+ok(document.getElementById('modal-quota-create').textContent.includes('暂未开放'), '弹窗含「暂未开放」占位文案');
+ok(document.getElementById('modal-plan-create').classList.contains('flex'), '上一层售卖计划弹窗仍保持打开（叠层）');
+window.closeModal('quota-create');
+ok(!document.getElementById('modal-quota-create').classList.contains('flex'), '关闭后弹窗隐藏');
+window.closeModal('plan-create');
+
 // ================= 售卖计划 Tab / 详情页（回归） =================
 section('售卖计划 Tab 状态第2列 + 配额项列（16列，回归）');
 const planTable = document.querySelector('#plan-tbody').closest('table');
