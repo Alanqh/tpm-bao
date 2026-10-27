@@ -62,7 +62,7 @@ section('计费项下拉过滤');
 window.switchInnerTab('plan');
 window.openPlanCreateModal();
 const merged = document.getElementById('plan-units-charge-container');
-const optCodes = Array.from(merged.querySelectorAll('option')).map(o => o.value).filter(v => v);
+const optCodes = Array.from(merged.querySelectorAll('select.plan-charge-select option')).map(o => o.value).filter(v => v);
 ok(optCodes.every(c => c.startsWith('maas-product-vtpm-pre.')), 'pre 弹窗计费项下拉只含 pre 前缀（共 ' + optCodes.length + ' 项）: ' + optCodes.join(', '));
 ok(optCodes.includes('maas-product-vtpm-pre.30d'), 'pre.30d 在候选中');
 // std 打开时只含 std
@@ -71,7 +71,7 @@ window.backToList();
 window.openDetailFromListed('maas-product-vtpm-std');
 window.switchInnerTab('plan');
 window.openPlanCreateModal();
-const optCodes2 = Array.from(document.querySelectorAll('#plan-units-charge-container option')).map(o => o.value).filter(v => v);
+const optCodes2 = Array.from(document.querySelectorAll('#plan-units-charge-container select.plan-charge-select option')).map(o => o.value).filter(v => v);
 ok(optCodes2.every(c => c.startsWith('maas-product-vtpm-std.')), 'std 弹窗计费项下拉只含 std 前缀（共 ' + optCodes2.length + ' 项）');
 window.closeModal('plan-create');
 
