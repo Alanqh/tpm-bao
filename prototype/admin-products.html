@@ -250,11 +250,12 @@
           <div id="detail-info" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs"></div>
        </div>
 
-        <!-- 下半：售卖单元（含配置查询）/ 售卖计划 / 折算系数 / SLO -->
-        <div class="admin-card">
+        <!-- 下半：售卖单元（含配置查询）/ 售卖计划 / 定价计划 / 折算系数 / SLO -->
+        <div id="plan-tabs-card" class="admin-card">
           <div class="flex border-b border-slate-200 px-2 overflow-x-auto">
             <button type="button" class="admin-tab active" data-tab="saleunit" onclick="switchInnerTab('saleunit')">售卖单元</button>
             <button type="button" class="admin-tab" data-tab="plan" onclick="switchInnerTab('plan')">售卖计划</button>
+            <button type="button" class="admin-tab" data-tab="pricing" onclick="switchInnerTab('pricing')">定价计划</button>
             <button type="button" class="admin-tab" data-tab="factor-config" onclick="switchInnerTab('factor-config')">vTPM折算系数配置</button>
             <button type="button" class="admin-tab" data-tab="slo-config" onclick="switchInnerTab('slo-config')">SLO赔付规则配置</button>
           </div>
@@ -281,6 +282,7 @@
                   <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">关联计费项</th>
                   <th class="text-right px-3 py-2 font-medium">刊例价</th>
+                  <th class="text-right px-3 py-2 font-medium">所选时间执行价</th>
                   <th class="text-left px-3 py-2 font-medium">折算系数</th>
                   <th class="text-left px-3 py-2 font-medium">SLO</th>
                   <th class="text-left px-3 py-2 font-medium">payload</th>
@@ -288,7 +290,7 @@
                   <th class="text-right px-3 py-2 font-medium">最大购买量</th>
                   <th class="text-right px-3 py-2 font-medium">购买量step</th>
                   <th class="text-left px-3 py-2 font-medium">售卖起止</th>
-                  <th class="text-left px-3 py-2 font-medium">生效起止</th>
+                  <th class="text-left px-3 py-2 font-medium">操作</th>
                 </tr>
               </thead>
               <tbody id="saleunit-tbody" class="divide-y divide-slate-100"></tbody>
@@ -296,7 +298,7 @@
             </div>
           </div>
 
-          <!-- 售卖计划 Tab -->
+          <!-- 售卖计划 Tab：计划单元列表（售卖计划 × 售卖单元 展开） -->
           <div id="inner-tab-plan" class="p-4 hidden">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
               <p class="text-xs text-slate-500">&nbsp;</p>
@@ -306,25 +308,49 @@
             <table class="w-full text-sm min-w-[1600px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th class="text-left px-3 py-2 font-medium">名称</th>
-                  <th class="text-left px-3 py-2 font-medium">关联售卖单元（各自计费项）</th>
-                  <th class="text-left px-3 py-2 font-medium">关联配额项</th>
-                  <th class="text-left px-3 py-2 font-medium">关联折算系数</th>
-                  <th class="text-left px-3 py-2 font-medium">关联SLO赔付规则</th>
+                  <th class="text-left px-3 py-2 font-medium">计划单元</th>
+                  <th class="text-left px-3 py-2 font-medium">所属售卖计划</th>
+                  <th class="text-left px-3 py-2 font-medium">售卖单元</th>
+                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
+                  <th class="text-left px-3 py-2 font-medium">计费项</th>
+                  <th class="text-left px-3 py-2 font-medium">折算系数</th>
+                  <th class="text-left px-3 py-2 font-medium">SLO</th>
+                  <th class="text-left px-3 py-2 font-medium">payload</th>
                   <th class="text-right px-3 py-2 font-medium">最小购买量</th>
                   <th class="text-right px-3 py-2 font-medium">最大购买量</th>
                   <th class="text-right px-3 py-2 font-medium">购买量step</th>
-                  <th class="text-left px-3 py-2 font-medium">开始售卖时间</th>
-                  <th class="text-left px-3 py-2 font-medium">结束售卖时间</th>
-                  <th class="text-left px-3 py-2 font-medium">关联payload</th>
+                  <th class="text-left px-3 py-2 font-medium">售卖起止</th>
                   <th class="text-left px-3 py-2 font-medium">优先级</th>
-                  <th class="text-left px-3 py-2 font-medium">开始生效时间</th>
-                  <th class="text-left px-3 py-2 font-medium">结束生效时间</th>
+                  <th class="text-left px-3 py-2 font-medium">生效起止</th>
                   <th class="text-left px-3 py-2 font-medium">状态</th>
-                  <th class="text-left px-3 py-2 font-medium">操作</th>
                 </tr>
               </thead>
               <tbody id="plan-tbody" class="divide-y divide-slate-100"></tbody>
+            </table>
+            </div>
+          </div>
+
+          <!-- 定价计划 Tab：占位（沿用旧版定价计划展示） -->
+          <div id="inner-tab-pricing" class="p-4 hidden">
+            <div class="text-center py-10">
+              <i class="fa-solid fa-tags text-3xl text-slate-300 mb-3"></i>
+              <p class="text-sm text-slate-500 mb-4">定价计划沿用旧版展示</p>
+            </div>
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[1200px]">
+              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left px-3 py-2 font-medium">定价计划</th>
+                  <th class="text-left px-3 py-2 font-medium">计费项</th>
+                  <th class="text-right px-3 py-2 font-medium">刊例价</th>
+                  <th class="text-right px-3 py-2 font-medium">所选时间刊例价</th>
+                  <th class="text-right px-3 py-2 font-medium">所选时间段执行价</th>
+                  <th class="text-left px-3 py-2 font-medium">单位</th>
+                  <th class="text-left px-3 py-2 font-medium">生效时间</th>
+                  <th class="text-left px-3 py-2 font-medium">状态</th>
+                </tr>
+              </thead>
+              <tbody id="pricing-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
             </div>
           </div>
@@ -336,6 +362,40 @@
           <!-- SLO赔付规则配置 Tab -->
           <div id="inner-tab-slo-config" class="p-4 hidden">
             <div id="slo-config-container"></div>
+          </div>
+        </div>
+
+        <!-- 售卖计划详情（从计划单元「所属售卖计划」进入；隐藏 tabs 卡片切换显示） -->
+        <div id="plan-detail-view" class="admin-card p-4 hidden">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 id="plan-detail-title" class="text-base font-semibold text-slate-900">售卖计划详情</h3>
+              <p class="text-xs text-slate-500 mt-0.5">售卖计划全部字段与状态操作</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="plan-detail-status" class="badge bg-blue-50 text-blue-700">待发布</span>
+              <button type="button" onclick="closePlanDetail()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回</button>
+            </div>
+          </div>
+          <!-- 操作区 -->
+          <div id="plan-detail-actions" class="flex flex-wrap items-center gap-2 mb-4"></div>
+          <!-- 字段区 -->
+          <div id="plan-detail-fields" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs"></div>
+          <!-- 计划单元区 -->
+          <p class="text-sm font-medium text-slate-900 mt-5 mb-3">计划单元</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[900px]">
+              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left px-3 py-2 font-medium">计划单元</th>
+                  <th class="text-left px-3 py-2 font-medium">售卖单元</th>
+                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
+                  <th class="text-left px-3 py-2 font-medium">计费项</th>
+                  <th class="text-left px-3 py-2 font-medium">刊例价</th>
+                </tr>
+              </thead>
+              <tbody id="plan-detail-tbody" class="divide-y divide-slate-100"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -378,7 +438,7 @@
   <div id="modal-plan-create" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
-        <h3 class="text-sm font-semibold text-slate-900">创建售卖计划</h3>
+        <h3 id="plan-create-title" class="text-sm font-semibold text-slate-900">创建售卖计划</h3>
         <button type="button" onclick="closeModal('plan-create')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 grid grid-cols-1 gap-4">
@@ -599,7 +659,7 @@
     function switchInnerTab(tab) {
       document.querySelectorAll('#detail-view .admin-tab[data-tab]').forEach(t => t.classList.remove('active'));
       document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
-      ['saleunit', 'plan', 'factor-config', 'slo-config'].forEach(id => {
+      ['saleunit', 'plan', 'pricing', 'factor-config', 'slo-config'].forEach(id => {
         document.getElementById('inner-tab-' + id).classList.toggle('hidden', tab !== id);
       });
    }
@@ -741,7 +801,7 @@
     }
     function renderSaleUnits() {
       if (saleUnits.length === 0) {
-        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元，请先点击「确认售卖单元」</td></tr>`;
+        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="15" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元，请先点击「确认售卖单元」</td></tr>`;
         return;
       }
       document.getElementById('saleunit-tbody').innerHTML = saleUnits.map(u => {
@@ -749,7 +809,17 @@
         const st = unitStatusOf(u.id);
         const charge = plan ? (chargeItems.find(c => c.code === (plan.chargeCodes && plan.chargeCodes[u.id]) || c.code === plan.chargeCode) || {}) : {};
         const sellSpan = plan ? `${plan.sellStart} ~ ${plan.sellEnd}` : '—';
-        const effSpan = plan ? `${plan.effStart} ~ ${plan.effEnd}` : '—';
+        // 所选时间执行价：有 timeFilter 且查询点命中售卖期时展示（= 刊例价 × 0.95 折扣示意），否则 —
+        let execPrice = '—';
+        if (timeFilter && plan && (charge.price || charge.price === 0)) {
+          const p = timeFilter.point;
+          if (p >= plan.sellStart && p <= plan.sellEnd) execPrice = (charge.price * 0.95).toFixed(4);
+        }
+        // 未配置（无已发布售卖计划）的售卖单元可删除
+        const deletable = !plan && st.text === '未配置';
+        const action = deletable
+          ? `<button type="button" onclick="removeSaleUnit('${u.id}')" class="text-red-500 hover:underline text-xs">删除</button>`
+          : '<span class="text-slate-300 text-xs">—</span>';
         return `
         <tr class="hover:bg-slate-50">
           <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
@@ -758,6 +828,7 @@
           <td class="px-3 py-2">${formatDimMeasure(u)}</td>
           <td class="px-3 py-2 font-mono text-xs">${charge.code || '—'}${charge.code ? '<button type="button" onclick="copyChargeCode(\'' + charge.code + '\', this)" class="ml-1 text-slate-400 hover:text-slate-600" title="复制code"><i class="fa-solid fa-copy"></i></button>' : ''}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${(charge.price || 0).toFixed(4)}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs">${execPrice}</td>
           <td class="px-3 py-2 text-xs">${plan ? plan.factor : '—'}</td>
           <td class="px-3 py-2 text-xs">${plan ? plan.slo : '—'}</td>
           <td class="px-3 py-2 text-xs font-mono">${plan ? plan.payloadId : '—'}</td>
@@ -765,47 +836,78 @@
           <td class="px-3 py-2 text-right text-xs">${plan ? plan.maxQty : '—'}</td>
           <td class="px-3 py-2 text-right text-xs">${plan ? plan.stepQty : '—'}</td>
           <td class="px-3 py-2 text-xs whitespace-nowrap">${sellSpan}</td>
-          <td class="px-3 py-2 text-xs whitespace-nowrap">${effSpan}</td>
+          <td class="px-3 py-2 whitespace-nowrap">${action}</td>
         </tr>`;
       }).join('');
     }
-    function renderPlan() {
-      if (planRows.length === 0) {
-        document.getElementById('plan-tbody').innerHTML = `<tr><td colspan="16" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖计划</td></tr>`;
+    // 删除未配置的售卖单元（有已发布售卖计划关联的不可删）
+    function removeSaleUnit(unitId) {
+      const hasPlan = planRows.some((r, i) => (r.units || []).includes(unitId) && planRowStatuses[i] === 'published');
+      if (hasPlan) { alert('该售卖单元已关联已发布售卖计划，不可删除'); return; }
+      saleUnits = saleUnits.filter(u => u.id !== unitId);
+      renderSaleUnits();
+    }
+    // ===== 定价计划占位渲染（沿用旧版：按计费项展示刊例价/执行价） =====
+    function renderPricing() {
+      const tbody = document.getElementById('pricing-tbody');
+      if (!tbody) return;
+      if (chargeItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-3 py-8 text-center text-xs text-slate-400">暂无定价计划数据</td></tr>`;
         return;
       }
-      document.getElementById('plan-tbody').innerHTML = planRows.map((r, idx) => {
-        const meta = planStatusMeta(planRowStatuses[idx]);
-        let action = '';
-        if (planRowStatuses[idx] === 'pending_publish') {
-          action = `<button type="button" onclick="publishPlanRow(${idx})" class="text-violet-600 hover:underline text-xs">发布</button>`;
-        } else if (planRowStatuses[idx] === 'published') {
-          action = `<button type="button" onclick="stopPlanRow(${idx})" class="text-red-500 hover:underline text-xs">停用</button>`;
-        } else {
-          action = '<span class="text-slate-300 text-xs">---</span>';
-        }
-        const unitsTxt = (r.units || []).map(id => {
-          const code = (r.chargeCodes && r.chargeCodes[id]) || (r.chargeCode || '');
-          return `<div class="font-mono">${id}${code ? '<span class="text-slate-400"> → </span>' + code : ''}</div>`;
-        }).join('') || '—';
+      tbody.innerHTML = chargeItems.map((c, idx) => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-3 py-2 text-xs">旧版定价计划 #${idx + 1}</td>
+          <td class="px-3 py-2 font-mono text-xs">${c.code}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs">${c.price.toFixed(4)}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs">${c.price.toFixed(4)}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs">${(c.price * 0.95).toFixed(4)}</td>
+          <td class="px-3 py-2 text-xs">${c.unit} / ${c.currency}</td>
+          <td class="px-3 py-2 text-xs whitespace-nowrap">2026-10-01 ~ 2026-12-31</td>
+          <td class="px-3 py-2"><span class="badge bg-green-100 text-green-700">生效中</span></td>
+        </tr>`).join('');
+    }
+    // ===== 售卖计划 Tab：计划单元列表（每个售卖计划为其包含的每个售卖单元生成一个计划单元） =====
+    // 计划单元 = 售卖计划 × 售卖单元；状态跟随所属售卖计划
+    function planUnitId(planIdx, unitId) { return 'pu-' + (planIdx + 1) + '-' + unitId; }
+    function renderPlan() {
+      // 先构建全部计划单元行
+      const rows = [];
+      planRows.forEach((r, planIdx) => {
+        (r.units || []).forEach(uid => {
+          const u = saleUnits.find(x => x.id === uid) || {};
+          const charge = chargeItems.find(c => c.code === (r.chargeCodes && r.chargeCodes[uid]));
+          rows.push({ planIdx, uid, r, u, charge });
+        });
+      });
+      const tbody = document.getElementById('plan-tbody');
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="15" class="px-3 py-8 text-center text-xs text-slate-400">暂无计划单元，请先创建售卖计划</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map(row => {
+        const { planIdx, uid, r, u, charge } = row;
+        const meta = planStatusMeta(planRowStatuses[planIdx]);
+        const puId = planUnitId(planIdx, uid);
+        const sellSpan = `${r.sellStart} ~ ${r.sellEnd}`;
+        const effSpan = `${r.effStart} ~ ${r.effEnd}`;
         return `
           <tr class="hover:bg-slate-50">
-            <td class="px-3 py-2 text-xs font-medium text-slate-800">${r.name || '—'}</td>
-            <td class="px-3 py-2 text-xs">${unitsTxt}</td>
-            <td class="px-3 py-2 text-xs text-slate-400">${r.quotaItem || '—'}</td>
+            <td class="px-3 py-2 font-mono text-xs">${puId}</td>
+            <td class="px-3 py-2 text-xs"><button type="button" onclick="openPlanDetail(${planIdx})" class="text-violet-600 hover:underline font-medium">${r.name || '—'}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
+            <td class="px-3 py-2 font-mono text-xs">${uid}</td>
+            <td class="px-3 py-2">${formatDimMeasure(u)}</td>
+            <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code : '—'}</td>
             <td class="px-3 py-2 text-xs">${r.factor}</td>
             <td class="px-3 py-2 text-xs">${r.slo}</td>
+            <td class="px-3 py-2 text-xs font-mono">${r.payloadId}</td>
             <td class="px-3 py-2 text-right text-xs">${r.minQty}</td>
             <td class="px-3 py-2 text-right text-xs">${r.maxQty}</td>
             <td class="px-3 py-2 text-right text-xs">${r.stepQty}</td>
-            <td class="px-3 py-2 text-xs whitespace-nowrap">${r.sellStart}</td>
-            <td class="px-3 py-2 text-xs whitespace-nowrap">${r.sellEnd}</td>
-            <td class="px-3 py-2 text-xs font-mono">${r.payloadId}</td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap">${sellSpan}</td>
             <td class="px-3 py-2 text-xs">${r.priority}</td>
-            <td class="px-3 py-2 text-xs whitespace-nowrap">${r.effStart}</td>
-            <td class="px-3 py-2 text-xs whitespace-nowrap">${r.effEnd}</td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap">${effSpan}</td>
             <td class="px-3 py-2"><span class="badge ${meta.cls}">${meta.text}</span></td>
-            <td class="px-3 py-2 whitespace-nowrap">${action}</td>
           </tr>`;
       }).join('');
     }
@@ -885,8 +987,13 @@
       `;
       renderSaleUnits();
       renderPlan();
+      renderPricing();
       renderConfig('factor');
       renderConfig('slo');
+      // 复位售卖计划详情视图
+      currentPlanDetailIdx = -1;
+      document.getElementById('plan-detail-view').classList.add('hidden');
+      document.getElementById('plan-tabs-card').classList.remove('hidden');
       switchInnerTab('saleunit');
    }
     function backToList() {
@@ -907,8 +1014,125 @@
    }
 
     // ===== 售卖计划：状态操作 =====
-    function publishPlanRow(idx) { planRowStatuses[idx] = 'published'; renderPlan(); renderSaleUnits(); }
-    function stopPlanRow(idx) { planRowStatuses[idx] = 'stopped'; renderPlan(); renderSaleUnits(); }
+    function publishPlanRow(idx) {
+      planRowStatuses[idx] = 'published';
+      renderPlan(); renderSaleUnits();
+      // 详情页打开时同步刷新
+      if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
+    }
+    function stopPlanRow(idx) {
+      planRowStatuses[idx] = 'stopped';
+      renderPlan(); renderSaleUnits();
+      if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
+    }
+
+    // ===== 售卖计划详情页：从计划单元「所属售卖计划」进入；发布/停用/修改 =====
+    let currentPlanDetailIdx = -1;
+    function openPlanDetail(idx) {
+      currentPlanDetailIdx = idx;
+      // 隐藏 tabs 卡片，显示计划详情
+      document.getElementById('plan-detail-view').classList.remove('hidden');
+      document.getElementById('plan-tabs-card').classList.add('hidden');
+      renderPlanDetail(idx);
+    }
+    function closePlanDetail() {
+      currentPlanDetailIdx = -1;
+      document.getElementById('plan-detail-view').classList.add('hidden');
+      document.getElementById('plan-tabs-card').classList.remove('hidden');
+    }
+    function renderPlanDetail(idx) {
+      const r = planRows[idx];
+      if (!r) return;
+      const st = planRowStatuses[idx];
+      const meta = planStatusMeta(st);
+      document.getElementById('plan-detail-title').textContent = '售卖计划详情：' + (r.name || '—');
+      const stEl = document.getElementById('plan-detail-status');
+      stEl.className = 'badge ' + meta.cls;
+      stEl.textContent = meta.text;
+      // 操作区：待发布=发布+修改；已发布=停用；已停用/已过期=无
+      const actionsEl = document.getElementById('plan-detail-actions');
+      if (st === 'pending_publish') {
+        actionsEl.innerHTML = `
+          <button type="button" onclick="publishPlanRow(${idx})" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>发布</button>
+          <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>`;
+      } else if (st === 'published') {
+        actionsEl.innerHTML = `
+          <button type="button" onclick="stopPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-ban mr-1"></i>停用</button>`;
+      } else {
+        actionsEl.innerHTML = '<span class="text-xs text-slate-400">当前状态无可用操作</span>';
+      }
+      // 字段区
+      const field = (label, val) => `<div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">${label}</p><p class="text-slate-800 font-medium">${val ?? '—'}</p></div>`;
+      document.getElementById('plan-detail-fields').innerHTML = [
+        field('名称', r.name),
+        field('关联配额项', r.quotaItem),
+        field('关联折算系数', r.factor),
+        field('关联SLO赔付规则', r.slo),
+        field('最小购买量', r.minQty),
+        field('最大购买量', r.maxQty),
+        field('购买量step', r.stepQty),
+        field('开始售卖时间', r.sellStart),
+        field('结束售卖时间', r.sellEnd),
+        field('关联payload', `<span class="font-mono">${r.payloadId}</span>`),
+        field('优先级', r.priority),
+        field('开始生效时间', r.effStart),
+        field('结束生效时间', r.effEnd)
+      ].join('');
+      // 计划单元区
+      const tbody = document.getElementById('plan-detail-tbody');
+      const units = r.units || [];
+      if (units.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-3 py-6 text-center text-xs text-slate-400">无计划单元</td></tr>`;
+      } else {
+        tbody.innerHTML = units.map(uid => {
+          const u = saleUnits.find(x => x.id === uid) || {};
+          const charge = chargeItems.find(c => c.code === (r.chargeCodes && r.chargeCodes[uid]));
+          return `
+          <tr class="hover:bg-slate-50">
+            <td class="px-3 py-2 font-mono text-xs">${planUnitId(idx, uid)}</td>
+            <td class="px-3 py-2 font-mono text-xs">${uid}</td>
+            <td class="px-3 py-2">${formatDimMeasure(u)}</td>
+            <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code : '—'}</td>
+            <td class="px-3 py-2 text-right font-mono text-xs">${charge ? charge.price.toFixed(4) + ' / ' + charge.unit : '—'}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+    // 修改（仅待发布）：打开创建弹窗并回填当前值，确认后覆盖原行
+    let editingPlanIdx = -1;
+    function editPlanRow(idx) {
+      editingPlanIdx = idx;
+      const r = planRows[idx];
+      document.getElementById('plan-name').value = r.name || '';
+      renderPlanUnitCheckboxes();
+      // 回填勾选 = r.units
+      document.querySelectorAll('.plan-unit-check').forEach(c => { c.checked = (r.units || []).includes(c.value); });
+      renderPlanChargeList();
+      // 回填每个 unit 的计费项
+      Object.entries(r.chargeCodes || {}).forEach(([uid, code]) => {
+        const sel = document.querySelector(`select.plan-charge-select[data-unit="${uid}"]`);
+        if (sel && chargeItems.some(c => c.code === code)) sel.value = code;
+      });
+      renderPlanConfigSelector('factor');
+      renderPlanConfigSelector('slo');
+      const factorSel = document.getElementById('plan-factor');
+      const sloSel = document.getElementById('plan-slo');
+      if (factorSel && chargeItems.length) factorSel.value = r.factor;
+      if (sloSel && chargeItems.length) sloSel.value = r.slo;
+      refreshPlanPayloadSelect();
+      const payloadSel = document.getElementById('plan-payload');
+      if (payloadSel) payloadSel.value = r.payloadId;
+      document.getElementById('plan-min-qty').value = r.minQty;
+      document.getElementById('plan-max-qty').value = r.maxQty;
+      document.getElementById('plan-step-qty').value = r.stepQty;
+      document.getElementById('plan-priority').value = r.priority;
+      document.getElementById('plan-sell-start').value = (r.sellStart || '').replace(' ', 'T');
+      document.getElementById('plan-sell-end').value = (r.sellEnd || '').replace(' ', 'T');
+      document.getElementById('plan-eff-start').value = (r.effStart || '').replace(' ', 'T');
+      document.getElementById('plan-eff-end').value = (r.effEnd || '').replace(' ', 'T');
+      document.getElementById('plan-create-title').textContent = '修改售卖计划';
+      openModal('plan-create');
+    }
 
     // ===== 售卖计划：状态元数据 / 创建入口 =====
     function planStatusMeta(st) {
@@ -1001,6 +1225,8 @@
       return Array.from(document.querySelectorAll('.plan-unit-check')).filter(c => c.checked).map(c => c.value);
     }
     function openPlanCreateModal() {
+      editingPlanIdx = -1;
+      document.getElementById('plan-create-title').textContent = '创建售卖计划';
       document.getElementById('plan-name').value = '';
       renderPlanUnitCheckboxes();
       renderPlanConfigSelector('factor');
@@ -1120,11 +1346,21 @@
       const effStart = fmtDt('plan-eff-start', '2026-11-01T00:00:00');
       const effEnd = fmtDt('plan-eff-end', '2027-11-01T00:00:00');
       const priority = parseInt(document.getElementById('plan-priority').value) || 0;
-      planRows.push({ name, units, chargeCodes, quotaItem: '—（暂未启用）', factor, slo, minQty, maxQty, stepQty, sellStart, sellEnd, payloadId, priority, effStart, effEnd });
-      planRowStatuses.push('pending_publish');
+      const row = { name, units, chargeCodes, quotaItem: '—（暂未启用）', factor, slo, minQty, maxQty, stepQty, sellStart, sellEnd, payloadId, priority, effStart, effEnd };
+      if (editingPlanIdx >= 0 && planRows[editingPlanIdx]) {
+        // 修改模式：覆盖原行（状态保持不变）
+        planRows[editingPlanIdx] = row;
+      } else {
+        planRows.push(row);
+        planRowStatuses.push('pending_publish');
+      }
+      const editIdx = editingPlanIdx;
+      editingPlanIdx = -1;
       closeModal('plan-create');
       renderPlan();
       renderSaleUnits();
+      // 详情页打开时同步刷新
+      if (currentPlanDetailIdx >= 0) renderPlanDetail(currentPlanDetailIdx === editIdx ? editIdx : currentPlanDetailIdx);
     }
 
     // ===== 待上架：商品详情 → 进入相同详情页（待上架） =====
