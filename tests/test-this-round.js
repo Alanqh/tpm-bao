@@ -18,50 +18,44 @@ function section(t) { console.log('\n== ' + t + ' =='); }
 
 window.openDetailFromListed('maas-product-vtpm-std');
 
-// ================= 1. 创建售卖计划弹窗：计费项详情换行展示 =================
+// ================= 1. 创建售卖计划页面：计费项详情换行展示 =================
 section('1. 计费项详情换行展示');
 window.switchInnerTab('plan');
-window.openPlanCreateModal();
-const merged = document.getElementById('plan-units-charge-container');
-const modal = document.getElementById('modal-plan-create');
-ok(!modal.classList.contains('hidden'), '创建售卖计划弹窗打开');
-// 每个售卖单元下方有计费详情容器
-const details = merged.querySelectorAll('[id^="plan-charge-detail-"]');
-ok(details.length === evalInPage('saleUnits.length'), '每个售卖单元有计费详情容器（' + details.length + ' 个）');
-// 默认选中第一个计费项 → 详情行应含 code/名称/刊例价/单位/货币单位/标签
-const firstDetail = document.getElementById('plan-charge-detail-su-1');
-ok(firstDetail && firstDetail.textContent.includes('code：'), '详情行含 code 字段');
+window.openPlanCreatePage();
+const pcView = document.getElementById('plan-create-view');
+ok(!pcView.classList.contains('hidden'), '创建售卖计划页面打开');
+// unified 行有计费详情容器
+ok(!!document.getElementById('plan-charge-detail-unified'), 'unified 行有计费详情容器');
+const firstDetail = document.getElementById('plan-charge-detail-unified');
+ok(firstDetail.textContent.includes('code：'), '详情行含 code 字段');
 ok(firstDetail.textContent.includes('名称：'), '详情行含 名称 字段');
 ok(firstDetail.textContent.includes('刊例价：'), '详情行含 刊例价 字段');
 ok(firstDetail.textContent.includes('单位：'), '详情行含 单位 字段');
 ok(firstDetail.textContent.includes('货币单位：'), '详情行含 货币单位 字段');
 ok(firstDetail.textContent.includes('标签：'), '详情行含 标签 字段');
-const chargeText = firstDetail.textContent;
-ok(chargeText.includes('maas-product-vtpm-std.30d'), '详情行展示所选计费项 code');
-// 切换下拉 → 详情行实时刷新（su-1 从 .30d 换到 .60d）
-const sel1 = merged.querySelector('select.plan-charge-select[data-unit="su-1"]');
-sel1.value = 'maas-product-vtpm-std.60d';
-window.renderChargeDetail('su-1');
-ok(document.getElementById('plan-charge-detail-su-1').textContent.includes('maas-product-vtpm-std.60d'), '切换下拉后详情行实时刷新为 .60d');
-// 取消勾选 → 重渲后下拉禁用，详情行保留
-const cb = merged.querySelector('.plan-unit-check');
-const cbVal = cb.value;
-cb.checked = false;
-cb.dispatchEvent(new window.Event('change', { bubbles: true }));
-ok(document.querySelector('select.plan-charge-select[data-unit="' + cbVal + '"]').disabled, '取消勾选后下拉禁用');
-ok(!!document.getElementById('plan-charge-detail-' + cbVal), '取消勾选后详情行保留');
+ok(firstDetail.textContent.includes('maas-product-vtpm-std.30d'), '详情行展示所选计费项 code');
+// 切换下拉 → 详情行实时刷新（unified 从 .30d 换到 .60d）
+const uSel = document.querySelector('#plan-charge-unified select.plan-charge-select');
+uSel.value = 'maas-product-vtpm-std.60d';
+window.renderChargeDetail('');
+ok(firstDetail.textContent.includes('maas-product-vtpm-std.60d'), '切换下拉后详情行实时刷新为 .60d');
+// perUnit 模式：每个在售售卖单元行有自己的详情容器
+document.getElementById('plan-mode-charge').checked = true;
+window.renderPlanCreateSections();
+const pDetails = document.querySelectorAll('#plan-charge-perunit [id^="plan-charge-detail-"]');
+ok(pDetails.length === evalInPage('saleUnits.length'), 'perUnit 每个售卖单元有计费详情容器（' + pDetails.length + ' 个）');
+document.getElementById('plan-mode-charge').checked = false;
 // 去创建计费项后回填 → 详情行展示新计费项（code 前缀须为当前商品 std）
-window.closeModal('plan-create');
-window.openPlanCreateModal();
-window.openCreateBillingModal('su-1');
+window.renderPlanCreateSections();
+window.openCreateBillingModal('');
 document.getElementById('billing-code').value = 'maas-product-vtpm-std.smoke';
 document.getElementById('billing-price').value = '0.0099';
 window.confirmCreateBilling();
-const afterSel = merged.querySelector('select.plan-charge-select[data-unit="su-1"]');
-ok(afterSel.value === 'maas-product-vtpm-std.smoke', '去创建后回填新计费项到该行');
-ok(document.getElementById('plan-charge-detail-su-1').textContent.includes('maas-product-vtpm-std.smoke'), '回填后详情行展示新计费项');
-ok(document.getElementById('plan-charge-detail-su-1').textContent.includes('0.0099'), '详情行展示新计费项刊例价');
-window.closeModal('plan-create');
+const afterSel = document.querySelector('#plan-charge-unified select.plan-charge-select');
+ok(afterSel.value === 'maas-product-vtpm-std.smoke', '去创建后回填新计费项到 unified 行');
+ok(document.getElementById('plan-charge-detail-unified').textContent.includes('maas-product-vtpm-std.smoke'), '回填后详情行展示新计费项');
+ok(document.getElementById('plan-charge-detail-unified').textContent.includes('0.0099'), '详情行展示新计费项刊例价');
+window.closePlanCreatePage();
 
 // ================= 2. 售卖单元刊例价来自关联计费项，无则 — =================
 section('2. 售卖单元刊例价');
