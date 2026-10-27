@@ -289,7 +289,6 @@
                   <th class="text-right px-3 py-2 font-medium">最小购买量</th>
                   <th class="text-right px-3 py-2 font-medium">最大购买量</th>
                   <th class="text-right px-3 py-2 font-medium">购买量step</th>
-                  <th class="text-left px-3 py-2 font-medium">售卖起止</th>
                   <th class="text-left px-3 py-2 font-medium">操作</th>
                 </tr>
               </thead>
@@ -305,7 +304,7 @@
               <button type="button" onclick="openPlanCreatePage()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
             </div>
             <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[1700px]">
+            <table class="w-full text-sm min-w-[1600px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th class="text-left px-3 py-2 font-medium">计划单元</th>
@@ -322,7 +321,6 @@
                   <th class="text-right px-3 py-2 font-medium">最小购买量</th>
                   <th class="text-right px-3 py-2 font-medium">最大购买量</th>
                   <th class="text-right px-3 py-2 font-medium">购买量step</th>
-                  <th class="text-left px-3 py-2 font-medium">售卖起止</th>
                   <th class="text-left px-3 py-2 font-medium">优先级</th>
                   <th class="text-left px-3 py-2 font-medium">生效起止</th>
                 </tr>
@@ -395,7 +393,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h3 id="plan-create-page-title" class="text-lg font-semibold text-slate-900">创建售卖计划</h3>
-            <p class="text-xs text-slate-500 mt-0.5">按区块填写：基础信息 → 生效售卖单元 → 生效时间 → 各字段组（全部一致 / 按售卖单元配置）</p>
+            <p class="text-xs text-slate-500 mt-0.5">按区块填写：基础信息（含生效时间）→ 生效售卖单元（勾选 ID，选择上架 / 下架）→ 计划字段配置（全部一致 / 按售卖单元配置）</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="closePlanCreatePage()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回商品详情</button>
@@ -403,9 +401,9 @@
           </div>
         </div>
 
-        <!-- 区块1：基础信息（名称 + 优先级） -->
+        <!-- 区块1：基础信息（名称 + 优先级 + 生效时间） -->
         <div class="admin-card p-4 mb-4">
-          <p class="text-sm font-medium text-slate-900 mb-3">1. 基础信息</p>
+          <p class="text-sm font-medium text-slate-900 mb-3">1. 基础信息（含生效时间）</p>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="form-label">售卖计划名称</label>
@@ -415,24 +413,6 @@
               <label class="form-label">优先级（数字，越大越优先）</label>
               <input id="plan-priority" type="number" class="form-input" placeholder="如 100">
             </div>
-          </div>
-        </div>
-
-        <!-- 区块2：生效售卖单元（勾选 + 在售/禁售） -->
-        <div class="admin-card p-4 mb-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <p class="text-sm font-medium text-slate-900">2. 本售卖计划对哪些售卖单元生效（勾选后选择在售 / 禁售）</p>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="toggleAllPlanUnits()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-regular fa-square-check mr-1"></i>全选/全不选</button>
-            </div>
-          </div>
-          <div id="plan-units-charge-container" class="border border-slate-200 rounded-md p-2.5 space-y-2"></div>
-        </div>
-
-        <!-- 区块3：生效时间 -->
-        <div class="admin-card p-4 mb-4">
-          <p class="text-sm font-medium text-slate-900 mb-3">3. 售卖计划生效时间</p>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="form-label">开始生效时间</label>
               <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00">
@@ -444,32 +424,40 @@
           </div>
         </div>
 
-        <!-- 区块4：各字段组（每个都带「全部一致 / 按售卖单元配置」开关） -->
+        <!-- 区块2：生效售卖单元（勾选售卖单元 ID，下方展示 function 与维度组合；上架/下架） -->
+        <div class="admin-card p-4 mb-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <p class="text-sm font-medium text-slate-900">2. 本售卖计划对哪些售卖单元生效（勾选售卖单元 ID，选择上架 / 下架）</p>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="toggleAllPlanUnits()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-regular fa-square-check mr-1"></i>全选/全不选</button>
+            </div>
+          </div>
+          <div id="plan-units-charge-container" class="border border-slate-200 rounded-md p-2.5 space-y-2"></div>
+        </div>
+
+        <!-- 区块3：各字段组（每个都带「全部一致 / 按售卖单元配置」开关） -->
         <div class="admin-card p-4">
-          <p class="text-sm font-medium text-slate-900 mb-1">4. 计划字段配置</p>
-          <p class="text-xs text-slate-500 mb-3">每组字段可用开关选择「全部售卖单元一致」或「按售卖单元配置」（只为在售售卖单元逐个配置）</p>
+          <p class="text-sm font-medium text-slate-900 mb-1">3. 计划字段配置</p>
+          <p class="text-xs text-slate-500 mb-3">每组字段可用开关选择「全部售卖单元一致」或「按售卖单元配置」（只为已上架售卖单元逐个配置）</p>
           <div class="grid grid-cols-1 gap-5">
 
-            <!-- 4.1 计费项 -->
+            <!-- 3.1 计费项 -->
             <div class="border border-slate-200 rounded-md p-3">
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                <p class="text-xs font-semibold text-slate-700">4.1 关联计费项</p>
-                <div class="flex items-center gap-1.5">
-                  <button type="button" onclick="smartMatchCharges()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>按周期智能匹配</button>
-                  <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-                    <input type="checkbox" id="plan-mode-charge" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
-                    按售卖单元配置
-                  </label>
-                </div>
+              <div class="flex flex-wrap items-center gap-3 mb-2">
+                <p class="text-xs font-semibold text-slate-700">3.1 关联计费项</p>
+                <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
+                  <input type="checkbox" id="plan-mode-charge" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
+                  按售卖单元配置
+                </label>
               </div>
               <div id="plan-charge-unified" class="flex items-center gap-2"></div>
               <div id="plan-charge-perunit" class="hidden"></div>
             </div>
 
-            <!-- 4.2 配额项 -->
+            <!-- 3.2 配额项 -->
             <div class="border border-slate-200 rounded-md p-3">
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                <p class="text-xs font-semibold text-slate-700">4.2 关联配额项</p>
+              <div class="flex flex-wrap items-center gap-3 mb-2">
+                <p class="text-xs font-semibold text-slate-700">3.2 关联配额项</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="plan-mode-quota" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                   按售卖单元配置
@@ -479,10 +467,10 @@
               <div id="plan-quota-perunit" class="hidden"></div>
             </div>
 
-            <!-- 4.3 库存项 -->
+            <!-- 3.3 库存项 -->
             <div class="border border-slate-200 rounded-md p-3">
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                <p class="text-xs font-semibold text-slate-700">4.3 关联库存项</p>
+              <div class="flex flex-wrap items-center gap-3 mb-2">
+                <p class="text-xs font-semibold text-slate-700">3.3 关联库存项</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="plan-mode-inventory" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                   按售卖单元配置
@@ -492,11 +480,11 @@
               <div id="plan-inventory-perunit" class="hidden"></div>
             </div>
 
-            <!-- 4.4 折算系数 / SLO -->
+            <!-- 3.4 折算系数 / SLO -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div class="border border-slate-200 rounded-md p-3">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <p class="text-xs font-semibold text-slate-700">4.4 关联vTPM折算系数配置（版本）</p>
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                  <p class="text-xs font-semibold text-slate-700">3.4 关联vTPM折算系数配置（版本）</p>
                   <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                     <input type="checkbox" id="plan-mode-factor" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                     按售卖单元配置
@@ -506,8 +494,8 @@
                 <div id="plan-factor-perunit" class="hidden"></div>
               </div>
               <div class="border border-slate-200 rounded-md p-3">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <p class="text-xs font-semibold text-slate-700">4.5 关联SLO赔付规则配置（版本）</p>
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                  <p class="text-xs font-semibold text-slate-700">3.5 关联SLO赔付规则配置（版本）</p>
                   <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                     <input type="checkbox" id="plan-mode-slo" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                     按售卖单元配置
@@ -518,10 +506,10 @@
               </div>
             </div>
 
-            <!-- 4.6 payload -->
+            <!-- 3.6 payload -->
             <div class="border border-slate-200 rounded-md p-3">
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                <p class="text-xs font-semibold text-slate-700">4.6 关联payload（根据 SKU 关联的 playground 选取）</p>
+              <div class="flex flex-wrap items-center gap-3 mb-2">
+                <p class="text-xs font-semibold text-slate-700">3.6 关联payload（根据 SKU 关联的 playground 选取）</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="plan-mode-payload" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                   按售卖单元配置
@@ -531,10 +519,10 @@
               <div id="plan-payload-perunit" class="hidden"></div>
             </div>
 
-            <!-- 4.7 购买量 -->
+            <!-- 3.7 购买量 -->
             <div class="border border-slate-200 rounded-md p-3">
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                <p class="text-xs font-semibold text-slate-700">4.7 购买量（最小 / 最大 / step，万 vTPM）</p>
+              <div class="flex flex-wrap items-center gap-3 mb-2">
+                <p class="text-xs font-semibold text-slate-700">3.7 购买量（最小 / 最大 / step，万 vTPM）</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="plan-mode-qty" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                   按售卖单元配置
@@ -542,19 +530,6 @@
               </div>
               <div id="plan-qty-unified" class="grid grid-cols-3 gap-3"></div>
               <div id="plan-qty-perunit" class="hidden"></div>
-            </div>
-
-            <!-- 4.8 售卖时间 -->
-            <div class="border border-slate-200 rounded-md p-3">
-              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                <p class="text-xs font-semibold text-slate-700">4.8 售卖起止时间</p>
-                <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-                  <input type="checkbox" id="plan-mode-sell" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
-                  按售卖单元配置
-                </label>
-              </div>
-              <div id="plan-sell-unified" class="grid grid-cols-2 gap-3"></div>
-              <div id="plan-sell-perunit" class="hidden"></div>
             </div>
 
           </div>
@@ -858,18 +833,18 @@
     const defaultPlans = {
       // std：DeepSeek playground，3 个售卖单元各挂一个 30/60/90 天售卖计划（全部已发布 → 在售）
       'maas-product-vtpm-std': [
-        { name: 'vTPM 预留·标准·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-std.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified', sell: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
-        { name: 'vTPM 预留·标准·60天', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-std.60d' }, quotaCodes: { 'su-2': 'quota-vtpm-60d' }, inventoryCodes: { 'su-2': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified', sell: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00' },
-        { name: 'vTPM 预留·标准·90天', units: ['su-3'], unitStates: { 'su-3': 'on' }, chargeCodes: { 'su-3': 'maas-product-vtpm-std.90d' }, quotaCodes: { 'su-3': 'quota-vtpm-90d' }, inventoryCodes: { 'su-3': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified', sell: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-003', priority: 300, effStart: '2026-11-01 00:00:00', effEnd: '2028-05-01 00:00:00' }
+        { name: 'vTPM 预留·标准·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-std.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+        { name: 'vTPM 预留·标准·60天', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-std.60d' }, quotaCodes: { 'su-2': 'quota-vtpm-60d' }, inventoryCodes: { 'su-2': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00' },
+        { name: 'vTPM 预留·标准·90天', units: ['su-3'], unitStates: { 'su-3': 'on' }, chargeCodes: { 'su-3': 'maas-product-vtpm-std.90d' }, quotaCodes: { 'su-3': 'quota-vtpm-90d' }, inventoryCodes: { 'su-3': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-vtpm-003', priority: 300, effStart: '2026-11-01 00:00:00', effEnd: '2028-05-01 00:00:00' }
       ],
       // pro：GLM playground（payload 取 payload-glm-00x）；su-3(500+·30天)/su-4(500+·90天) 无计划 → 未配置
       'maas-product-vtpm-pro': [
-        { name: 'vTPM 预留·专业·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pro.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified', sell: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-glm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
-        { name: 'vTPM 预留·专业·90天', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-pro.90d' }, quotaCodes: { 'su-2': 'quota-vtpm-90d' }, inventoryCodes: { 'su-2': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified', sell: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-glm-002', priority: 200, effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00' }
+        { name: 'vTPM 预留·专业·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pro.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+        { name: 'vTPM 预留·专业·90天', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-pro.90d' }, quotaCodes: { 'su-2': 'quota-vtpm-90d' }, inventoryCodes: { 'su-2': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', priority: 200, effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00' }
       ],
       // pre：待上架商品，仅有待发布计划（未发布 → 售卖单元为待发布状态）
       'maas-product-vtpm-pre': [
-        { name: 'vTPM 预留·预发布·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified', sell: 'unified' }, factor: 'vtpm-factor-deepseek v3.3', slo: 'slo-rule-95 v5.1', minQty: 100, maxQty: 10000, stepQty: 100, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
+        { name: 'vTPM 预留·预发布·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.3', slo: 'slo-rule-95 v5.1', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ]
     };
     // 各商品售卖计划的状态（与 defaultPlans 一一对应）
@@ -988,7 +963,7 @@
     }
     function renderSaleUnits() {
       if (saleUnits.length === 0) {
-        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="15" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元，请先点击「确认售卖单元」</td></tr>`;
+        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元，请先点击「确认售卖单元」</td></tr>`;
         return;
       }
       document.getElementById('saleunit-tbody').innerHTML = saleUnits.map(u => {
@@ -996,13 +971,8 @@
         const st = unitStatusOf(u.id);
         // 计费项来自关联售卖计划的 chargeCodes；刊例价来自计费项，无计费项则无刊例价
         const charge = plan ? (chargeItems.find(c => c.code === (plan.chargeCodes && plan.chargeCodes[u.id]) || c.code === plan.chargeCode) || null) : null;
-        const sellSpan = plan ? `${plan.sellStart} ~ ${plan.sellEnd}` : '—';
-        // 所选时间执行价：有 timeFilter 且查询点命中售卖期时展示（= 刊例价 × 0.95 折扣示意），否则 —
-        let execPrice = '—';
-        if (timeFilter && plan && charge) {
-          const p = timeFilter.point;
-          if (p >= plan.sellStart && p <= plan.sellEnd) execPrice = (charge.price * 0.95).toFixed(4);
-        }
+        // 所选时间执行价（示意）：有 charge 时 = 刊例价 × 0.95 折扣示意
+        const execPrice = charge ? (charge.price * 0.95).toFixed(4) : '—';
         // 未配置（无任何关联售卖计划）的售卖单元可删除
         const hasAnyPlan = planRows.some(r => (r.units || []).includes(u.id));
         const deletable = !hasAnyPlan;
@@ -1024,7 +994,6 @@
           <td class="px-3 py-2 text-right text-xs">${plan ? plan.minQty : '—'}</td>
           <td class="px-3 py-2 text-right text-xs">${plan ? plan.maxQty : '—'}</td>
           <td class="px-3 py-2 text-right text-xs">${plan ? plan.stepQty : '—'}</td>
-          <td class="px-3 py-2 text-xs whitespace-nowrap">${sellSpan}</td>
           <td class="px-3 py-2 whitespace-nowrap">${action}</td>
         </tr>`;
       }).join('');
@@ -1039,12 +1008,11 @@
     // ===== 售卖计划 Tab：计划单元列表（每个售卖计划为其包含的每个售卖单元生成一个计划单元） =====
     // 计划单元 = 售卖计划 × 售卖单元；状态跟随所属售卖计划
     function planUnitId(planIdx, unitId) { return 'pu-' + (planIdx + 1) + '-' + unitId; }
-    // 字段取值 helper：unified → 标量；perUnit → map[uid]（售卖单元在计划下禁售仍显示其配置但标记禁售）
-    const PLAN_FIELDS = { factor: ['factor', 'factors'], slo: ['slo', 'slos'], payloadId: ['payloadId', 'payloads'], minQty: ['minQty', 'qtys', 'min'], maxQty: ['maxQty', 'qtys', 'max'], stepQty: ['stepQty', 'qtys', 'step'], sellStart: ['sellStart', 'sells', 'start'], sellEnd: ['sellEnd', 'sells', 'end'] };
+    // 字段取值 helper：unified → 标量；perUnit → map[uid]（售卖单元在计划下下架仍显示其配置但标记下架）
+    const PLAN_FIELDS = { factor: ['factor', 'factors'], slo: ['slo', 'slos'], payloadId: ['payloadId', 'payloads'], minQty: ['minQty', 'qtys', 'min'], maxQty: ['maxQty', 'qtys', 'max'], stepQty: ['stepQty', 'qtys', 'step'] };
     function planFieldVal(r, uid, field) {
       const def = PLAN_FIELDS[field]; if (!def) return undefined;
       const [scalar, mapKey, sub] = def;
-      const perUnit = ((r.modes || {})[field.replace('Id', '').replace(/(Start|End)/, '')] || ((r.modes || {})[mapKey === 'sells' ? 'sell' : field])) === 'perUnit';
       if (mapKey && r[mapKey] && r[mapKey][uid] !== undefined && r[mapKey][uid] !== '') {
         const v = r[mapKey][uid];
         return sub ? v[sub] : v;
@@ -1065,17 +1033,16 @@
       });
       const tbody = document.getElementById('plan-tbody');
       if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="17" class="px-3 py-8 text-center text-xs text-slate-400">暂无计划单元，请先创建售卖计划</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="16" class="px-3 py-8 text-center text-xs text-slate-400">暂无计划单元，请先创建售卖计划</td></tr>`;
         return;
       }
       tbody.innerHTML = rows.map(row => {
         const { planIdx, uid, r, u, charge, quota, inv } = row;
         const meta = planStatusMeta(planRowStatuses[planIdx]);
         const puId = planUnitId(planIdx, uid);
-        // 该售卖单元在计划下的在售/禁售（unified 兼容无 unitStates 的旧数据）
+        // 该售卖单元在计划下的上架/下架（unified 兼容无 unitStates 的旧数据）
         const unitState = (r.unitStates || {})[uid] || 'on';
-        const offBadge = unitState === 'off' ? ' <span class="badge bg-slate-100 text-slate-500">禁售</span>' : '';
-        const sellSpan = `${planFieldVal(r, uid, 'sellStart')} ~ ${planFieldVal(r, uid, 'sellEnd')}`;
+        const offBadge = unitState === 'off' ? ' <span class="badge bg-slate-100 text-slate-500">下架</span>' : '';
         const effSpan = `${r.effStart} ~ ${r.effEnd}`;
         return `
           <tr class="hover:bg-slate-50">
@@ -1093,7 +1060,6 @@
             <td class="px-3 py-2 text-right text-xs">${planFieldVal(r, uid, 'minQty')}</td>
             <td class="px-3 py-2 text-right text-xs">${planFieldVal(r, uid, 'maxQty')}</td>
             <td class="px-3 py-2 text-right text-xs">${planFieldVal(r, uid, 'stepQty')}</td>
-            <td class="px-3 py-2 text-xs whitespace-nowrap">${sellSpan}</td>
             <td class="px-3 py-2 text-xs">${r.priority}</td>
             <td class="px-3 py-2 text-xs whitespace-nowrap">${effSpan}</td>
           </tr>`;
@@ -1116,9 +1082,7 @@
     function planOfUnit(unitId) {
       const published = planRows.filter((r, i) => (r.units || []).includes(unitId) && planRowStatuses[i] === 'published');
       if (published.length > 0) {
-        if (!timeFilter) return published[0];
-        const p = timeFilter.point;
-        return published.find(r => p >= r.sellStart && p <= r.sellEnd) || published[0];
+        return published[0];
       }
       // 无已发布计划：回退到首个关联计划（含待发布，用于展示计费项/刊例价等配置信息）
       return planRows.find(r => (r.units || []).includes(unitId)) || null;
@@ -1133,11 +1097,7 @@
         const stopped = plans.some(r => { const st = planRowStatuses[planRows.indexOf(r)]; return st === 'stopped' || st === 'expired'; });
         return stopped ? { text: '已停售', cls: 'bg-slate-100 text-slate-500' } : { text: '待发布', cls: 'bg-blue-50 text-blue-700' };
       }
-      if (!timeFilter) return { text: '在售', cls: 'bg-green-100 text-green-700' };
-      const p = timeFilter.point;
-      if (published.some(r => p >= r.sellStart && p <= r.sellEnd)) return { text: '在售', cls: 'bg-green-100 text-green-700' };
-      if (published.some(r => p < r.sellStart)) return { text: '待生效', cls: 'bg-blue-50 text-blue-700' };
-      return { text: '已停售', cls: 'bg-slate-100 text-slate-500' };
+      return { text: '在售', cls: 'bg-green-100 text-green-700' };
     }
     function copyChargeCode(code, btn) {
       const done = () => {
@@ -1276,12 +1236,12 @@
       }
       // 字段区
       const field = (label, val) => `<div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">${label}</p><p class="text-slate-800 font-medium">${val ?? '—'}</p></div>`;
-      // 生效售卖单元概览（在售/禁售）
+      // 生效售卖单元概览（上架/下架）
       const usEntries = Object.entries(r.unitStates || {});
       const onCount = usEntries.filter(([, st]) => st !== 'off').length;
       const offList = usEntries.filter(([, st]) => st === 'off').map(([uid]) => uid);
       const unitOverview = usEntries.length
-        ? `${usEntries.length} 个（在售 ${onCount}${offList.length ? '，禁售 ' + offList.join('、') : ''}）`
+        ? `${usEntries.length} 个（上架 ${onCount}${offList.length ? '，下架 ' + offList.join('、') : ''}）`
         : (r.units || []).length + ' 个';
       // 各字段组模式
       const m = r.modes || {};
@@ -1296,12 +1256,10 @@
         field(modeText('qty', '最小购买量'), r.modes && r.modes.qty === 'perUnit' ? '见计划单元' : r.minQty),
         field(modeText('qty', '最大购买量'), r.modes && r.modes.qty === 'perUnit' ? '见计划单元' : r.maxQty),
         field(modeText('qty', '购买量step'), r.modes && r.modes.qty === 'perUnit' ? '见计划单元' : r.stepQty),
-        field(modeText('sell', '开始售卖时间'), r.modes && r.modes.sell === 'perUnit' ? '见计划单元' : r.sellStart),
-        field(modeText('sell', '结束售卖时间'), r.modes && r.modes.sell === 'perUnit' ? '见计划单元' : r.sellEnd),
         field('开始生效时间', r.effStart),
         field('结束生效时间', r.effEnd)
       ].join('');
-      // 计划单元区（含计费项/配额项/库存项，均与售卖单元一一对应；显示在售/禁售）
+      // 计划单元区（含计费项/配额项/库存项，均与售卖单元一一对应；显示上架/下架）
       const tbody = document.getElementById('plan-detail-tbody');
       const units = r.units || [];
       if (units.length === 0) {
@@ -1313,7 +1271,7 @@
           const quota = quotaItems.find(q => q.id === (r.quotaCodes && r.quotaCodes[uid]));
           const inv = inventoryItems.find(q => q.id === (r.inventoryCodes && r.inventoryCodes[uid]));
           const unitState = (r.unitStates || {})[uid] || 'on';
-          const stateBadge = unitState === 'off' ? '<span class="badge bg-slate-100 text-slate-500">禁售</span>' : '<span class="badge bg-green-100 text-green-700">在售</span>';
+          const stateBadge = unitState === 'off' ? '<span class="badge bg-slate-100 text-slate-500">下架</span>' : '<span class="badge bg-green-100 text-green-700">在售</span>';
           return `
           <tr class="hover:bg-slate-50">
             <td class="px-3 py-2 font-mono text-xs">${planUnitId(idx, uid)}</td>
@@ -1420,7 +1378,7 @@
     function selectedPlanUnits() {
       return Array.from(document.querySelectorAll('.plan-unit-check')).filter(c => c.checked).map(c => c.value);
     }
-    // 选中且状态为「在售」的售卖单元（perUnit 字段只为它们配置）
+    // 选中且状态为「上架」的售卖单元（perUnit 字段只为它们配置）
     function onSalePlanUnits() {
       return Array.from(document.querySelectorAll('.plan-unit-check'))
         .filter(c => c.checked && (!c.dataset.state || c.dataset.state === 'on'))
@@ -1435,7 +1393,7 @@
       document.getElementById('plan-eff-start').value = '2026-11-01T00:00:00';
       document.getElementById('plan-eff-end').value = '2027-11-01T00:00:00';
       // 全部开关复位为「全部一致」
-      ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty', 'sell'].forEach(k => {
+      ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty'].forEach(k => {
         const m = document.getElementById('plan-mode-' + k);
         if (m) m.checked = false;
       });
@@ -1450,8 +1408,8 @@
       document.getElementById('detail-view').classList.remove('hidden');
       renderPlan(); renderSaleUnits();
     }
-    // 区块2：生效售卖单元（每行 = 勾选框 + 售卖单元 + 在售/禁售切换 + 计费项详情容器）
-    // 勾选/切状态时重渲整页区块（保留勾选状态、在售/禁售选择）
+    // 区块2：生效售卖单元（每行 = 勾选框+售卖单元ID + 下方展示 function 与维度组合 + 上架/下架切换）
+    // 勾选/切状态时重渲整页区块（保留勾选状态、上架/下架选择）
     function renderPlanUnitsCharge() {
       const box = document.getElementById('plan-units-charge-container');
       if (!box) return;
@@ -1466,40 +1424,43 @@
       box.innerHTML = saleUnits.map(u => {
         const checked = hasPrev ? (prevStates[u.id] !== undefined ? prevStates[u.id] : false) : true;
         const onoff = prevOnOff[u.id] || 'on';
+        const fnText = u.fn ? u.fn : '—';
         return `
         <div class="p-2 bg-slate-50 rounded-md ${checked ? '' : 'opacity-60'}">
           <div class="flex flex-wrap items-center gap-2">
             <input type="checkbox" class="plan-unit-check mt-0" value="${u.id}" data-state="${onoff}" ${checked ? 'checked' : ''} style="accent-color:#7C3AED" onchange="renderPlanCreatePage()">
-            <div class="text-xs text-slate-600 w-52 shrink-0">
-              <span class="font-mono">${u.id}</span>
-              <span class="text-slate-400 mx-1">·</span>
-              <span>${formatDimMeasureText(u)}</span>
-            </div>
+            <span class="font-mono text-xs text-slate-700">${u.id}</span>
             <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-md p-0.5">
-              <button type="button" onclick="setPlanUnitState('${u.id}', 'on')" class="text-xs px-2.5 py-1 rounded ${checked ? '' : 'opacity-50 pointer-events-none'} ${onoff === 'on' ? 'bg-violet-600 text-white' : 'text-slate-500'}">在售</button>
-              <button type="button" onclick="setPlanUnitState('${u.id}', 'off')" class="text-xs px-2.5 py-1 rounded ${checked ? '' : 'opacity-50 pointer-events-none'} ${onoff === 'off' ? 'bg-slate-500 text-white' : 'text-slate-500'}">禁售</button>
+              <button type="button" onclick="setPlanUnitState('${u.id}', 'on')" class="text-xs px-2.5 py-1 rounded ${checked ? '' : 'opacity-50 pointer-events-none'} ${onoff === 'on' ? 'bg-violet-600 text-white' : 'text-slate-500'}">上架</button>
+              <button type="button" onclick="setPlanUnitState('${u.id}', 'off')" class="text-xs px-2.5 py-1 rounded ${checked ? '' : 'opacity-50 pointer-events-none'} ${onoff === 'off' ? 'bg-slate-500 text-white' : 'text-slate-500'}">下架</button>
             </div>
             <span class="text-xs ${checked ? (onoff === 'on' ? 'text-green-600' : 'text-slate-400') : 'text-slate-300'}">
-              ${checked ? (onoff === 'on' ? '本计划下在售' : '本计划下禁售') : '未生效'}
+              ${checked ? (onoff === 'on' ? '本计划下上架' : '本计划下下架') : '未生效'}
+            </span>
+          </div>
+          <div class="mt-1.5 pt-1.5 border-t border-slate-200/70 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+            <span><span class="text-slate-400">Function：</span><span class="text-slate-600">${fnText}</span></span>
+            <span class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+              <span class="text-slate-400">维度组合：</span>${formatDimMeasure(u)}
             </span>
           </div>
           <div id="plan-charge-detail-${u.id}" class="charge-detail-row"></div>
         </div>`;
       }).join('');
     }
-    // 切换售卖单元在售/禁售（写 DOM data-state 后整体重渲）
+    // 切换售卖单元上架/下架（写 DOM data-state 后整体重渲）
     function setPlanUnitState(uid, st) {
       const c = document.querySelector('.plan-unit-check[value="' + uid + '"]');
       if (!c || !c.checked) return;
       c.dataset.state = st;
       renderPlanCreatePage();
     }
-    // ============ 区块4：字段组渲染（unified / perUnit 由开关决定；perUnit 只为在售售卖单元渲染行） ============
+    // ============ 区块3：字段组渲染（unified / perUnit 由开关决定；perUnit 只为已上架售卖单元渲染行） ============
     // 值暂存：开关切换和重渲之间保留 unified 与各 unit 的已选值
-    const planDraft = { charge: {}, quota: {}, inventory: {}, factor: {}, slo: {}, payload: {}, qty: {}, sell: {} };
+    const planDraft = { charge: {}, quota: {}, inventory: {}, factor: {}, slo: {}, payload: {}, qty: {} };
     let draftInited = false;
     function resetPlanDraft() {
-      ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty', 'sell'].forEach(k => {
+      ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty'].forEach(k => {
         planDraft[k] = { unified: undefined, units: {} };
       });
       draftInited = true;
@@ -1523,7 +1484,6 @@
       renderDraftSection('slo', onUnits);
       renderDraftSection('payload', onUnits);
       renderDraftSection('qty', onUnits);
-      renderDraftSection('sell', onUnits);
       // 计费项详情行
       document.querySelectorAll('#plan-create-view select.plan-charge-select').forEach(sel => renderChargeDetail(sel.dataset.unit));
     }
@@ -1557,15 +1517,6 @@
         const uid = inp.dataset.unit; const q = inp.dataset.q;
         if (!planDraft.qty.units[uid]) planDraft.qty.units[uid] = { min: '', max: '', step: '' };
         planDraft.qty.units[uid][q] = inp.value;
-      });
-      // sell unified
-      const ss = document.querySelector('#plan-sell-unified input[data-t="start"]');
-      const se = document.querySelector('#plan-sell-unified input[data-t="end"]');
-      if (ss) planDraft.sell.unified = { start: ss.value, end: se.value };
-      document.querySelectorAll('#plan-sell-perunit input[data-unit]').forEach(inp => {
-        const uid = inp.dataset.unit; const t = inp.dataset.t;
-        if (!planDraft.sell.units[uid]) planDraft.sell.units[uid] = { start: '', end: '' };
-        planDraft.sell.units[uid][t] = inp.value;
       });
     }
     // 选项渲染辅助
@@ -1616,7 +1567,7 @@
           ${isCharge ? '' : '<span class="text-xs text-slate-400">（数量值将随关联项带入）</span>'}`;
         if (isCharge) uBox.insertAdjacentHTML('beforeend', detail);
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无在售售卖单元（请先在区块2勾选并设为「在售」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无已上架售卖单元（请先在区块2勾选并设为「上架」）</p>'
           : onUnits.map(uid => `
             <div class="p-2 bg-slate-50 rounded-md mb-2">
               <div class="flex items-center gap-2">
@@ -1636,7 +1587,7 @@
           ? `<div class="flex items-center gap-2"><span class="text-xs text-amber-600"><i class="fa-solid fa-triangle-exclamation mr-1"></i>尚未创建${label}配置</span><button type="button" onclick="openConfigCreate('${cfgKey}')" class="text-violet-600 hover:underline text-xs font-medium">去创建</button></div>`
           : `<div class="flex items-center gap-2"><select class="form-input flex-1 text-xs" data-unit="">${configOptionsHTML(cfgKey, d.unified)}</select>${upBtn()}</div>`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无在售售卖单元（请先在区块2勾选并设为「在售」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无已上架售卖单元（请先在区块2勾选并设为「上架」）</p>'
           : onUnits.map(uid => `
             <div class="p-2 bg-slate-50 rounded-md mb-2">
               <div class="flex items-center gap-2">
@@ -1647,7 +1598,7 @@
       } else if (key === 'payload') {
         uBox.innerHTML = `<select class="plan-payload-select form-input flex-1 text-xs" data-unit="">${payloadOptionsHTML(d.unified)}</select>`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无在售售卖单元（请先在区块2勾选并设为「在售」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无已上架售卖单元（请先在区块2勾选并设为「上架」）</p>'
           : onUnits.map(uid => `
             <div class="p-2 bg-slate-50 rounded-md mb-2">
               <div class="flex items-center gap-2">
@@ -1662,7 +1613,7 @@
           <div><label class="form-label">最大购买量（万 vTPM）</label><input data-q="max" type="number" class="form-input text-xs" placeholder="如 10000" value="${q.max}"></div>
           <div><label class="form-label">购买量step（万 vTPM）</label><input data-q="step" type="number" class="form-input text-xs" placeholder="如 100" value="${q.step}"></div>`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无在售售卖单元（请先在区块2勾选并设为「在售」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无已上架售卖单元（请先在区块2勾选并设为「上架」）</p>'
           : onUnits.map(uid => {
             const qv = (d.units[uid] && typeof d.units[uid] === 'object') ? d.units[uid] : { min: '', max: '', step: '' };
             return `
@@ -1672,24 +1623,6 @@
                 <input data-unit="${uid}" data-q="min" type="number" class="form-input text-xs" placeholder="最小" value="${qv.min}">
                 <input data-unit="${uid}" data-q="max" type="number" class="form-input text-xs" placeholder="最大" value="${qv.max}">
                 <input data-unit="${uid}" data-q="step" type="number" class="form-input text-xs" placeholder="step" value="${qv.step}">
-              </div>
-            </div>`;
-          }).join('');
-      } else if (key === 'sell') {
-        const s = (d.unified && typeof d.unified === 'object') ? d.unified : { start: '', end: '' };
-        uBox.innerHTML = `
-          <div><label class="form-label">开始售卖时间</label><input data-t="start" type="datetime-local" step="1" class="form-input text-xs" value="${s.start || '2026-10-01T00:00:00'}"></div>
-          <div><label class="form-label">结束售卖时间</label><input data-t="end" type="datetime-local" step="1" class="form-input text-xs" value="${s.end || '2026-12-31T23:59:59'}"></div>`;
-        pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无在售售卖单元（请先在区块2勾选并设为「在售」）</p>'
-          : onUnits.map(uid => {
-            const sv = (d.units[uid] && typeof d.units[uid] === 'object') ? d.units[uid] : { start: '2026-10-01T00:00:00', end: '2026-12-31T23:59:59' };
-            return `
-            <div class="p-2 bg-slate-50 rounded-md mb-2">
-              <div class="text-xs text-slate-600 mb-1.5">${unitLabel(uid)}</div>
-              <div class="grid grid-cols-2 gap-2">
-                <input data-unit="${uid}" data-t="start" type="datetime-local" step="1" class="form-input text-xs" value="${sv.start || '2026-10-01T00:00:00'}">
-                <input data-unit="${uid}" data-t="end" type="datetime-local" step="1" class="form-input text-xs" value="${sv.end || '2026-12-31T23:59:59'}">
               </div>
             </div>`;
           }).join('');
@@ -1716,51 +1649,6 @@
           <span class="flex items-center gap-1 flex-wrap"><span class="text-slate-400">标签：</span>${tags}</span>
         </div>`;
     }
-    // 按周期智能匹配：对在售售卖单元按购买周期匹配计费项/配额项/库存项（写入 draft 后重渲）
-    // perUnit 模式：逐单元回填；unified 模式：仅当所有在售单元匹配结果一致时回填，不一致时保留现值（提示切换按售卖单元配置）
-    function smartMatchCharges() {
-      const skuPrefix = currentProduct ? currentProduct.code : '';
-      const myCharges = skuPrefix ? chargeItems.filter(c => c.code.startsWith(skuPrefix + '.')) : chargeItems;
-      const units = onSalePlanUnits();
-      if (units.length === 0) { alert('请先勾选至少一个「在售」售卖单元'); return; }
-      collectDraftFromDOM();
-      const modes = { charge: document.getElementById('plan-mode-charge').checked, quota: document.getElementById('plan-mode-quota').checked, inventory: document.getElementById('plan-mode-inventory').checked };
-      let ok = 0, miss = [];
-      const matches = { charge: {}, quota: {}, inventory: {} };
-      units.forEach(uid => {
-        const u = saleUnits.find(x => x.id === uid);
-        if (!u) return;
-        const m = /(\d+)天/.exec(u.measure || '');
-        if (!m) { miss.push(uid); return; }
-        const days = m[1];
-        const charge = myCharges.find(c => c.code.endsWith('.' + days + 'd'));
-        const quota = quotaItems.find(q => q.id.endsWith('-' + days + 'd'));
-        const inv = inventoryItems.find(q => q.id.endsWith('-' + days + 'd'));
-        if (charge) { matches.charge[uid] = charge.code; ok++; } else miss.push(uid);
-        if (quota) matches.quota[uid] = quota.id;
-        if (inv) matches.inventory[uid] = inv.id;
-      });
-      const conflicted = [];
-      ['charge', 'quota', 'inventory'].forEach(key => {
-        const vals = Object.values(matches[key]);
-        if (vals.length === 0) return;
-        if (modes[key]) {
-          // 按售卖单元配置：逐单元回填
-          units.forEach(uid => { if (matches[key][uid] !== undefined) planDraft[key].units[uid] = matches[key][uid]; });
-        } else {
-          // 全部一致：仅当所有在售单元匹配到相同值时回填
-          const uniq = Array.from(new Set(vals));
-          if (uniq.length === 1) planDraft[key].unified = uniq[0];
-          else conflicted.push(key);
-        }
-      });
-      renderPlanCreateSections(true);
-      const conflictNote = conflicted.length
-        ? '；' + conflicted.map(k => DRAFT_LABELS[k]).join('、') + '因各在售售卖单元周期不同无法统一，请切换为「按售卖单元配置」后逐一匹配'
-        : '';
-      if (miss.length) alert('以下售卖单元未匹配到对应周期的计费项，请手动选择或去创建：' + miss.join('、'));
-      else alert('已按购买周期完成 ' + ok + ' 个在售售卖单元的计费项/配额项/库存项匹配' + conflictNote);
-    }
     // 全选/全不选（勾选主入口在区块2；切换后整体重渲）
     function toggleAllPlanUnits() {
       const checks = Array.from(document.querySelectorAll('.plan-unit-check'));
@@ -1779,25 +1667,25 @@
       if (allUnits.length === 0) { alert('请至少选择一个售卖单元'); return; }
       collectDraftFromDOM();
       const onUnits = onSalePlanUnits();
-      // unitStates：勾选且在售=on；勾选但禁售=off
+      // unitStates：勾选且上架=on；勾选但下架=off
       const unitStates = {};
       document.querySelectorAll('.plan-unit-check').forEach(c => { if (c.checked) unitStates[c.value] = (c.dataset.state === 'off' ? 'off' : 'on'); });
       // modes
       const modes = {};
-      ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty', 'sell'].forEach(k => { modes[k] = document.getElementById('plan-mode-' + k).checked ? 'perUnit' : 'unified'; });
-      // 收集函数：unified→标量，perUnit→map（只为在售售卖单元）
+      ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty'].forEach(k => { modes[k] = document.getElementById('plan-mode-' + k).checked ? 'perUnit' : 'unified'; });
+      // 收集函数：unified→标量，perUnit→map（只为已上架售卖单元）
       const mapOr = (key, uid, unifiedVal) => modes[key] === 'perUnit' ? (planDraft[key].units[uid] !== undefined ? planDraft[key].units[uid] : unifiedVal) : unifiedVal;
       const chargeCodes = {}, quotaCodes = {}, inventoryCodes = {};
       for (const uid of onUnits) {
         const chargeCode = mapOr('charge', uid, 'charge' in planDraft ? planDraft.charge.unified : undefined);
         const code = chargeCode && chargeCode !== '__perunit__' ? chargeCode : (modes.charge === 'perUnit' ? planDraft.charge.units[uid] : planDraft.charge.unified);
-        if (!code) { alert('请为在售售卖单元 ' + uid + ' 创建或关联一个计费项'); return; }
+        if (!code) { alert('请为已上架售卖单元 ' + uid + ' 创建或关联一个计费项'); return; }
         chargeCodes[uid] = code;
         const qid = modes.quota === 'perUnit' ? planDraft.quota.units[uid] : planDraft.quota.unified;
-        if (!qid) { alert('请为在售售卖单元 ' + uid + ' 关联一个配额项'); return; }
+        if (!qid) { alert('请为已上架售卖单元 ' + uid + ' 关联一个配额项'); return; }
         quotaCodes[uid] = qid;
         const iid = modes.inventory === 'perUnit' ? planDraft.inventory.units[uid] : planDraft.inventory.unified;
-        if (!iid) { alert('请为在售售卖单元 ' + uid + ' 关联一个库存项'); return; }
+        if (!iid) { alert('请为已上架售卖单元 ' + uid + ' 关联一个库存项'); return; }
         inventoryCodes[uid] = iid;
       }
       // factor / slo / payload
@@ -1813,7 +1701,7 @@
       const slo = modes.slo === 'perUnit' ? {} : (planDraft.slo.unified || '未关联');
       const payloadId = modes.payload === 'perUnit' ? {} : (planDraft.payload.unified || '');
       const factors = {}, slos = {}, payloads = {};
-      const qtys = {}, sells = {};
+      const qtys = {};
       if (modes.factor === 'perUnit') onUnits.forEach(uid => factors[uid] = pickCfg('factor', uid));
       if (modes.slo === 'perUnit') onUnits.forEach(uid => slos[uid] = pickCfg('slo', uid));
       if (modes.payload === 'perUnit') onUnits.forEach(uid => payloads[uid] = pickU('payload', uid));
@@ -1823,20 +1711,12 @@
           qtys[uid] = q ? { min: q.min || '100', max: q.max || '10000', step: q.step || '100' } : { min: '100', max: '10000', step: '100' };
         });
       }
-      if (modes.sell === 'perUnit') {
-        onUnits.forEach(uid => {
-          const s = planDraft.sell.units[uid] || {};
-          sells[uid] = { start: pcpVal(s.start, '2026-10-01T00:00:00'), end: pcpVal(s.end, '2026-12-31T23:59:59') };
-        });
-      }
       const qunified = (planDraft.qty.unified && typeof planDraft.qty.unified === 'object') ? planDraft.qty.unified : { min: '100', max: '10000', step: '100' };
-      const sunified = (planDraft.sell.unified && typeof planDraft.sell.unified === 'object') ? planDraft.sell.unified : { start: '2026-10-01T00:00:00', end: '2026-12-31T23:59:59' };
       const row = {
         name, units: allUnits, unitStates, chargeCodes, quotaCodes, inventoryCodes,
         modes, factor, slo, factors, slos, payloadId, payloads,
         minQty: qunified.min || '100', maxQty: qunified.max || '10000', stepQty: qunified.step || '100',
         qtys,
-        sellStart: pcpVal(sunified.start, '2026-10-01T00:00:00'), sellEnd: pcpVal(sunified.end, '2026-12-31T23:59:59'), sells,
         priority: parseInt(document.getElementById('plan-priority').value) || 0,
         effStart: pcpVal(document.getElementById('plan-eff-start').value, '2026-11-01T00:00:00'),
         effEnd: pcpVal(document.getElementById('plan-eff-end').value, '2027-11-01T00:00:00')
@@ -1883,14 +1763,12 @@
       planDraft.payload.units = Object.assign({}, r.payloads || {});
       planDraft.qty.unified = { min: r.minQty, max: r.maxQty, step: r.stepQty };
       planDraft.qty.units = Object.assign({}, r.qtys || {});
-      planDraft.sell.unified = { start: (r.sellStart || '').replace(' ', 'T'), end: (r.sellEnd || '').replace(' ', 'T') };
-      planDraft.sell.units = Object.fromEntries(Object.entries(r.sells || {}).map(([uid, s]) => [uid, { start: (s.start || '').replace(' ', 'T'), end: (s.end || '').replace(' ', 'T') }]));
       // 开关回填
-      ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty', 'sell'].forEach(k => {
+      ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty'].forEach(k => {
         const m = document.getElementById('plan-mode-' + k);
         if (m) m.checked = ((r.modes || {})[k] === 'perUnit');
       });
-      // 先渲染区块2 并写勾选+在售/禁售，再渲染区块4（内部会按 onSalePlanUnits 渲染 perUnit 行）
+      // 先渲染区块2 并写勾选+上架/下架，再渲染区块4（内部会按 onSalePlanUnits 渲染 perUnit 行）
       renderPlanUnitsCharge();
       document.querySelectorAll('.plan-unit-check').forEach(c => {
         const st = (r.unitStates || {})[c.value];
