@@ -399,19 +399,20 @@
       <div class="p-5 grid grid-cols-1 gap-4">
         <div>
           <label class="form-label">商品类型</label>
-          <select class="form-input"><option>maas-product-vtpm</option></select>
+          <select id="inp-type" class="form-input" onchange="autogenProductNameCode()"><option>maas-product-vtpm</option></select>
         </div>
         <div>
-          <label class="form-label">商品code</label>
-          <input id="inp-code" class="form-input" placeholder="如 maas-product-vtpm-pre">
+          <label class="form-label">模型（对应关联 Playground）</label>
+          <select id="inp-playground" class="form-input" onchange="autogenProductNameCode()"></select>
+          <p class="text-xs text-slate-400 mt-1">选择模型后将自动关联对应 Playground，并自动生成商品 code / 名称</p>
         </div>
         <div>
-         <label class="form-label">商品名称</label>
-         <input id="inp-name" class="form-input" placeholder="如 vTPM 预留资源包（预）">
-       </div>
+          <label class="form-label">商品code（自动生成，可修改）</label>
+          <input id="inp-code" class="form-input font-mono" placeholder="选择模型后自动生成">
+        </div>
         <div>
-          <label class="form-label">关联 Playground</label>
-          <select id="inp-playground" class="form-input"></select>
+          <label class="form-label">商品名称（自动生成，可修改）</label>
+          <input id="inp-name" class="form-input" placeholder="选择模型后自动生成">
         </div>
      </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
@@ -649,13 +650,18 @@
    }
 
     // ===== 数据 =====
-    // playground 选项（SKU 创建时关联；payload 从所属 playground 下取）
-    const playgroundOptions = ['pg-deepseek-v4.1', 'pg-glm-4', 'pg-qwen2.5'];
+    // 模型选项（创建商品时先选模型；背后自动关联 playground；payload 从所属 playground 下取）
+    const modelPlaygrounds = [
+      { model: 'DeepSeek-V4.1', playground: 'pg-deepseek-v4.1' },
+      { model: 'GLM-4', playground: 'pg-glm-4' },
+      { model: 'Qwen2.5', playground: 'pg-qwen2.5' }
+    ];
     const playgroundPayloads = {
       'pg-deepseek-v4.1': ['payload-vtpm-001', 'payload-vtpm-002', 'payload-vtpm-003'],
       'pg-glm-4': ['payload-glm-001', 'payload-glm-002'],
       'pg-qwen2.5': ['payload-qwen-001']
     };
+    const playgroundOptions = modelPlaygrounds.map(m => m.playground);
     // 已上架商品
     const listedProducts = [
       { code: 'maas-product-vtpm-std', name: 'vTPM 预留资源包（标准）', type: 'maas-product-vtpm', playground: 'pg-deepseek-v4.1', status: '售卖中' },
@@ -791,11 +797,12 @@
       document.getElementById('saleunit-tbody').innerHTML = saleUnits.map(u => {
         const plan = planOfUnit(u.id);
         const st = unitStatusOf(u.id);
-        const charge = plan ? (chargeItems.find(c => c.code === (plan.chargeCodes && plan.chargeCodes[u.id]) || c.code === plan.chargeCode) || {}) : {};
+        // 计费项来自关联售卖计划的 chargeCodes；刊例价来自计费项，无计费项则无刊例价
+        const charge = plan ? (chargeItems.find(c => c.code === (plan.chargeCodes && plan.chargeCodes[u.id]) || c.code === plan.chargeCode) || null) : null;
         const sellSpan = plan ? `${plan.sellStart} ~ ${plan.sellEnd}` : '—';
         // 所选时间执行价：有 timeFilter 且查询点命中售卖期时展示（= 刊例价 × 0.95 折扣示意），否则 —
         let execPrice = '—';
-        if (timeFilter && plan && (charge.price || charge.price === 0)) {
+        if (timeFilter && plan && charge) {
           const p = timeFilter.point;
           if (p >= plan.sellStart && p <= plan.sellEnd) execPrice = (charge.price * 0.95).toFixed(4);
         }
@@ -810,8 +817,8 @@
           <td class="px-3 py-2"><span class="badge ${st.cls}">${st.text}</span></td>
           <td class="px-3 py-2 text-xs">${u.fn || '—'}</td>
           <td class="px-3 py-2">${formatDimMeasure(u)}</td>
-          <td class="px-3 py-2 font-mono text-xs">${charge.code || '—'}${charge.code ? '<button type="button" onclick="copyChargeCode(\'' + charge.code + '\', this)" class="ml-1 text-slate-400 hover:text-slate-600" title="复制code"><i class="fa-solid fa-copy"></i></button>' : ''}</td>
-          <td class="px-3 py-2 text-right font-mono text-xs">${(charge.price || 0).toFixed(4)}</td>
+          <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code + '<button type="button" onclick="copyChargeCode(\'' + charge.code + '\', this)" class="ml-1 text-slate-400 hover:text-slate-600" title="复制code"><i class="fa-solid fa-copy"></i></button>' : '—'}</td>
+          <td class="px-3 py-2 text-right font-mono text-xs">${charge ? charge.price.toFixed(4) : '—'}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${execPrice}</td>
           <td class="px-3 py-2 text-xs">${plan ? plan.factor : '—'}</td>
           <td class="px-3 py-2 text-xs">${plan ? plan.slo : '—'}</td>
@@ -888,13 +895,16 @@
       document.getElementById('tf-point').value = '';
       renderSaleUnits();
     }
-    // 售卖单元关联的售卖计划：无 timeFilter 时取任意已发布计划；有 timeFilter 时取售卖期命中该时间点的已发布计划
+    // 售卖单元关联的售卖计划：已发布优先；有 timeFilter 时取售卖期命中该时间点的已发布计划，否则回退任意关联计划（含待发布）
     function planOfUnit(unitId) {
       const published = planRows.filter((r, i) => (r.units || []).includes(unitId) && planRowStatuses[i] === 'published');
-      if (published.length === 0) return null;
-      if (!timeFilter) return published[0];
-      const p = timeFilter.point;
-      return published.find(r => p >= r.sellStart && p <= r.sellEnd) || null;
+      if (published.length > 0) {
+        if (!timeFilter) return published[0];
+        const p = timeFilter.point;
+        return published.find(r => p >= r.sellStart && p <= r.sellEnd) || published[0];
+      }
+      // 无已发布计划：回退到首个关联计划（含待发布，用于展示计费项/刊例价等配置信息）
+      return planRows.find(r => (r.units || []).includes(unitId)) || null;
     }
     // 状态定义：在售 / 待生效 / 已停售 / 未配置
     function unitStatusOf(unitId) {
@@ -917,15 +927,31 @@
     }
 
     // ===== 新增商品 → 创建后直接打开详情页（待上架） =====
+    // 弹窗：先选商品类型 → 选模型（背后自动关联 playground）→ 自动生成商品code/名称（可手改）
     function openProductModal() {
-      document.getElementById('inp-playground').innerHTML = playgroundOptions.map(p => `<option>${p}</option>`).join('');
+      document.getElementById('inp-playground').innerHTML = modelPlaygrounds.map(m => `<option value="${m.playground}">${m.model}（${m.playground}）</option>`).join('');
+      document.getElementById('inp-code').value = '';
+      document.getElementById('inp-name').value = '';
       openModal('product');
+      autogenProductNameCode();
+    }
+    // 根据商品类型 + 所选模型，自动生成商品 code 与名称（例：maas-product-vtpm-deepseek-v41 / DeepSeek-V4.1 预留vTPM包）
+    function autogenProductNameCode() {
+      const type = document.getElementById('inp-type').value;
+      const pg = document.getElementById('inp-playground').value;
+      if (!type || !pg) return;
+      const mp = modelPlaygrounds.find(m => m.playground === pg);
+      if (!mp) return;
+      // code 后缀：模型名小写、去分隔符（DeepSeek-V4.1 → deepseek-v41）
+      const modelSlug = mp.model.toLowerCase().replace(/[-_.\s]/g, '');
+      document.getElementById('inp-code').value = type + '-' + modelSlug;
+      document.getElementById('inp-name').value = mp.model + ' 预留vTPM包';
     }
     function submitProduct() {
      currentProduct = {
        code: (document.getElementById('inp-code').value || 'maas-product-vtpm-pre').trim(),
        name: (document.getElementById('inp-name').value || 'vTPM 预留资源包（预）').trim(),
-       type: 'maas-product-vtpm',
+       type: document.getElementById('inp-type').value,
        playground: document.getElementById('inp-playground').value,
        lifeStatus: '待上架'
      };
@@ -1203,6 +1229,7 @@
       openModal('plan-create');
     }
     // 售卖计划：关联售卖单元及各自计费项（合并区块；每行 = 勾选框 + 售卖单元 + 计费项下拉 + 去创建按钮；默认全选）
+    // 选中计费项后，该行下方换行展示计费项详情（code/名称/刊例价/单位/货币单位/标签）
     // 勾选/取消勾选时重渲整块，保留已有勾选状态与各行计费项已选值
     function renderPlanUnitsCharge() {
       const box = document.getElementById('plan-units-charge-container');
@@ -1223,15 +1250,18 @@
         const prev = prevCharges[u.id];
         const selVal = (prev && chargeItems.some(c => c.code === prev)) ? prev : (chargeItems[0] ? chargeItems[0].code : '');
         return `
-        <div class="flex items-center gap-2 p-2 bg-slate-50 rounded-md ${checked ? '' : 'opacity-60'}">
-          <input type="checkbox" class="plan-unit-check mt-0" value="${u.id}" ${checked ? 'checked' : ''} style="accent-color:#7C3AED" onchange="renderPlanUnitsCharge()">
-          <div class="text-xs text-slate-600 w-52 shrink-0">
-            <span class="font-mono">${u.id}</span>
-            <span class="text-slate-400 mx-1">·</span>
-            <span>${formatDimMeasureText(u)}</span>
+        <div class="p-2 bg-slate-50 rounded-md ${checked ? '' : 'opacity-60'}">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" class="plan-unit-check mt-0" value="${u.id}" ${checked ? 'checked' : ''} style="accent-color:#7C3AED" onchange="renderPlanUnitsCharge()">
+            <div class="text-xs text-slate-600 w-52 shrink-0">
+              <span class="font-mono">${u.id}</span>
+              <span class="text-slate-400 mx-1">·</span>
+              <span>${formatDimMeasureText(u)}</span>
+            </div>
+            <select class="plan-charge-select form-input flex-1 text-xs" data-unit="${u.id}" ${checked ? '' : 'disabled'} ${chargeItems.length ? '' : 'disabled'} onchange="renderChargeDetail('${u.id}')">${opts}</select>
+            <button type="button" onclick="openCreateBillingModal('${u.id}')" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
           </div>
-          <select class="plan-charge-select form-input flex-1 text-xs" data-unit="${u.id}" ${checked ? '' : 'disabled'} ${chargeItems.length ? '' : 'disabled'}>${opts}</select>
-          <button type="button" onclick="openCreateBillingModal('${u.id}')" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
+          <div id="plan-charge-detail-${u.id}" class="charge-detail-row"></div>
         </div>`;
       }).join('');
       // 还原已选 chargeCode（模板内 selVal 已处理默认值，此处兜底重渲后还原）
@@ -1239,12 +1269,35 @@
         const v = prevCharges[sel.dataset.unit];
         if (v && chargeItems.some(c => c.code === v)) sel.value = v;
       });
+      // 渲染每个选中售卖单元的计费项详情行
+      box.querySelectorAll('select.plan-charge-select').forEach(sel => renderChargeDetail(sel.dataset.unit));
+    }
+    // 计费项详情行：展示所选计费项的 code/名称/刊例价/单位/货币单位/标签（换行展示；无计费项则不展示）
+    function renderChargeDetail(uid) {
+      const el = document.getElementById('plan-charge-detail-' + uid);
+      if (!el) return;
+      const sel = document.querySelector(`#plan-units-charge-container select.plan-charge-select[data-unit="${uid}"]`);
+      const code = sel ? sel.value : '';
+      const c = chargeItems.find(x => x.code === code);
+      if (!c) { el.innerHTML = ''; return; }
+      const tags = (c.tags || []).map(t => `<span class="badge bg-slate-200/70 text-slate-600 font-mono">${t}</span>`).join(' ');
+      el.innerHTML = `
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 pl-6 pt-1.5 border-t border-slate-200/70 text-xs text-slate-600">
+          <span><span class="text-slate-400">code：</span><span class="font-mono text-slate-800">${c.code}</span></span>
+          <span><span class="text-slate-400">名称：</span><span class="text-slate-800">${c.name}</span></span>
+          <span><span class="text-slate-400">刊例价：</span><span class="font-mono text-slate-800">${c.price.toFixed(4)}</span></span>
+          <span><span class="text-slate-400">单位：</span><span class="text-slate-800">${c.unit}</span></span>
+          <span><span class="text-slate-400">货币单位：</span><span class="text-slate-800">${c.currency}</span></span>
+          <span class="flex items-center gap-1 flex-wrap"><span class="text-slate-400">标签：</span>${tags}</span>
+        </div>`;
     }
     // 创建计费项后回填到指定售卖单元行（重渲合并区块以让新 code 进入 options，再回填触发 unit）
     function applyNewChargeToUnit(uid, code) {
       renderPlanUnitsCharge();
       const sel = document.querySelector(`select.plan-charge-select[data-unit="${uid}"]`);
       if (sel && chargeItems.some(c => c.code === code)) sel.value = code;
+      // 回填后刷新该行计费项详情展示
+      if (sel) renderChargeDetail(uid);
     }
     // 售卖计划：payload 从 SKU 关联的 playground 选取
     function refreshPlanPayloadSelect() {
