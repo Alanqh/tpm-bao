@@ -700,20 +700,41 @@
       ]
     };
     let saleUnits = [];
-    // 默认售卖计划行（units 关联售卖单元；chargeCodes 为每个售卖单元各自关联的计费项；其余字段统一）
-    const defaultPlanRows = [
-      { name: 'vTPM 预留·标准·30天', units: ['su-1'], chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
-      { name: 'vTPM 预留·标准·60天', units: ['su-2'], chargeCodes: { 'su-2': 'maas-product-vtpm-pre.60d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00' },
-      { name: 'vTPM 预留·标准·90天', units: ['su-1','su-3'], chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d', 'su-3': 'maas-product-vtpm-pre.90d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-003', priority: 300, effStart: '2026-11-01 00:00:00', effEnd: '2028-05-01 00:00:00' }
-    ];
-    let planRows = JSON.parse(JSON.stringify(defaultPlanRows));
-    // 状态： pending_publish(待发布) / published(已发布) / stopped(已停用) / expired(已过期)
-    let planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
-    // 计费项池（精简：code/名称/刊例价/计费项单位/货币单位/标签；折算/SLO/payload/量/step 归售卖计划层）
+    // 售卖计划（按商品 code 存储：units 关联售卖单元；chargeCodes 为每个售卖单元各自关联的计费项；payload 必须属于该商品 playground 下的 payload）
+    // 自洽性约定：①售卖计划按商品隔离（打开某商品详情只挂该商品自己的计划）②计划名/计费项后缀 = 售卖单元购买周期 ③计费项 code 前缀 = 商品 code ④payloadId 属于该商品 playground 的 payload 列表 ⑤折算/SLO 版本来自该商品的 defaultConfigs ⑥刊例价随周期递增（周期越长单价越低）
+    const defaultPlans = {
+      // std：DeepSeek playground，3 个售卖单元各挂一个 30/60/90 天售卖计划（全部已发布 → 在售）
+      'maas-product-vtpm-std': [
+        { name: 'vTPM 预留·标准·30天', units: ['su-1'], chargeCodes: { 'su-1': 'maas-product-vtpm-std.30d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+        { name: 'vTPM 预留·标准·60天', units: ['su-2'], chargeCodes: { 'su-2': 'maas-product-vtpm-std.60d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00' },
+        { name: 'vTPM 预留·标准·90天', units: ['su-3'], chargeCodes: { 'su-3': 'maas-product-vtpm-std.90d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-003', priority: 300, effStart: '2026-11-01 00:00:00', effEnd: '2028-05-01 00:00:00' }
+      ],
+      // pro：GLM playground（payload 取 payload-glm-00x）；su-3(500+·30天)/su-4(500+·90天) 无计划 → 未配置
+      'maas-product-vtpm-pro': [
+        { name: 'vTPM 预留·专业·30天', units: ['su-1'], chargeCodes: { 'su-1': 'maas-product-vtpm-pro.30d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-glm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+        { name: 'vTPM 预留·专业·90天', units: ['su-2'], chargeCodes: { 'su-2': 'maas-product-vtpm-pro.90d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-glm-002', priority: 200, effStart: '2026-11-01 00:00:00', effEnd: '2028-02-01 00:00:00' }
+      ],
+      // pre：待上架商品，仅有待发布计划（未发布 → 售卖单元为待发布状态）
+      'maas-product-vtpm-pre': [
+        { name: 'vTPM 预留·预发布·30天', units: ['su-1'], chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaItem: '—（暂未启用）', factor: 'vtpm-factor-deepseek v3.3', slo: 'slo-rule-95 v5.1', minQty: 100, maxQty: 10000, stepQty: 100, sellStart: '2026-10-01 00:00:00', sellEnd: '2026-12-31 23:59:59', payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
+      ]
+    };
+    // 各商品售卖计划的状态（与 defaultPlans 一一对应）
+    const defaultPlanStatuses = {
+      'maas-product-vtpm-std': ['published', 'published', 'published'],
+      'maas-product-vtpm-pro': ['published', 'pending_publish'],
+      'maas-product-vtpm-pre': ['pending_publish']
+    };
+    let planRows = [];
+    let planRowStatuses = [];
+    // 计费项池（精简：code/名称/刊例价/计费项单位/货币单位/标签；code 前缀 = 商品 code；刊例价随周期递增）
     const defaultChargeItems = [
-      { id: 27291, code: 'maas-product-vtpm-pre.30d', name: 'maas-product-vtpm-pre.30d', price: 0.0084, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:30天', '计费项', '元', '万 vTPM'] },
-      { id: 27292, code: 'maas-product-vtpm-pre.60d', name: 'maas-product-vtpm-pre.60d', price: 0.0077, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:60天', '计费项', '元', '万 vTPM'] },
-      { id: 27293, code: 'maas-product-vtpm-pre.90d', name: 'maas-product-vtpm-pre.90d', price: 0.0075, unit: '万 vTPM', currency: '美元', tags: ['maas-product-vtpm', '购买周期:90天', '计费项', '美元', '万 vTPM'] }
+      { id: 27291, code: 'maas-product-vtpm-std.30d', name: 'vTPM 预留·标准·30天·计费项', price: 0.0084, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:30天', '计费项', '元', '万 vTPM'] },
+      { id: 27292, code: 'maas-product-vtpm-std.60d', name: 'vTPM 预留·标准·60天·计费项', price: 0.0077, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:60天', '计费项', '元', '万 vTPM'] },
+      { id: 27293, code: 'maas-product-vtpm-std.90d', name: 'vTPM 预留·标准·90天·计费项', price: 0.0075, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:90天', '计费项', '元', '万 vTPM'] },
+      { id: 27294, code: 'maas-product-vtpm-pro.30d', name: 'vTPM 预留·专业·30天·计费项', price: 0.0062, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:30天', '计费项', '元', '万 vTPM'] },
+      { id: 27295, code: 'maas-product-vtpm-pro.90d', name: 'vTPM 预留·专业·90天·计费项', price: 0.0058, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:90天', '计费项', '元', '万 vTPM'] },
+      { id: 27296, code: 'maas-product-vtpm-pre.30d', name: 'vTPM 预留·预发布·30天·计费项', price: 0.0081, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:30天', '计费项', '元', '万 vTPM'] }
     ];
     let chargeItems = JSON.parse(JSON.stringify(defaultChargeItems));
     // 配置数据：按商品code存储，每个SKU最多一份配置（多版本）
@@ -735,6 +756,15 @@
         ]},
         slo: { name: 'slo-rule-95', sku: 'maas-product-vtpm-pro', versions: [
           { version: 'v5.2', yaml: '# SLO赔付规则 v5.2\nslo:\n  availability: 99.9%\n  latency_p99: 300ms\ncompensation:\n  breach_1h: 15%\n  breach_4h: 40%\n  breach_24h: 80%', createdAt: '2026-08-01 10:00:00' }
+        ]}
+      },
+      // pre：待上架商品也有一份配置（售卖计划引用其中版本）
+      'maas-product-vtpm-pre': {
+        factor: { name: 'vtpm-factor-deepseek', sku: 'maas-product-vtpm-pre', versions: [
+          { version: 'v3.3', yaml: '# vTPM 折算系数 v3.3\nmodels:\n  deepseek-chat:\n    factor: 0.8\n  deepseek-coder:\n    factor: 0.9', createdAt: '2026-07-01 10:00:00' }
+        ]},
+        slo: { name: 'slo-rule-95', sku: 'maas-product-vtpm-pre', versions: [
+          { version: 'v5.1', yaml: '# SLO赔付规则 v5.1\nslo:\n  availability: 99.5%\n  latency_p99: 500ms\ncompensation:\n  breach_1h: 10%\n  breach_4h: 30%', createdAt: '2026-07-01 10:00:00' }
         ]}
       }
     };
@@ -806,8 +836,9 @@
           const p = timeFilter.point;
           if (p >= plan.sellStart && p <= plan.sellEnd) execPrice = (charge.price * 0.95).toFixed(4);
         }
-        // 未配置（无已发布售卖计划）的售卖单元可删除
-        const deletable = !plan && st.text === '未配置';
+        // 未配置（无任何关联售卖计划）的售卖单元可删除
+        const hasAnyPlan = planRows.some(r => (r.units || []).includes(u.id));
+        const deletable = !hasAnyPlan;
         const action = deletable
           ? `<button type="button" onclick="removeSaleUnit('${u.id}')" class="text-red-500 hover:underline text-xs">删除</button>`
           : '<span class="text-slate-300 text-xs">—</span>';
@@ -831,10 +862,10 @@
         </tr>`;
       }).join('');
     }
-    // 删除未配置的售卖单元（有已发布售卖计划关联的不可删）
+    // 删除售卖单元（有任何售卖计划关联即不可删）
     function removeSaleUnit(unitId) {
-      const hasPlan = planRows.some((r, i) => (r.units || []).includes(unitId) && planRowStatuses[i] === 'published');
-      if (hasPlan) { alert('该售卖单元已关联已发布售卖计划，不可删除'); return; }
+      const hasPlan = planRows.some(r => (r.units || []).includes(unitId));
+      if (hasPlan) { alert('该售卖单元已关联售卖计划，不可删除'); return; }
       saleUnits = saleUnits.filter(u => u.id !== unitId);
       renderSaleUnits();
     }
@@ -906,14 +937,20 @@
       // 无已发布计划：回退到首个关联计划（含待发布，用于展示计费项/刊例价等配置信息）
       return planRows.find(r => (r.units || []).includes(unitId)) || null;
     }
-    // 状态定义：在售 / 待生效 / 已停售 / 未配置
+    // 状态定义（四级）：未配置（无任何关联计划，可删除）/ 待发布（仅待发布计划）/ 在售 / 待生效 / 已停售（曾发布但已停用或过期）
     function unitStatusOf(unitId) {
-      const plans = planRows.filter((r, i) => (r.units || []).includes(unitId) && planRowStatuses[i] === 'published');
+      const plans = planRows.filter(r => (r.units || []).includes(unitId));
       if (plans.length === 0) return { text: '未配置', cls: 'bg-slate-100 text-slate-500' };
+      const published = plans.filter(r => planRowStatuses[planRows.indexOf(r)] === 'published');
+      if (published.length === 0) {
+        // 无在售计划：若存在已停用/已过期（曾发布）→ 已停售；否则（仅待发布）→ 待发布
+        const stopped = plans.some(r => { const st = planRowStatuses[planRows.indexOf(r)]; return st === 'stopped' || st === 'expired'; });
+        return stopped ? { text: '已停售', cls: 'bg-slate-100 text-slate-500' } : { text: '待发布', cls: 'bg-blue-50 text-blue-700' };
+      }
       if (!timeFilter) return { text: '在售', cls: 'bg-green-100 text-green-700' };
       const p = timeFilter.point;
-      if (plans.some(r => p >= r.sellStart && p <= r.sellEnd)) return { text: '在售', cls: 'bg-green-100 text-green-700' };
-      if (plans.some(r => p < r.sellStart)) return { text: '待生效', cls: 'bg-blue-50 text-blue-700' };
+      if (published.some(r => p >= r.sellStart && p <= r.sellEnd)) return { text: '在售', cls: 'bg-green-100 text-green-700' };
+      if (published.some(r => p < r.sellStart)) return { text: '待生效', cls: 'bg-blue-50 text-blue-700' };
       return { text: '已停售', cls: 'bg-slate-100 text-slate-500' };
     }
     function copyChargeCode(code, btn) {
@@ -995,8 +1032,8 @@
         code: p.code, name: p.name, type: p.type, playground: p.playground, lifeStatus: '售卖中'
      };
       currentConfigs = JSON.parse(JSON.stringify(defaultConfigs[code] || {}));
-      planRows = JSON.parse(JSON.stringify(defaultPlanRows));
-     planRowStatuses = ['pending_publish', 'pending_publish', 'published'];
+      planRows = JSON.parse(JSON.stringify(defaultPlans[code] || []));
+     planRowStatuses = JSON.parse(JSON.stringify(defaultPlanStatuses[code] || []));
      saleUnits = JSON.parse(JSON.stringify(defaultSaleUnits[code] || []));
      showDetailView();
    }
@@ -1244,11 +1281,14 @@
       box.querySelectorAll('.plan-unit-check').forEach(c => { prevStates[c.value] = c.checked; });
       const prevCharges = {};
       box.querySelectorAll('select.plan-charge-select').forEach(sel => { prevCharges[sel.dataset.unit] = sel.value; });
+      // 计费项候选：按当前商品 code 前缀过滤（跨商品不互选）；无匹配时提示去创建
+      const skuPrefix = currentProduct ? currentProduct.code : '';
+      const myCharges = skuPrefix ? chargeItems.filter(c => c.code.startsWith(skuPrefix + '.')) : chargeItems;
       box.innerHTML = saleUnits.map(u => {
         const checked = hasPrev ? (prevStates[u.id] !== undefined ? prevStates[u.id] : false) : true;
-        const opts = chargeItems.length ? chargeItems.map(c => `<option value="${c.code}">${c.code} · ${c.name}（${c.currency}，刊例价 ${c.price.toFixed(4)}/${c.unit}）</option>`).join('') : '<option value="">暂无计费项，请点击「去创建」</option>';
+        const opts = myCharges.length ? myCharges.map(c => `<option value="${c.code}">${c.code} · ${c.name}（${c.currency}，刊例价 ${c.price.toFixed(4)}/${c.unit}）</option>`).join('') : '<option value="">暂无计费项，请点击「去创建」</option>';
         const prev = prevCharges[u.id];
-        const selVal = (prev && chargeItems.some(c => c.code === prev)) ? prev : (chargeItems[0] ? chargeItems[0].code : '');
+        const selVal = (prev && myCharges.some(c => c.code === prev)) ? prev : (myCharges[0] ? myCharges[0].code : '');
         return `
         <div class="p-2 bg-slate-50 rounded-md ${checked ? '' : 'opacity-60'}">
           <div class="flex items-center gap-2">
@@ -1258,7 +1298,7 @@
               <span class="text-slate-400 mx-1">·</span>
               <span>${formatDimMeasureText(u)}</span>
             </div>
-            <select class="plan-charge-select form-input flex-1 text-xs" data-unit="${u.id}" ${checked ? '' : 'disabled'} ${chargeItems.length ? '' : 'disabled'} onchange="renderChargeDetail('${u.id}')">${opts}</select>
+            <select class="plan-charge-select form-input flex-1 text-xs" data-unit="${u.id}" ${checked ? '' : 'disabled'} ${myCharges.length ? '' : 'disabled'} onchange="renderChargeDetail('${u.id}')">${opts}</select>
             <button type="button" onclick="openCreateBillingModal('${u.id}')" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
           </div>
           <div id="plan-charge-detail-${u.id}" class="charge-detail-row"></div>
@@ -1267,7 +1307,7 @@
       // 还原已选 chargeCode（模板内 selVal 已处理默认值，此处兜底重渲后还原）
       box.querySelectorAll('select.plan-charge-select').forEach(sel => {
         const v = prevCharges[sel.dataset.unit];
-        if (v && chargeItems.some(c => c.code === v)) sel.value = v;
+        if (v && myCharges.some(c => c.code === v)) sel.value = v;
       });
       // 渲染每个选中售卖单元的计费项详情行
       box.querySelectorAll('select.plan-charge-select').forEach(sel => renderChargeDetail(sel.dataset.unit));
@@ -1377,8 +1417,8 @@
         code: p.code, name: p.name, type: p.type, playground: p.playground, lifeStatus: '待上架'
      };
       currentConfigs = JSON.parse(JSON.stringify(defaultConfigs[p.code] || {}));
-      planRows = JSON.parse(JSON.stringify(defaultPlanRows));
-     planRowStatuses = ['pending_publish', 'pending_publish', 'pending_publish'];
+      planRows = JSON.parse(JSON.stringify(defaultPlans[p.code] || []));
+     planRowStatuses = JSON.parse(JSON.stringify(defaultPlanStatuses[p.code] || []));
      saleUnits = JSON.parse(JSON.stringify(defaultSaleUnits[p.code] || []));
      showDetailView();
    }
