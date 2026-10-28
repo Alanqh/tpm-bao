@@ -43,7 +43,7 @@ ok(document.getElementById('detail-status').textContent === '已上架', '发布
 window.backToList();
 const listedTxt2 = document.getElementById('listed-tbody').textContent;
 ok(listedTxt2.includes('maas-product-vtpm-pre'), '返回列表后 pre 移入已上架 Tab');
-ok(!document.getElementById('pending-tbody').textContent.includes('maas-product-vtpm-pre'), '未上架 Tab 不再含 pre');
+ok(!Array.from(document.querySelectorAll('#pending-tbody tr')).some(r => r.cells[2] && r.cells[2].textContent.trim() === 'maas-product-vtpm-pre' && r.cells[0].textContent.trim() === 'su-1'), '第13轮：pre 的 su-1 不再出现在未上架 Tab（转在售）');
 
 // ===== 4. 停用全部生效计划 → 商品回未上架 =====
 section('4. 停用→未上架');
