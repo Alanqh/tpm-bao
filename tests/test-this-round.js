@@ -88,7 +88,7 @@ ok(!prodModal.classList.contains('hidden'), '新增商品弹窗打开');
 // 字段顺序：商品类型 → 模型 → code → 名称
 const labels = Array.from(prodModal.querySelectorAll('label.form-label')).map(l => l.textContent.trim());
 ok(labels[0] === '商品类型', '第1个字段为商品类型');
-ok(labels[1].startsWith('模型'), '第2个字段为模型（对应关联 Playground）');
+ok(labels[1].startsWith('模型'), '第2个字段为模型（用于生成默认 code/名称）');
 ok(labels[2].startsWith('商品code'), '第3个字段为商品code');
 ok(labels[3].startsWith('商品名称'), '第4个字段为商品名称');
 // 模型下拉展示模型名（含 playground）
@@ -106,7 +106,15 @@ ok(document.getElementById('inp-name').value === 'GLM-4 预留vTPM包', '切换�
 document.getElementById('inp-name').value = 'GLM-4 专属包';
 window.submitProduct();
 ok(evalInPage('currentProduct.name') === 'GLM-4 专属包', '手改名称后提交生效');
-ok(evalInPage('currentProduct.playground') === 'pg-glm-4', '提交的 playground 为所选模型对应值');
+ok(evalInPage('currentProduct.playground') === undefined, '第12轮：商品与模型/Playground 解耦，currentProduct 无 playground 字段');
+// 详情页基本信息不含关联 Playground
+const infoText = document.getElementById('detail-info').textContent;
+ok(!infoText.includes('Playground') && !infoText.includes('playground'), '详情页基本信息无 playground 展示');
+// payload 下拉展示全量候选池（不限当前商品来源：6 项，标注来源模型）
+const payloadHtml = evalInPage('payloadOptionsHTML("")');
+const payloadCount = (String(payloadHtml).match(/<option/g) || []).length;
+ok(payloadCount === 6, 'payload 下拉展示全量候选池 6 项: ' + payloadCount);
+ok(String(payloadHtml).includes('DeepSeek-V4.1') && String(payloadHtml).includes('GLM-4') && String(payloadHtml).includes('Qwen2.5'), 'payload 选项标注来源模型');
 ok(evalInPage('currentProduct.type') === 'maas-product-vtpm', '提交的商品类型正确');
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');

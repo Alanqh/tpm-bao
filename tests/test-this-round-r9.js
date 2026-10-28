@@ -17,7 +17,7 @@ const dv = document.getElementById('detail-view').textContent;
 ok(dv.includes('基本信息') && !dv.includes('创建信息'), '第一部分标题为「基本信息」');
 const infoGrid = document.getElementById('detail-info');
 ok(infoGrid.className.includes('md:grid-cols-4'), '基本信息 4 列紧凑排列');
-ok(infoGrid.querySelectorAll('div.bg-slate-50').length === 4, '基本信息 4 个字段');
+ok(infoGrid.querySelectorAll('div.bg-slate-50').length === 3, '基本信息 3 个字段（第12轮：删除关联 Playground 后剩类型/code/名称）');
 
 // 2. 售卖单元 Tab 文案
 section('2. 创建售卖单元文案');
