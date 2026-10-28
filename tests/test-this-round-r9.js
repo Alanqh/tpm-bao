@@ -57,7 +57,7 @@ const listHeader = document.querySelector('#list-view > div');
 const addBtn = listHeader.querySelector('button');
 ok(addBtn.textContent.includes('新增商品'), '新增商品按钮存在');
 ok(addBtn.className.includes('admin-btn-primary'), '新增商品按钮为紫色');
-ok(addBtn === listHeader.firstElementChild, '新增商品按钮在最左侧');
+ok(addBtn === listHeader.lastElementChild, '新增商品按钮在标题右侧');
 
 window.openDetailFromListed('maas-product-vtpm-std');
 window.switchInnerTab('plan');
