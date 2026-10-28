@@ -184,7 +184,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h2 class="text-lg font-semibold text-slate-900">商品管理</h2>
-            <p class="text-xs text-slate-500 mt-0.5">列表直接展示售卖单元（按 SKU 与售卖单元 ID 排序），点击 SKU 进入商品详情；商品状态（已上架/未上架）由售卖单元状态实时推导。</p>
+            <p class="text-xs text-slate-500 mt-0.5">已上架/未上架 Tab 分别展示「在售/禁售」状态的售卖单元（按 SKU 与售卖单元 ID 排序），点击 SKU 进入商品详情。</p>
           </div>
           <button onclick="openProductModal()" class="admin-btn-primary text-sm px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>新增商品</button>
         </div>
@@ -215,7 +215,6 @@
                  <th class="text-right px-3 py-2 font-medium">最小购买量</th>
                  <th class="text-right px-3 py-2 font-medium">最大购买量</th>
                  <th class="text-right px-3 py-2 font-medium">购买量step</th>
-                 <th class="text-left px-3 py-2 font-medium">操作</th>
                </tr>
              </thead>
              <tbody id="listed-tbody" class="divide-y divide-slate-100"></tbody>
@@ -243,7 +242,6 @@
                  <th class="text-right px-3 py-2 font-medium">最小购买量</th>
                  <th class="text-right px-3 py-2 font-medium">最大购买量</th>
                  <th class="text-right px-3 py-2 font-medium">购买量step</th>
-                 <th class="text-left px-3 py-2 font-medium">操作</th>
                </tr>
              </thead>
              <tbody id="pending-tbody" class="divide-y divide-slate-100"></tbody>
@@ -1020,20 +1018,10 @@
       planRows = bakRows; planRowStatuses = bakSts; saleUnits = bakUnits; timeFilter = bakNow;
       return rows;
     }
-    // 列表页售卖单元行渲染（列结构与详情页售卖单元 Tab 一致 + 第三列 SKU）
+    // 列表页售卖单元行渲染（列结构与详情页售卖单元 Tab 一致 + 第三列 SKU；无操作列）
     function renderUnitRow(row) {
       const { code, u, st, plan, charge } = row;
       const execPrice = charge ? (charge.price * 0.95).toFixed(4) : '—';
-      // 操作列：有关联售卖计划不可删；他人持锁置灰 🔒；无锁可点击删除（自动抢锁）
-      const lock = editLocks[code];
-      let action;
-      if (row.hasAnyPlan) {
-        action = '<span class="text-slate-300 text-xs">—</span>';
-      } else if (lock && lock.passport !== currentUser.passport) {
-        action = `<span class="text-slate-300 text-xs" title="当前由 ${lock.holder}（${lock.passport}）正在编辑">🔒 删除</span>`;
-      } else {
-        action = `<button type="button" onclick="removeSaleUnitFromList('${code}', '${u.id}')" class="text-red-500 hover:underline text-xs">删除</button>`;
-      }
       return `
        <tr class="hover:bg-slate-50">
          <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
@@ -1050,68 +1038,39 @@
          <td class="px-3 py-2 text-right text-xs">${plan ? plan.minQty : '—'}</td>
          <td class="px-3 py-2 text-right text-xs">${plan ? plan.maxQty : '—'}</td>
          <td class="px-3 py-2 text-right text-xs">${plan ? plan.stepQty : '—'}</td>
-         <td class="px-3 py-2 whitespace-nowrap">${action}</td>
        </tr>`;
     }
     function renderListed() {
-      // 已上架商品下的售卖单元合并平铺，按 SKU + 售卖单元 ID 排序
-      const codes = allProducts.filter(p => productIsListed(p.code)).map(p => p.code).sort();
-      const rows = codes.flatMap(code => computeUnitRowsOf(code));
+      // 已上架 Tab：只展示「在售」状态的售卖单元（按 SKU + 售卖单元 ID 排序）
+      const codes = allProducts.map(p => p.code).sort();
+      const rows = codes.flatMap(code => computeUnitRowsOf(code)).filter(row => !row.st.offline);
       document.getElementById('listed-tbody').innerHTML = rows.length === 0
-        ? '<tr><td colspan="15" class="px-3 py-8 text-center text-xs text-slate-400">暂无已上架商品的售卖单元</td></tr>'
+        ? '<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无在售售卖单元</td></tr>'
         : rows.map(renderUnitRow).join('');
    }
     function renderPending() {
-      // 未上架商品：有售卖单元则平铺展示（全部禁售）；无售卖单元则显示商品占位行（SKD 列点击进详情）
-      const codes = allProducts.filter(p => !productIsListed(p.code)).map(p => p.code).sort();
+      // 未上架 Tab：只展示「禁售」状态的售卖单元；无售卖单元的商品显示占位行（SKU 列点击进详情）
+      const codes = allProducts.map(p => p.code).sort();
       const parts = [];
       codes.forEach(code => {
-        const rows = computeUnitRowsOf(code);
+        const all = computeUnitRowsOf(code);
+        const rows = all.filter(row => row.st.offline);
         if (rows.length > 0) {
           parts.push(rows.map(renderUnitRow).join(''));
-        } else {
+        } else if (all.length === 0) {
           parts.push(`
            <tr class="hover:bg-slate-50 bg-slate-50/50">
              <td class="px-3 py-2 font-mono text-xs">—</td>
              <td class="px-3 py-2"><span class="badge bg-slate-100 text-slate-400">禁售</span></td>
              <td class="px-3 py-2 font-mono text-xs"><button type="button" onclick="openDetailByCode('${code}')" class="text-violet-600 hover:underline" title="进入商品详情">${code}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
-             <td class="px-3 py-2 text-xs text-slate-300" colspan="12">该商品暂无售卖单元，请进入详情页创建</td>
+             <td class="px-3 py-2 text-xs text-slate-300" colspan="11">该商品暂无售卖单元，请进入详情页创建</td>
            </tr>`);
         }
       });
       document.getElementById('pending-tbody').innerHTML = parts.length === 0
-        ? '<tr><td colspan="15" class="px-3 py-8 text-center text-xs text-slate-400">暂无未上架商品</td></tr>'
+        ? '<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无禁售售卖单元</td></tr>'
         : parts.join('');
    }
-    // 列表页删除售卖单元：自动抢该商品的锁（他人持锁/不可删除均有拦截）→ 删除 → 回写快照 → 刷新列表
-    function removeSaleUnitFromList(code, unitId) {
-      const { plans, statuses, units } = productDataOf(code);
-      if (plans.some(r => (r.units || []).includes(unitId))) { alert('该售卖单元已关联售卖计划，不可删除'); return; }
-      const lock = editLocks[code];
-      if (lock && lock.passport !== currentUser.passport) {
-        alert('当前由 ' + lock.holder + '（' + lock.passport + '）正在编辑，需其退出变更后才能操作');
-        return;
-      }
-      // 自动抢锁（列表页无「发起变更」入口；无锁商品直接获得锁）
-      if (!lock) {
-        editLocks[code] = { holder: currentUser.name, passport: currentUser.passport, since: new Date().toISOString().slice(0, 19).replace('T', ' ') };
-      }
-      const newUnits = units.filter(u => u.id !== unitId);
-      // 回写快照（含原锁状态数据），列表推导与后续详情打开均取最新
-      planRowsSnapshot[code] = {
-        planRows: JSON.parse(JSON.stringify(plans)),
-        planRowStatuses: JSON.parse(JSON.stringify(statuses)),
-        saleUnits: newUnits
-      };
-      // 若删除的是当前浏览中的商品，同步内存副本与详情表格
-      if (currentProduct && currentProduct.code === code) {
-        saleUnits = newUnits;
-        renderSaleUnits();
-        refreshProductBadge();
-      }
-      renderListed();
-      renderPending();
-    }
     // 售卖单元渲染（合并：售卖单元 + 配置查询 + 状态；状态第二列；维度:度量合并展示）
     // 把 saleUnit 的 dim/measure（可能多维度拼接 "购买量区间 + 购买周期" / "1～100 + 30天"）拆解为维度:度量对
     function formatDimMeasure(u) {
