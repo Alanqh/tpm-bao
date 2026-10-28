@@ -192,7 +192,7 @@
         <div class="admin-card">
           <div class="flex border-b border-slate-200 px-2">
             <button type="button" class="admin-tab" data-tab="listed" onclick="switchTopTab('listed')">已上架</button>
-            <button type="button" class="admin-tab active" data-tab="pending" onclick="switchTopTab('pending')">待上架</button>
+            <button type="button" class="admin-tab active" data-tab="pending" onclick="switchTopTab('pending')">未上架</button>
           </div>
 
           <!-- 已上架 Tab：商品列表 -->
@@ -212,7 +212,7 @@
             </table>
           </div>
 
-          <!-- 待上架 Tab：商品列表（无已生效计费项） -->
+          <!-- 未上架 Tab：商品列表（无任何在售售卖单元，实时推导） -->
           <div id="top-tab-pending" class="p-4">
             <table class="w-full text-sm">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
@@ -239,7 +239,7 @@
             <p class="text-xs text-slate-500 mt-0.5">上半部分为商品基本信息；下半部分管理上架情况、售卖计划及配置（折算系数/SLO赔付规则）。</p>
           </div>
           <div class="flex items-center gap-3">
-            <span id="detail-status" class="badge bg-amber-50 text-amber-700">待上架</span>
+            <span id="detail-status" class="badge bg-slate-100 text-slate-500">未上架</span>
             <div id="edit-lock-bar" class="flex items-center gap-2"></div>
             <button onclick="backToList()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回列表</button>
           </div>
@@ -772,7 +772,7 @@
       }
     }
 
-    // ===== 顶部 Tab：已上架 / 待上架（默认待上架） =====
+    // ===== 顶部 Tab：已上架 / 未上架（默认未上架；第11轮状态推导化） =====
     function switchTopTab(tab) {
       document.querySelectorAll('.admin-tab[data-tab="listed"], .admin-tab[data-tab="pending"]').forEach(t => t.classList.remove('active'));
       document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
@@ -802,14 +802,12 @@
       'pg-qwen2.5': ['payload-qwen-001']
     };
     const playgroundOptions = modelPlaygrounds.map(m => m.playground);
-    // 已上架商品
-    const listedProducts = [
-      { code: 'maas-product-vtpm-std', name: 'vTPM 预留资源包（标准）', type: 'maas-product-vtpm', playground: 'pg-deepseek-v4.1', status: '售卖中' },
-      { code: 'maas-product-vtpm-pro', name: 'vTPM 预留资源包（专业）', type: 'maas-product-vtpm', playground: 'pg-glm-4', status: '售卖中' }
-    ];
-    // 待上架商品
-    const pendingProducts = [
-      { code: 'maas-product-vtpm-pre', name: 'vTPM 预留资源包（预）', type: 'maas-product-vtpm', playground: 'pg-deepseek-v4.1', status: '待上架' }
+    // 商品列表（第11轮：状态推导化——商品不存 lifeStatus，是否已上架由"存在至少一个在售售卖单元"实时推导）
+    // 在售 = 该时刻生效期内最高优先级的已发布计划单元类型为「上架」
+    const allProducts = [
+      { code: 'maas-product-vtpm-std', name: 'vTPM 预留资源包（标准）', type: 'maas-product-vtpm', playground: 'pg-deepseek-v4.1' },
+      { code: 'maas-product-vtpm-pro', name: 'vTPM 预留资源包（专业）', type: 'maas-product-vtpm', playground: 'pg-glm-4' },
+      { code: 'maas-product-vtpm-pre', name: 'vTPM 预留资源包（预）', type: 'maas-product-vtpm', playground: 'pg-deepseek-v4.1' }
     ];
     // 当前详情商品占位
     let currentProduct = null;
@@ -936,26 +934,70 @@
     }
 
     // ===== 渲染 =====
+    // 商品状态推导（第11轮）：存在至少一个「在售」售卖单元 → 已上架；否则未上架
+    // plans/statuses/units 不传时用该商品的 mock 默认数据；详情页编辑中则传入当前副本（实时反映发布/停用）
+    function productIsListed(code, plans, statuses, units) {
+      const ps = plans || defaultPlans[code] || [];
+      const sts = statuses || defaultPlanStatuses[code] || [];
+      const us = units || defaultSaleUnits[code] || [];
+      const saved = planRowsSnapshot[code]; // backToList 时回写的编辑中数据
+      const p2 = plans ? ps : (saved ? saved.planRows : ps);
+      const s2 = statuses ? sts : (saved ? saved.planRowStatuses : sts);
+      const u2 = units ? us : (saved ? saved.saleUnits : us);
+      const bakRows = planRows, bakSts = planRowStatuses, bakUnits = saleUnits, bakNow = timeFilter;
+      planRows = p2; planRowStatuses = s2; saleUnits = u2; timeFilter = null;
+      let listed = false;
+      try { listed = u2.some(u => !unitStatusOf(u.id).offline); }
+      catch (e) { listed = false; }
+      planRows = bakRows; planRowStatuses = bakSts; saleUnits = bakUnits; timeFilter = bakNow;
+      return listed;
+    }
+    // 列表回写快照：详情页编辑后返回列表时保存（key=商品code），保证列表推导用的是最新操作结果
+    const planRowsSnapshot = {};
+    function snapshotCurrentProduct() {
+      if (!currentProduct) return;
+      planRowsSnapshot[currentProduct.code] = {
+        planRows: JSON.parse(JSON.stringify(planRows)),
+        planRowStatuses: JSON.parse(JSON.stringify(planRowStatuses)),
+        saleUnits: JSON.parse(JSON.stringify(saleUnits))
+      };
+    }
+    const statusBadgeListed = '<span class="badge bg-green-100 text-green-700">已上架</span>';
+    const statusBadgeUnlisted = '<span class="badge bg-slate-100 text-slate-500">未上架</span>';
+    // 详情页头部徽标（第11轮推导）：基于当前编辑副本实时计算
+    function refreshProductBadge() {
+      const s = document.getElementById('detail-status');
+      if (!s || !currentProduct) return;
+      const listed = productIsListed(currentProduct.code, planRows, planRowStatuses, saleUnits);
+      if (listed) { s.className = 'badge bg-green-100 text-green-700'; s.textContent = '已上架'; }
+      else { s.className = 'badge bg-slate-100 text-slate-500'; s.textContent = '未上架'; }
+    }
     function renderListed() {
-     document.getElementById('listed-tbody').innerHTML = listedProducts.map(p => `
+      const rows = allProducts.filter(p => productIsListed(p.code));
+      document.getElementById('listed-tbody').innerHTML = rows.length === 0
+        ? '<tr><td colspan="6" class="px-3 py-8 text-center text-xs text-slate-400">暂无已上架商品</td></tr>'
+        : rows.map(p => `
        <tr class="hover:bg-slate-50">
          <td class="px-3 py-2 font-mono text-xs">${p.code}</td>
          <td class="px-3 py-2">${p.name}</td>
          <td class="px-3 py-2 text-xs text-slate-500">${p.type}</td>
          <td class="px-3 py-2 text-xs font-mono">${p.playground || '—'}</td>
-         <td class="px-3 py-2"><span class="badge bg-green-100 text-green-700">${p.status}</span></td>
-         <td class="px-3 py-2"><button type="button" onclick="openDetailFromListed('${p.code}')" class="text-violet-600 hover:underline text-xs">详情</button></td>
+         <td class="px-3 py-2">${statusBadgeListed}</td>
+         <td class="px-3 py-2"><button type="button" onclick="openDetailByCode('${p.code}')" class="text-violet-600 hover:underline text-xs">详情</button></td>
        </tr>`).join('');
    }
     function renderPending() {
-     document.getElementById('pending-tbody').innerHTML = pendingProducts.map((p, idx) => `
+      const rows = allProducts.filter(p => !productIsListed(p.code));
+      document.getElementById('pending-tbody').innerHTML = rows.length === 0
+        ? '<tr><td colspan="6" class="px-3 py-8 text-center text-xs text-slate-400">暂无未上架商品</td></tr>'
+        : rows.map(p => `
        <tr class="hover:bg-slate-50">
          <td class="px-3 py-2 font-mono text-xs">${p.code}</td>
          <td class="px-3 py-2">${p.name}</td>
          <td class="px-3 py-2 text-xs text-slate-500">${p.type}</td>
          <td class="px-3 py-2 text-xs font-mono">${p.playground || '—'}</td>
-         <td class="px-3 py-2"><span class="badge bg-amber-50 text-amber-700">${p.status}</span></td>
-         <td class="px-3 py-2"><button type="button" onclick="openPendingDetail(${idx})" class="text-violet-600 hover:underline text-xs">详情</button></td>
+         <td class="px-3 py-2">${statusBadgeUnlisted}</td>
+         <td class="px-3 py-2"><button type="button" onclick="openDetailByCode('${p.code}')" class="text-violet-600 hover:underline text-xs">详情</button></td>
        </tr>`).join('');
    }
     // 售卖单元渲染（合并：售卖单元 + 配置查询 + 状态；状态第二列；维度:度量合并展示）
@@ -1020,6 +1062,7 @@
       if (hasPlan) { alert('该售卖单元已关联售卖计划，不可删除'); return; }
       saleUnits = saleUnits.filter(u => u.id !== unitId);
       renderSaleUnits();
+      refreshProductBadge();
     }
     // ===== 售卖计划 Tab：计划单元列表（每个售卖计划为其包含的每个售卖单元生成一个计划单元） =====
     // 计划单元 = 售卖计划 × 售卖单元；状态跟随所属售卖计划
@@ -1248,8 +1291,7 @@
        code: (document.getElementById('inp-code').value || 'maas-product-vtpm-pre').trim(),
        name: (document.getElementById('inp-name').value || 'vTPM 预留资源包（预）').trim(),
        type: document.getElementById('inp-type').value,
-       playground: document.getElementById('inp-playground').value,
-       lifeStatus: '待上架'
+       playground: document.getElementById('inp-playground').value
      };
       currentConfigs = {};
       planRows = [];
@@ -1267,9 +1309,7 @@
       editMode = (lock0 && lock0.passport === currentUser.passport) ? 'owner' : false;
       renderEditLockBar();
       refreshEditControls();
-      const s = document.getElementById('detail-status');
-      if (currentProduct.lifeStatus === '售卖中') { s.className = 'badge bg-green-100 text-green-700'; s.textContent = '售卖中'; }
-      else if (currentProduct.lifeStatus === '待上架') { s.className = 'badge bg-amber-50 text-amber-700'; s.textContent = '待上架'; }
+      refreshProductBadge();
       document.getElementById('detail-info').innerHTML = `
         <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品类型</p><p class="text-slate-800 font-medium">${currentProduct.type}</p></div>
         <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品code</p><p class="font-mono">${currentProduct.code}</p></div>
@@ -1287,34 +1327,55 @@
       switchInnerTab('saleunit');
    }
     function backToList() {
+      // 第11轮：返回列表前回写当前商品的编辑数据快照 + 新建商品入列，保证列表推导使用最新状态
+      snapshotCurrentProduct();
+      if (currentProduct && !allProducts.some(p => p.code === currentProduct.code)) {
+        allProducts.push({ code: currentProduct.code, name: currentProduct.name, type: currentProduct.type, playground: currentProduct.playground });
+      }
+      renderListed();
+      renderPending();
       document.getElementById('detail-view').classList.add('hidden');
       document.getElementById('list-view').classList.remove('hidden');
     }
-    function openDetailFromListed(code) {
-     const p = listedProducts.find(x => x.code === code);
+    // 统一详情入口（第11轮）：从商品 code 打开详情（列表两个 Tab 共用；商品状态进详情页后实时推导）
+    function openDetailByCode(code) {
+     const p = allProducts.find(x => x.code === code);
      if (!p) return;
      currentProduct = {
-        code: p.code, name: p.name, type: p.type, playground: p.playground, lifeStatus: '售卖中'
+        code: p.code, name: p.name, type: p.type, playground: p.playground
      };
       currentConfigs = JSON.parse(JSON.stringify(defaultConfigs[code] || {}));
       planRows = JSON.parse(JSON.stringify(defaultPlans[code] || []));
      planRowStatuses = JSON.parse(JSON.stringify(defaultPlanStatuses[code] || []));
      saleUnits = JSON.parse(JSON.stringify(defaultSaleUnits[code] || []));
+     // 恢复编辑快照（若有）：上次编辑的结果优先于 mock 默认
+     const snap = planRowsSnapshot[code];
+     if (snap) {
+       planRows = JSON.parse(JSON.stringify(snap.planRows));
+       planRowStatuses = JSON.parse(JSON.stringify(snap.planRowStatuses));
+       saleUnits = JSON.parse(JSON.stringify(snap.saleUnits));
+     }
      showDetailView();
    }
+    // 兼容旧入口（旧测试/旧引用）
+    function openDetailFromListed(code) { openDetailByCode(code); }
+    function openPendingDetail(idx) {
+      const p = allProducts.filter(x => !productIsListed(x.code))[idx];
+      if (p) openDetailByCode(p.code);
+    }
 
     // ===== 售卖计划：状态操作（需持有编辑锁） =====
     function publishPlanRow(idx) {
       if (!guardEdit()) return;
       planRowStatuses[idx] = 'published';
-      renderPlan(); renderSaleUnits();
+      renderPlan(); renderSaleUnits(); refreshProductBadge();
       // 详情页打开时同步刷新
       if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
     }
     function stopPlanRow(idx) {
       if (!guardEdit()) return;
       planRowStatuses[idx] = 'stopped';
-      renderPlan(); renderSaleUnits();
+      renderPlan(); renderSaleUnits(); refreshProductBadge();
       if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
     }
 
@@ -1495,6 +1556,7 @@
       closeModal('su-confirm');
       renderSaleUnits();
       renderPlan();
+      refreshProductBadge();
       const added = next.length - before;
       alert('已创建售卖单元：' + next.length + ' 个' + (added > 0 ? '（新增 ' + added + ' 个，已创建项不可取消）' : '（无新增）'));
     }
@@ -1832,6 +1894,7 @@
       closePlanCreatePage();
       renderPlan();
       renderSaleUnits();
+      refreshProductBadge();
       if (currentPlanDetailIdx >= 0) renderPlanDetail(currentPlanDetailIdx === editIdx ? editIdx : currentPlanDetailIdx);
     }
     // 修改（仅待发布）：打开创建页面并回填当前值
@@ -1881,18 +1944,7 @@
       document.getElementById('plan-create-view').classList.remove('hidden');
     }
 
-// ===== 待上架：商品详情 → 进入相同详情页（待上架） =====
-    function openPendingDetail(idx) {
-     const p = pendingProducts[idx];
-     currentProduct = {
-        code: p.code, name: p.name, type: p.type, playground: p.playground, lifeStatus: '待上架'
-     };
-      currentConfigs = JSON.parse(JSON.stringify(defaultConfigs[p.code] || {}));
-      planRows = JSON.parse(JSON.stringify(defaultPlans[p.code] || []));
-     planRowStatuses = JSON.parse(JSON.stringify(defaultPlanStatuses[p.code] || []));
-     saleUnits = JSON.parse(JSON.stringify(defaultSaleUnits[p.code] || []));
-     showDetailView();
-   }
+// ===== 未上架商品：详情入口走统一 openDetailByCode（第11轮状态推导化，不再独立） =====
 
     // prefix: 'billing'（计费项）
     function renderItemConfigSelector(type, prefix) {
