@@ -36,6 +36,7 @@ ok(!pcView.textContent.includes('智能匹配'), '计费项组已去掉智能匹
 // ================= 打开创建页面（std） =================
 section('打开创建页面（std）');
 window.openDetailFromListed('maas-product-vtpm-std');
+window.startEdit(); // 第10轮：测试模拟持锁编辑
 window.switchInnerTab('plan');
 window.openPlanCreatePage();
 ok(!document.getElementById('plan-create-view').classList.contains('hidden'), '页面显示');

@@ -240,6 +240,7 @@
           </div>
           <div class="flex items-center gap-3">
             <span id="detail-status" class="badge bg-amber-50 text-amber-700">待上架</span>
+            <div id="edit-lock-bar" class="flex items-center gap-2"></div>
             <button onclick="backToList()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回列表</button>
           </div>
         </div>
@@ -264,7 +265,7 @@
           <div id="inner-tab-saleunit" class="p-4">
             <!-- 顶部：小按钮「创建售卖单元」打开弹窗（只增不减） -->
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <button type="button" onclick="openSuConfirmModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>创建售卖单元</button>
+              <button type="button" id="su-create-btn" onclick="if(!guardEdit())return; openSuConfirmModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>创建售卖单元</button>
               <div class="flex flex-wrap items-center gap-2 text-xs">
                 <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间</span>
                 <input id="tf-point" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-56">
@@ -300,7 +301,7 @@
           <!-- 售卖计划 Tab：计划单元列表（售卖计划 × 售卖单元 展开） -->
           <div id="inner-tab-plan" class="p-4 hidden">
             <div class="flex flex-wrap items-center gap-3 mb-3">
-              <button type="button" onclick="openPlanCreatePage()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
+              <button type="button" id="plan-create-btn" onclick="if(!guardEdit())return; openPlanCreatePage()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
             </div>
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[1700px]">
@@ -985,12 +986,14 @@
         const charge = plan ? (chargeItems.find(c => c.code === (plan.chargeCodes && plan.chargeCodes[u.id]) || c.code === plan.chargeCode) || null) : null;
         // 所选时间执行价（示意）：有 charge 时 = 刊例价 × 0.95 折扣示意
         const execPrice = charge ? (charge.price * 0.95).toFixed(4) : '—';
-        // 未配置（无任何关联售卖计划）的售卖单元可删除
+        // 未配置（无任何关联售卖计划）的售卖单元可删除；未持有编辑锁时置灰（第10轮编辑锁）
         const hasAnyPlan = planRows.some(r => (r.units || []).includes(u.id));
         const deletable = !hasAnyPlan;
-        const action = deletable
-          ? `<button type="button" onclick="removeSaleUnit('${u.id}')" class="text-red-500 hover:underline text-xs">删除</button>`
-          : '<span class="text-slate-300 text-xs">—</span>';
+        const action = !deletable
+          ? '<span class="text-slate-300 text-xs">—</span>'
+          : (canEdit()
+            ? `<button type="button" onclick="removeSaleUnit('${u.id}')" class="text-red-500 hover:underline text-xs">删除</button>`
+            : '<span class="text-slate-300 text-xs" title="需先「发起变更」获得编辑锁">🔒 删除</span>');
         return `
         <tr class="hover:bg-slate-50">
           <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
@@ -1010,8 +1013,9 @@
         </tr>`;
       }).join('');
     }
-    // 删除售卖单元（有任何售卖计划关联即不可删）
+    // 删除售卖单元（有任何售卖计划关联即不可删；需持有编辑锁）
     function removeSaleUnit(unitId) {
+      if (!guardEdit()) return;
       const hasPlan = planRows.some(r => (r.units || []).includes(unitId));
       if (hasPlan) { alert('该售卖单元已关联售卖计划，不可删除'); return; }
       saleUnits = saleUnits.filter(u => u.id !== unitId);
@@ -1082,6 +1086,94 @@
     }
     // ===== 时间筛选器：查询指定时间节点的售卖单元配置 =====
     let timeFilter = null; // { point } 或 null（默认：当前在售）
+
+    // ===== 编辑锁（第10轮）：按商品维度；普通用户进入详情页为浏览态，变更类操作置灰，需先「发起变更」获得锁 =====
+    // 锁数据（mock，模拟服务端）：null = 无锁；{ holder, passport, since } = 持锁人
+    // 注：std/pre 无锁；pro 由其他用户持有（演示「当前由 xxx 正在编辑」）
+    const editLocks = {
+      'maas-product-vtpm-std': null,
+      'maas-product-vtpm-pro': { holder: '张三', passport: 'zhangsan01', since: '2026-10-28 10:30:00' },
+      'maas-product-vtpm-pre': null
+    };
+    // 当前登录用户（mock）
+    const currentUser = { name: '吕', passport: 'lvqing01' };
+    // 编辑状态：false=浏览态（无锁）；'owner'=我持有锁（编辑态）；'locked'=他人持有锁
+    let editMode = false;
+    // 是否可执行变更类操作
+    function canEdit() { return editMode === 'owner'; }
+    // 变更操作护栏：无锁时拦截并提示
+    function guardEdit() {
+      if (canEdit()) return true;
+      const lock = editLocks[currentProduct ? currentProduct.code : ''];
+      if (lock) alert('当前由 ' + lock.holder + '（' + lock.passport + '）正在编辑，需其退出变更后才能操作');
+      else alert('请先点击右上角「发起变更」进入编辑态后操作');
+      return false;
+    }
+    // 发起变更：抢占当前商品的编辑锁
+    function startEdit() {
+      const code = currentProduct ? currentProduct.code : '';
+      const lock = editLocks[code];
+      if (lock) {
+        alert('当前由 ' + lock.holder + '（' + lock.passport + '）正在编辑，需其退出变更后才能发起');
+        return;
+      }
+      editLocks[code] = { holder: currentUser.name, passport: currentUser.passport, since: new Date().toISOString().slice(0, 19).replace('T', ' ') };
+      editMode = 'owner';
+      renderEditLockBar();
+      refreshEditControls();
+      renderSaleUnits();
+      renderPlan();
+    }
+    // 退出变更：主动释放锁（仅持锁人可退）
+    function exitEdit() {
+      if (editMode !== 'owner') return;
+      if (!confirm('确认退出变更状态？退出后将释放编辑锁')) return;
+      const code = currentProduct ? currentProduct.code : '';
+      editLocks[code] = null;
+      editMode = false;
+      renderEditLockBar();
+      refreshEditControls();
+      renderSaleUnits();
+      renderPlan();
+    }
+    // 详情页头部右侧：发起变更 / 退出变更 按钮 + 他人持锁提示
+    function renderEditLockBar() {
+      const bar = document.getElementById('edit-lock-bar');
+      if (!bar || !currentProduct) return;
+      const lock = editLocks[currentProduct.code] || null;
+      // 情况1：我持有锁 → 显示编辑中徽标 + 退出变更按钮
+      if (editMode === 'owner') {
+        bar.innerHTML = `
+          <span class="badge bg-violet-100 text-violet-700"><i class="fa-solid fa-pen-nib mr-1"></i>编辑中（${currentUser.name}·${currentUser.passport}）</span>
+          <button type="button" onclick="exitEdit()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-lock-open mr-1"></i>退出变更</button>`;
+        return;
+      }
+      // 情况2：他人持有锁 → 显示持锁人提示
+      if (lock) {
+        bar.innerHTML = `
+          <span class="badge bg-amber-50 text-amber-700"><i class="fa-solid fa-user-pen mr-1"></i>当前由 ${lock.holder}（${lock.passport}）正在编辑</span>`;
+        return;
+      }
+      // 情况3：无锁 → 显示发起变更按钮
+      bar.innerHTML = `
+        <button type="button" onclick="startEdit()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>发起变更</button>`;
+    }
+    // 置灰/恢复所有变更类控件（创建售卖计划/创建售卖单元 + 发布/停用/修改 + 删除售卖单元）
+    function refreshEditControls() {
+      const editable = canEdit();
+      // Tab 内顶部按钮：创建售卖单元（售卖单元Tab）、创建售卖计划（售卖计划Tab）
+      ['su-create-btn', 'plan-create-btn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.disabled = !editable;
+        btn.classList.toggle('opacity-40', !editable);
+        btn.classList.toggle('cursor-not-allowed', !editable);
+        btn.title = editable ? '' : '需先「发起变更」获得编辑锁';
+      });
+      // 详情页操作区（发布/修改/停用）与计划单元表重渲（删除按钮）由 renderPlanDetail/renderSaleUnits 内部按 canEdit() 处理
+      if (currentPlanDetailIdx >= 0 && planRows[currentPlanDetailIdx]) renderPlanDetail(currentPlanDetailIdx);
+    }
+
     function querySaleParams() {
       const p = (document.getElementById('tf-point').value || '').replace('T', ' ');
       if (!p) { alert('请先选择一个时间节点'); return; }
@@ -1170,6 +1262,11 @@
       document.getElementById('list-view').classList.add('hidden');
       document.getElementById('detail-view').classList.remove('hidden');
       document.getElementById('detail-title').textContent = `${currentProduct.name}（${currentProduct.code}）`;
+      // 第10轮编辑锁：进入详情页初始化编辑状态——锁记录若属当前用户则恢复编辑态，否则浏览态（他人持锁显示提示）
+      const lock0 = editLocks[currentProduct.code] || null;
+      editMode = (lock0 && lock0.passport === currentUser.passport) ? 'owner' : false;
+      renderEditLockBar();
+      refreshEditControls();
       const s = document.getElementById('detail-status');
       if (currentProduct.lifeStatus === '售卖中') { s.className = 'badge bg-green-100 text-green-700'; s.textContent = '售卖中'; }
       else if (currentProduct.lifeStatus === '待上架') { s.className = 'badge bg-amber-50 text-amber-700'; s.textContent = '待上架'; }
@@ -1206,14 +1303,16 @@
      showDetailView();
    }
 
-    // ===== 售卖计划：状态操作 =====
+    // ===== 售卖计划：状态操作（需持有编辑锁） =====
     function publishPlanRow(idx) {
+      if (!guardEdit()) return;
       planRowStatuses[idx] = 'published';
       renderPlan(); renderSaleUnits();
       // 详情页打开时同步刷新
       if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
     }
     function stopPlanRow(idx) {
+      if (!guardEdit()) return;
       planRowStatuses[idx] = 'stopped';
       renderPlan(); renderSaleUnits();
       if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
@@ -1244,16 +1343,22 @@
       stEl.className = 'badge ' + meta.cls;
       stEl.textContent = meta.text;
       // 操作区（第9轮移至计划单元列表右下方）：待发布=发布+修改；已发布=停用（+修改）；已停用=无
+      // 第10轮编辑锁：未持有编辑锁时全部置灰不可点
       // 注：是否生效由生效起止时间决定，与状态不耦合
       const actionsEl = document.getElementById('plan-detail-actions');
+      const disCls = canEdit() ? '' : 'pointer-events-none opacity-40';
       if (st === 'pending_publish') {
         actionsEl.innerHTML = `
-          <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
-          <button type="button" onclick="publishPlanRow(${idx})" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>发布</button>`;
+          <div class="flex flex-wrap items-center justify-end gap-2 ${disCls}">
+            <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
+            <button type="button" onclick="publishPlanRow(${idx})" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>发布</button>
+          </div>`;
       } else if (st === 'published') {
         actionsEl.innerHTML = `
-          <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
-          <button type="button" onclick="stopPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-ban mr-1"></i>停用</button>`;
+          <div class="flex flex-wrap items-center justify-end gap-2 ${disCls}">
+            <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
+            <button type="button" onclick="stopPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-ban mr-1"></i>停用</button>
+          </div>`;
       } else {
         actionsEl.innerHTML = '<span class="text-xs text-slate-400">当前状态无可用操作</span>';
       }
@@ -1354,8 +1459,9 @@
         </div>`;
       }).join('');
     }
-    // 创建售卖单元：收集勾选项 → 多维度笛卡尔积 → 生成售卖单元（fn='', 保留已有 id）
+    // 创建售卖单元：收集勾选项 → 多维度笛卡尔积 → 生成售卖单元（fn='', 保留已有 id；需持有编辑锁）
     function confirmSaleUnits() {
+      if (!guardEdit()) return;
       const checked = Array.from(document.querySelectorAll('.su-leaf:checked')).map(c => ({ dim: c.dataset.dim, measure: c.dataset.measure }));
       if (checked.length === 0) { alert('请至少勾选一个度量'); return; }
       // 按维度分组
@@ -1652,8 +1758,9 @@
     }
     // 时间格式化
     function pcpVal(v, def) { return (v || def).replace('T', ' '); }
-    // 保存（创建/修改共用）：收集页面数据 → planRows
+    // 保存（创建/修改共用）：收集页面数据 → planRows（需持有编辑锁；锁丢失时退出编辑页防止改动丢失后静默失败）
     function confirmPlanCreate() {
+      if (!guardEdit()) { closePlanCreatePage(); return; }
       const name = (document.getElementById('plan-name').value || '').trim();
       if (!name) { alert('请填写售卖计划名称'); return; }
       const allUnits = selectedPlanUnits();
@@ -1730,6 +1837,7 @@
     // 修改（仅待发布）：打开创建页面并回填当前值
     let editingPlanIdx = -1;
     function editPlanRow(idx) {
+      if (!guardEdit()) return;
       editingPlanIdx = idx;
       const r = planRows[idx];
       closePlanDetail();

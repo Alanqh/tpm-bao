@@ -41,6 +41,9 @@ ok(!su2Row.textContent.includes('0.0058'), '禁售 su-2 不展示刊例价');
 ok(evalInPage('planRows.every(r => r.payloadId.startsWith("payload-glm-"))'), 'pro 计划 payload 全部属于 glm playground');
 
 // 发布 pro 的第二个计划（详情页发布）→ su-2 变在售
+// 第10轮编辑锁：pro 默认由张三持锁——测试模拟张三退出后由当前用户发起变更
+window.eval('editLocks["maas-product-vtpm-pro"] = null;');
+window.startEdit();
 window.openPlanDetail(1);
 const actBtns = document.getElementById('plan-detail-actions').textContent;
 ok(actBtns.includes('发布'), 'pro 第2个计划（待发布）详情有发布按钮');
@@ -58,15 +61,19 @@ ok(statusOf('su-2') === '禁售', 'pre su-2 禁售（未配置）');
 
 // ================= 计费项下拉按商品过滤 =================
 section('计费项下拉过滤');
+// 第10轮：需持锁才能打开创建页（pre 上一段已 startEdit？pre 打开时锁已释放，重新发起）
+window.eval('editLocks["maas-product-vtpm-pre"] = null;');
+window.startEdit();
 window.switchInnerTab('plan');
 window.openPlanCreatePage();
 const optCodes = Array.from(document.querySelectorAll('#plan-charge-unified select.plan-charge-select option')).map(o => o.value).filter(v => v);
 ok(optCodes.every(c => c.startsWith('maas-product-vtpm-pre.')), 'pre 页面计费项下拉只含 pre 前缀（共 ' + optCodes.length + ' 项）: ' + optCodes.join(', '));
 ok(optCodes.includes('maas-product-vtpm-pre.30d'), 'pre.30d 在候选中');
-// std 打开时只含 std
+// std 打开时只含 std（第10轮：需先发起变更拿锁）
 window.closePlanCreatePage();
 window.backToList();
 window.openDetailFromListed('maas-product-vtpm-std');
+window.startEdit();
 window.switchInnerTab('plan');
 window.openPlanCreatePage();
 const optCodes2 = Array.from(document.querySelectorAll('#plan-charge-unified select.plan-charge-select option')).map(o => o.value).filter(v => v);
