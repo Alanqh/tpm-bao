@@ -1531,6 +1531,13 @@
         if (!byDim[dim]) byDim[dim] = [];
         byDim[dim].push(measure);
       });
+      // 校验：售卖单元中出现的维度，创建时至少每个维度选一个度量
+      // （已确认维度勾选为 disabled+checked 天然计入，本条拦截的是"整个维度漏选"——如只勾购买周期、漏掉购买量区间）
+      const emptyDims = dimensionOptions.filter(dim => !(byDim[dim] && byDim[dim].length));
+      if (emptyDims.length > 0) {
+        alert('以下维度至少需要选择一个度量：' + emptyDims.join('、'));
+        return;
+      }
       const dims = Object.keys(byDim);
       // 笛卡尔积（单维度时退化为枚举）
       let combos = [[]];
