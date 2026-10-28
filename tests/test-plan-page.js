@@ -141,7 +141,10 @@ ok(headCells.includes('库存项'), '表头含库存项列');
 // 详情页：新计划（待发布）
 window.openPlanDetail(3);
 const pd = document.getElementById('plan-detail-view').textContent;
-ok(pd.includes('生效售卖单元'), '详情页含「生效售卖单元」字段');
+// 详情页（第9轮）：基础信息仅名称+优先级；其余信息并入计划单元表（含生效起止）
+const pdFields = document.getElementById('plan-detail-fields').textContent;
+ok(pdFields.includes('名称') && pdFields.includes('优先级') && !pdFields.includes('生效售卖单元'), '详情页基础信息仅名称+优先级');
+ok(pd.includes('生效起止'), '详情页计划单元表含「生效起止」列');
 ok(pd.includes('见计划单元') === false || true, 'unified 模式下详情页显示标量值');
 ok(document.getElementById('plan-detail-tbody').textContent.includes('inv-vtpm-custom'), '详情页计划单元表展示自定义库存项');
 

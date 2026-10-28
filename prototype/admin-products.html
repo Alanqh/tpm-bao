@@ -181,12 +181,12 @@
 
       <!-- 列表视图 -->
       <div id="list-view">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <button onclick="openProductModal()" class="admin-btn-primary text-sm px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>新增商品</button>
           <div>
             <h2 class="text-lg font-semibold text-slate-900">商品管理</h2>
             <p class="text-xs text-slate-500 mt-0.5">先创建商品（SKU）；再在详情页创建上架项（关联计费项、折算系数、SLO 配置），创建售卖计划完成上架。</p>
           </div>
-          <button onclick="openProductModal()" class="admin-btn-primary text-sm px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>新增商品</button>
         </div>
 
         <div class="admin-card">
@@ -236,7 +236,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h2 id="detail-title" class="text-lg font-semibold text-slate-900">商品详情</h2>
-            <p class="text-xs text-slate-500 mt-0.5">上半部分为商品创建信息；下半部分管理上架情况、售卖计划及配置（折算系数/SLO赔付规则）。</p>
+            <p class="text-xs text-slate-500 mt-0.5">上半部分为商品基本信息；下半部分管理上架情况、售卖计划及配置（折算系数/SLO赔付规则）。</p>
           </div>
           <div class="flex items-center gap-3">
             <span id="detail-status" class="badge bg-amber-50 text-amber-700">待上架</span>
@@ -244,10 +244,10 @@
           </div>
         </div>
 
-        <!-- 上半：创建信息 -->
+        <!-- 上半：基本信息（紧凑排列） -->
         <div class="admin-card p-4 mb-4">
-          <p class="text-sm font-medium text-slate-900 mb-3">创建信息</p>
-          <div id="detail-info" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs"></div>
+          <p class="text-sm font-medium text-slate-900 mb-2.5">基本信息</p>
+          <div id="detail-info" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs"></div>
        </div>
 
         <!-- 下半：售卖单元（含配置查询）/ 售卖计划 / 定价计划 / 折算系数 / SLO -->
@@ -262,9 +262,9 @@
 
           <!-- 售卖单元 Tab：按钮（弹窗确认）+ 配置查询（时间筛选 + 状态） -->
           <div id="inner-tab-saleunit" class="p-4">
-            <!-- 顶部：小按钮「确认售卖单元」打开弹窗（只增不减） -->
+            <!-- 顶部：小按钮「创建售卖单元」打开弹窗（只增不减） -->
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <button type="button" onclick="openSuConfirmModal()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>确认售卖单元</button>
+              <button type="button" onclick="openSuConfirmModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>创建售卖单元</button>
               <div class="flex flex-wrap items-center gap-2 text-xs">
                 <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间</span>
                 <input id="tf-point" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-56">
@@ -299,8 +299,7 @@
 
           <!-- 售卖计划 Tab：计划单元列表（售卖计划 × 售卖单元 展开） -->
           <div id="inner-tab-plan" class="p-4 hidden">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <p class="text-xs text-slate-500">&nbsp;</p>
+            <div class="flex flex-wrap items-center gap-3 mb-3">
               <button type="button" onclick="openPlanCreatePage()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
             </div>
             <div class="overflow-x-auto">
@@ -355,30 +354,30 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h3 id="plan-detail-title" class="text-lg font-semibold text-slate-900">售卖计划详情</h3>
-            <p class="text-xs text-slate-500 mt-0.5">售卖计划全部字段与状态操作</p>
+            <p class="text-xs text-slate-500 mt-0.5">基础信息与计划单元及配置信息</p>
           </div>
           <div class="flex items-center gap-2">
             <span id="plan-detail-status" class="badge bg-blue-50 text-blue-700">待发布</span>
             <button type="button" onclick="closePlanDetail()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回商品详情</button>
           </div>
         </div>
+        <!-- 基础信息（第9轮：仅名称 + 优先级） -->
         <div class="admin-card p-4 mb-4">
-          <!-- 操作区 -->
-          <div id="plan-detail-actions" class="flex flex-wrap items-center gap-2"></div>
-          <!-- 字段区 -->
-          <div id="plan-detail-fields" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs"></div>
+          <p class="text-sm font-medium text-slate-900 mb-2.5">基础信息</p>
+          <div id="plan-detail-fields" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs"></div>
         </div>
         <div class="admin-card p-4">
-          <!-- 计划单元区（第8轮：含类型列与全部配置信息，unified 值展开到行） -->
+          <!-- 计划单元区（第9轮：含生效起止列与全部配置信息；操作区移至列表右下方） -->
           <p class="text-sm font-medium text-slate-900 mb-3">计划单元</p>
           <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[1400px]">
+            <table class="w-full text-sm min-w-[1600px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th class="text-left px-3 py-2 font-medium">计划单元</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元</th>
                   <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">类型</th>
+                  <th class="text-left px-3 py-2 font-medium">生效起止</th>
                   <th class="text-left px-3 py-2 font-medium">计费项</th>
                   <th class="text-left px-3 py-2 font-medium">配额项</th>
                   <th class="text-left px-3 py-2 font-medium">库存项</th>
@@ -394,6 +393,8 @@
               <tbody id="plan-detail-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
+          <!-- 操作区（第9轮：发布/修改/停用移至计划单元列表右下方） -->
+          <div id="plan-detail-actions" class="flex flex-wrap items-center justify-end gap-2 mt-3"></div>
         </div>
       </div>
       <!-- 售卖计划创建/修改（独立页面，从「创建售卖计划」按钮/修改进入） -->
@@ -686,11 +687,11 @@
     </div>
   </div>
 
-  <!-- Modal: 确认售卖单元（维度 × 度量 复选框；只增不减） -->
+  <!-- Modal: 创建售卖单元（维度 × 度量 复选框；只增不减） -->
   <div id="modal-su-confirm" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-900/50 p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
-        <h3 class="text-sm font-semibold text-slate-900">确认售卖单元</h3>
+        <h3 class="text-sm font-semibold text-slate-900">创建售卖单元</h3>
         <button type="button" onclick="closeModal('su-confirm')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5">
@@ -698,7 +699,7 @@
       </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
         <button type="button" onclick="closeModal('su-confirm')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
-        <button type="button" onclick="confirmSaleUnits()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>确认</button>
+        <button type="button" onclick="confirmSaleUnits()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>创建</button>
       </div>
     </div>
   </div>
@@ -735,14 +736,16 @@
     </div>
   </div>
 
-  <!-- Modal: 配置版本历史 -->
+  <!-- Modal: 配置版本历史（第9轮：左版本号列表（最新在前，可滑动）+ 右内容展示） -->
   <div id="modal-config-history" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-900/50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[85vh] overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
         <h3 id="config-history-title" class="text-sm font-semibold text-slate-900">版本历史</h3>
         <button type="button" onclick="closeModal('config-history')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="p-5" id="config-history-body"></div>
+      <div class="p-5 overflow-hidden flex-1">
+        <div id="config-history-body" class="h-full"></div>
+      </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
         <button type="button" onclick="closeModal('config-history')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">关闭</button>
       </div>
@@ -839,7 +842,7 @@
     // 售卖计划（按商品 code 存储：units 关联售卖单元；chargeCodes 为每个售卖单元各自关联的计费项；payload 必须属于该商品 playground 下的 payload）
     // 自洽性约定：①售卖计划按商品隔离（打开某商品详情只挂该商品自己的计划）②计划名/计费项后缀 = 售卖单元购买周期 ③计费项 code 前缀 = 商品 code ④payloadId 属于该商品 playground 的 payload 列表 ⑤折算/SLO 版本来自该商品的 defaultConfigs ⑥刊例价随周期递增（周期越长单价越低）
     const defaultPlans = {
-      // std：DeepSeek playground，3 个售卖单元各挂一个 30/60/90 天售卖计划（全部生效中）
+      // std：DeepSeek playground，3 个售卖单元各挂一个 30/60/90 天售卖计划（全部已发布且处于生效期内）
       'maas-product-vtpm-std': [
         { name: 'vTPM 预留·标准·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-std.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
         { name: 'vTPM 预留·标准·60天', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-std.60d' }, quotaCodes: { 'su-2': 'quota-vtpm-60d' }, inventoryCodes: { 'su-2': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-10-01 00:00:00', effEnd: '2028-02-01 00:00:00' },
@@ -850,7 +853,7 @@
         { name: 'vTPM 预留·专业·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pro.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
         { name: 'vTPM 预留·专业·90天', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-pro.90d' }, quotaCodes: { 'su-2': 'quota-vtpm-90d' }, inventoryCodes: { 'su-2': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', priority: 200, effStart: '2026-10-01 00:00:00', effEnd: '2028-02-01 00:00:00' }
       ],
-      // pre：待上架商品，仅有待发布计划（未发布 → 售卖单元为待发布状态）
+      // pre：待上架商品，仅有待发布计划（未发布 → 无生效期内已发布计划 → 售卖单元禁售）
       'maas-product-vtpm-pre': [
         { name: 'vTPM 预留·预发布·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.3', slo: 'slo-rule-95 v5.1', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ]
@@ -971,7 +974,7 @@
     }
     function renderSaleUnits() {
       if (saleUnits.length === 0) {
-        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元，请先点击「确认售卖单元」</td></tr>`;
+        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元，请先点击「创建售卖单元」</td></tr>`;
         return;
       }
       document.getElementById('saleunit-tbody').innerHTML = saleUnits.map(u => {
@@ -1090,7 +1093,7 @@
       document.getElementById('tf-point').value = '';
       renderSaleUnits();
     }
-    // 售卖单元关联的售卖计划：生效中优先；有 timeFilter 时取该时刻生效中的计划，否则取生效中优先
+    // 售卖单元关联的售卖计划：生效期内的已发布计划优先；有 timeFilter 时取该时刻生效期内的计划，否则取生效期内优先
     function planOfUnit(unitId) {
       const published = planRows.filter((r, i) => (r.units || []).includes(unitId) && planRowStatuses[i] === 'published');
       if (published.length > 0) {
@@ -1099,19 +1102,19 @@
       // 无生效中计划：回退到首个关联计划（含待发布，用于展示计费项/刊例价等配置信息）
       return planRows.find(r => (r.units || []).includes(unitId)) || null;
     }
-    // 状态定义（第8轮，两态）：查询某一时刻，售卖单元状态由该时刻【生效中】的最高优先级计划单元类型决定——
-    // 在售 = 生效中的最高优先级计划单元类型为【上架】；禁售 = 该时刻无生效中计划单元，或最高优先级计划单元为【下架】（禁售无额外信息可查）
-    // 时间点取 timeFilter.point（未选择时按当前时间）
+    // 状态定义（第9轮，两态）：查询某一时刻，售卖单元状态由该时刻处于生效期内的【已发布】的最高优先级计划单元类型决定——
+    // 在售 = 生效期内已发布的最高优先级计划单元类型为【上架】；禁售 = 该时刻无生效期内的已发布计划单元，或最高优先级计划单元为【下架】（禁售无额外信息可查）
+    // 时间点取 timeFilter.point（未选择时按当前时间）；状态与生效解耦（是否生效只看 effStart/effEnd）
     function unitStatusOf(unitId) {
       const now = timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' ');
-      // 该时刻生效中的计划（状态=生效中 且 生效起止命中时间点）
+      // 该时刻生效期内的计划（状态=已发布 且 生效起止命中时间点）
       const active = planRows.filter((r, i) =>
         (r.units || []).includes(unitId) && planRowStatuses[i] === 'published' && r.effStart <= now && now <= r.effEnd
       );
       if (active.length === 0) {
         return { text: '禁售', cls: 'bg-slate-100 text-slate-500', offline: true };
       }
-      // 生效中的最高优先级计划 → 计划单元类型（上架/下架）
+      // 生效期内的最高优先级已发布计划 → 计划单元类型（上架/下架）
       const top = active.slice().sort((a, b) => (b.priority || 0) - (a.priority || 0))[0];
       const unitState = (top.unitStates || {})[unitId] || 'on';
       if (unitState === 'off') return { text: '禁售', cls: 'bg-slate-100 text-slate-500', offline: true };
@@ -1171,10 +1174,10 @@
       if (currentProduct.lifeStatus === '售卖中') { s.className = 'badge bg-green-100 text-green-700'; s.textContent = '售卖中'; }
       else if (currentProduct.lifeStatus === '待上架') { s.className = 'badge bg-amber-50 text-amber-700'; s.textContent = '待上架'; }
       document.getElementById('detail-info').innerHTML = `
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品类型</p><p class="text-slate-800 font-medium">${currentProduct.type}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品code</p><p class="font-mono">${currentProduct.code}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">商品名称</p><p class="font-medium">${currentProduct.name}</p></div>
-        <div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">关联 Playground</p><p class="font-mono">${currentProduct.playground || '—'}</p></div>
+        <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品类型</p><p class="text-slate-800 font-medium">${currentProduct.type}</p></div>
+        <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品code</p><p class="font-mono">${currentProduct.code}</p></div>
+        <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品名称</p><p class="font-medium">${currentProduct.name}</p></div>
+        <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">关联 Playground</p><p class="font-mono">${currentProduct.playground || '—'}</p></div>
       `;
       renderSaleUnits();
       renderPlan();
@@ -1240,49 +1243,39 @@
       const stEl = document.getElementById('plan-detail-status');
       stEl.className = 'badge ' + meta.cls;
       stEl.textContent = meta.text;
-      // 操作区：待发布=发布+修改；生效中=停用；已停用/已过期=无
+      // 操作区（第9轮移至计划单元列表右下方）：待发布=发布+修改；已发布=停用（+修改）；已停用=无
+      // 注：是否生效由生效起止时间决定，与状态不耦合
       const actionsEl = document.getElementById('plan-detail-actions');
       if (st === 'pending_publish') {
         actionsEl.innerHTML = `
-          <button type="button" onclick="publishPlanRow(${idx})" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>发布</button>
-          <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>`;
+          <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
+          <button type="button" onclick="publishPlanRow(${idx})" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>发布</button>`;
       } else if (st === 'published') {
         actionsEl.innerHTML = `
+          <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
           <button type="button" onclick="stopPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-ban mr-1"></i>停用</button>`;
       } else {
         actionsEl.innerHTML = '<span class="text-xs text-slate-400">当前状态无可用操作</span>';
       }
-      // 字段区
-      const field = (label, val) => `<div class="bg-slate-50 rounded-md p-2.5"><p class="text-slate-500 mb-0.5">${label}</p><p class="text-slate-800 font-medium">${val ?? '—'}</p></div>`;
-      // 生效售卖单元概览（上架/下架）
-      const usEntries = Object.entries(r.unitStates || {});
-      const onCount = usEntries.filter(([, st]) => st !== 'off').length;
-      const offList = usEntries.filter(([, st]) => st === 'off').map(([uid]) => uid);
-      const unitOverview = usEntries.length
-        ? `${usEntries.length} 个（上架 ${onCount}${offList.length ? '，下架 ' + offList.join('、') : ''}）`
-        : (r.units || []).length + ' 个';
-      // 各字段组模式
-      const m = r.modes || {};
-      const modeText = (k, label) => label + '：' + (m[k] === 'perUnit' ? '按售卖单元配置' : '全部一致');
+      // 字段区（第9轮：基础信息仅名称 + 优先级（+状态徽标已在头部）；其余信息见计划单元）
+      const field = (label, val) => `<div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">${label}</p><p class="text-slate-800 font-medium">${val ?? '—'}</p></div>`;
       document.getElementById('plan-detail-fields').innerHTML = [
         field('名称', r.name),
-        field('优先级', r.priority),
-        field('生效售卖单元', unitOverview),
-        field(modeText('factor', '关联折算系数'), typeof r.factor === 'string' ? r.factor : '见计划单元'),
-        field(modeText('slo', '关联SLO赔付规则'), typeof r.slo === 'string' ? r.slo : '见计划单元'),
-        field(modeText('payload', '关联payload'), typeof r.payloadId === 'string' ? `<span class="font-mono">${r.payloadId}</span>` : '见计划单元'),
-        field(modeText('qty', '最小购买量'), r.modes && r.modes.qty === 'perUnit' ? '见计划单元' : r.minQty),
-        field(modeText('qty', '最大购买量'), r.modes && r.modes.qty === 'perUnit' ? '见计划单元' : r.maxQty),
-        field(modeText('qty', '购买量step'), r.modes && r.modes.qty === 'perUnit' ? '见计划单元' : r.stepQty),
-        field('开始生效时间', r.effStart),
-        field('结束生效时间', r.effEnd)
+        field('优先级', r.priority)
       ].join('');
       // 计划单元区（含计费项/配额项/库存项，均与售卖单元一一对应；显示上架/下架）
       const tbody = document.getElementById('plan-detail-tbody');
       const units = r.units || [];
       if (units.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="14" class="px-3 py-6 text-center text-xs text-slate-400">无计划单元</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="15" class="px-3 py-6 text-center text-xs text-slate-400">无计划单元</td></tr>`;
       } else {
+        // 是否生效：由生效起止时间决定（与状态不耦合）
+        const nowStr = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        const isEff = r.effStart <= nowStr && nowStr <= r.effEnd;
+        const effBadge = isEff
+          ? '<span class="badge bg-green-100 text-green-700">生效中</span>'
+          : '<span class="badge bg-slate-100 text-slate-500">未生效</span>';
+        const effSpan = `<div class="flex flex-col gap-0.5"><span class="text-xs font-mono">${r.effStart} ~ ${r.effEnd}</span>${effBadge}</div>`;
         tbody.innerHTML = units.map(uid => {
           const u = saleUnits.find(x => x.id === uid) || {};
           const charge = chargeItems.find(c => c.code === (r.chargeCodes && r.chargeCodes[uid]));
@@ -1296,6 +1289,7 @@
             <td class="px-3 py-2 font-mono text-xs">${uid}</td>
             <td class="px-3 py-2">${formatDimMeasure(u)}</td>
             <td class="px-3 py-2">${stateBadge}</td>
+            <td class="px-3 py-2">${effSpan}</td>
             <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code : '—'}</td>
             <td class="px-3 py-2 font-mono text-xs">${quota ? (quota.id + '（数量 ' + quota.qty + '）') : '—'}</td>
             <td class="px-3 py-2 font-mono text-xs">${inv ? (inv.id + '（数量 ' + inv.qty + '）') : '—'}</td>
@@ -1313,18 +1307,17 @@
     // 修改（仅待发布）逻辑已在下方「售卖计划创建/修改页面」区块（openPlanCreatePage/editPlanRow/confirmPlanCreate）
     // editingPlanIdx 的唯一声明在 planDraft 区块附近
 
-    // ===== 售卖计划：状态元数据 / 创建入口 =====
+    // ===== 售卖计划：状态元数据（第9轮三态：待发布/已发布/已停用；生效与否由生效起止时间决定，不与状态耦合） =====
     function planStatusMeta(st) {
       const map = {
         pending_publish: { text: '待发布', cls: 'bg-blue-50 text-blue-700' },
-        published: { text: '生效中', cls: 'bg-green-100 text-green-700' },
-        stopped: { text: '已停用', cls: 'bg-slate-100 text-slate-600' },
-        expired: { text: '已过期', cls: 'bg-slate-100 text-slate-600' }
+        published: { text: '已发布', cls: 'bg-green-100 text-green-700' },
+        stopped: { text: '已停用', cls: 'bg-slate-100 text-slate-600' }
       };
       return map[st] || map.pending_publish;
     }
 
-    // ===== 售卖单元：弹窗确认（维度 × 度量，只增不减） =====
+    // 售卖单元：弹窗创建（维度 × 度量，只增不减）
     // function 暂不考虑，统一显示 —；按维度勾选度量，确认后生成全部维度组合的售卖单元
     function saleUnitKey(dim, measure) { return dim + '|' + measure; }
     function openSuConfirmModal() {
@@ -1361,7 +1354,7 @@
         </div>`;
       }).join('');
     }
-    // 确认售卖单元：收集勾选项 → 多维度笛卡尔积 → 生成售卖单元（fn='', 保留已有 id）
+    // 创建售卖单元：收集勾选项 → 多维度笛卡尔积 → 生成售卖单元（fn='', 保留已有 id）
     function confirmSaleUnits() {
       const checked = Array.from(document.querySelectorAll('.su-leaf:checked')).map(c => ({ dim: c.dataset.dim, measure: c.dataset.measure }));
       if (checked.length === 0) { alert('请至少勾选一个度量'); return; }
@@ -1980,26 +1973,54 @@
         renderPlanCreateSections(true);
       }
     }
+    // 版本历史（第9轮）：左侧版本号列表（最新在前，可滑动，点击选中），右侧展示选中版本内容
+    let configHistoryType = null;
+    let configHistorySel = 0; // 选中版本在倒序数组中的下标（0 = 最新）
     function openConfigHistory(type) {
       const config = currentConfigs[type];
       if (!config) return;
       const label = type === 'factor' ? 'vTPM折算系数配置' : 'SLO赔付规则配置';
+      configHistoryType = type;
+      configHistorySel = 0; // 默认选中最新版
       document.getElementById('config-history-title').textContent = label + ' - 版本历史';
-      document.getElementById('config-history-body').innerHTML = config.versions.slice().reverse().map((v, idx) => {
-        const isLatest = idx === 0;
-        return `
-          <div class="border border-slate-200 rounded-md p-3 mb-3 ${isLatest ? 'border-violet-300 bg-violet-50' : ''}">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <span class="badge ${isLatest ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-600'}">${v.version}</span>
-                ${isLatest ? '<span class="text-xs text-violet-600 font-medium">当前版本</span>' : ''}
-              </div>
-              <span class="text-xs text-slate-400">${v.createdAt}</span>
-            </div>
-            <pre class="bg-slate-900 text-slate-100 rounded-md p-3 text-xs font-mono overflow-x-auto whitespace-pre-wrap">${escapeHtml(v.yaml)}</pre>
-          </div>`;
-      }).join('');
+      renderConfigHistory();
       openModal('config-history');
+    }
+    function renderConfigHistory() {
+      if (!configHistoryType) return;
+      const config = currentConfigs[configHistoryType];
+      if (!config) return;
+      const label = configHistoryType === 'factor' ? 'vTPM折算系数配置' : 'SLO赔付规则配置';
+      const rev = config.versions.slice().reverse(); // 最新在前
+      const v = rev[configHistorySel] || rev[0];
+      document.getElementById('config-history-body').innerHTML = `
+        <div class="flex gap-4 h-full min-h-[320px]">
+          <div class="w-44 shrink-0 overflow-y-auto pr-1 space-y-1.5" id="config-history-list">
+            ${rev.map((ver, idx) => {
+              const selected = idx === configHistorySel;
+              return `
+              <button type="button" onclick="selectConfigHistoryVersion(${idx})" class="w-full text-left rounded-md border px-3 py-2 transition-colors ${selected ? 'border-violet-400 bg-violet-50' : 'border-slate-200 hover:bg-slate-50'}">
+                <div class="flex items-center gap-1.5">
+                  <span class="badge ${selected ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-600'}">${ver.version}</span>
+                  ${idx === 0 ? '<span class="text-[10px] text-violet-600 font-medium whitespace-nowrap">最新</span>' : ''}
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">${ver.createdAt || ''}</p>
+              </button>`;
+            }).join('')}
+          </div>
+          <div class="flex-1 min-w-0 flex flex-col">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-sm font-medium text-slate-900">${label} · ${v.version}</span>
+              ${configHistorySel === 0 ? '<span class="badge bg-violet-100 text-violet-700">当前版本</span>' : '<span class="badge bg-slate-100 text-slate-500">历史版本</span>'}
+              <span class="text-xs text-slate-400 ml-auto">${v.createdAt || ''}</span>
+            </div>
+            <pre class="flex-1 bg-slate-900 text-slate-100 rounded-lg p-4 text-xs font-mono overflow-auto whitespace-pre-wrap">${escapeHtml(v.yaml)}</pre>
+          </div>
+        </div>`;
+    }
+    function selectConfigHistoryVersion(idx) {
+      configHistorySel = idx;
+      renderConfigHistory();
     }
 
    // ===== 初始化 =====
