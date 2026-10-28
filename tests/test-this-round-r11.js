@@ -16,11 +16,11 @@ const section = (t) => console.log('\n== ' + t + ' ==');
 section('1. 初始列表推导');
 const listedTxt = document.getElementById('listed-tbody').textContent;
 const pendingTxt = document.getElementById('pending-tbody').textContent;
-ok(listedTxt.includes('maas-product-vtpm-std') && listedTxt.includes('maas-product-vtpm-pro'), '已上架 Tab 含 std/pro');
+ok(listedTxt.includes('maas-product-vtpm-std') && listedTxt.includes('maas-product-vtpm-pro'), '已上架 Tab 含 std/pro（第13轮：SKU 列）');
 ok(!listedTxt.includes('maas-product-vtpm-pre'), '已上架 Tab 不含 pre');
-ok(pendingTxt.includes('maas-product-vtpm-pre'), '未上架 Tab 含 pre');
-ok(pendingTxt.includes('已上架') === false && pendingTxt.includes('未上架'), '未上架行状态=未上架');
-ok(listedTxt.includes('已上架'), '已上架行状态=已上架');
+ok(pendingTxt.includes('maas-product-vtpm-pre'), '未上架 Tab 含 pre（SKU 列）');
+ok(pendingTxt.includes('禁售') && !pendingTxt.includes('在售'), '未上架 Tab 单元状态=禁售');
+ok(listedTxt.includes('在售'), '已上架 Tab 含在售售卖单元（第13轮：列表平铺售卖单元）');
 // Tab 文案
 ok(document.querySelector('.admin-tab[data-tab="pending"]').textContent === '未上架', 'Tab 名=未上架（原待上架）');
 // 无 status 假字段
