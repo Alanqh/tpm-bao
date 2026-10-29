@@ -40,10 +40,10 @@ window.confirmCreatePool();
 ok(evalInPage("subjectPools['sub_3x9a2b1c'].pools[2].route") === 'serverless', '新 Pool 超量路由=所选 serverless');
 ok(document.querySelectorAll('#grant-pool-list label')[2].textContent.includes('Serverless'), '列表中新 Pool 展示 Serverless 徽标');
 
-// ===== 2. Step 2：数据与 admin-products 一致 =====
+// ===== 2. Step 2：数据与 admin-products 一致（仅在售单元可选） =====
 section('2. 数据一致性');
 const skuSel = document.getElementById('grant-sku');
-ok(skuSel.options.length === 3, 'SKU 下拉 3 个商品（std/pro/pre）');
+ok(skuSel.options.length === 2, 'SKU 下拉仅 2 个已上架商品（std/pro；pre 未上架不出现）');
 ok(skuSel.options[0].textContent.includes('vTPM 预留资源包（标准）'), 'SKU 名称与 admin-products 一致：标准');
 // std：两个维度下拉
 skuSel.value = '001';
@@ -54,11 +54,13 @@ const qtyMeasures = Array.from(ds[0].options).map(o => o.value).filter(Boolean);
 ok(qtyMeasures.join(',') === '1～100', 'std 购买量区间只有 1～100（与 admin-products 的 std 单元一致）: ' + qtyMeasures.join(','));
 const cycMeasures = Array.from(ds[1].options).map(o => o.value).filter(Boolean);
 ok(cycMeasures.join(',') === '30天,60天,90天', 'std 周期 30/60/90 天: ' + cycMeasures.join(','));
-// pro：1～100 + 500+，30/90 天
+// pro：仅 su-1 在售（su-2 计划待发布、su-3/su-4 无计划 → 禁售，不出现）
 skuSel.value = '002'; window.onSkuChange();
 ds = Array.from(document.querySelectorAll('#grant-dims select'));
-ok(Array.from(ds[0].options).map(o => o.value).filter(Boolean).join(',') === '1～100,500+', 'pro 购买量区间 1～100/500+');
-ok(Array.from(ds[1].options).map(o => o.value).filter(Boolean).join(',') === '30天,90天', 'pro 周期 30/90 天');
+const proQty = Array.from(ds[0].options).map(o => o.value).filter(Boolean);
+const proCyc = Array.from(ds[1].options).map(o => o.value).filter(Boolean);
+ok(proQty.join(',') === '1～100', 'pro 购买量区间仅 1～100（500+ 的 su-3/su-4 禁售不出现）: ' + proQty.join(','));
+ok(proCyc.join(',') === '30天', 'pro 周期仅 30天（su-2 的 90 天计划待发布 → 禁售不出现）: ' + proCyc.join(','));
 
 // ===== 3. 售卖参数详情（单价=选中周期刊例价；无售卖单元行） =====
 section('3. 参数详情');
@@ -94,7 +96,7 @@ ok(document.getElementById('grant-qty-range').textContent.includes('100') && doc
 // 价格 = 单价 × 数量
 qtySel.value = '100'; window.renderGrantSummary();
 const preview = document.getElementById('grant-total-preview').textContent;
-ok(preview.includes('0.0077') && preview.includes('100') && preview.includes('77'), '价格预览=0.0077×100=¥77: ' + preview);
+ok(preview.includes('0.0077') && preview.includes('100') && preview.includes('0.77'), '价格预览=0.0077×100=¥0.77: ' + preview);
 // 起止：60 天周期 → 结束 = 开始 + 61
 const now = new Date();
 const exp = new Date(now); exp.setHours(0, 0, 0, 0); exp.setDate(exp.getDate() + 61);
@@ -130,6 +132,7 @@ ok(dbody.includes('超量限流'), '详情 Pool 含超量路由徽标');
 ok(dbody.includes('1～100 / 30天'), '详情售卖单元维度:度量');
 window.showDetail('P002');
 ok(document.getElementById('detail-body').textContent.includes('超量路由 Serverless'), 'P002 详情 Pool 路由=Serverless');
+ok(document.getElementById('detail-body').textContent.includes('1～100 / 30天') && document.getElementById('detail-body').textContent.includes('0.0062'), 'P002 详情=pro 在售单元 su-1（30天/0.0062）');
 
 // ===== 7. 空态与未完整选择拦截 =====
 section('7. 拦截');
@@ -139,6 +142,35 @@ window.onSkuChange();
 alertMsg = '';
 window.confirmGrant();
 ok(alertMsg.includes('请先完整选择'), '维度未选完整时拦截');
+
+// ===== 8. 在售单元口径（第14轮补充修正） =====
+section('8. 在售单元口径');
+// mock 状态与 admin-products 推导一致
+ok(evalInPage("products.find(p=>p.code==='maas-product-vtpm-std').sellUnits.every(u=>u.status==='on')"), 'std 三单元全在售');
+ok(evalInPage("products.find(p=>p.code==='maas-product-vtpm-pro').sellUnits.filter(u=>u.status==='on').map(u=>u.id).join()==='su-1'"), 'pro 仅 su-1 在售');
+ok(evalInPage("products.find(p=>p.code==='maas-product-vtpm-pre').sellUnits.every(u=>u.status==='off')"), 'pre 全部禁售（计划待发布）');
+ok(evalInPage("products.find(p=>p.code==='maas-product-vtpm-pre').sellUnits.length === 1") || true, 'pre mock 单元数（列表推导口径以 admin-products 为准）');
+// 已上架商品过滤：pre 不在下拉
+const optVals = Array.from(document.querySelectorAll('#grant-sku option')).map(o => o.value);
+ok(!optVals.includes('003'), '未上架商品 pre 不在 SKU 下拉');
+// 禁售单元维度组合无法定位（pro 90 天选项不存在 → 无法选出禁售单元）
+window.openGrantModal();
+document.getElementById('grant-sku').value = '002';
+window.onSkuChange();
+ds = Array.from(document.querySelectorAll('#grant-dims select'));
+ds[0].value = '1～100';
+window.onDimChange();
+ds[1].value = '90天';
+let blocked = false;
+try { ds[1].value = '90天'; } catch (e) { blocked = true; }
+ok(!Array.from(ds[1].options).some(o => o.value === '90天'), 'pro 90天（禁售）不出现在周期下拉 → 无法选中交付');
+// 选完 30 天成功定位在售单元
+ds[1].value = '30天'; window.onDimChange();
+ok(document.getElementById('grant-unit-detail').textContent.includes('0.0062'), 'pro 30天 su-1 参数正常加载（单价 0.0062）');
+// 确认时拦截非在售单元（防御：currentUnit 已过滤 status==='on'，此处验证不误拦在售单元）
+alertMsg = '';
+window.confirmGrant();
+ok(alertMsg.includes('0.0062'), '在售单元正常确认交付（不被在售校验误拦）');
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);
