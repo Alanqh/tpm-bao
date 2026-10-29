@@ -338,31 +338,23 @@
         </div>
       </div>
 
-      <!-- Step 2: 商品信息 + Payload -->
+      <!-- Step 2: 选择预留 vTPM 商品（SKU），按维度选度量 → 售卖单元 -->
       <div class="border border-slate-200 rounded-lg p-3 mb-3">
-        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择预留 vTPM 商品（SKU）及 Payload</p>
-        <div id="grant-sku-block" class="hidden space-y-2">
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择预留 vTPM 商品（SKU）</p>
+        <div id="grant-sku-block" class="space-y-2">
           <div>
             <label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU 商品</label>
             <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
           </div>
-          <div id="grant-sku-info" class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600 space-y-1.5">
-            <!-- JS 填充 -->
+          <!-- 维度级联选择：依次选择各维度的度量，实际是选择在售售卖单元 -->
+          <div id="grant-dims-block" class="hidden">
+            <label class="block text-xs font-medium text-slate-700 mb-1">选择售卖单元（按维度依次选择度量，仅列在售单元）</label>
+            <div id="grant-dims" class="grid grid-cols-2 gap-2"></div>
           </div>
-          <div class="flex gap-2">
-            <button type="button" onclick="showFactorPreview()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
-              <i class="fa-solid fa-table text-[10px]"></i>vTPM 折算系数预览
-            </button>
-            <button type="button" onclick="showSloPreview()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded border border-violet-200 text-violet-700 text-[11px] hover:bg-violet-50">
-              <i class="fa-solid fa-shield-halved text-[10px]"></i>SLO 赔付规则预览
-            </button>
-          </div>
-          <div id="grant-payload-block" class="hidden">
-            <label class="block text-xs font-medium text-slate-700 mb-1">选择关联 Payload</label>
-            <select id="grant-payload" onchange="onPayloadChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
-          </div>
+          <!-- 售卖单元售卖参数详情 -->
+          <div id="grant-unit-detail" class="hidden bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600"></div>
         </div>
-        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择商品及 Payload 后进行交付配置。</p>
+        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择商品并依次选择维度度量后展示售卖参数。</p>
       </div>
 
       <!-- Step 3: 交付配置 -->
@@ -371,7 +363,7 @@
         <div id="grant-config" class="hidden space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-700 mb-1">购买量</label>
+              <label class="block text-xs font-medium text-slate-700 mb-1">购买量（万 vTPM）</label>
               <select id="grant-multiplier" onchange="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
               <p id="grant-total-preview" class="text-[11px] text-violet-600 font-medium mt-1"></p>
             </div>
@@ -393,30 +385,11 @@
             </div>
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">超量路由配置</label>
-            <div class="grid grid-cols-2 gap-2">
-              <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
-                <input type="radio" name="grant-serverless" value="off" checked onchange="renderGrantSummary()" class="mt-0.5">
-                <span>
-                  <span class="block text-xs font-medium text-slate-800">超量限流</span>
-                  <span class="block text-[11px] text-slate-400">超出预留 vTPM 时返回 429</span>
-                </span>
-              </label>
-              <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
-                <input type="radio" name="grant-serverless" value="on" onchange="renderGrantSummary()" class="mt-0.5">
-                <span>
-                  <span class="block text-xs font-medium text-slate-800">超量路由 Serverless</span>
-                  <span class="block text-[11px] text-slate-400">路由至相同模型，按量计费</span>
-                </span>
-              </label>
-            </div>
-          </div>
-          <div>
             <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
             <textarea id="grant-note" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="2" placeholder="填写交付原因或其他说明"></textarea>
           </div>
         </div>
-        <p id="grant-config-hint" class="text-[11px] text-slate-400">选择商品及 Payload 后进行交付配置。</p>
+        <p id="grant-config-hint" class="text-[11px] text-slate-400">选定售卖单元后进行交付配置。</p>
       </div>
 
       <div class="mt-5 flex justify-end gap-2">
@@ -507,25 +480,31 @@
     // ===== 手动交付：数据与联动 =====
     let poolQueryTimer = null;
     const grantPoolQuery = { lastSid: null };
+    // subject → pool 列表（pool 携带超量路由配置：'limit' = 超量限流（返回 429）；'serverless' = 超量路由 Serverless（同模型按量计费））
     const subjectPools = {
       'sub_3x9a2b1c': {
         name: '智象科技',
         pools: [
-          { id: 'pool_3x9_alpha', name: 'proj-alpha' },
-          { id: 'pool_3x9_beta', name: 'proj-beta' }
+          { id: 'pool_3x9_alpha', name: 'proj-alpha', route: 'limit' },
+          { id: 'pool_3x9_beta', name: 'proj-beta', route: 'serverless' }
         ]
       },
       'sub_7k2m5n8p': {
         name: '星河互娱',
         pools: [
-          { id: 'pool_7k2_gamma', name: 'proj-gamma' }
+          { id: 'pool_7k2_gamma', name: 'proj-gamma', route: 'limit' }
         ]
       }
     };
+    function poolRouteBadge(route) {
+      return route === 'serverless'
+        ? '<span class="px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 text-[10px] font-medium">超量路由 Serverless</span>'
+        : '<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px] font-medium">超量限流（429）</span>';
+    }
 
-    // vTPM Payload 主数据（Payload 关联 playground 模型、SKU、折算系数与 SLO 规则）
+    // vTPM Payload 主数据（payload 关联模型与折算/SLO 配置；折算与 SLO 随售卖单元展示）
     const payloadMaster = [
-      { id: 'payload-dsv4f', name: 'Deepseek V4 Flash 0731 预留 vTPM', modelId: 'playground-dsv4f', modelName: 'Deepseek V4 Flash 0731', skuId: '23456', skuCode: 'DSV4F-VTPM',
+      { id: 'payload-dsv4f', name: 'Deepseek V4 Flash 0731 预留 vTPM', modelId: 'playground-dsv4f', modelName: 'Deepseek V4 Flash 0731',
         factors: [
           { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.20, outputF: 1.00 },
           { input: '0 ~ 128K', cache: '0%', output: '512 ~ 4K', inputF: 1.00, cacheF: 0.20, outputF: 2.00 },
@@ -540,7 +519,7 @@
           { metric: '吞吐量（vTPM）', target: '≥ 承诺值', penalty: '未达标的分钟数按分钟费用 2 倍赔付' }
         ]
       },
-      { id: 'payload-glm52', name: 'GLM 5.2 预留 vTPM', modelId: 'playground-glm52', modelName: 'GLM 5.2', skuId: '34567', skuCode: 'GLM52-VTPM',
+      { id: 'payload-glm52', name: 'GLM 5.2 预留 vTPM', modelId: 'playground-glm52', modelName: 'GLM 5.2',
         factors: [
           { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.25, outputF: 1.00 },
           { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.06, outputF: 1.00 }
@@ -550,7 +529,7 @@
           { metric: '首 Token 延迟 P99', target: '≤ 600ms', penalty: '延迟超标的请求按 50% 计费' }
         ]
       },
-      { id: 'payload-kimik2', name: 'Kimi K2 预留 vTPM', modelId: 'playground-kimik2', modelName: 'Kimi K2', skuId: '45678', skuCode: 'KIMIK2-VTPM',
+      { id: 'payload-kimik2', name: 'Kimi K2 预留 vTPM', modelId: 'playground-kimik2', modelName: 'Kimi K2',
         factors: [
           { input: '0 ~ 128K', cache: '0%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.30, outputF: 1.00 },
           { input: '0 ~ 128K', cache: '50% ~ 100%', output: '0 ~ 512', inputF: 1.00, cacheF: 0.08, outputF: 1.00 }
@@ -562,29 +541,43 @@
       }
     ];
 
-    // 商品列表（SKU 级别：基础参数与定价）
+    // 商品（SKU）→ 在售售卖单元：每单元 = 各维度度量组合（如 购买量区间 × 购买周期）
+    // minQty/maxQty/stepQty 单位：万 vTPM；price = 单价（元/万 vTPM·周期天）；cycleDays = 该周期度量的天数
     const products = [
-      { id: '001', name: 'Deepseek V4 Flash 0731 预留 vTPM', skuId: '23456', minVtpm: 100, minCycle: 30, sellStart: '2026-08-01', sellEnd: '2026-12-31', total: 30000, price: 99000, note: '主力售卖批次' },
-      { id: '002', name: 'GLM 5.2 预留 vTPM', skuId: '34567', minVtpm: 100, minCycle: 30, sellStart: '2026-09-01', sellEnd: '2026-11-30', total: 20000, price: 198000, note: 'Q4 活动批次' },
-      { id: '003', name: 'Kimi K2 预留 vTPM', skuId: '45678', minVtpm: 100, minCycle: 30, sellStart: '2026-10-15', sellEnd: '2027-03-31', total: 0, price: 148500, note: '新模型预售批次' }
+      { id: '001', name: 'Deepseek V4 Flash 0731 预留 vTPM', skuId: '23456', sellUnits: [
+        { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '30天' }], price: 330, minQty: 1, maxQty: 100, stepQty: 1, cycleDays: 30, payloadId: 'payload-dsv4f', factorName: 'vtpm-factor-deepseek v3.4', sloName: 'slo-rule-95 v5.2' },
+        { id: 'su-2', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '90天' }], price: 300, minQty: 1, maxQty: 100, stepQty: 1, cycleDays: 90, payloadId: 'payload-dsv4f', factorName: 'vtpm-factor-deepseek v3.4', sloName: 'slo-rule-95 v5.2' },
+        { id: 'su-3', status: 'on', dims: [{ dim: '购买量区间', measure: '100～500' }, { dim: '购买周期', measure: '30天' }], price: 310, minQty: 100, maxQty: 500, stepQty: 10, cycleDays: 30, payloadId: 'payload-dsv4f', factorName: 'vtpm-factor-deepseek v3.4', sloName: 'slo-rule-95 v5.2' },
+        { id: 'su-x', status: 'off', dims: [{ dim: '购买量区间', measure: '100～500' }, { dim: '购买周期', measure: '90天' }], price: 280, minQty: 100, maxQty: 500, stepQty: 10, cycleDays: 90, payloadId: 'payload-dsv4f', factorName: 'vtpm-factor-deepseek v3.4', sloName: 'slo-rule-95 v5.2' }
+      ] },
+      { id: '002', name: 'GLM 5.2 预留 vTPM', skuId: '34567', sellUnits: [
+        { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '30天' }], price: 660, minQty: 1, maxQty: 100, stepQty: 1, cycleDays: 30, payloadId: 'payload-glm52', factorName: 'vtpm-factor-glm v2.1', sloName: 'slo-rule-95 v5.2' },
+        { id: 'su-2', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '60天' }], price: 630, minQty: 1, maxQty: 100, stepQty: 1, cycleDays: 60, payloadId: 'payload-glm52', factorName: 'vtpm-factor-glm v2.1', sloName: 'slo-rule-95 v5.2' },
+        { id: 'su-3', status: 'on', dims: [{ dim: '购买量区间', measure: '100～500' }, { dim: '购买周期', measure: '30天' }], price: 620, minQty: 100, maxQty: 500, stepQty: 10, cycleDays: 30, payloadId: 'payload-glm52', factorName: 'vtpm-factor-glm v2.1', sloName: 'slo-rule-95 v5.2' }
+      ] },
+      { id: '003', name: 'Kimi K2 预留 vTPM', skuId: '45678', sellUnits: [
+        { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '500+' }, { dim: '购买周期', measure: '30天' }], price: 495, minQty: 500, maxQty: 5000, stepQty: 100, cycleDays: 30, payloadId: 'payload-kimik2', factorName: 'vtpm-factor-kimi v1.2', sloName: 'slo-rule-99 v2.0' }
+      ] }
     ];
 
     function payloadMasterById(id) { return payloadMaster.find(s => s.id === id); }
     function productById(id) { return products.find(s => s.id === id); }
-    function payloadsBySkuId(skuId) { return payloadMaster.filter(s => s.skuId === skuId); }
-    function currentPayload() {
-      const pid = document.getElementById('grant-payload').value;
-      return payloadMasterById(pid);
+    // 当前选中的在售售卖单元（维度度量级联筛选结果）
+    function currentUnit() {
+      const product = productById(document.getElementById('grant-sku').value);
+      if (!product) return null;
+      const selections = Array.from(document.querySelectorAll('#grant-dims select')).map(s => s.value);
+      return product.sellUnits.find(u =>
+        u.status === 'on' && u.dims.every((d, i) => String(selections[i]) === d.measure)
+      ) || null;
     }
 
     function openGrantModal() {
       document.getElementById('grant-subject').value = '';
       document.getElementById('grant-pool-block').classList.add('hidden');
       document.getElementById('grant-pool-list').innerHTML = '';
-      document.getElementById('grant-pool-hint').textContent = '输入 subject_id 后自动查询 Pool；Pool 为可选关联。';
+      document.getElementById('grant-pool-hint').textContent = '填写 subject_id 后自动查询该客户下的 Pool；可关联任意多个，也可不关联。';
       document.getElementById('grant-note').value = '';
-      document.querySelector('input[name="grant-serverless"][value="off"]').checked = true;
-      // Step 2 / Step 3 与 Pool 解耦，打开弹窗即可完整配置
       initSkuSelection();
       openModal('grant');
     }
@@ -623,10 +616,11 @@
 
       const safe = name.replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 8);
       const newId = 'pool_' + sid.replace(/[^a-z0-9]/gi, '').slice(0, 6) + '_' + (safe || String(Date.now()).slice(-6));
-      customer.pools.push({ id: newId, name });
+      // 新建 Pool 默认超量限流（返回 429），可交付后在 Pool 管理处调整
+      customer.pools.push({ id: newId, name, route: 'limit' });
       renderPoolList(customer);
       closeCreatePoolModal();
-      document.getElementById('grant-pool-hint').textContent = `已创建 Pool「${name}」，按需勾选关联。`;
+      document.getElementById('grant-pool-hint').textContent = `已创建 Pool「${name}」（超量路由默认：超量限流），按需勾选关联。`;
     }
 
     function schedulePoolQuery() {
@@ -635,10 +629,10 @@
       if (!sid) {
         document.getElementById('grant-pool-block').classList.add('hidden');
         document.getElementById('grant-pool-list').innerHTML = '';
-        document.getElementById('grant-pool-hint').textContent = '输入 subject_id 后自动查询 Pool；Pool 为可选关联。';
+        document.getElementById('grant-pool-hint').textContent = '填写 subject_id 后自动查询该客户下的 Pool；可关联任意多个，也可不关联。';
         return;
       }
-      document.getElementById('grant-pool-hint').textContent = '正在查询 Pool...';
+      document.getElementById('grant-pool-hint').textContent = '正在查询该 subject_id 下的 Pool...';
       poolQueryTimer = setTimeout(() => loadPools(), 350);
     }
 
@@ -675,10 +669,11 @@
         <label class="flex items-center gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
           <input type="checkbox" name="grant-pool" value="${p.id}" onchange="onPoolChange()" class="mt-0.5">
           <span class="text-xs font-medium text-slate-800">${p.name}</span>
+          <span class="ml-auto">${poolRouteBadge(p.route)}</span>
         </label>
       `).join('') + `
         <button type="button" onclick="openCreatePoolModal()" class="flex items-center justify-center gap-1.5 border border-dashed border-slate-300 rounded-lg p-2.5 text-xs text-slate-500 hover:border-violet-400 hover:text-violet-600 transition-colors">
-          <i class="fa-solid fa-plus"></i>创建新 Pool
+          <i class="fa-solid fa-plus"></i>快速创建新 Pool
         </button>
       `;
     }
@@ -705,95 +700,143 @@
       onSkuChange();
     }
 
+    // SKU 变化 → 重置维度级联（每个维度一个下拉，选项来自该商品在售单元的度量并集，按维度顺序依次选择）
     function onSkuChange() {
       const product = productById(document.getElementById('grant-sku').value);
+      const dimsBlock = document.getElementById('grant-dims-block');
+      const detail = document.getElementById('grant-unit-detail');
       const config = document.getElementById('grant-config');
-      const payloadBlock = document.getElementById('grant-payload-block');
-      if (!product) { config.classList.add('hidden'); payloadBlock.classList.add('hidden'); return; }
+      detail.classList.add('hidden');
+      config.classList.add('hidden');
+      document.getElementById('grant-config-hint').classList.remove('hidden');
+      if (!product) { dimsBlock.classList.add('hidden'); return; }
 
-      // SKU 基本信息展示
-      document.getElementById('grant-sku-info').innerHTML = `
-        <div class="flex items-center gap-4 flex-wrap">
-          <div><span class="text-slate-400">售卖窗口：</span><span class="font-semibold text-slate-800">${product.sellStart} ~ ${product.sellEnd}</span></div>
-          <div><span class="text-slate-400">最小购买量 / 最小购买周期：</span><span class="font-semibold text-slate-800">${product.minVtpm} 万 vTPM / ${product.minCycle} 天</span></div>
-          <div><span class="text-slate-400">单价：</span><span class="font-semibold text-slate-800">¥${product.price.toLocaleString()}</span></div>
+      // 维度名列表（取第一个在售单元的 dims 顺序）
+      const onUnits = product.sellUnits.filter(u => u.status === 'on');
+      if (onUnits.length === 0) {
+        dimsBlock.classList.add('hidden');
+        document.getElementById('grant-sku-hint').innerHTML = '<span class="text-red-500">该商品当前无在售售卖单元。</span>';
+        return;
+      }
+      document.getElementById('grant-sku-hint').classList.add('hidden');
+      const dimNames = onUnits[0].dims.map(d => d.dim);
+      document.getElementById('grant-dims').innerHTML = dimNames.map(dim => {
+        // 该维度的可选度量（在售单元并集，保持出现顺序）
+        const measures = [];
+        onUnits.forEach(u => u.dims.forEach(d => { if (d.dim === dim && !measures.includes(d.measure)) measures.push(d.measure); }));
+        return `
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">${dim}</label>
+            <select onchange="onDimChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+              <option value="">请选择${dim}度量</option>
+              ${measures.map(m => `<option value="${m}">${m}</option>`).join('')}
+            </select>
+          </div>`;
+      }).join('');
+      dimsBlock.classList.remove('hidden');
+      onDimChange();
+    }
+
+    // 维度度量变化 → 匹配在售售卖单元 → 展示售卖参数详情 / 解锁交付配置
+    function onDimChange() {
+      const product = productById(document.getElementById('grant-sku').value);
+      const detail = document.getElementById('grant-unit-detail');
+      const config = document.getElementById('grant-config');
+      const selections = Array.from(document.querySelectorAll('#grant-dims select')).map(s => s.value);
+      const allChosen = selections.length > 0 && selections.every(v => v !== '');
+      const unit = allChosen ? currentUnit() : null;
+      detail.classList.add('hidden');
+      config.classList.add('hidden');
+      if (!unit) {
+        document.getElementById('grant-config-hint').textContent = '请将各维度度量选择完整，以定位售卖单元。';
+        document.getElementById('grant-config-hint').classList.remove('hidden');
+        return;
+      }
+
+      // 售卖单元售卖参数详情：单价 / payload / 折算（预览） / SLO（预览）
+      const payload = payloadMasterById(unit.payloadId);
+      detail.innerHTML = `
+        <div class="grid grid-cols-4 gap-3">
+          <div>
+            <p class="text-slate-400">单价</p>
+            <p class="text-slate-800 font-semibold mt-0.5">¥${unit.price.toLocaleString()} <span class="text-slate-400 font-normal">/ 万 vTPM · 天</span></p>
+          </div>
+          <div>
+            <p class="text-slate-400">关联 payload_id</p>
+            <p class="text-slate-800 font-mono font-medium mt-0.5">${unit.payloadId}</p>
+            ${payload ? `<p class="text-slate-400 mt-0.5">${payload.modelName}</p>` : ''}
+          </div>
+          <div>
+            <p class="text-slate-400">vTPM 折算系数</p>
+            <p class="mt-1"><button type="button" onclick="showFactorPreview('${unit.payloadId}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium">${unit.factorName}<i class="fa-solid fa-table text-[10px] ml-0.5"></i>预览</button></p>
+          </div>
+          <div>
+            <p class="text-slate-400">SLO 赔付规则</p>
+            <p class="mt-1"><button type="button" onclick="showSloPreview('${unit.payloadId}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium">${unit.sloName}<i class="fa-solid fa-shield-halved text-[10px] ml-0.5"></i>预览</button></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 mt-2 pt-2 border-t border-slate-200 text-slate-500">
+          <span>售卖单元：<span class="font-mono font-medium text-slate-700">${unit.id}</span></span>
+          <span>维度：${unit.dims.map(d => d.dim + ' ' + d.measure).join(' + ')}</span>
         </div>
       `;
+      detail.classList.remove('hidden');
 
-      // 填充关联 Payload 下拉
-      const payloads = payloadsBySkuId(product.skuId);
-      const payloadSelect = document.getElementById('grant-payload');
-      payloadSelect.innerHTML = payloads.map(p =>
-        `<option value="${p.id}">${p.name}（${p.id}）</option>`
-      ).join('');
-      payloadBlock.classList.remove('hidden');
-
-      // Step 3 预填充
+      // ===== Step 3 交付配置：由售卖单元参数驱动 =====
       const start = new Date();
       start.setHours(0, 0, 0, 0);
       document.getElementById('grant-start').value = fmtDateTime(start);
 
-      // 购买量：最小购买量的 1~10 倍，直接展示 vTPM 值
-      const multiplierSelect = document.getElementById('grant-multiplier');
-      let multiplierOpts = '';
-      for (let m = 1; m <= 10; m++) {
-        const total = m * product.minVtpm;
-        multiplierOpts += `<option value="${m}">${total} 万 vTPM</option>`;
+      // 购买量：按售卖单元 minQty/maxQty/stepQty（万 vTPM）生成下拉
+      const qtySelect = document.getElementById('grant-multiplier');
+      let qtyOpts = '';
+      for (let q = unit.minQty; q <= unit.maxQty; q += unit.stepQty) {
+        qtyOpts += `<option value="${q}">${q} 万 vTPM</option>`;
       }
-      multiplierSelect.innerHTML = multiplierOpts;
+      qtySelect.innerHTML = qtyOpts || '<option value="" disabled>无可选购买量</option>';
 
-      // 购买周期：最小购买周期整数倍，在售卖窗口内，简化为仅展示天数
-      const sellEnd = new Date(product.sellEnd + 'T00:00:00');
-      const cycleOptions = [];
-      for (let k = 1; k <= 24; k++) {
-        const probe = new Date(start);
-        probe.setDate(probe.getDate() + k * product.minCycle);
-        if (probe > sellEnd) break;
-        cycleOptions.push({ k, days: k * product.minCycle });
-      }
-      document.getElementById('grant-cycle').innerHTML = cycleOptions.map(o =>
-        `<option value="${o.k}">${o.days} 天</option>`
-      ).join('') || '<option value="" disabled>无可选周期（已超出截止售卖时间）</option>';
+      // 购买周期：动态下拉 = 同购买量维度下其他在售单元的周期度量（周期随购买量区间的可售组合变化）
+      const qtyDim = unit.dims.find(d => d.dim === '购买量区间');
+      const qtyMeasure = qtyDim ? qtyDim.measure : null;
+      const cycleUnits = product.sellUnits.filter(u =>
+        u.status === 'on' && (!qtyMeasure || u.dims.some(d => d.dim === '购买量区间' && d.measure === qtyMeasure) || u.dims.every(d => d.dim !== '购买量区间'))
+      );
+      const cycleDays = [];
+      cycleUnits.forEach(u => u.dims.forEach(d => { if (d.dim === '购买周期' && !cycleDays.includes(u.cycleDays)) cycleDays.push(u.cycleDays); }));
+      cycleDays.sort((a, b) => a - b);
+      document.getElementById('grant-cycle').innerHTML = cycleDays.length
+        ? cycleDays.map(d => `<option value="${d}" ${d === unit.cycleDays ? 'selected' : ''}>${d} 天</option>`).join('')
+        : '<option value="" disabled>无可选周期</option>';
 
-      // 选择 SKU 后直接展示配置区（Pool 为可选项，Payload 默认选中第一项）
       config.classList.remove('hidden');
       document.getElementById('grant-config-hint').classList.add('hidden');
       renderGrantSummary();
     }
 
-    function onPayloadChange() {
-      // Payload 选择仅影响预览数据，无需额外展示信息
-      renderGrantSummary();
-    }
-
     function renderGrantSummary() {
-      const product = productById(document.getElementById('grant-sku').value);
-      if (!product) return;
+      const unit = currentUnit();
+      if (!unit) return;
+      const qty = parseInt(document.getElementById('grant-multiplier').value || String(unit.minQty), 10) || unit.minQty;
+      const days = parseInt(document.getElementById('grant-cycle').value || String(unit.cycleDays), 10) || unit.cycleDays;
+      document.getElementById('grant-total-preview').textContent = `合计：${qty} 万 vTPM × ${days} 天 × ¥${unit.price.toLocaleString()} = ¥${(qty * days * unit.price).toLocaleString()}`;
 
-      const multi = parseInt(document.getElementById('grant-multiplier').value || '1', 10) || 1;
-      const cycle = parseInt(document.getElementById('grant-cycle').value || '1', 10) || 1;
-      const totalVtpm = multi * product.minVtpm;
-      const totalPrice = multi * cycle * product.price;
-      document.getElementById('grant-total-preview').textContent = `合计：${totalVtpm.toLocaleString()} 万 vTPM，¥${totalPrice.toLocaleString()}`;
-
-      const k = cycle;
       const start = new Date(); start.setHours(0, 0, 0, 0);
       const end = new Date(start);
-      end.setDate(end.getDate() + k * product.minCycle + 1);
+      end.setDate(end.getDate() + days + 1);
       document.getElementById('grant-end').value = fmtDateTime(end);
     }
 
     function confirmGrant() {
       const selectedPools = getSelectedPools();
       const product = productById(document.getElementById('grant-sku').value);
-      const payload = currentPayload();
-      const multiplier = document.getElementById('grant-multiplier').value;
-      const cycle = document.getElementById('grant-cycle').value;
-      const serverlessOn = document.querySelector('input[name="grant-serverless"]:checked').value === 'on';
+      const unit = currentUnit();
+      if (!product || !unit) { alert('请先完整选择售卖单元（各维度度量）'); return; }
+      const qty = parseInt(document.getElementById('grant-multiplier').value, 10);
+      const days = parseInt(document.getElementById('grant-cycle').value, 10);
       const note = document.getElementById('grant-note').value.trim();
-      const totalPrice = (parseInt(multiplier, 10) || 1) * (parseInt(cycle, 10) || 1) * (product ? product.price : 0);
+      const totalPrice = qty * days * unit.price;
       closeModal('grant');
-      alert(`已交付：关联 ${selectedPools.length} 个 Pool 的预留 vTPM 包。\n商品：${product ? product.name : '-'}\nPayload：${payload ? payload.id : '-'}\n购买量：${multiplier} × ${product ? product.minVtpm : '-'} 万 vTPM\n购买周期：${cycle} × ${product ? product.minCycle : '-'} 天\n费用：¥${totalPrice.toLocaleString()}\n超量路由：${serverlessOn ? '自动降级到 Serverless' : '超量限流（返回 429）'}\n备注：${note || '无'}`);
+      alert(`已交付：关联 ${selectedPools.length} 个 Pool 的预留 vTPM 包。\n商品：${product.name}\n售卖单元：${unit.id}（${unit.dims.map(d => d.measure).join(' + ')}）\nPayload：${unit.payloadId}\n购买量：${qty} 万 vTPM\n购买周期：${days} 天\n费用：¥${totalPrice.toLocaleString()}\n各 Pool 超量路由配置：\n${(selectedPools.length ? selectedPools.map(p => `  · ${p.name}：${p.route === 'serverless' ? '超量路由 Serverless' : '超量限流（429）'}`).join('\n') : '  无关联 Pool')}\n备注：${note || '无'}`);
     }
 
     function fmtDate(d) {
@@ -884,7 +927,7 @@
     }
 
     function showFactorPreview(payloadId) {
-      const payload = payloadId ? payloadMasterById(payloadId) : currentPayload();
+      const payload = payloadId ? payloadMasterById(payloadId) : null;
       if (!payload || !payload.factors) return;
       const rows = payload.factors.map(f => `
         <tr>
@@ -926,7 +969,7 @@
     }
 
     function showSloPreview(payloadId) {
-      const payload = payloadId ? payloadMasterById(payloadId) : currentPayload();
+      const payload = payloadId ? payloadMasterById(payloadId) : null;
       if (!payload || !payload.sloRules) return;
       const rows = payload.sloRules.map(r => `
         <tr>
