@@ -23,11 +23,12 @@ document.getElementById('inp-name').value = '无维度商品';
 window.submitProduct();
 ok(alertMsg === '', '未勾选维度不拦截提交');
 ok(evalInPage('currentProduct.dims.length') === 0, 'dims=[]');
-// 未勾选 → 创建售卖单元弹窗展示全量维度
+// 未勾选 → 创建售卖单元弹窗空态（第17轮：不勾选=无这些维度）
 window.eval('startEdit()');
 window.openSuConfirmModal();
-const dimTitles0 = Array.from(document.querySelectorAll('#su-confirm-body p.text-xs.font-semibold')).map(p => p.textContent.trim()).join(',');
-ok(dimTitles0.includes('购买量区间') && dimTitles0.includes('购买周期'), '未勾选商品创建售卖单元展示全量维度: ' + dimTitles0);
+const suBody0 = document.getElementById('su-confirm-body').textContent;
+ok(suBody0.includes('未勾选售卖维度'), '未勾选商品创建售卖单元弹窗=空态提示');
+ok(document.querySelectorAll('#su-confirm-body .su-leaf').length === 0, '无度量复选框');
 
 // ===== 2. 复制：待发布计划 =====
 section('2. 复制待发布计划');

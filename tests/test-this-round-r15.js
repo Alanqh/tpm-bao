@@ -25,9 +25,9 @@ ok(dimChecks.every(c => !c.checked), '默认不勾选');
 ok(!!document.getElementById('inp-dims'), '弹窗含 #inp-dims 勾选区');
 // 提示文案
 const dimsBlock = document.getElementById('inp-dims');
-ok(dimsBlock.closest('div').nextElementSibling && dimsBlock.closest('div').nextElementSibling.textContent.includes('不勾选则默认全部维度'), '含「不勾选则默认全部维度」提示（第16轮非必选）');
+ok(dimsBlock.closest('div').nextElementSibling && dimsBlock.closest('div').nextElementSibling.textContent.includes('不勾选则无法创建售卖单元'), '含「不勾选则无法创建售卖单元」提示（第17轮语义）');
 
-// ===== 2. 非必选（第16轮修订：未勾选允许提交，dims=[] 按全量维度兜底） =====
+// ===== 2. 非必选（第17轮修订：未勾选=创建售卖单元时无这些维度，不兜底） =====
 section('2. 非必选');
 alertMsg = '';
 document.getElementById('inp-code').value = 'maas-product-vtpm-r15a';
@@ -36,9 +36,19 @@ window.submitProduct();
 ok(alertMsg === '', '未勾选维度时提交不拦截（非必选）');
 ok(evalInPage('currentProduct.code') === 'maas-product-vtpm-r15a', '未勾选也能创建成功并进入详情页');
 ok(evalInPage('currentProduct.dims.length') === 0, 'currentProduct.dims=[]（未勾选）');
-ok(evalInPage('productDims().join(",")') === '购买量区间,购买周期', 'productDims() 兜底=全量维度');
-// 详情页基本信息展示「全部维度（未指定）」
-ok(document.getElementById('detail-info').textContent.includes('全部维度'), '详情页未勾选时展示「全部维度（未指定）」');
+ok(evalInPage('productDims().length') === 0, 'productDims() 为空（不兜底全量）');
+// 详情页基本信息展示未配置提示
+ok(document.getElementById('detail-info').textContent.includes('未配置'), '详情页未勾选时展示「—（未配置，无法创建售卖单元）」');
+// 创建售卖单元弹窗：无维度 → 空态提示
+window.eval('startEdit()');
+window.openSuConfirmModal();
+const suEmpty = document.getElementById('su-confirm-body').textContent;
+ok(suEmpty.includes('未勾选售卖维度'), '创建售卖单元弹窗空态提示: ' + suEmpty.trim().slice(0, 30) + '…');
+ok(document.querySelectorAll('#su-confirm-body .su-leaf').length === 0, '空态无任何度量复选框');
+// 确认按钮拦截
+alertMsg = '';
+window.confirmSaleUnits();
+ok(alertMsg.includes('未勾选售卖维度'), 'confirmSaleUnits 拦截（无维度不可创建）');
 
 // ===== 3. 勾选提交 → dims 写入 =====
 section('3. 勾选提交');
