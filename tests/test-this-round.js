@@ -71,8 +71,8 @@ window.eval(`
 `);
 const su1Row2 = Array.from(document.querySelectorAll('#saleunit-tbody tr')).find(r => r.textContent.includes('su-1'));
 const cells = su1Row2.querySelectorAll('td');
-const priceCell = cells[5].textContent.trim();
-const chargeCell = cells[4].textContent.trim();
+const priceCell = cells[7].textContent.trim();
+const chargeCell = cells[6].textContent.trim();
 ok(priceCell === '—', '无关联计费项时刊例价显示 —（实际: ' + priceCell + '）');
 ok(chargeCell === '—', '无关联计费项时关联计费项显示 —（实际: ' + chargeCell + '）');
 // 待发布计划的计费项也能取到（回退逻辑）：恢复后 su-1 恢复刊例价

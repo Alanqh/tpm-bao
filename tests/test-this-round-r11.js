@@ -85,8 +85,9 @@ window.eval(`
     renderPlan(); renderSaleUnits(); refreshProductBadge();
   })()
 `);
-const su1Row = Array.from(document.querySelectorAll('#saleunit-tbody tr')).find(r => r.cells[0].textContent.trim() === 'su-1');
-ok(su1Row.cells[1].textContent.trim() === '禁售', 'su-1 被最高优先级下架计划压制 → 单元禁售');
+// 第20轮：售卖单元前三列=function（合并）/售卖空间（合并）/售卖单元，su-1 首行完整呈现
+const su1Row = Array.from(document.querySelectorAll('#saleunit-tbody tr')).find(r => Array.from(r.cells).some(c => c.textContent.trim() === 'su-1'));
+ok(Array.from(su1Row.cells).some(c => c.textContent.trim() === '禁售'), 'su-1 被最高优先级下架计划压制 → 单元禁售');
 ok(document.getElementById('detail-status').textContent === '已上架', 'su-1 被压制但 su-2/su-3 仍在售 → 商品仍已上架');
 // 所有计划单元均下架 → 商品未上架（即使计划已发布且生效）
 window.eval(`

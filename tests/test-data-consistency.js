@@ -13,8 +13,9 @@ const evalInPage = (expr) => window.eval(expr);
 let pass = 0, fail = 0;
 const ok = (c, msg) => { c ? (pass++, console.log('  ✓ ' + msg)) : (fail++, console.log('  ✗ ' + msg)); };
 const section = (t) => console.log('\n== ' + t + ' ==');
-const rowOf = (id) => Array.from(document.querySelectorAll('#saleunit-tbody tr')).find(r => r.cells[0].textContent.trim() === id);
-const statusOf = (id) => { const r = rowOf(id); return r ? r.cells[1].textContent.trim() : '(无行)'; };
+// 第20轮：售卖单元详情行前三列=function（合并）/售卖空间（合并）/售卖单元，su-1 为首行完整呈现
+const rowOf = (id) => Array.from(document.querySelectorAll('#saleunit-tbody tr')).find(r => Array.from(r.cells).some(c => c.textContent.trim() === id));
+const statusOf = (id) => { const r = rowOf(id); return r ? Array.from(r.cells).find(c => ['在售','禁售'].includes(c.textContent.trim())).textContent.trim() : '(无行)'; };
 
 // ================= std：3 个生效中计划 → 全部在售 =================
 section('std 商品（3 计划全部生效中）');
