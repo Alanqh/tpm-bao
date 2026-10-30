@@ -597,7 +597,7 @@
         <div>
           <label class="form-label">售卖维度</label>
           <div id="inp-dims" class="flex flex-wrap gap-x-4 gap-y-1.5 border border-slate-200 rounded-md px-3 py-2 bg-slate-50"></div>
-          <p class="text-xs text-slate-400 mt-1">勾选该 SKU 下的售卖维度，将决定后续创建售卖单元时可选的维度组合（至少选择一个）</p>
+          <p class="text-xs text-slate-400 mt-1">可选。勾选该 SKU 下的售卖维度，将决定后续创建售卖单元时可选的维度组合；不勾选则默认全部维度</p>
         </div>
      </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
@@ -1370,9 +1370,8 @@
       document.getElementById('inp-name').value = mp.model + ' 预留vTPM包';
     }
     function submitProduct() {
-     // 第15轮：售卖维度勾选校验（至少一个；决定创建售卖单元时的可选维度组合）
+     // 第15轮/第16轮：售卖维度为可选字段——未勾选时 dims 为空数组，创建售卖单元时按全量维度兜底（productDims()）
      const checkedDims = Array.from(document.querySelectorAll('.product-dim-check:checked')).map(c => c.value);
-     if (checkedDims.length === 0) { alert('请至少勾选一个售卖维度'); return; }
      // 第12轮：商品与模型/Playground 解耦——模型仅用于生成默认 code/名称，不写入商品数据
      currentProduct = {
        code: (document.getElementById('inp-code').value || 'maas-product-vtpm-pre').trim(),
@@ -1401,7 +1400,7 @@
         <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品类型</p><p class="text-slate-800 font-medium">${currentProduct.type}</p></div>
         <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品code</p><p class="font-mono">${currentProduct.code}</p></div>
         <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品名称</p><p class="font-medium">${currentProduct.name}</p></div>
-        <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">售卖维度</p><p class="font-medium">${(currentProduct.dims || []).join(' + ') || '—'}</p></div>
+        <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">售卖维度</p><p class="font-medium">${(currentProduct.dims || []).length ? (currentProduct.dims).join(' + ') : '全部维度（未指定）'}</p></div>
       `;
       renderSaleUnits();
       renderPlan();
@@ -1465,6 +1464,22 @@
       renderPlan(); renderSaleUnits(); refreshProductBadge();
       if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
     }
+    // 复制售卖计划（第16轮）：深拷贝生成新的待发布计划；名称加「-副本」后缀（重名自动加序号）；三种状态均可复制
+    function copyPlanRow(idx) {
+      if (!guardEdit()) return;
+      const src = planRows[idx];
+      if (!src) return;
+      // 副本名称：原名-副本；若重名继续追加序号
+      let copyName = (src.name || '售卖计划') + '-副本';
+      let n = 2;
+      while (planRows.some(r => r.name === copyName)) { copyName = (src.name || '售卖计划') + '-副本' + n; n++; }
+      const copy = JSON.parse(JSON.stringify(src));
+      copy.name = copyName;
+      planRows.push(copy);
+      planRowStatuses.push('pending_publish');
+      renderPlan(); renderSaleUnits(); refreshProductBadge();
+      alert('已复制售卖计划「' + (src.name || '—') + '」→「' + copyName + '」（待发布），可进入修改后发布。');
+    }
 
     // ===== 售卖计划详情页（独立页面）：从计划单元「所属售卖计划」进入；发布/停用/修改 =====
     let currentPlanDetailIdx = -1;
@@ -1491,24 +1506,28 @@
       stEl.className = 'badge ' + meta.cls;
       stEl.textContent = meta.text;
       // 操作区（第9轮移至计划单元列表右下方）：待发布=发布+修改；已发布=停用（+修改）；已停用=无
+      // 第16轮：三种状态均提供「复制」——深拷贝生成新的待发布计划（名称加「-副本」后缀，可再修改）
       // 第10轮编辑锁：未持有编辑锁时全部置灰不可点
       // 注：是否生效由生效起止时间决定，与状态不耦合
       const actionsEl = document.getElementById('plan-detail-actions');
       const disCls = canEdit() ? '' : 'pointer-events-none opacity-40';
+      const copyBtn = `<button type="button" onclick="copyPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-copy mr-1"></i>复制</button>`;
       if (st === 'pending_publish') {
         actionsEl.innerHTML = `
           <div class="flex flex-wrap items-center justify-end gap-2 ${disCls}">
             <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
+            ${copyBtn}
             <button type="button" onclick="publishPlanRow(${idx})" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>发布</button>
           </div>`;
       } else if (st === 'published') {
         actionsEl.innerHTML = `
           <div class="flex flex-wrap items-center justify-end gap-2 ${disCls}">
             <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
+            ${copyBtn}
             <button type="button" onclick="stopPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-ban mr-1"></i>停用</button>
           </div>`;
       } else {
-        actionsEl.innerHTML = '<span class="text-xs text-slate-400">当前状态无可用操作</span>';
+        actionsEl.innerHTML = `<div class="flex flex-wrap items-center justify-end gap-2 ${disCls}">${copyBtn}</div>`;
       }
       // 字段区（第9轮：基础信息仅名称 + 优先级（+状态徽标已在头部）；其余信息见计划单元）
       const field = (label, val) => `<div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">${label}</p><p class="text-slate-800 font-medium">${val ?? '—'}</p></div>`;

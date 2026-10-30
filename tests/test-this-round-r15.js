@@ -25,21 +25,29 @@ ok(dimChecks.every(c => !c.checked), '默认不勾选');
 ok(!!document.getElementById('inp-dims'), '弹窗含 #inp-dims 勾选区');
 // 提示文案
 const dimsBlock = document.getElementById('inp-dims');
-ok(dimsBlock.closest('div').nextElementSibling && dimsBlock.closest('div').nextElementSibling.textContent.includes('至少选择一个'), '含"至少选择一个"提示');
+ok(dimsBlock.closest('div').nextElementSibling && dimsBlock.closest('div').nextElementSibling.textContent.includes('不勾选则默认全部维度'), '含「不勾选则默认全部维度」提示（第16轮非必选）');
 
-// ===== 2. 校验拦截 =====
-section('2. 校验拦截');
+// ===== 2. 非必选（第16轮修订：未勾选允许提交，dims=[] 按全量维度兜底） =====
+section('2. 非必选');
 alertMsg = '';
 document.getElementById('inp-code').value = 'maas-product-vtpm-r15a';
-document.getElementById('inp-name').value = '维度拦截测试';
+document.getElementById('inp-name').value = '维度兜底测试';
 window.submitProduct();
-ok(alertMsg.includes('至少勾选一个售卖维度'), '未勾选维度时提交拦截: ' + alertMsg);
-ok(evalInPage('currentProduct') === null || evalInPage('currentProduct.code') !== 'maas-product-vtpm-r15a', '拦截后未创建商品');
+ok(alertMsg === '', '未勾选维度时提交不拦截（非必选）');
+ok(evalInPage('currentProduct.code') === 'maas-product-vtpm-r15a', '未勾选也能创建成功并进入详情页');
+ok(evalInPage('currentProduct.dims.length') === 0, 'currentProduct.dims=[]（未勾选）');
+ok(evalInPage('productDims().join(",")') === '购买量区间,购买周期', 'productDims() 兜底=全量维度');
+// 详情页基本信息展示「全部维度（未指定）」
+ok(document.getElementById('detail-info').textContent.includes('全部维度'), '详情页未勾选时展示「全部维度（未指定）」');
 
 // ===== 3. 勾选提交 → dims 写入 =====
 section('3. 勾选提交');
+window.backToList();
+window.openProductModal();
 // 仅勾「购买周期」单维度
 document.querySelectorAll('.product-dim-check').forEach(c => { c.checked = c.value === '购买周期'; });
+document.getElementById('inp-code').value = 'maas-product-vtpm-r15a';
+document.getElementById('inp-name').value = '维度拦截测试';
 window.submitProduct();
 ok(evalInPage('currentProduct.code') === 'maas-product-vtpm-r15a', '勾选后创建成功并进入详情页');
 ok(evalInPage('currentProduct.dims.join(",")') === '购买周期', 'currentProduct.dims=[购买周期]（单维度）');
