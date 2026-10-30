@@ -76,10 +76,10 @@ ok(window.eval('editMode') === false, '他人持锁时为浏览态');
 ok(bar.textContent.includes('张三') && bar.textContent.includes('zhangsan01') && bar.textContent.includes('正在编辑'), '显示「当前由 张三（zhangsan01）正在编辑」');
 ok(!bar.textContent.includes('发起变更'), '他人持锁时不显示发起变更按钮');
 ok(suBtn.disabled === true && planBtn.disabled === true, '变更按钮仍置灰');
-// 已发布计划详情页操作区置灰
+// 已发布计划详情页操作区置灰（第18轮：复制按钮豁免置灰——置灰块为容器内首个 div）
 window.openPlanDetail(0);
-const actDiv = document.getElementById('plan-detail-actions').querySelector('div');
-ok(actDiv && actDiv.className.includes('opacity-40') && actDiv.className.includes('pointer-events-none'), '详情页操作区置灰');
+const actDiv = document.getElementById('plan-detail-actions').querySelector('div.pointer-events-none');
+ok(actDiv && actDiv.className.includes('opacity-40') && actDiv.className.includes('pointer-events-none'), '详情页操作区置灰（修改/停用；复制豁免在外）');
 window.closePlanDetail();
 // 发起变更被拦截
 window.startEdit();

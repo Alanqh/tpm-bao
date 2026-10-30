@@ -25,25 +25,31 @@ ok(dimChecks.every(c => !c.checked), '默认不勾选');
 ok(!!document.getElementById('inp-dims'), '弹窗含 #inp-dims 勾选区');
 // 提示文案
 const dimsBlock = document.getElementById('inp-dims');
-ok(dimsBlock.closest('div').nextElementSibling && dimsBlock.closest('div').nextElementSibling.textContent.includes('不勾选则无法创建售卖单元'), '含「不勾选则无法创建售卖单元」提示（第17轮语义）');
+ok(dimsBlock.closest('div').nextElementSibling && dimsBlock.closest('div').nextElementSibling.textContent.includes('至少勾选 1 个'), '含「至少勾选 1 个」提示（第18轮必选）');
 
-// ===== 2. 非必选（第17轮修订：未勾选=创建售卖单元时无这些维度，不兜底） =====
-section('2. 非必选');
+// ===== 2. 必选校验（第18轮：至少勾 1 个） =====
+section('2. 必选校验');
 alertMsg = '';
 document.getElementById('inp-code').value = 'maas-product-vtpm-r15a';
-document.getElementById('inp-name').value = '维度兜底测试';
+document.getElementById('inp-name').value = '维度校验测试';
 window.submitProduct();
-ok(alertMsg === '', '未勾选维度时提交不拦截（非必选）');
-ok(evalInPage('currentProduct.code') === 'maas-product-vtpm-r15a', '未勾选也能创建成功并进入详情页');
-ok(evalInPage('currentProduct.dims.length') === 0, 'currentProduct.dims=[]（未勾选）');
-ok(evalInPage('productDims().length') === 0, 'productDims() 为空（不兜底全量）');
-// 详情页基本信息展示未配置提示
-ok(document.getElementById('detail-info').textContent.includes('未配置'), '详情页未勾选时展示「—（未配置，无法创建售卖单元）」');
+ok(alertMsg.includes('至少勾选一个售卖维度'), '不勾任何维度时提交拦截: ' + alertMsg);
+ok(evalInPage('currentProduct') === null, '拦截后未创建商品');
+
+// 手动构造空 dims 商品（提交校验之外的兜底行为验证：不勾=创建售卖单元无这些维度）
+window.eval(`
+  currentProduct = { code: 'maas-product-vtpm-r15a', name: '空维度商品', type: 'maas-product-vtpm', dims: [] };
+  currentConfigs = {}; planRows = []; planRowStatuses = []; saleUnits = [];
+  showDetailView();
+`);
+ok(evalInPage('currentProduct.dims.length') === 0, '空 dims 商品（模拟历史数据）');
+ok(evalInPage('productDims().length') === 0, 'productDims() 为空（不兜底）');
+ok(document.getElementById('detail-info').textContent.includes('未配置'), '详情页展示「—（未配置，无法创建售卖单元）」');
 // 创建售卖单元弹窗：无维度 → 空态提示
 window.eval('startEdit()');
 window.openSuConfirmModal();
 const suEmpty = document.getElementById('su-confirm-body').textContent;
-ok(suEmpty.includes('未勾选售卖维度'), '创建售卖单元弹窗空态提示: ' + suEmpty.trim().slice(0, 30) + '…');
+ok(suEmpty.includes('未勾选售卖维度'), '创建售卖单元弹窗空态提示');
 ok(document.querySelectorAll('#su-confirm-body .su-leaf').length === 0, '空态无任何度量复选框');
 // 确认按钮拦截
 alertMsg = '';
