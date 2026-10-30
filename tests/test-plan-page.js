@@ -133,11 +133,12 @@ ok(np.chargeCodes['su-1'] === 'maas-product-vtpm-std.30d', 'chargeCodes 从 unif
 ok(np.inventoryCodes['su-1'] === 'inv-vtpm-custom', 'inventoryCodes 保存自定义库存项');
 ok(document.getElementById('plan-create-view').classList.contains('hidden'), '保存后页面关闭返回列表');
 
-// ================= 售卖计划 Tab 17 列 + 详情 =================
-section('售卖计划 Tab（17 列，含类型列）+ 详情页');
+// ================= 售卖计划 Tab 18 列 + 详情 =================
+section('售卖计划 Tab（18 列，含类型列+Function 列）+ 详情页');
 const headCells = Array.from(document.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(headCells.length === 17, '表头 17 列（含类型列）: ' + headCells.length);
+ok(headCells.length === 18, '表头 18 列（第19轮加 Function 列）: ' + headCells.length);
 ok(headCells[2] === '类型', '第 3 列 = 类型');
+ok(headCells.includes('Function'), '表头含 Function 列（第19轮：function 专门展示列）');
 ok(headCells.includes('库存项'), '表头含库存项列');
 // 详情页：新计划（待发布）
 window.openPlanDetail(3);
