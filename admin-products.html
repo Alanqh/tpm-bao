@@ -579,7 +579,8 @@
       <div class="p-5 grid grid-cols-1 gap-4">
         <div>
           <label class="form-label">商品类型</label>
-          <select id="inp-type" class="form-input" onchange="autogenProductNameCode()"><option>maas-product-vtpm</option></select>
+          <select id="inp-type" class="form-input" onchange="onTypeChange()"><option value="maas-product-vtpm">maas-product-vtpm</option><option value="maas-online-text">maas-online-text</option></select>
+          <p class="text-xs text-slate-400 mt-1">可选的售卖维度由商品类型决定</p>
         </div>
         <div>
           <label class="form-label">模型（用于生成默认 code/名称）</label>
@@ -597,7 +598,7 @@
         <div>
           <label class="form-label">售卖维度</label>
           <div id="inp-dims" class="flex flex-wrap gap-x-4 gap-y-1.5 border border-slate-200 rounded-md px-3 py-2 bg-slate-50"></div>
-          <p class="text-xs text-slate-400 mt-1">可选。勾选该 SKU 下的售卖维度，将决定后续创建售卖单元时可选的维度组合；不勾选则无法创建售卖单元</p>
+          <p class="text-xs text-slate-400 mt-1">勾选该 SKU 下的售卖维度，将决定后续创建售卖单元时可选的维度组合；至少勾选 1 个；<span class="text-amber-600">function</span> 为必选维度（该类型含 function 时强制勾选）</p>
         </div>
      </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
@@ -837,8 +838,19 @@
     // 当前详情商品占位
     let currentProduct = null;
     // 售卖单元选项：维度 × 度量（度量是维度下的元素，如购买周期下的 30/60/90 天，购买量区间下的 1～100/100～500/500+）
-    const dimensionOptions = ['购买量区间', '购买周期'];
-    const measureOptions = { '购买量区间': ['1～100', '100～500', '500+'], '购买周期': ['30天', '60天', '90天'] };
+    const dimensionOptions = ['购买量区间', '购买周期', 'function', '输入token区间', '输出token区间'];
+    const measureOptions = {
+      '购买量区间': ['1～100', '100～500', '500+'],
+      '购买周期': ['30天', '60天', '90天'],
+      'function': ['input', 'output', 'cache'],
+      '输入token区间': ['0～128K', '128K～1M', '1M+'],
+      '输出token区间': ['0～4K', '4K～16K', '16K+']
+    };
+    // 售卖维度由商品类型决定（第18轮）：每个类型定义可选维度集合；hasFn=该类型含 function 维度（列售卖维度时 function 必选）
+    const productDimSpecs = {
+      'maas-product-vtpm': { dims: ['购买量区间', '购买周期'], hasFn: false },
+      'maas-online-text': { dims: ['function', '输入token区间', '输出token区间'], hasFn: true }
+    };
     // 售卖单元（按 SKU code 存储；function 暂不考虑，统一显示 — ；维度+度量，多维度笛卡尔积；确认后只增不减）
     // 注意：默认数据必须是"已勾选度量集合的完整笛卡尔积"，保证售卖单元列表与确认弹窗勾选状态一致
     const defaultSaleUnits = {
@@ -1345,16 +1357,38 @@
     // ===== 新增商品 → 创建后直接打开详情页（待上架） =====
     // 弹窗：先选商品类型 → 选模型（仅用于自动生成默认 code/名称，商品不与模型/Playground 建立关联）→ code/名称可手改 → 勾选售卖维度
     function openProductModal() {
+      document.getElementById('inp-type').value = 'maas-product-vtpm';
       document.getElementById('inp-playground').innerHTML = modelPlaygrounds.map(m => `<option value="${m.playground}">${m.model}（${m.playground}）</option>`).join('');
       document.getElementById('inp-code').value = '';
       document.getElementById('inp-name').value = '';
-      // 第15轮：售卖维度勾选（展示该 SKU 类型下全部可选维度，默认不勾；决定创建售卖单元时的可选维度）
-      document.getElementById('inp-dims').innerHTML = dimensionOptions.map(dim => `
+      renderProductDimChecks();
+      openModal('product');
+      autogenProductNameCode();
+    }
+    // 第18轮：售卖维度复选区按商品类型渲染——维度集合来自 productDimSpecs[type]；function（hasFn 类型）必选（disabled+checked）
+    function renderProductDimChecks() {
+      const type = document.getElementById('inp-type').value;
+      const spec = productDimSpecs[type] || { dims: [...dimensionOptions], hasFn: false };
+      document.getElementById('inp-dims').innerHTML = spec.dims.map(dim => {
+        const isFn = dim === 'function' && spec.hasFn;
+        if (isFn) {
+          return `
+        <label class="flex items-center gap-1 text-xs cursor-not-allowed text-slate-500">
+          <input type="checkbox" class="product-dim-check" value="${dim}" checked disabled style="accent-color:#7C3AED">
+          <span>${dim}</span>
+          <span class="text-[10px] text-amber-600">必选</span>
+        </label>`;
+        }
+        return `
         <label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
           <input type="checkbox" class="product-dim-check" value="${dim}" style="accent-color:#7C3AED">
           <span>${dim}</span>
-        </label>`).join('');
-      openModal('product');
+        </label>`;
+      }).join('');
+    }
+    // 商品类型切换 → 重渲售卖维度复选区（function 必选项自动带上）+ 重生成默认 code/名称
+    function onTypeChange() {
+      renderProductDimChecks();
       autogenProductNameCode();
     }
     // 根据商品类型 + 所选模型，自动生成商品 code 与名称（例：maas-product-vtpm-deepseek-v41 / DeepSeek-V4.1 预留vTPM包）
@@ -1367,11 +1401,12 @@
       // code 后缀：模型名小写、去分隔符（DeepSeek-V4.1 → deepseek-v41）
       const modelSlug = mp.model.toLowerCase().replace(/[-_.\s]/g, '');
       document.getElementById('inp-code').value = type + '-' + modelSlug;
-      document.getElementById('inp-name').value = mp.model + ' 预留vTPM包';
+      document.getElementById('inp-name').value = type === 'maas-online-text' ? (mp.model + ' 在线文本包') : (mp.model + ' 预留vTPM包');
     }
     function submitProduct() {
-     // 第15轮/第16轮：售卖维度为可选字段——未勾选时 dims 为空数组，创建售卖单元时按全量维度兜底（productDims()）
+     // 第18轮：售卖维度至少勾选 1 个（function 在含它的类型下已强制勾选，天然满足）
      const checkedDims = Array.from(document.querySelectorAll('.product-dim-check:checked')).map(c => c.value);
+     if (checkedDims.length === 0) { alert('请至少勾选一个售卖维度'); return; }
      // 第12轮：商品与模型/Playground 解耦——模型仅用于生成默认 code/名称，不写入商品数据
      currentProduct = {
        code: (document.getElementById('inp-code').value || 'maas-product-vtpm-pre').trim(),
@@ -1465,8 +1500,8 @@
       if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
     }
     // 复制售卖计划（第16轮）：深拷贝生成新的待发布计划；名称加「-副本」后缀（重名自动加序号）；三种状态均可复制
+    // 第18轮：复制不受计划状态与编辑锁限制（生成的是待发布副本，不改变现有计划）
     function copyPlanRow(idx) {
-      if (!guardEdit()) return;
       const src = planRows[idx];
       if (!src) return;
       // 副本名称：原名-副本；若重名继续追加序号
@@ -1506,28 +1541,32 @@
       stEl.className = 'badge ' + meta.cls;
       stEl.textContent = meta.text;
       // 操作区（第9轮移至计划单元列表右下方）：待发布=发布+修改；已发布=停用（+修改）；已停用=无
-      // 第16轮：三种状态均提供「复制」——深拷贝生成新的待发布计划（名称加「-副本」后缀，可再修改）
-      // 第10轮编辑锁：未持有编辑锁时全部置灰不可点
+      // 第18轮：复制按钮始终可操作——与售卖计划状态无关，且不受编辑锁限制（复制生成待发布副本，不属于对现网计划的变更）
+      // 修改/发布/停用仍受第10轮编辑锁限制（未持锁置灰）
       // 注：是否生效由生效起止时间决定，与状态不耦合
       const actionsEl = document.getElementById('plan-detail-actions');
       const disCls = canEdit() ? '' : 'pointer-events-none opacity-40';
       const copyBtn = `<button type="button" onclick="copyPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-copy mr-1"></i>复制</button>`;
       if (st === 'pending_publish') {
         actionsEl.innerHTML = `
-          <div class="flex flex-wrap items-center justify-end gap-2 ${disCls}">
-            <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            <div class="flex flex-wrap items-center gap-2 ${disCls}">
+              <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
+              <button type="button" onclick="publishPlanRow(${idx})" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>发布</button>
+            </div>
             ${copyBtn}
-            <button type="button" onclick="publishPlanRow(${idx})" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-cloud-arrow-up mr-1"></i>发布</button>
           </div>`;
       } else if (st === 'published') {
         actionsEl.innerHTML = `
-          <div class="flex flex-wrap items-center justify-end gap-2 ${disCls}">
-            <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            <div class="flex flex-wrap items-center gap-2 ${disCls}">
+              <button type="button" onclick="editPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
+              <button type="button" onclick="stopPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-ban mr-1"></i>停用</button>
+            </div>
             ${copyBtn}
-            <button type="button" onclick="stopPlanRow(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-ban mr-1"></i>停用</button>
           </div>`;
       } else {
-        actionsEl.innerHTML = `<div class="flex flex-wrap items-center justify-end gap-2 ${disCls}">${copyBtn}</div>`;
+        actionsEl.innerHTML = `<div class="flex flex-wrap items-center justify-end gap-2">${copyBtn}</div>`;
       }
       // 字段区（第9轮：基础信息仅名称 + 优先级（+状态徽标已在头部）；其余信息见计划单元）
       const field = (label, val) => `<div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">${label}</p><p class="text-slate-800 font-medium">${val ?? '—'}</p></div>`;
@@ -1599,11 +1638,13 @@
     // 渲染弹窗内每个维度下的度量复选框；已勾选的设为 disabled（只增不减）
     // 判断依据：把 saleUnit 的多维度 dim/measure 拆解回单维度对，任一命中即视为已确认
     // 第15轮：只展示该商品「售卖维度」（currentProduct.dims）内的维度——新增商品时勾选决定创建售卖单元的维度范围
-    // 第17轮语义修正：不勾选=创建售卖单元时没有这些维度（绝不兜底全量）；仅当商品数据缺 dims 字段（历史数据）时兜底全量
+    // 第17轮：不勾选=创建售卖单元时没有这些维度（不兜底全量）
+    // 第18轮：历史数据无 dims 字段时按商品类型的维度集兜底（vtpm=购买量区间+购买周期；online-text=function+输入+输出token区间）
     function productDims() {
       if (!currentProduct) return [];
       if (Array.isArray(currentProduct.dims)) return currentProduct.dims;
-      return [...dimensionOptions]; // 历史数据兼容（无 dims 字段）
+      const spec = productDimSpecs[currentProduct.type];
+      return spec ? [...spec.dims] : [];
     }
     function renderSuConfirmModalBody() {
       const box = document.getElementById('su-confirm-body');
