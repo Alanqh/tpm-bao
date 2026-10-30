@@ -332,6 +332,7 @@
                   <th class="text-left px-3 py-2 font-medium">类型</th>
                   <th class="text-left px-3 py-2 font-medium">所属售卖计划</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元</th>
+                  <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">计费项</th>
                   <th class="text-left px-3 py-2 font-medium">配额项</th>
@@ -396,6 +397,7 @@
                 <tr>
                   <th class="text-left px-3 py-2 font-medium">计划单元</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元</th>
+                  <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">类型</th>
                   <th class="text-left px-3 py-2 font-medium">生效起止</th>
@@ -1045,7 +1047,7 @@
          <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
          <td class="px-3 py-2"><span class="badge ${st.cls}">${st.text}</span></td>
          <td class="px-3 py-2 font-mono text-xs"><button type="button" onclick="openDetailByCode('${code}')" class="text-violet-600 hover:underline" title="进入商品详情">${code}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
-         <td class="px-3 py-2 text-xs">${u.fn || '—'}</td>
+         <td class="px-3 py-2 text-xs">${fnOfUnit(u) || '—'}</td>
          <td class="px-3 py-2">${formatDimMeasure(u)}</td>
          <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code + '<button type="button" onclick="copyChargeCode(\'' + charge.code + '\', this)" class="ml-1 text-slate-400 hover:text-slate-600" title="复制code"><i class="fa-solid fa-copy"></i></button>' : '—'}</td>
          <td class="px-3 py-2 text-right font-mono text-xs">${charge ? charge.price.toFixed(4) : '—'}</td>
@@ -1089,20 +1091,35 @@
         ? '<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无禁售售卖单元</td></tr>'
         : parts.join('');
    }
+    // 第19轮：function 有专门展示列——从售卖单元 dim/measure 拆出 function 维度的度量（如 input），无 function 维度时返回 ''
+    function fnOfUnit(u) {
+      if (!u || !u.dim) return '';
+      const dims = u.dim.split(' + ');
+      const measures = (u.measure || '').split(' + ');
+      const i = dims.indexOf('function');
+      return i >= 0 ? (measures[i] || '') : '';
+    }
     // 售卖单元渲染（合并：售卖单元 + 配置查询 + 状态；状态第二列；维度:度量合并展示）
     // 把 saleUnit 的 dim/measure（可能多维度拼接 "购买量区间 + 购买周期" / "1～100 + 30天"）拆解为维度:度量对
+    // 第19轮：function 维度不出现在「维度:度量」中——由专门 Function 列展示（fnOfUnit）
     function formatDimMeasure(u) {
       if (!u || !u.dim) return '—';
-      const dims = u.dim.split(' + ');
+      const dims = u.dim.split(' + ').filter(d => d !== 'function');
       const measures = (u.measure || '').split(' + ');
-      return dims.map((d, i) => `<div class="text-xs"><span class="text-slate-500">${d}:</span><span class="text-slate-800 font-medium ml-1">${measures[i] || ''}</span></div>`).join('');
+      const allDims = (u.dim || '').split(' + ');
+      if (dims.length === 0) return '—';
+      return dims.map((d, i) => {
+        const m = measures[allDims.indexOf(d)] || '';
+        return `<div class="text-xs"><span class="text-slate-500">${d}:</span><span class="text-slate-800 font-medium ml-1">${m}</span></div>`;
+      }).join('');
     }
-    // 纯文本版（用于弹窗等紧凑展示场景）
+    // 纯文本版（用于弹窗等紧凑展示场景；同样跳过 function）
     function formatDimMeasureText(u) {
       if (!u || !u.dim) return '—';
-      const dims = u.dim.split(' + ');
+      const allDims = (u.dim || '').split(' + ');
       const measures = (u.measure || '').split(' + ');
-      return dims.map((d, i) => `${d}:${measures[i] || ''}`).join(' / ');
+      const pairs = allDims.filter(d => d !== 'function').map(d => `${d}:${measures[allDims.indexOf(d)] || ''}`);
+      return pairs.length ? pairs.join(' / ') : '—';
     }
     function renderSaleUnits() {
       if (saleUnits.length === 0) {
@@ -1129,7 +1146,7 @@
         <tr class="hover:bg-slate-50">
           <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
           <td class="px-3 py-2"><span class="badge ${st.cls}">${st.text}</span></td>
-          <td class="px-3 py-2 text-xs">${u.fn || '—'}</td>
+          <td class="px-3 py-2 text-xs">${fnOfUnit(u) || '—'}</td>
           <td class="px-3 py-2">${formatDimMeasure(u)}</td>
           <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code + '<button type="button" onclick="copyChargeCode(\'' + charge.code + '\', this)" class="ml-1 text-slate-400 hover:text-slate-600" title="复制code"><i class="fa-solid fa-copy"></i></button>' : '—'}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${charge ? charge.price.toFixed(4) : '—'}</td>
@@ -1181,7 +1198,7 @@
       });
       const tbody = document.getElementById('plan-tbody');
       if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="17" class="px-3 py-8 text-center text-xs text-slate-400">暂无计划单元，请先创建售卖计划</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="18" class="px-3 py-8 text-center text-xs text-slate-400">暂无计划单元，请先创建售卖计划</td></tr>`;
         return;
       }
       tbody.innerHTML = rows.map(row => {
@@ -1201,6 +1218,7 @@
             <td class="px-3 py-2">${typeBadge}</td>
             <td class="px-3 py-2 text-xs"><button type="button" onclick="openPlanDetail(${planIdx})" class="text-violet-600 hover:underline font-medium">${r.name || '—'}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
             <td class="px-3 py-2 font-mono text-xs">${uid}</td>
+            <td class="px-3 py-2 text-xs">${fnOfUnit(u) || '—'}</td>
             <td class="px-3 py-2">${formatDimMeasure(u)}</td>
             <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code : '—'}</td>
             <td class="px-3 py-2 font-mono text-xs">${quota ? quota.id : '—'}</td>
@@ -1578,7 +1596,7 @@
       const tbody = document.getElementById('plan-detail-tbody');
       const units = r.units || [];
       if (units.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="15" class="px-3 py-6 text-center text-xs text-slate-400">无计划单元</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="16" class="px-3 py-6 text-center text-xs text-slate-400">无计划单元</td></tr>`;
       } else {
         // 是否生效：由生效起止时间决定（与状态不耦合）
         const nowStr = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -1598,6 +1616,7 @@
           <tr class="hover:bg-slate-50">
             <td class="px-3 py-2 font-mono text-xs">${planUnitId(idx, uid)}</td>
             <td class="px-3 py-2 font-mono text-xs">${uid}</td>
+            <td class="px-3 py-2 text-xs">${fnOfUnit(u) || '—'}</td>
             <td class="px-3 py-2">${formatDimMeasure(u)}</td>
             <td class="px-3 py-2">${stateBadge}</td>
             <td class="px-3 py-2">${effSpan}</td>
@@ -1779,7 +1798,7 @@
       box.innerHTML = saleUnits.map(u => {
         const checked = hasPrev ? (prevStates[u.id] !== undefined ? prevStates[u.id] : false) : true;
         const onoff = prevOnOff[u.id] || 'on';
-        const fnText = u.fn ? u.fn : '—';
+        const fnText = fnOfUnit(u) || '—';
         return `
         <div class="p-2 bg-slate-50 rounded-md ${checked ? '' : 'opacity-60'}">
           <div class="flex flex-wrap items-center gap-2">
