@@ -103,6 +103,7 @@ window.backToList();
 window.openProductModal();
 document.getElementById('inp-code').value = 'maas-product-vtpm-new1';
 document.getElementById('inp-name').value = '新建商品测试';
+document.querySelectorAll('.product-dim-check').forEach(cb => { cb.checked = true; });
 window.submitProduct();
 ok(document.getElementById('detail-status').textContent === '未上架', '新建商品详情页徽标=未上架');
 window.backToList();

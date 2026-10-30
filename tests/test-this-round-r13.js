@@ -86,6 +86,7 @@ section('7. 空态占位');
 window.openProductModal();
 document.getElementById('inp-code').value = 'maas-product-vtpm-new13';
 document.getElementById('inp-name').value = '空商品测试';
+document.querySelectorAll('.product-dim-check').forEach(cb => { cb.checked = true; });
 window.submitProduct();
 window.backToList();
 const pTxt = document.getElementById('pending-tbody').textContent;
