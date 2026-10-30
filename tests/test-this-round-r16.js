@@ -13,26 +13,17 @@ const ok = (c, msg) => { c ? (pass++, console.log('  ✓ ' + msg)) : (fail++, co
 const section = (t) => console.log('\n== ' + t + ' ==');
 const evalInPage = (expr) => window.eval(expr);
 
-// ===== 1. 售卖维度非必选 =====
-section('1. 售卖维度至少勾1个');
+// ===== 1. 新增商品不再勾选售卖维度（第21轮） =====
+section('1. 新增商品无售卖维度字段');
 window.openProductModal();
-ok(document.querySelectorAll('.product-dim-check:checked').length === 0, '默认不勾选');
+ok(!document.getElementById('inp-dims'), '弹窗无 #inp-dims 勾选区（第21轮移除）');
+ok(document.querySelectorAll('.product-dim-check').length === 0, '无售卖维度复选框');
 alertMsg = '';
 document.getElementById('inp-code').value = 'maas-product-vtpm-r16';
 document.getElementById('inp-name').value = '无维度商品';
 window.submitProduct();
-ok(alertMsg.includes('至少勾选一个售卖维度'), '未勾选维度提交拦截（第18轮）');
-// 空 dims 商品（手动构造）→ 创建售卖单元弹窗空态
-window.eval(`
-  currentProduct = { code: 'maas-product-vtpm-r16', name: '无维度商品', type: 'maas-product-vtpm', dims: [] };
-  currentConfigs = {}; planRows = []; planRowStatuses = []; saleUnits = [];
-  showDetailView();
-`);
-window.eval('startEdit()');
-window.openSuConfirmModal();
-const suBody0 = document.getElementById('su-confirm-body').textContent;
-ok(suBody0.includes('未勾选售卖维度'), '空 dims 商品创建售卖单元弹窗=空态提示');
-ok(document.querySelectorAll('#su-confirm-body .su-leaf').length === 0, '无度量复选框');
+ok(alertMsg === '', '直接提交不拦截（无维度校验）');
+ok(evalInPage('currentProduct.dims') === undefined, 'currentProduct 无 dims 字段');
 
 // ===== 2. 复制：待发布计划 =====
 section('2. 复制待发布计划');

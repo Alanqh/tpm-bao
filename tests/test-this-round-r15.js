@@ -1,6 +1,6 @@
-// 第15轮验证：新增商品弹窗「售卖维度」勾选字段（admin-products.html）
-// ①弹窗展示全量可选维度 ②至少勾选一个拦截 ③勾选结果写入商品 dims
-// ④创建售卖单元弹窗只展示已勾选维度的度量组 ⑤详情页基本信息展示售卖维度 ⑥既有商品（全维度）不受影响
+// 第15轮原验证「新增商品售卖维度勾选」——第21轮整体移除该功能，本套改为验证第21轮新口径：
+// ①新增商品无售卖维度字段 ②提交无维度校验 ③创建后默认进入「售卖空间」Tab（先创建售卖空间）
+// ④创建售卖单元按空间维度+全量度量勾选（pair 只增不减）
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
 const html = fs.readFileSync('/Users/lqh/Documents/ChatGPT/TPM保障包/prototype/admin-products.html', 'utf8');
@@ -15,98 +15,107 @@ const ok = (c, msg) => { c ? (pass++, console.log('  ✓ ' + msg)) : (fail++, co
 const section = (t) => console.log('\n== ' + t + ' ==');
 const evalInPage = (expr) => window.eval(expr);
 
-// ===== 1. 弹窗结构 =====
+// ===== 1. 弹窗结构（第21轮：无售卖维度勾选区） =====
 section('1. 弹窗结构');
 window.openProductModal();
-const dimChecks = Array.from(document.querySelectorAll('.product-dim-check'));
-ok(dimChecks.length === 2, '售卖维度勾选项 2 个（dimensionOptions 全量）');
-ok(dimChecks.map(c => c.value).join(',') === '购买量区间,购买周期', '维度全集=购买量区间/购买周期');
-ok(dimChecks.every(c => !c.checked), '默认不勾选');
-ok(!!document.getElementById('inp-dims'), '弹窗含 #inp-dims 勾选区');
-// 提示文案
-const dimsBlock = document.getElementById('inp-dims');
-ok(dimsBlock.closest('div').nextElementSibling && dimsBlock.closest('div').nextElementSibling.textContent.includes('至少勾选 1 个'), '含「至少勾选 1 个」提示（第18轮必选）');
+ok(!document.getElementById('inp-dims'), '弹窗无 #inp-dims 勾选区（第21轮移除）');
+ok(document.querySelectorAll('.product-dim-check').length === 0, '无 product-dim-check 复选框');
+const labels = Array.from(document.querySelectorAll('#modal-product label.form-label')).map(l => l.textContent.trim());
+ok(!labels.some(l => l.includes('售卖维度')), '字段清单无「售卖维度」');
 
-// ===== 2. 必选校验（第18轮：至少勾 1 个） =====
-section('2. 必选校验');
+// ===== 2. 提交无维度校验 =====
+section('2. 提交');
 alertMsg = '';
-document.getElementById('inp-code').value = 'maas-product-vtpm-r15a';
-document.getElementById('inp-name').value = '维度校验测试';
+document.getElementById('inp-code').value = 'maas-product-vtpm-r21a';
+document.getElementById('inp-name').value = 'r21 商品A';
 window.submitProduct();
-ok(alertMsg.includes('至少勾选一个售卖维度'), '不勾任何维度时提交拦截: ' + alertMsg);
-ok(evalInPage('currentProduct') === null, '拦截后未创建商品');
+ok(alertMsg === '', '提交不拦截（无维度校验）: ' + alertMsg);
+ok(evalInPage('currentProduct.code') === 'maas-product-vtpm-r21a', '商品创建成功');
+ok(evalInPage('currentProduct.dims') === undefined, 'currentProduct 无 dims 字段');
+// 创建后默认打开「售卖空间」Tab
+const activeTab = document.querySelector('#plan-tabs-card .admin-tab.active');
+ok(activeTab && activeTab.textContent.trim() === '售卖空间', '创建后默认进入「售卖空间」Tab（先建空间）');
+const tabsOrder = Array.from(document.querySelectorAll('#plan-tabs-card .admin-tab')).map(b => b.textContent.trim());
+ok(tabsOrder[0] === '售卖空间', '售卖空间为第一个 Tab');
 
-// 手动构造空 dims 商品（提交校验之外的兜底行为验证：不勾=创建售卖单元无这些维度）
-window.eval(`
-  currentProduct = { code: 'maas-product-vtpm-r15a', name: '空维度商品', type: 'maas-product-vtpm', dims: [] };
-  currentConfigs = {}; planRows = []; planRowStatuses = []; saleUnits = [];
-  showDetailView();
-`);
-ok(evalInPage('currentProduct.dims.length') === 0, '空 dims 商品（模拟历史数据）');
-ok(evalInPage('productDims().length') === 0, 'productDims() 为空（不兜底）');
-ok(document.getElementById('detail-info').textContent.includes('未配置'), '详情页展示「—（未配置，无法创建售卖单元）」');
-// 创建售卖单元弹窗：无维度 → 空态提示
+// ===== 3. 新商品先批量创建售卖空间（弹窗多行） =====
+section('3. 批量创建售卖空间');
 window.eval('startEdit()');
+window.eval('openSpaceBulkModal()');
+ok(document.querySelectorAll('.space-row').length === 1, '弹窗默认 1 行');
+ok(document.querySelectorAll('.space-dim-check').length === 4, '维度候选 4 个（dimensionOptions 全量）');
+// 第一行：fn=—（vtpm 无 function）+ 仅购买量区间（fn='' 内与 sp1 两维度不同→不重复）
+document.querySelectorAll('.space-row')[0].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买量区间'; });
+// 添加第二行：仅购买周期
+window.eval('addSpaceRow()');
+ok(document.querySelectorAll('.space-row').length === 2, '添加一行后共 2 行');
+document.querySelectorAll('.space-row')[1].querySelector('.space-row-fn').value = '';
+document.querySelectorAll('.space-row')[1].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买周期'; });
+alertMsg = '';
+window.confirmSpaceBulk();
+ok(alertMsg.includes('已创建 2 个售卖空间'), '批量创建 2 个: ' + alertMsg);
+ok(evalInPage('Object.keys(spaces).some(k => spaces[k].seq === 6 && spaces[k].dims.join(",") === "购买量区间")'), '新空间（售卖空间6）序号自增+维度正确');
+ok(evalInPage('Object.keys(spaces).some(k => spaces[k].seq === 7 && spaces[k].dims.join(",") === "购买周期")'), '第二行空间（售卖空间7）单维度');
+ok(alertMsg.includes('售卖空间6') && alertMsg.includes('售卖空间7'), '名称按序号自增（售卖空间6/7）');
+
+// ===== 4. 创建售卖单元：按空间维度 + 全量度量 + pair 只增不减 =====
+section('4. 创建售卖单元');
 window.openSuConfirmModal();
-const suEmpty = document.getElementById('su-confirm-body').textContent;
-ok(suEmpty.includes('未勾选售卖维度'), '创建售卖单元弹窗空态提示');
-ok(document.querySelectorAll('#su-confirm-body .su-leaf').length === 0, '空态无任何度量复选框');
-// 确认按钮拦截
+// vtpm 无 function → fn block 隐藏；空间下拉默认=fn('') 生效空间（回退第一个）
+ok(document.getElementById('su-fn-block').classList.contains('hidden'), '无 function 商品隐藏 fn 下拉');
+ok(!!document.getElementById('su-space-select'), '显示售卖空间下拉');
+ok(evalInPage('suSpaceSel') === 'sp1', '默认选中该 fn 最早空间 sp1（seq 最小）');
+// 切换到新建的 sp6（单维度空间）
+window.eval('document.getElementById("su-space-select").value = "sp6"; onSuSpaceChange();');
+const suDimTitles = Array.from(document.querySelectorAll('#su-confirm-body p.text-xs.font-semibold')).map(p => p.textContent.trim());
+ok(suDimTitles.join(',').includes('购买量区间') && !suDimTitles.join(',').includes('购买周期'), 'sp6 仅展示空间定义的维度（购买量区间）');
+// 不勾任何度量 → 拦截
 alertMsg = '';
 window.confirmSaleUnits();
-ok(alertMsg.includes('未勾选售卖维度'), 'confirmSaleUnits 拦截（无维度不可创建）');
-
-// ===== 3. 勾选提交 → dims 写入 =====
-section('3. 勾选提交');
-window.backToList();
-window.openProductModal();
-// 仅勾「购买周期」单维度
-document.querySelectorAll('.product-dim-check').forEach(c => { c.checked = c.value === '购买周期'; });
-document.getElementById('inp-code').value = 'maas-product-vtpm-r15a';
-document.getElementById('inp-name').value = '维度拦截测试';
-window.submitProduct();
-ok(evalInPage('currentProduct.code') === 'maas-product-vtpm-r15a', '勾选后创建成功并进入详情页');
-ok(evalInPage('currentProduct.dims.join(",")') === '购买周期', 'currentProduct.dims=[购买周期]（单维度）');
-ok(!document.getElementById('detail-view').classList.contains('hidden'), '创建后直接进入详情页');
-// 详情页基本信息展示售卖维度
-const infoTxt = document.getElementById('detail-info').textContent;
-ok(infoTxt.includes('售卖维度') && infoTxt.includes('购买周期'), '详情页基本信息展示售卖维度');
-
-// ===== 4. 创建售卖单元弹窗 → 只展示勾选维度 =====
-section('4. 维度范围联动');
-window.eval('startEdit()');
-window.openSuConfirmModal();
-const suDimTitles = Array.from(document.querySelectorAll('#su-confirm-body p.text-xs.font-semibold')).map(p => p.textContent.replace(/^[^\u4e00-\u9fa5]+/, ''));
-ok(suDimTitles.length === 1, '创建售卖单元弹窗只展示 1 个维度（商品 dims 内）');
-ok(suDimTitles[0].includes('购买周期') || suDimTitles.join(',').includes('购买周期'), '展示的维度=购买周期: ' + suDimTitles.join(','));
-ok(!suDimTitles.join(',').includes('购买量区间'), '未勾选的「购买量区间」不出现');
-// 勾选 30天 → 创建
-document.querySelector('#su-confirm-body input[type="checkbox"][data-measure="30天"]').checked = true;
+ok(alertMsg.includes('请至少勾选一个度量'), '不勾度量拦截: ' + alertMsg);
+// 勾 1～100 创建（单维度）
+document.querySelector('.su-leaf[data-dim="购买量区间"][data-measure="1～100"]').checked = true;
 alertMsg = '';
 window.confirmSaleUnits();
-ok(alertMsg.includes('已创建售卖单元'), '单维度商品创建售卖单元成功: ' + alertMsg);
-ok(evalInPage('saleUnits.length') === 1, '生成 1 个售卖单元');
-ok(evalInPage('saleUnits[0].dim') === '购买周期', '售卖单元 dim=购买周期（单维度组合）');
+ok(alertMsg.includes('已创建售卖单元：1 个'), '单维单度量 → 创建 1 个');
+ok(evalInPage('saleUnits[0].spaceKey') === 'sp6' && evalInPage('saleUnits[0].dim') === '购买量区间', '单元挂 sp6 + 单维购买量区间');
 
-// ===== 5. 既有商品（全维度）不受影响 =====
-section('5. 既有商品');
-window.backToList();
+// ===== 5. 已确认 pair 置灰只增不减 =====
+section('5. 只增不减');
+window.openSuConfirmModal();
+window.eval('document.getElementById("su-space-select").value = "sp6"; onSuSpaceChange();');
+ok(evalInPage('suSpaceSel') === 'sp6', '切到 sp6');
+const disabledCnt = document.querySelectorAll('#su-confirm-body input.su-leaf:checked[disabled]').length;
+ok(disabledCnt === 1, '已确认 pair（1～100）置灰: ' + disabledCnt);
+// 加勾 500+ → 组合扩展（1～100+500+ 两个单元）
+document.querySelector('.su-leaf[data-dim="购买量区间"][data-measure="500+"]').checked = true;
+alertMsg = '';
+window.confirmSaleUnits();
+ok(alertMsg.includes('已创建售卖单元：2 个'), '追加勾选扩展为 2 个（1～100/500+）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp6").length') === 2, '同组单元数=2');
+
+// ===== 6. 既有商品（std）流程不回归 =====
+section('6. 既有商品');
+window.eval('backToList()');
 window.openDetailByCode('maas-product-vtpm-std');
-ok(evalInPage('currentProduct.dims.length') === 2, 'std 商品 dims=2（全维度，向后兼容）');
+ok(evalInPage('currentProduct.dims') === undefined, 'std 商品无 dims（第21轮统一）');
+window.eval('startEdit()');
 window.openSuConfirmModal();
 const suDimTitles2 = Array.from(document.querySelectorAll('#su-confirm-body p.text-xs.font-semibold')).map(p => p.textContent.trim());
-ok(suDimTitles2.join(',').includes('购买量区间') && suDimTitles2.join(',').includes('购买周期'), 'std 创建售卖单元弹窗仍展示两个维度');
+ok(suDimTitles2.join(',').includes('购买量区间') && suDimTitles2.join(',').includes('购买周期'), 'std（sp1 两维度）弹窗仍展示两个维度');
+const disabledCnt2 = document.querySelectorAll('#su-confirm-body input.su-leaf:checked[disabled]').length;
+ok(disabledCnt2 > 0, 'std 已确认 pair 置灰（只增不减）');
 
-// ===== 6. 新建商品入列带 dims =====
-section('6. 列表入列');
+// ===== 7. 新建商品入列（无 dims） =====
+section('7. 列表入列');
+window.eval('backToList()');
 window.openProductModal();
-document.getElementById('inp-code').value = 'maas-product-vtpm-r15b';
-document.getElementById('inp-name').value = '轮15商品B';
-document.querySelectorAll('.product-dim-check').forEach(c => { c.checked = c.value === '购买量区间'; });
+document.getElementById('inp-code').value = 'maas-product-vtpm-r21b';
+document.getElementById('inp-name').value = 'r21 商品B';
 window.submitProduct();
 window.backToList();
-ok(evalInPage('allProducts.find(p=>p.code==="maas-product-vtpm-r15b")') !== undefined, '新建商品入列 allProducts');
-ok(evalInPage('allProducts.find(p=>p.code==="maas-product-vtpm-r15b").dims.join(",")') === '购买量区间', '入列商品携带 dims=[购买量区间]');
+ok(evalInPage('allProducts.find(p=>p.code==="maas-product-vtpm-r21b")') !== undefined, '新建商品入列 allProducts');
+ok(evalInPage('allProducts.find(p=>p.code==="maas-product-vtpm-r21b").dims') === undefined, '入列商品无 dims 字段');
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

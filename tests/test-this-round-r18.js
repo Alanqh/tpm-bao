@@ -1,4 +1,4 @@
-// 第18/20轮验证：①售卖维度由商品类型决定（第20轮：function 不是维度，online-text 维度=输入/输出token区间）②维度至少勾 1 个 ③复制按钮始终可操作（不受状态/编辑锁限制）
+// 第18/20/21轮验证：①新增商品无售卖维度勾选（第21轮移除；空间创建时才选维度）②复制按钮始终可操作（不受状态/编辑锁限制）③online-text 建售卖单元（fn→空间→度量）
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
 const html = fs.readFileSync('/Users/lqh/Documents/ChatGPT/TPM保障包/prototype/admin-products.html', 'utf8');
@@ -13,51 +13,44 @@ const ok = (c, msg) => { c ? (pass++, console.log('  ✓ ' + msg)) : (fail++, co
 const section = (t) => console.log('\n== ' + t + ' ==');
 const evalInPage = (expr) => window.eval(expr);
 
-// ===== 1. 商品类型与售卖维度联动 =====
-section('1. 类型驱动售卖维度');
+// ===== 1. 新增商品无售卖维度（第21轮） =====
+section('1. 新增商品无售卖维度');
 const typeSel = document.getElementById('inp-type');
 ok(typeSel.options.length === 2 && Array.from(typeSel.options).some(o => o.value === 'maas-online-text'), '商品类型含 maas-product-vtpm / maas-online-text');
 window.openProductModal();
-let checks = Array.from(document.querySelectorAll('.product-dim-check'));
-ok(checks.map(c => c.value).join(',') === '购买量区间,购买周期', 'vtpm 类型维度=购买量区间+购买周期（无 function）');
-ok(checks.every(c => !c.disabled), 'vtpm 维度均可自由勾选');
-// 切 online-text（第20轮：function 不是维度——维度=输入token区间+输出token区间，另有提示文案）
-document.getElementById('inp-type').value = 'maas-online-text';
-window.onTypeChange();
-checks = Array.from(document.querySelectorAll('.product-dim-check'));
-ok(checks.map(c => c.value).join(',') === '输入token区间,输出token区间', 'online-text 维度=输入token区间+输出token区间（第20轮：无 function）');
-ok(!checks.some(c => c.value === 'function'), 'function 不在维度复选区（第20轮：由类型 hasFn 决定）');
-ok(document.getElementById('inp-dims').textContent.includes('该类型含 function'), 'online-text 含 function 提示文案');
-ok(checks.every(c => !c.disabled && !c.checked), '维度自由勾选且默认不勾');
-// 切回 vtpm → function 消失
-document.getElementById('inp-type').value = 'maas-product-vtpm';
-window.onTypeChange();
-checks = Array.from(document.querySelectorAll('.product-dim-check'));
-ok(!checks.some(c => c.value === 'function'), '切回 vtpm 后 function 维度消失');
-ok(checks.every(c => !c.disabled), 'vtpm 无必选维度');
+ok(document.querySelectorAll('.product-dim-check').length === 0, '无售卖维度复选框（第21轮移除）');
+ok(!document.getElementById('inp-dims'), '弹窗无 #inp-dims 区块');
 
-// ===== 2. 至少勾 1 个 =====
-section('2. 至少勾1个');
-document.getElementById('inp-type').value = 'maas-product-vtpm';
-window.onTypeChange();
+// ===== 2. 创建商品后先进售卖空间 Tab =====
+section('2. 创建商品');
 alertMsg = '';
-document.getElementById('inp-code').value = 'maas-product-vtpm-r18a';
-window.submitProduct();
-ok(alertMsg.includes('至少勾选一个售卖维度'), 'vtpm 不勾任何维度提交拦截: ' + alertMsg);
-ok(evalInPage('currentProduct') === null || evalInPage('currentProduct.code') !== 'maas-product-vtpm-r18a', '拦截后未创建');
-// online-text（第20轮：勾选两个维度提交）
 document.getElementById('inp-type').value = 'maas-online-text';
 window.onTypeChange();
-document.querySelector('.product-dim-check[value="输入token区间"]').checked = true;
-document.querySelector('.product-dim-check[value="输出token区间"]').checked = true;
-alertMsg = '';
-document.getElementById('inp-code').value = 'maas-online-text-r18';
-document.getElementById('inp-name').value = 'r18 在线文本包';
+document.getElementById('inp-code').value = 'maas-online-text-r21c';
+document.getElementById('inp-name').value = 'r21 在线文本包';
 window.submitProduct();
-ok(alertMsg === '', 'online-text 勾选维度后提交不拦截');
-ok(evalInPage('currentProduct.code') === 'maas-online-text-r18', 'online-text 商品创建成功');
-ok(evalInPage('currentProduct.dims.join(",")') === '输入token区间,输出token区间', 'dims=[输入token区间,输出token区间]');
+ok(alertMsg === '', '提交不拦截（无维度校验）');
+ok(evalInPage('currentProduct.code') === 'maas-online-text-r21c', 'online-text 商品创建成功');
+ok(evalInPage('currentProduct.dims') === undefined, '商品无 dims 字段（第21轮）');
 ok(evalInPage('currentProduct.type') === 'maas-online-text', '商品类型= maas-online-text');
+const activeTab2 = document.querySelector('#plan-tabs-card .admin-tab.active');
+ok(activeTab2 && activeTab2.textContent.trim() === '售卖空间', '创建后默认打开「售卖空间」Tab');
+// 新商品：批量创建空间（input fn 两个空间，跨 fn 维度可相同）
+window.eval('startEdit(); openSpaceBulkModal()');
+document.querySelectorAll('.space-row')[0].querySelector('.space-row-fn').value = 'input';
+document.querySelectorAll('.space-row')[0].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '输出token区间'; });
+window.eval('addSpaceRow()');
+document.querySelectorAll('.space-row')[1].querySelector('.space-row-fn').value = 'input';
+document.querySelectorAll('.space-row')[1].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买量区间'; });
+window.eval('addSpaceRow()');
+document.querySelectorAll('.space-row')[2].querySelector('.space-row-fn').value = 'output';
+document.querySelectorAll('.space-row')[2].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '输入token区间'; });
+alertMsg = '';
+window.confirmSpaceBulk();
+ok(alertMsg.includes('已创建 3 个售卖空间'), '批量创建 3 个（input×2 + output×1）: ' + alertMsg);
+ok(evalInPage('spaceSeq') === 8, 'spaceSeq=8（售卖空间6/7/8，跨 function 连续编号）');
+// output 空间与 input 空间维度集合相同 → 允许（不同 fn 可同维度）
+ok(evalInPage('spaces["sp2"].fn === "input" && spaces["sp4"].fn === "output" && spaces["sp2"].dims.join(",") === spaces["sp4"].dims.join(",")'), '不同 function 的空间维度可相同（mock sp2/sp4 同维度集合各自独立）');
 
 // ===== 3. online-text 建售卖单元（第20轮：先选 function → 空间 → 度量） =====
 section('3. 建售卖单元');
@@ -69,11 +62,11 @@ ok(fnOpts.join(',') === ',input,output,cache', 'function 选项=—/input/output
 // 未选 function → 提示
 let bodyTxt = document.getElementById('su-confirm-body').textContent;
 ok(bodyTxt.includes('请先选择 function'), '未选 function 时提示先选');
-// 选 input → 出现空间选择行（新商品继承默认文本空间 sp-txt-std/sp-txt-lite）
+// 选 input → 出现空间选择行（全局空间池：input 名下 sp2/sp3/sp6/sp7）
 document.getElementById('su-fn-select').value = 'input';
 window.onSuFnChange();
 ok(!document.getElementById('su-space-line').classList.contains('hidden'), '选 function 后出现售卖空间行');
-ok(!!document.getElementById('su-space-select'), '售卖空间下拉存在（默认文本空间已继承）');
+ok(!!document.getElementById('su-space-select'), '售卖空间下拉存在');
 // 勾两个维度的度量创建
 document.querySelector('#su-confirm-body input[data-dim="输入token区间"][data-measure="0～128K"]').checked = true;
 document.querySelector('#su-confirm-body input[data-dim="输出token区间"][data-measure="0～4K"]').checked = true;

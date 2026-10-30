@@ -102,13 +102,12 @@ document.getElementById('inp-playground').value = 'pg-glm-4';
 document.getElementById('inp-playground').dispatchEvent(new window.Event('change', { bubbles: true }));
 ok(document.getElementById('inp-code').value === 'maas-product-vtpm-glm4', '切换模型后 code 更新: ' + document.getElementById('inp-code').value);
 ok(document.getElementById('inp-name').value === 'GLM-4 预留vTPM包', '切换模型后名称更新: ' + document.getElementById('inp-name').value);
-// 可手动改 → 提交用手改值（第15轮：需勾选售卖维度后提交）
+// 可手动改 → 提交用手改值（第21轮：新增商品不再勾选售卖维度）
 document.getElementById('inp-name').value = 'GLM-4 专属包';
-document.querySelectorAll('.product-dim-check').forEach(cb => { cb.checked = true; });
 window.submitProduct();
 ok(evalInPage('currentProduct.name') === 'GLM-4 专属包', '手改名称后提交生效');
 ok(evalInPage('currentProduct.playground') === undefined, '第12轮：商品与模型/Playground 解耦，currentProduct 无 playground 字段');
-ok(evalInPage('currentProduct.dims.length') === 2, '第15轮：提交的商品含售卖维度 dims（勾选两项）');
+ok(evalInPage('currentProduct.dims') === undefined, '第21轮：商品无 dims 字段（售卖维度已移除）');
 // 详情页基本信息不含关联 Playground
 const infoText = document.getElementById('detail-info').textContent;
 ok(!infoText.includes('Playground') && !infoText.includes('playground'), '详情页基本信息无 playground 展示');

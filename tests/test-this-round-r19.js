@@ -91,7 +91,7 @@ window.eval('closePlanCreatePage(); exitEdit(); backToList()');
 window.openDetailByCode('maas-product-vtpm-std');
 rows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(rows[0].cells[0].textContent.trim() === '—', 'vtpm 第一列 Function=—（无 function，合并单元格）');
-ok(rows[0].cells[1].textContent.includes('标准空间A'), 'vtpm 第二列 售卖空间=标准空间A');
+ok(rows[0].cells[1].textContent.includes('售卖空间1'), 'vtpm 第二列 售卖空间=售卖空间1（第21轮序号名）');
 ok(rows[0].cells[2].textContent.trim() === 'su-1', 'vtpm 第三列 售卖单元=su-1');
 ok(rows[0].cells[4].textContent.includes('购买量区间') && rows[0].cells[4].textContent.includes('购买周期'), 'vtpm 维度:度量正常展示');
 // vtpm 无 function → 创建售卖单元弹窗无 function 下拉
