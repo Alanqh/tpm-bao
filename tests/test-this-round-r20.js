@@ -146,25 +146,53 @@ ok(evalInPage('typeof editSpaceMeasures') === 'undefined', 'editSpaceMeasures �
 ok(evalInPage('typeof confirmSpaceMeasureEdit') === 'undefined', 'confirmSpaceMeasureEdit 函数已删');
 ok(evalInPage('spaces["sp2"].dims.length') === 2, 'sp2 维度集合不变（2 个）');
 
-// ===== 8. 售卖计划区块2：筛选 + 跨 fn 累积勾选 =====
+// ===== 8. 售卖计划区块2：fn 多选筛选 + 空间筛（全部/仅生效中）+ 超范围勾选自动取消（第24轮） =====
 section('8. 售卖计划区块2');
 window.eval('openPlanCreatePage()');
-ok(!!document.getElementById('plan-filter-fn') && !!document.getElementById('plan-filter-space'), '区块2 含 function/空间筛选下拉');
+const fnBoxes8 = () => Array.from(document.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)'));
+ok(fnBoxes8().length === 3 && !!document.querySelector('.plan-filter-fn-all'), 'function 复选组 3 个 + 全选框（第24轮）');
+ok(!!document.getElementById('plan-filter-space'), '含售卖空间筛选下拉（全部空间/仅生效中）');
 const allUnitRows = Array.from(document.querySelectorAll('.plan-unit-row'));
 ok(allUnitRows.length === 4, '全量售卖单元 4 行');
-window.toggleAllPlanUnits(); // 全选→全不选
+const vis8 = () => Array.from(document.querySelectorAll('.plan-unit-row')).filter(r => !r.classList.contains('hidden')).map(r => r.querySelector('.plan-unit-check').value);
+const chk8 = () => Array.from(document.querySelectorAll('.plan-unit-check:checked')).map(c => c.value);
+ok(vis8().length === 4, '进入创建页筛选重置=全部可见');
+// T1: 只勾 cache+output fn → 可见 su-3/su-4，input 的已勾选被取消（applyPlanUnitFilter 重渲后须重新查询 fn 复选框）
+fnBoxes8().forEach(c => { c.checked = ['cache', 'output'].includes(c.value); });
+window.applyPlanUnitFilter();
+ok(vis8().sort().join(',') === 'su-3,su-4', 'fn 勾 cache+output 可见 su-3/su-4: ' + vis8().join(','));
+ok(chk8().sort().join(',') === 'su-3,su-4', '超范围勾选自动取消（su-1/su-2 被清）: ' + chk8().join(','));
+// fn 全不勾（=全部）→ 4 行恢复可见，已取消的勾选不恢复
+fnBoxes8().forEach(c => { c.checked = false; });
+window.applyPlanUnitFilter();
+ok(vis8().length === 4 && chk8().sort().join(',') === 'su-3,su-4', 'fn 清空=全部可见；已取消的勾选不恢复');
+// T2: 勾回 su-1（input），再筛 fn=output → su-1 被取消
 document.querySelector('.plan-unit-check[value="su-1"]').checked = true;
-document.getElementById('plan-filter-fn').value = 'input';
+fnBoxes8().forEach(c => { c.checked = c.value === 'output'; });
 window.applyPlanUnitFilter();
-const visibleRows = Array.from(document.querySelectorAll('.plan-unit-row')).filter(r => !r.classList.contains('hidden'));
-ok(visibleRows.length === 2, '筛选 input 后可见 2 行（未勾选的 input su-2 + 已勾选 su-1）: ' + visibleRows.length);
-document.getElementById('plan-filter-fn').value = 'output';
+ok(vis8().join(',') === 'su-3' && chk8().join(',') === 'su-3', '切 fn=output 后 su-1（input）已勾选被取消: ' + chk8().join(','));
+// T3: 空间筛=仅生效中（fn 全部）：mock 四单元均在生成效空间（sp2/sp4/sp5）→ 全命中
+fnBoxes8().forEach(c => { c.checked = false; });
+document.getElementById('plan-filter-space').value = '__ACTIVE__';
 window.applyPlanUnitFilter();
-const visibleRows2 = Array.from(document.querySelectorAll('.plan-unit-row')).filter(r => !r.classList.contains('hidden'));
-ok(visibleRows2.length === 2, '切到 output 筛选：已勾选 su-1 + output 的 su-3 可见: ' + visibleRows2.length);
-ok(visibleRows2.some(r => r.textContent.includes('su-1')), '已勾选的 su-1 不受筛选影响（跨 function 累积）');
-document.querySelector('.plan-unit-check[value="su-3"]').checked = true;
-ok(window.eval('Array.from(document.querySelectorAll(".plan-unit-check:checked")).length') === 2, '跨 fn 已累积勾选 2 个售卖单元');
+ok(vis8().length === 4, '仅生效中：mock 单元均在生成效空间: ' + vis8().length);
+// T5: 全选/全不选只作用于当前可见行
+document.getElementById('plan-filter-space').value = '';
+fnBoxes8().forEach(c => { c.checked = c.value === 'input'; });
+window.applyPlanUnitFilter(); // 可见 su-1/su-2，其余已勾选被取消
+document.querySelector('.plan-unit-check[value="su-1"]').checked = false;
+window.eval('renderPlanCreatePage()');
+window.eval('toggleAllPlanUnits()');
+ok(chk8().sort().join(',') === 'su-1,su-2', '全选只作用于可见行（input 2 个全选）: ' + chk8().join(','));
+window.eval('toggleAllPlanUnits()');
+ok(chk8().length === 0, '再点全不选清空可见行勾选');
+// T6: 全选框联动
+fnBoxes8().forEach(c => { c.checked = false; });
+window.applyPlanUnitFilter();
+document.querySelector('.plan-filter-fn-all').checked = true;
+window.onPlanFnFilterToggleAll(document.querySelector('.plan-filter-fn-all'));
+ok(fnBoxes8().every(c => c.checked), '全选框勾上→fn 子框全选');
+ok(vis8().length === 4, '全选后全部可见');
 
 // ===== 9. vtpm 商品回归（无 function：单一空间 sp1 生效中） =====
 section('9. vtpm 回归');

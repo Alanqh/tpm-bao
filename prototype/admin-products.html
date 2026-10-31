@@ -2092,6 +2092,7 @@
     // 页面打开入口（创建模式）
     function openPlanCreatePage() {
       editingPlanIdx = -1;
+      planUnitsFilterReset(); // 第24轮：进入创建页重置筛选（fn 全选 + 全部空间）
       document.getElementById('plan-create-page-title').textContent = '创建售卖计划';
       document.getElementById('plan-name').value = '';
       document.getElementById('plan-priority').value = '';
@@ -2113,8 +2114,10 @@
       document.getElementById('detail-view').classList.remove('hidden');
       renderPlan(); renderSaleUnits();
     }
-    // 区块2：生效售卖单元（第20轮：先按 function/售卖空间筛选，再勾选；可跨 function 累积——已勾选行不受筛选影响始终展示）
-    // 勾选/切状态时重渲整页区块（保留勾选状态、上架/下架选择）；筛选只影响未勾选行的可见性
+    // 区块2：生效售卖单元（第24轮：fn 复选组多选/全选 + 空间筛「全部/仅生效中」；筛选改变→超出范围的勾选自动取消）
+    // 勾选/切状态时重渲整页区块（保留勾选状态、上架/下架选择、筛选状态）
+    let planUnitsFilterNeedsReset = false; // 打开创建/修改页时置 true：重渲时丢弃旧筛选回全量
+    function planUnitsFilterReset() { planUnitsFilterNeedsReset = true; }
     function renderPlanUnitsCharge() {
       const box = document.getElementById('plan-units-charge-container');
       if (!box) return;
@@ -2124,27 +2127,35 @@
       }
       const prevStates = {};
       const prevOnOff = {};
-      const prevFnFilter = document.getElementById('plan-filter-fn') ? document.getElementById('plan-filter-fn').value : null;
-      const prevSpFilter = document.getElementById('plan-filter-space') ? document.getElementById('plan-filter-space').value : null;
+      const prevFnChecks = {};
+      document.querySelectorAll('#plan-units-charge-container .plan-filter-fn-check').forEach(c => { prevFnChecks[c.value] = c.checked; });
+      const prevSpFilter = planUnitsFilterNeedsReset ? '' : (document.getElementById('plan-filter-space') ? document.getElementById('plan-filter-space').value : '');
+      const keepFnFilter = !planUnitsFilterNeedsReset;
+      planUnitsFilterNeedsReset = false;
       const hasPrev = box.querySelectorAll('.plan-unit-check').length > 0;
       box.querySelectorAll('.plan-unit-check').forEach(c => { prevStates[c.value] = c.checked; prevOnOff[c.value] = c.dataset.state || 'on'; });
-      // 筛选行（第20轮）：function → 售卖空间 → 勾选售卖单元；无 function 商品隐藏 function 下拉
+      // 筛选行（第24轮）：function 多选（复选组+全选） → 售卖空间（全部 / 仅生效中）；筛选变更即收窄勾选范围（超出新的筛选范围的已勾选项自动取消）
       const fns = Array.from(new Set(saleUnits.map(u => fnOfUnit(u) || '')));
       const sps = productSpaces();
       const filterRow = `
-        <div class="flex flex-wrap items-center gap-2 mb-2 p-2 bg-white border border-slate-200 rounded-md">
-          ${fns.filter(f => f).length > 0 ? `
-            <span class="text-xs text-slate-500 whitespace-nowrap"><i class="fa-solid fa-filter mr-1"></i>先选 function：</span>
-            <select id="plan-filter-fn" class="form-input text-xs px-2 py-1 w-36" onchange="applyPlanUnitFilter()">
-              <option value="">全部 function</option>
-              ${fns.filter(f => f).map(f => `<option value="${f}" ${prevFnFilter === f ? 'selected' : ''}>${f}</option>`).join('')}
-            </select>` : ''}
-          <span class="text-xs text-slate-500 whitespace-nowrap">售卖空间：</span>
-          <select id="plan-filter-space" class="form-input text-xs px-2 py-1 w-44" onchange="applyPlanUnitFilter()">
-            <option value="">全部空间</option>
-            ${Object.keys(sps).map(k => `<option value="${k}" ${prevSpFilter === k ? 'selected' : ''}>${sps[k].name}（${k}）</option>`).join('')}
-          </select>
-          <span class="text-xs text-slate-400">（已勾选的售卖单元跨 function 累积保留，不受筛选影响）</span>
+        <div class="p-2 mb-2 bg-white border border-slate-200 rounded-md">
+          <div class="flex flex-wrap items-center gap-2">
+            ${fns.filter(f => f).length > 0 ? `
+              <span class="text-xs text-slate-500 whitespace-nowrap"><i class="fa-solid fa-filter mr-1"></i>Function：</span>
+              <label class="flex items-center gap-1 text-xs cursor-pointer text-violet-700 font-medium border border-violet-200 bg-violet-50 rounded px-1.5 py-0.5">
+                <input type="checkbox" class="plan-filter-fn-check plan-filter-fn-all" value="${fns.filter(f => f).join(',')}" style="accent-color:#7C3AED" onchange="onPlanFnFilterToggleAll(this)">
+                <span>全选</span>
+              </label>
+              ${fns.filter(f => f).map(f => `<label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
+                <input type="checkbox" class="plan-filter-fn-check" value="${f}" style="accent-color:#7C3AED" onchange="applyPlanUnitFilter()">
+                <span>${f}</span></label>`).join('')}` : ''}
+            <span class="text-xs text-slate-500 whitespace-nowrap ${fns.filter(f => f).length > 0 ? 'ml-3' : ''}">售卖空间：</span>
+            <select id="plan-filter-space" class="form-input text-xs px-2 py-1 w-36" onchange="applyPlanUnitFilter()">
+              <option value="">全部空间</option>
+              <option value="__ACTIVE__" ${prevSpFilter === '__ACTIVE__' ? 'selected' : ''}>仅生效中</option>
+            </select>
+            <span class="text-xs text-slate-400 whitespace-nowrap">（勾选范围始终=当前筛选结果；改变筛选会自动取消超出范围的已勾选项）</span>
+          </div>
         </div>`;
       box.innerHTML = filterRow + saleUnits.map(u => {
         const checked = hasPrev ? (prevStates[u.id] !== undefined ? prevStates[u.id] : false) : true;
@@ -2173,20 +2184,54 @@
           </div>
         </div>`;
       }).join('');
+      // 恢复上一次的 fn 复选状态（进入新页面时 keepFnFilter=false → 全量）
+      if (keepFnFilter) {
+        box.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)').forEach(c => {
+          if (prevFnChecks[c.value]) c.checked = true;
+        });
+        const fboxes = Array.from(box.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)'));
+        const allB = box.querySelector('.plan-filter-fn-all');
+        if (allB && fboxes.length > 0) allB.checked = fboxes.every(c => c.checked);
+      }
       applyPlanUnitFilter();
     }
-    // 筛选：未勾选行按 function/空间显隐；已勾选行始终展示（跨 function 累积）
-    function applyPlanUnitFilter() {
-      const fnSel = document.getElementById('plan-filter-fn') ? document.getElementById('plan-filter-fn').value : '';
+    // fn「全选」复选联动（第24轮）：勾=全部选中；取消=全部清空（单勾改变时同步全选框状态）
+    function onPlanFnFilterToggleAll(allBox) {
+      document.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)').forEach(c => { c.checked = allBox.checked; });
+      applyPlanUnitFilter();
+    }
+    // 筛选值读取（第24轮）：fn=复选组（全不勾=全部）；空间=''全部 / '__ACTIVE__'=仅生效中
+    function planFilterFns() {
+      const sel = Array.from(document.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)')).filter(c => c.checked).map(c => c.value);
+      return { fns: sel, isAll: sel.length === 0 };
+    }
+    function planUnitRowMatch(row) {
+      const { fns, isAll } = planFilterFns();
+      const fnOk = isAll || fns.includes(row.dataset.fn || '');
       const spSel = document.getElementById('plan-filter-space') ? document.getElementById('plan-filter-space').value : '';
+      let spOk = true;
+      if (spSel === '__ACTIVE__') {
+        const fn = row.dataset.fn || '';
+        spOk = currentSpaceOfFn(fn) === (row.dataset.space || '');
+      }
+      return fnOk && spOk;
+    }
+    // 筛选（第24轮重设计）：所有行按筛选显隐（含已勾选行）；超出筛选范围的已勾选项自动取消（筛选条件改变时，之前选中的就不算了）
+    // 若发生勾选取消 → 整体重渲统一视觉状态（renderPlanCreatePage 保留勾选/筛选状态，幂等不递归）
+    function applyPlanUnitFilter() {
+      let pruned = false;
       document.querySelectorAll('.plan-unit-row').forEach(row => {
         const check = row.querySelector('.plan-unit-check');
         if (!check) return;
-        if (check.checked) { row.classList.remove('hidden'); return; }
-        const fnOk = !fnSel || (row.dataset.fn || '') === fnSel;
-        const spOk = !spSel || (row.dataset.space || '') === spSel;
-        row.classList.toggle('hidden', !(fnOk && spOk));
+        const match = planUnitRowMatch(row);
+        if (check.checked && !match) { check.checked = false; pruned = true; }
+        row.classList.toggle('hidden', !match);
       });
+      // 同步 fn「全选」框状态
+      const fnChecks = Array.from(document.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)'));
+      const allBox = document.querySelector('.plan-filter-fn-all');
+      if (allBox && fnChecks.length > 0) allBox.checked = fnChecks.every(c => c.checked);
+      if (pruned) renderPlanCreatePage();
     }
     // 切换售卖单元上架/下架（写 DOM data-state 后整体重渲）
     function setPlanUnitState(uid, st) {
@@ -2370,12 +2415,14 @@
           }).join('');
       }
     }
-    // 全选/全不选（勾选主入口在区块2；切换后整体重渲）
+    // 全选/全不选（第24轮：仅作用于当前筛选可见的售卖单元；切换后整体重渲）
     function toggleAllPlanUnits() {
       const checks = Array.from(document.querySelectorAll('.plan-unit-check'));
       if (checks.length === 0) return;
-      const allChecked = checks.every(c => c.checked);
-      checks.forEach(c => { c.checked = !allChecked; });
+      const visible = checks.filter(c => !c.closest('.plan-unit-row').classList.contains('hidden'));
+      const targets = visible.length > 0 ? visible : checks;
+      const allChecked = targets.every(c => c.checked);
+      targets.forEach(c => { c.checked = !allChecked; });
       renderPlanCreatePage();
     }
     // 时间格式化
@@ -2464,6 +2511,7 @@
       editingPlanIdx = idx;
       const r = planRows[idx];
       closePlanDetail();
+      planUnitsFilterReset(); // 第24轮：进入修改页重置筛选（回填勾选不受影响——重置只筛选不取消勾选的逻辑由 renderPlanUnitsCharge 的默认全过完成）
       document.getElementById('plan-create-page-title').textContent = '修改售卖计划：' + (r.name || '—');
       document.getElementById('plan-name').value = r.name || '';
       document.getElementById('plan-priority').value = r.priority;

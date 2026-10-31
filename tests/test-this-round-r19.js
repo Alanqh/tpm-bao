@@ -82,7 +82,7 @@ const card1 = unitCards[0].textContent;
 ok(card1.includes('input'), '区块2 su-1 Function=input');
 ok(card1.includes('演示空间X'), '区块2 su-1 展示售卖空间');
 ok(!card1.includes('维度组合：function'), '区块2 维度组合不含 function');
-ok(!!document.getElementById('plan-filter-fn'), '区块2 有 function 筛选下拉（第20轮）');
+ok(document.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)').length === 2, '区块2 有 function 筛选复选组（第24轮多选，input/output）');
 ok(!!document.getElementById('plan-filter-space'), '区块2 有售卖空间筛选下拉（第20轮）');
 
 // ===== 6. vtpm 商品（无 function）不回归 =====
