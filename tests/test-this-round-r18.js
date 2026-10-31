@@ -35,20 +35,24 @@ ok(evalInPage('currentProduct.dims') === undefined, '商品无 dims 字段（第
 ok(evalInPage('currentProduct.type') === 'maas-online-text', '商品类型= maas-online-text');
 const activeTab2 = document.querySelector('#plan-tabs-card .admin-tab.active');
 ok(activeTab2 && activeTab2.textContent.trim() === '售卖空间', '创建后默认打开「售卖空间」Tab');
-// 新商品：批量创建空间（input fn 两个空间，跨 fn 维度可相同）
+// 新商品：批量创建空间（input fn 两个空间 + output 一个；创建时勾维度→度量默认全选）
 window.eval('startEdit(); openSpaceBulkModal()');
 document.querySelectorAll('.space-row')[0].querySelector('.space-row-fn').value = 'input';
 document.querySelectorAll('.space-row')[0].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '输出token区间'; });
+document.querySelectorAll('.space-row')[0].querySelector('.space-dim-check[value="输出token区间"]').dispatchEvent(new window.Event('change', { bubbles: true }));
 window.eval('addSpaceRow()');
 document.querySelectorAll('.space-row')[1].querySelector('.space-row-fn').value = 'input';
 document.querySelectorAll('.space-row')[1].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买量区间'; });
+document.querySelectorAll('.space-row')[1].querySelector('.space-dim-check[value="购买量区间"]').dispatchEvent(new window.Event('change', { bubbles: true }));
 window.eval('addSpaceRow()');
 document.querySelectorAll('.space-row')[2].querySelector('.space-row-fn').value = 'output';
 document.querySelectorAll('.space-row')[2].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '输入token区间'; });
+document.querySelectorAll('.space-row')[2].querySelector('.space-dim-check[value="输入token区间"]').dispatchEvent(new window.Event('change', { bubbles: true }));
 alertMsg = '';
 window.confirmSpaceBulk();
 ok(alertMsg.includes('已创建 3 个售卖空间'), '批量创建 3 个（input×2 + output×1）: ' + alertMsg);
 ok(evalInPage('spaceSeq') === 8, 'spaceSeq=8（售卖空间6/7/8，跨 function 连续编号）');
+ok(evalInPage('spaces["sp6"].measures["输出token区间"].length') === 3, 'sp6 度量默认全选（3 个）');
 // output 空间与 input 空间维度集合相同 → 允许（不同 fn 可同维度）
 ok(evalInPage('spaces["sp2"].fn === "input" && spaces["sp4"].fn === "output" && spaces["sp2"].dims.join(",") === spaces["sp4"].dims.join(",")'), '不同 function 的空间维度可相同（mock sp2/sp4 同维度集合各自独立）');
 
