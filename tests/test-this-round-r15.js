@@ -39,61 +39,56 @@ ok(activeTab && activeTab.textContent.trim() === '售卖空间', '创建后默�
 const tabsOrder = Array.from(document.querySelectorAll('#plan-tabs-card .admin-tab')).map(b => b.textContent.trim());
 ok(tabsOrder[0] === '售卖空间', '售卖空间为第一个 Tab');
 
-// ===== 3. 新商品先批量创建售卖空间（弹窗多行：fn + 维度 + 每维度度量） =====
+// ===== 3. 新商品先批量创建售卖空间（第23轮：弹窗多行 fn + 维度；不涉及度量） =====
 section('3. 批量创建售卖空间');
 window.eval('startEdit()');
 window.eval('openSpaceBulkModal()');
 ok(document.querySelectorAll('.space-row').length === 1, '弹窗默认 1 行');
 ok(document.querySelectorAll('.space-dim-check').length === 4, '维度候选 4 个（dimensionOptions 全量）');
-ok(document.querySelectorAll('.space-msr-check').length === 0, '未勾维度时不展示度量勾选区');
+ok(document.querySelectorAll('.space-msr-check').length === 0, '弹窗无度量勾选区（第23轮空间只管维度）');
 // 第一行：fn=—（vtpm 无 function）+ 仅购买量区间（fn='' 内与 sp1 两维度不同→不重复）
 const rowA = document.querySelectorAll('.space-row')[0];
 rowA.querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买量区间'; });
-rowA.querySelector('.space-dim-check[value="购买量区间"]').dispatchEvent(new window.Event('change', { bubbles: true }));
-ok(rowA.querySelectorAll('.space-msr-check').length === 3, '勾维度后展开度量勾选（默认全选 3 个）');
-// 第一行取消勾 500+（部分度量创建）
-rowA.querySelector('.space-msr-check[data-dim="购买量区间"][data-measure="500+"]').checked = false;
 // 添加第二行：仅购买周期
 window.eval('addSpaceRow()');
 ok(document.querySelectorAll('.space-row').length === 2, '添加一行后共 2 行');
 const rowB = document.querySelectorAll('.space-row')[1];
 rowB.querySelector('.space-row-fn').value = '';
 rowB.querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买周期'; });
-rowB.querySelector('.space-dim-check[value="购买周期"]').dispatchEvent(new window.Event('change', { bubbles: true }));
 alertMsg = '';
 window.confirmSpaceBulk();
 ok(alertMsg.includes('已创建 2 个售卖空间'), '批量创建 2 个: ' + alertMsg);
 ok(evalInPage('Object.keys(spaces).some(k => spaces[k].seq === 6 && spaces[k].dims.join(",") === "购买量区间")'), '新空间（售卖空间6）序号自增+维度正确');
 ok(evalInPage('Object.keys(spaces).some(k => spaces[k].seq === 7 && spaces[k].dims.join(",") === "购买周期")'), '第二行空间（售卖空间7）单维度');
 ok(alertMsg.includes('售卖空间6') && alertMsg.includes('售卖空间7'), '名称按序号自增（售卖空间6/7）');
-ok(evalInPage('spaces["sp6"].measures["购买量区间"].length') === 2, 'sp6 度量=弹窗勾选（取消 500+ 后 2 个）');
-// 重复维度集合 → 拦截（sp6 与 fn='' 单购买量区间重复）
+ok(evalInPage('spaces["sp6"].measures') === undefined, '空间无 measures 字段（第23轮只管维度）');
+// 重复维度集合 → 拦截（与 sp6 fn='' 单购买量区间重复）
 window.eval('openSpaceBulkModal()');
 const rowDup = document.querySelectorAll('.space-row')[0];
 rowDup.querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买量区间'; });
-rowDup.querySelector('.space-dim-check[value="购买量区间"]').dispatchEvent(new window.Event('change', { bubbles: true }));
 alertMsg = '';
 window.confirmSpaceBulk();
-ok(alertMsg.includes('已存在维度集合相同'), '同 fn 维度集合相同拦截: ' + alertMsg);
+ok(alertMsg.includes('已存在维度集合相同') || alertMsg.includes('不可重复创建'), '同 fn 维度集合相同拦截: ' + alertMsg.slice(0, 20));
 window.eval('closeModal("space-edit")');
-// fn 当前空间配置：fn='' 切到 sp6 → SU 默认跟随
-window.eval('setFnSpace("", "sp6")');
-ok(evalInPage('currentSpaceOfFn("")') === 'sp6', '无 fn 商品当前空间切到 sp6');
-window.eval('setFnSpace("", "")');
-ok(evalInPage('currentSpaceOfFn("")') === 'sp1', '清配置回退 sp1（seq 最早）');
+// 设为生效：sp6 设为 fn('') 生效空间 → SU 默认跟随；新空间默认未生效
+ok(evalInPage('currentSpaceOfFn("")') === 'sp1', 'sp1 默认生效（seq 最早回退）');
+window.eval('setSpaceActive("sp6")');
+ok(evalInPage('currentSpaceOfFn("")') === 'sp6', 'setSpaceActive 后 sp6 生效');
+window.eval('setSpaceActive("sp1")');
+ok(evalInPage('currentSpaceOfFn("")') === 'sp1', '切回 sp1');
 
-// ===== 4. 创建售卖单元：按空间维度 + 空间配置度量 + pair 只增不减 =====
+// ===== 4. 创建售卖单元：按空间维度 + 全量度量 + pair 只增不减 =====
 section('4. 创建售卖单元');
 window.openSuConfirmModal();
-// vtpm 无 function → fn block 隐藏；空间下拉默认=fn('') 当前空间
+// vtpm 无 function → fn block 隐藏；空间下拉默认=fn('') 生效空间
 ok(document.getElementById('su-fn-block').classList.contains('hidden'), '无 function 商品隐藏 fn 下拉');
 ok(!!document.getElementById('su-space-select'), '显示售卖空间下拉');
-ok(evalInPage('suSpaceSel') === 'sp1', '默认选中 fn 当前空间 sp1');
+ok(evalInPage('suSpaceSel') === 'sp1', '默认选中 fn 生效空间 sp1');
 // 切换到新建的 sp6（单维度空间）
 window.eval('document.getElementById("su-space-select").value = "sp6"; onSuSpaceChange();');
 const suDimTitles = Array.from(document.querySelectorAll('#su-confirm-body p.text-xs.font-semibold')).map(p => p.textContent.trim());
 ok(suDimTitles.join(',').includes('购买量区间') && !suDimTitles.join(',').includes('购买周期'), 'sp6 仅展示空间定义的维度（购买量区间）');
-ok(document.querySelectorAll('#su-confirm-body .su-leaf').length === 2, '度量候选=空间配置的 2 个（非全量 3）');
+ok(document.querySelectorAll('#su-confirm-body .su-leaf').length === 3, '度量候选=全量 3 个（第23轮空间不管度量）');
 // 不勾任何度量 → 拦截
 document.querySelectorAll('#su-confirm-body .su-leaf').forEach(c => { c.checked = false; });
 alertMsg = '';
@@ -106,24 +101,14 @@ window.confirmSaleUnits();
 ok(alertMsg.includes('已创建售卖单元：1 个'), '单维单度量 → 创建 1 个');
 ok(evalInPage('saleUnits[0].spaceKey') === 'sp6' && evalInPage('saleUnits[0].dim') === '购买量区间', '单元挂 sp6 + 单维购买量区间');
 
-// ===== 5. 只增不减 + 编辑度量扩展 =====
+// ===== 5. 只增不减（直接加勾全量候选中的新度量） =====
 section('5. 只增不减');
 window.openSuConfirmModal();
 window.eval('document.getElementById("su-space-select").value = "sp6"; onSuSpaceChange();');
 ok(evalInPage('suSpaceSel') === 'sp6', '切到 sp6');
 const disabledCnt = document.querySelectorAll('#su-confirm-body input.su-leaf:checked[disabled]').length;
 ok(disabledCnt === 1, '已确认 pair（1～100）置灰: ' + disabledCnt);
-window.eval('closeModal("su-confirm")');
-// 编辑度量：sp6 加回 500+（未被引用 → 可勾）
-window.eval('editSpaceMeasures("sp6")');
-document.querySelector('.sme-check[data-dim="购买量区间"][data-measure="1～100"]').disabled = false; // test hook: 解锁置灰项以便读取（真实交互中 1～100 被引用置灰）
-document.querySelector('.sme-check[data-dim="购买量区间"][data-measure="500+"]').checked = true;
-alertMsg = '';
-window.confirmSpaceMeasureEdit();
-ok(evalInPage('spaces["sp6"].measures["购买量区间"].length') === 3, '编辑度量加回 500+（共 3 个）');
-// 重新开 SU 弹窗加勾 500+ → 组合扩展（1～100+500+ 两个单元）
-window.openSuConfirmModal();
-window.eval('document.getElementById("su-space-select").value = "sp6"; onSuSpaceChange();');
+// 加勾 500+ → 组合扩展（1～100+500+ 两个单元）
 document.querySelector('.su-leaf[data-dim="购买量区间"][data-measure="500+"]').checked = true;
 alertMsg = '';
 window.confirmSaleUnits();

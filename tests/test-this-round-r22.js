@@ -1,4 +1,5 @@
-// 第22轮：售卖空间简化——空间含维度+度量、fn 当前空间直配（currentSpaceOfFn/setFnSpace/快照恢复）、创建拦截、编辑度量、SU 候选=空间配置
+// 第22轮→第23轮：空间只管维度（无 measures）；单一合并列表 + 状态列 + setSpaceActive；本套件聚焦：
+// 弹窗内多行互相重复拦截、多行批量创建、跨 fn 可同维度集合、fnSpaceMap 显式配置/回退/SU 默认生效空间、快照恢复链路
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
 const html = fs.readFileSync('prototype/admin-products.html', 'utf8');
@@ -8,107 +9,103 @@ const alerts = [];
 window.alert = m => alerts.push(String(m));
 window.confirm = () => true;
 const w = window;
+const d = w.document;
 let step = 0, fail = 0;
 function ok(cond, msg) { step++; if (!cond) { fail++; console.log('FAIL[' + step + '] ' + msg); } }
 
-// 1. mock 校验（先进入详情装载 mock；用 std 商品装载 defaultSpaces）
+// 1. mock 校验（第23轮口径：空间只有 fn+dims）
 w.eval('openDetailByCode("maas-online-text-glm4")');
 w.eval('startEdit()'); // 持有编辑锁（变更类操作需先发起变更）
-ok(w.eval('spaces["sp2"].measures["输入token区间"].length') === 3, 'sp2 输入token 3 measures');
-ok(w.eval('spaces["sp1"].dims.length') === 2, 'sp1 dims 2');
-// 2. 详情视图校验
-ok(w.document.getElementById('fn-space-cards').textContent.includes('售卖空间2'), 'fn 卡显示售卖空间2');
-ok(w.document.getElementById('space-tbody').querySelectorAll('tr').length === 4, '空间列表 4 行（sp2~sp5，sp1 属无 fn 不在池）');
-ok(w.document.getElementById('space-tbody').textContent.includes('0～128K、128K～1M、1M+'), '维度:度量 列展示度量');
-// 3. currentSpaceOfFn（mock 配置优先；已持有编辑锁）
+ok(w.eval('spaces["sp2"].measures === undefined'), '空间无 measures 字段');
+ok(w.eval('spaces["sp1"].dims.length') === 2 && w.eval('spaces["sp1"].fn') === '', 'sp1（vtpm）两维度 fn=""');
+// 2. 详情列表（合并列表）
+const spRows = Array.from(d.querySelectorAll('#space-tbody tr'));
+ok(spRows.length === 4, '空间列表 4 行（sp2~sp5，sp1 属无 fn 不在池）');
+ok(spRows[1].cells[3].textContent.includes('输入token区间 + 输出token区间'), '维度列展示 dims');
+ok(spRows[2].cells[1].textContent.includes('未生效'), 'sp3 未生效');
+// 3. currentSpaceOfFn（mock 配置优先）
 ok(w.eval('currentSpaceOfFn("input")') === 'sp2', 'input 当前 sp2');
 ok(w.eval('currentSpaceOfFn("output")') === 'sp4', 'output 当前 sp4');
 ok(w.eval('currentSpaceOfFn("cache")') === 'sp5', 'cache 当前 sp5');
-// 4. setFnSpace 切换 + 回退
-w.eval('setFnSpace("input", "sp3")');
+// 4. setSpaceActive 切换 + 回退
+w.eval('setSpaceActive("sp3")');
 ok(w.eval('currentSpaceOfFn("input")') === 'sp3', 'input 切到 sp3');
-w.eval('setFnSpace("input", "")');
+ok(alerts[alerts.length - 1].includes('生效售卖空间已切换'), '切换提示: ' + (alerts[alerts.length - 1] || '').slice(0, 18));
+w.eval('fnSpaceMap["input"] = ""');
 ok(w.eval('currentSpaceOfFn("input")') === 'sp2', '清配置回退 sp2（seq 最早）');
-// 5. SU 弹窗：input 默认 sp2、度量=空间配置（3+3=6）
+// 5. SU 弹窗：input 默认 sp2（生效空间）、度量=全量（3+3=6）
 w.eval('openSuConfirmModal()');
-w.document.getElementById('su-fn-select').value = 'input';
+d.getElementById('su-fn-select').value = 'input';
 w.eval('onSuFnChange()');
-ok(w.document.getElementById('su-space-select').value === 'sp2', 'SU 默认空间 sp2');
-ok(w.document.querySelectorAll('#su-confirm-body input.su-leaf').length === 6, 'SU 候选度量 6（空间配置）');
-// 6. 切 sp3：单维度 3 度量
+ok(d.getElementById('su-space-select').value === 'sp2', 'SU 默认空间=生效空间 sp2');
+ok(d.querySelectorAll('#su-confirm-body input.su-leaf').length === 6, 'SU 候选度量=全量 6');
+// 6. 切 sp3：单维度仍全量 3
 w.eval('document.getElementById("su-space-select").value = "sp3"; onSuSpaceChange()');
-ok(w.document.querySelectorAll('#su-confirm-body input.su-leaf').length === 3, 'sp3 候选 3');
+ok(d.querySelectorAll('#su-confirm-body input.su-leaf').length === 3, 'sp3 候选=全量单维度 3');
 w.eval('closeModal("su-confirm")');
-// 7. 批量创建：同 fn 相同维度集合 → 拦截提交
+// 7. 批量创建：与已有 fn 空间维度集合相同 → 拦截
 w.eval('openSpaceBulkModal()');
-const row0 = w.document.querySelector('.space-row');
+const row0 = d.querySelector('.space-row');
 row0.querySelector('.space-row-fn').value = 'input';
-['输入token区间', '输出token区间'].forEach(d => {
-  const c = row0.querySelector('.space-dim-check[value="' + d + '"]');
+['输入token区间', '输出token区间'].forEach(dm => {
+  const c = row0.querySelector('.space-dim-check[value="' + dm + '"]');
   c.checked = true;
   c.dispatchEvent(new w.Event('change', { bubbles: true }));
 });
 w.eval('confirmSpaceBulk()');
-ok(alerts[alerts.length - 1].includes('已存在维度集合相同'), '重复维度集合被拦截: ' + (alerts[alerts.length - 1] || '').slice(0, 24));
-// 8. 换维度集合（cache fn + 两 token 维度，不与 sp5 重复）→ 创建成功 sp6，度量默认全选
-row0.querySelector('.space-row-fn').value = 'cache';
-row0.querySelector('.space-dim-check[value="输出token区间"]').dispatchEvent(new w.Event('change', { bubbles: true }));
+ok(alerts[alerts.length - 1].includes('不可重复创建'), '重复维度集合被拦截: ' + (alerts[alerts.length - 1] || '').slice(0, 24));
+// 8. 弹窗内多行互相重复 → 拦截（两行同为 cache+两 token 维度，均不与 sp5 重复）
+w.eval('openSpaceBulkModal()');
+w.eval('addSpaceRow()');
+const rows8 = Array.from(d.querySelectorAll('.space-row'));
+rows8.forEach(r => {
+  r.querySelector('.space-row-fn').value = 'cache';
+  ['输入token区间', '输出token区间'].forEach(dm => {
+    r.querySelector('.space-dim-check[value="' + dm + '"]').checked = true;
+  });
+});
 w.eval('confirmSpaceBulk()');
+ok(alerts[alerts.length - 1].includes('多行 function 与维度集合相同'), '弹窗内两行互相重复拦截: ' + (alerts[alerts.length - 1] || '').slice(0, 20));
+ok(w.eval('spaceSeq') === 5, '拦截未创建空间');
+// 9. 跨 fn 可同维度集合：cache+两 token 维度（sp5=cache 仅输入token维度，不重复）→ 成功创建 sp6
+const rowA = d.querySelectorAll('.space-row')[0];
+const rowB = d.querySelectorAll('.space-row')[1];
+rowA.querySelector('.space-row-fn').value = 'cache';
+rowB.remove(); // 只留一行 cache+两维度
+w.eval('confirmSpaceBulk()');
+ok(alerts[alerts.length - 1].includes('已创建 1 个售卖空间'), 'cache+两 token 维度创建成功: ' + (alerts[alerts.length - 1] || '').slice(0, 18));
 ok(w.eval('spaceSeq') === 6, 'spaceSeq=6');
-ok(w.eval('spaces["sp6"].dims.length') === 2, 'sp6 两维度');
-ok(w.eval('spaces["sp6"].measures["输入token区间"].length') === 3, 'sp6 度量默认全选 3');
-// 9. 弹窗内取消部分度量再创建 sp7（output fn + 购买量两维度，勾部分度量）
+ok(w.eval('spaces["sp6"].fn') === 'cache' && w.eval('spaces["sp6"].dims.length') === 2, 'sp6 fn=cache 两维度');
+ok(w.eval('spaces["sp6"].measures') === undefined, '新空间无 measures（只管维度）');
+// 10. 多行成功创建：sp7（output+购买量区间）+ sp8（input+购买周期）不同 fn 不同维度集合
 w.eval('openSpaceBulkModal()');
-const row1 = w.document.querySelector('.space-row');
-row1.querySelector('.space-row-fn').value = 'output';
-['购买量区间', '购买周期'].forEach(d => {
-  const c = row1.querySelector('.space-dim-check[value="' + d + '"]');
-  c.checked = true;
-  c.dispatchEvent(new w.Event('change', { bubbles: true }));
-});
-// 取消 500+ 和 90天
-row1.querySelector('.space-msr-check[data-dim="购买量区间"][data-measure="500+"]').checked = false;
-row1.querySelector('.space-msr-check[data-dim="购买周期"][data-measure="90天"]').checked = false;
+w.eval('addSpaceRow()');
+const r10a = d.querySelectorAll('.space-row')[0];
+const r10b = d.querySelectorAll('.space-row')[1];
+r10a.querySelector('.space-row-fn').value = 'output';
+r10a.querySelector('.space-dim-check[value="购买量区间"]').checked = true;
+r10b.querySelector('.space-row-fn').value = 'input';
+r10b.querySelector('.space-dim-check[value="购买周期"]').checked = true;
 w.eval('confirmSpaceBulk()');
-ok(w.eval('spaceSeq') === 7, 'spaceSeq=7');
-ok(JSON.stringify(w.eval('spaces["sp7"].measures["购买量区间"]')) === JSON.stringify(['1～100', '100～500']), 'sp7 部分度量');
-// 10. 度量全不勾 → 拦截（input + 单输出token维度，非重复集合）
-w.eval('openSpaceBulkModal()');
-const row2 = w.document.querySelector('.space-row');
-row2.querySelector('.space-row-fn').value = 'input';
-const c2 = row2.querySelector('.space-dim-check[value="输出token区间"]');
-c2.checked = true;
-c2.dispatchEvent(new w.Event('change', { bubbles: true }));
-row2.querySelectorAll('.space-msr-check').forEach(c => { c.checked = false; });
-w.eval('confirmSpaceBulk()');
-ok(alerts[alerts.length - 1].includes('至少勾选一个度量'), '空度量拦截');
-w.eval('closeModal("space-edit")');
-// 11. 编辑度量：sp2 移除「1M+」；被引用度量置灰
-w.eval('editSpaceMeasures("sp2")');
-const locked = w.document.querySelector('.sme-check[data-dim="输入token区间"][data-measure="128K～1M"]');
-ok(locked && locked.disabled && locked.checked, '被引用 128K～1M 置灰');
-const free = w.document.querySelector('.sme-check[data-dim="输入token区间"][data-measure="1M+"]');
-ok(free && !free.disabled, '1M+ 可编辑');
-free.checked = false;
-w.eval('confirmSpaceMeasureEdit()');
-ok(!w.eval('spaces["sp2"].measures["输入token区间"]').includes('1M+'), '1M+ 已移除');
-// 12. SU 弹窗再开 input@sp2：候选=2+3=5
-w.eval('openSuConfirmModal()');
-w.document.getElementById('su-fn-select').value = 'input';
-w.eval('onSuFnChange()');
-ok(w.document.querySelectorAll('#su-confirm-body .su-leaf').length === 5, '度量移除后 SU 候选 5');
-// disabled pair 仍是 3 个（su-1/su-2 展开去重）
-ok(w.document.querySelectorAll('#su-confirm-body input.su-leaf:checked:disabled').length === 3, 'pair 置灰 3');
-w.eval('closeModal("su-confirm")');
-// 13. vtpm 商品：无 fn 单卡
+ok(alerts[alerts.length - 1].includes('已创建 2 个售卖空间'), '两行一次性创建 2 个空间: ' + (alerts[alerts.length - 1] || '').slice(0, 18));
+ok(w.eval('spaces["sp7"].name') === '售卖空间7' && w.eval('spaces["sp8"].name') === '售卖空间8', '名称连续自增 sp7/sp8');
+// 11. 返回列表（快照 glm4 编辑结果）→ vtpm 商品：无 fn 单行生效
+w.eval('backToList()');
 w.eval('openDetailByCode("maas-product-vtpm-std")');
-ok(w.document.getElementById('fn-space-cards').textContent.includes('—（无 function）'), 'vtpm 无 fn 单卡');
+const vRows = Array.from(d.querySelectorAll('#space-tbody tr'));
+ok(vRows.length === 1, 'vtpm 单行（sp1）');
+ok(vRows[0].cells[0].textContent.includes('—'), 'Function 列显示 —');
 ok(w.eval('currentSpaceOfFn("")') === 'sp1', 'vtpm 当前 sp1');
-// 14. snapshot 链路：glm4 编辑后返回列表再进入，fnSpaceMap 恢复
+// 12. snapshot 链路：glm4 设为生效 sp3 后返回列表再进入，fnSpaceMap 恢复
 w.eval('openDetailByCode("maas-online-text-glm4")');
-w.eval('setFnSpace("input", "sp3")');
+w.eval('setSpaceActive("sp3")');
 w.eval('backToList()');
 w.eval('openDetailByCode("maas-online-text-glm4")');
-ok(w.eval('currentSpaceOfFn("input")') === 'sp3', '快照恢复 input→sp3');
-console.log('\n结果: ' + step + ' 通过, ' + fail + ' 失败');
+ok(w.eval('currentSpaceOfFn("input")') === 'sp3', '快照恢复 input→sp3（设为生效持久）');
+// 13. 快照还含新建空间：sp6（cache 第二空间）在重进后存在且未生效
+ok(w.eval('spaces["sp6"].fn') === 'cache', '快照恢复新建空间 sp6');
+const rows13 = Array.from(d.querySelectorAll('#space-tbody tr'));
+const sp6Row = rows13.find(r => r.textContent.includes('sp6'));
+ok(!!sp6Row && sp6Row.textContent.includes('未生效'), 'sp6 重进后未生效（sp5 仍为 cache 生效）');
+console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);
