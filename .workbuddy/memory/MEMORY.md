@@ -1,7 +1,7 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第27轮（main c4e2a92 / gh-pages 85931c8，19 套 661 项 + smoke-r26 32 项全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第27轮（main 4f05bff / gh-pages e33fc26，19 套 661 项 + smoke-r26 32 项全绿）。
 
 ## 第27轮（现行口径）：空间计划独立 Tab + 设为默认语义
 - **新 Tab「空间计划」**：插在售卖空间之后（Tab 序：售卖空间→空间计划→售卖单元→售卖计划→定价计划→折算→SLO）；`#inner-tab-spaceplan` + `#spaceplan-tbody`。
