@@ -30,9 +30,9 @@ const tabs = Array.from(document.querySelectorAll('#plan-tabs-card .admin-tab'))
 ok(tabs[0] === '售卖空间', '售卖空间是第一个 Tab');
 const activeTab = document.querySelector('#plan-tabs-card .admin-tab.active');
 ok(activeTab && activeTab.textContent.trim() === '售卖空间', '进入详情默认打开售卖空间 Tab');
-ok(!document.getElementById('spaceplan-tbody'), '空间计划单元表已移除（第22轮）');
+ok(!!document.getElementById('spaceplan-tbody'), '空间切换计划列表存在（第26轮：独立实体回归）');
 ok(!document.getElementById('spaceplan-create-btn'), '创建空间计划按钮已移除');
-ok(!document.getElementById('modal-spaceplan'), '空间计划弹窗已移除');
+ok(!!document.getElementById('modal-spaceplan'), '空间切换计划弹窗存在（第26轮：独立实体回归）');
 ok(!!document.getElementById('space-new-btn') && document.getElementById('space-new-btn').textContent.includes('批量创建'), '含批量创建售卖空间按钮');
 ok(!document.getElementById('fn-space-cards'), 'fn 配置卡已删（第23轮合并进列表）');
 ok(!!document.getElementById('space-tbody'), '含售卖空间列表表');

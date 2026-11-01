@@ -1,7 +1,7 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第24轮（main e8cb9fc / gh-pages 9e9a914，全套 17 套 586 项测试全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第25轮（main bf99f21 / gh-pages 30d5cb4，全套 18 套 613 项测试全绿）。
 
 ## 第24轮（现行口径）：售卖计划售卖单元筛选重设计
 - **fn 筛选=复选组**：`.plan-filter-fn-check`（每 fn 一个）+ `.plan-filter-fn-all` 全选框（onPlanFnFilterToggleAll 联动；子框变化同步全选框 checked）；**全不勾=全部**（非全不显）。旧单选下拉 `#plan-filter-fn` 已删。
@@ -11,9 +11,19 @@
 - **入口重置**：openPlanCreatePage/editPlanRow 均调 planUnitsFilterReset()（置 planUnitsFilterNeedsReset=true，renderPlanUnitsCharge 消费后丢弃旧 fn 复选/空间筛回全量）；修改页勾选回填在 renderPlanCreatePage(true) 之后写 DOM，不受重置影响。
 - renderPlanUnitsCharge 保留 prevFnChecks（fn 复选状态跨重渲）；无 fn 商品不显示 fn 复选组。
 
+## 第25轮（现行口径）：售卖计划级 fn 生效空间定时切换（路径B）
+- **设计决策**：不建独立「空间切换计划」实体（第21轮教训）；空间生效性并入售卖计划——研发心智模型「计划控制某时段的配置」。
+- **planRow 新增 fnSpaces**：{fn: spaceKey}，可选；空/缺省=不指定（不参与空间决策）。
+- **effectiveSpaceAt(fn,t)**：时刻 t 生效期内（published 且 effStart≤t≤effEnd）最高优先级计划的 fnSpaces[fn]（source='plan'）→ 回落 currentSpaceOfFn（source='manual'）。t 省略=timeFilter.point。nextSpaceSwitchOfFn(fn,t)=t 后第一个改变生效空间的计划（预告用）。
+- **创建/修改页**：区块2 顶部「本计划各 function 生效售卖空间」选择区（.plan-fnspace-select，每 fn 一个下拉，默认空=不指定；editingFnSpaces 回填、planUnitsFilterReset 时清空、prevFnSpaceSel 跨重渲保留）；单元行空间≠生效空间时标「⚠ 非生效空间」；保存时勾选单元空间∉计划指定空间 → confirm 非阻断提示。
+- **挂载点**：售卖空间 Tab 状态列（effMap=effectiveSpaceAt；生效中+计划标注「⏱ 计划「名」指定」；未生效但未来有切换→「⏱ MM-DD 起生效」；计划接管时操作列=「⏱ 计划接管中」禁手动）；SU 弹窗默认空间；「仅生效中」筛选；publish/stopPlanRow 后补 renderSpaceTab。
+- **计划详情**：字段区新增「生效售卖空间」（有值显示 fn→空间名；无值显示「不指定（跟随现状）」）。
+- **mock**：glm4 新增两份已发布计划——「双11大促·输入切换售卖空间3」（fnSpaces.input=sp3，priority 500，11-11~11-20）+「GLM4·常规售卖」（无 fnSpaces，11-01 起常年）；补 glm4.30d/60d 计费项。glm4 列表页：已上架 6（su-3/su-4 在售）、未上架 8（su-1/su-2 禁售）。
+- snapshot 链路无改动（fnSpaces 随 planRows 深拷贝自然透传）。
+
 ## 核心业务概念
 - **预留 vTPM 资源包**：按「购买量（万 vTPM step）× 购买周期（天）」售卖，生效期=开始日0点 ~ 开始日+周期+1天。超量路由：超量限流（429）或超量路由 Serverless（交付二选一）。折算系数按三维度（输入长度×cache命中率×输出长度）配 YAML 版本；SLO A类违约按累计违约分钟/月分档赔付。
-- **关键实体链**：商品（SKU；状态纯推导第11轮：已上架=存在≥1在售售卖单元）→ 售卖空间（属 function，**只管维度**）→ fn 生效空间（currentSpaceOfFn）→ 售卖单元（{id,fn,spaceKey,dim,measure}）→ 售卖计划（七字段组 unified/perUnit）→ 手动交付 → 资源包（P001…）→ 监控。创建商品 → 批量创建售卖空间（勾维度）→ 行内「设为生效」→ 创建售卖单元（弹窗勾度量）→ 售卖计划。
+- **关键实体链**：商品（SKU；状态纯推导第11轮：已上架=存在≥1在售售卖单元）→ 售卖空间（属 function，**只管维度**）→ fn 生效空间（currentSpaceOfFn 手动 + effectiveSpaceAt 计划定时）→ 售卖单元（{id,fn,spaceKey,dim,measure}）→ 售卖计划（七字段组 unified/perUnit + fnSpaces）→ 手动交付 → 资源包（P001…）→ 监控。创建商品 → 批量创建售卖空间（勾维度）→ 行内「设为生效」/售卖计划定时切换 → 创建售卖单元（弹窗勾度量）→ 售卖计划。
 - 后台菜单：预留vTPM管理挂「活动运营」；商品管理挂「商品定价中心」。
 
 ## 第23轮（现行口径）：售卖空间只管维度 + 合并列表
@@ -57,7 +67,7 @@
 ## 技术约定与部署
 - 每页顶部深色「原型导航」栏；后台紫色主色 #7C3AED；管理员「吕」。数据全为页面内 JS mock。
 - **部署（Pages legacy 从分支部署，不用 Actions）**：gh-pages 分支=HTML 根目录直出 + .nojekyll（绝不镜像 prototype/ 结构）。流程：推 main → git worktree add gh-pages → 拷 prototype/*.html 到根 → 推送 → sleep~105s → curl 验证线上 → worktree remove。
-- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：17 套 586 项全绿——plan-page(77)/this-round(31)/data-consistency(28)/r9(25)/r10(32)/r11(22)/r13(30)/r14(50)/r15(38)/r16(29)/r18(28)/r19(33)/r20(78)/r22(29)/r23(34)/r24(16)/su-dim-validate(6)。jsdom runScripts:'dangerously'；window.confirm/alert 打桩；页面顶层 const 不挂 window 用 window.eval 取；eval 里函数调用写 fn().length 非 fn.length；详情页售卖单元行因 rowspan 合并须按"任意 cell 匹配"取行；勾选联动须 dispatchEvent(new window.Event('change',{bubbles:true})) 而非只改 checked；**合并列表行内 rowspan 导致 cells 索引偏移**（无 fn 列的行状态列=cells[1]）；**跨商品切换测试必须先 backToList()**（否则 snapshot 不触发、编辑丢失）；**筛选交互测试的元素引用必须在每次 applyPlanUnitFilter/renderPlanCreatePage 后重新查询**（prune 重渲使旧引用游离）；glm4 无自有计费项——测试保存计划前需先 chargeItems.push 一个 glm4 前缀计费项并选上。
+- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：18 套 613 项全绿——plan-page(77)/this-round(31)/data-consistency(28)/r9(25)/r10(32)/r11(22)/r13(30)/r14(50)/r15(38)/r16(29)/r18(28)/r19(33)/r20(78)/r22(29)/r23(34)/r24(16)/r25(27)/su-dim-validate(6)。jsdom runScripts:'dangerously'；window.confirm/alert 打桩；页面顶层 const 不挂 window 用 window.eval 取；eval 里函数调用写 fn().length 非 fn.length；详情页售卖单元行因 rowspan 合并须按"任意 cell 匹配"取行；勾选联动须 dispatchEvent(new window.Event('change',{bubbles:true})) 而非只改 checked；**合并列表行内 rowspan 导致 cells 索引偏移**（无 fn 列的行状态列=cells[1]）；**跨商品切换测试必须先 backToList()**（否则 snapshot 不触发、编辑丢失）；**筛选交互测试的元素引用必须在每次 applyPlanUnitFilter/renderPlanCreatePage 后重新查询**（prune 重渲使旧引用游离）；glm4 无自有计费项——测试保存计划前需先 chargeItems.push 一个 glm4 前缀计费项并选上（第25轮后 mock 已自带 glm4.30d/60d）。
 - 语法校验：node -e 提取 `<script>` 用 new Function()。
 - 修页面后测试同步：先跑全套找红，逐套按新口径改断言；口径根本性失效时整套重写（r22/r23 即重写 r20/r15/r22）。
 - 网络偶发 502（代理 CONNECT tunnel failed）：push 失败等 1-2 分钟重试即可恢复；恢复检测=轮询 `curl https://github.com` 状态码 200。
