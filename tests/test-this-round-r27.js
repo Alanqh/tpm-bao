@@ -18,16 +18,16 @@ ok(tabs.join(',') === 'space,spaceplan,saleunit,plan,pricing,factor-config,slo-c
 ok(d.querySelector('#plan-tabs-card .admin-tab[data-tab="space"]').classList.contains('active'), '默认打开售卖空间 Tab');
 ok(d.getElementById('inner-tab-spaceplan').classList.contains('hidden'), '空间计划 Tab 初始隐藏');
 
-// ===== 2. 空间计划 Tab 平铺：glm4 初始 4 行（双11 sp3 条目 + sp2/sp4/sp5 未指定）=====
+// ===== 2. 空间计划 Tab 平铺：glm4 初始 1 行（双11 pu-sp-1-1；第28轮起纯计划单元，无未指定行）=====
 w.eval('renderSpacePlans()');
 let rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
-ok(rows.length === 4, '初始 4 行（1 条目 + 3 未指定），实得 ' + rows.length);
+ok(rows.length === 1, '初始 1 行（双11计划单元），实得 ' + rows.length);
 const txt = d.getElementById('spaceplan-tbody').textContent;
 ok(txt.includes('pu-sp-1-1'), '计划单元 ID pu-sp-1-1（同构 planUnitId）');
 ok(txt.includes('双11大促·输入切换售卖空间3') && txt.includes('售卖空间3'), '双11条目：计划名+目标空间');
 ok(txt.includes('已发布'), '双11状态徽标');
-ok((txt.match(/未指定/g) || []).length === 3, '未指定行=3（sp2/sp4/sp5）');
-ok(txt.includes('sp2') && txt.includes('sp4') && txt.includes('sp5'), '未指定空间行均列出');
+ok((txt.match(/未指定/g) || []).length === 0, '无「未指定」行（每个单元必有所属计划，第28轮口径）');
+ok(txt.includes('sp3'), '目标空间 sp3 列出');
 const head = rows[0];
 ok(head.cells.length === 10, '计前行 10 列（计划单元/状态/所属空间计划/售卖空间/Function/维度/单元数/优先级/起止/操作）');
 ok(head.cells[4].textContent.trim() === 'input', 'Function 列=input');
@@ -71,23 +71,24 @@ d.querySelector('.sp-fn-space[data-fn="cache"]').value = 'sp5';
 w.eval('confirmSpacePlan()');
 w.eval('renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
-ok(rows.length === 5, '双fn计划加入后 5 行（双11sp3 + 新3条目 + sp2未指定）——sp4/sp5 由未指定转为计划行，实得 ' + rows.length);
-const first = rows.find(r => r.textContent.includes('pu-sp-2-1'));
-ok(first && first.cells.length === 10 && first.innerHTML.includes('rowspan="3"'), '新计划首行 10 列 + rowspan=3');
-const sub = rows.filter(r => /pu-sp-2-[23]/.test(r.textContent));
+ok(rows.length === 4, '双fn计划加入后 4 行（双11 1 行 + 新计划 3 条目），实得 ' + rows.length);
+// 第28轮排序：pending 组内按 fn 字典序（cache<input），pu-sp-2-3（cache/sp5）为该计划首行（10列+rowspan=3），pu-sp-2-1/2 为后续行（5列）
+const first = rows.find(r => r.textContent.includes('pu-sp-2-3'));
+ok(first && first.cells.length === 10 && first.innerHTML.includes('rowspan="3"'), '计划行首条（cache）10 列 + rowspan=3');
+const sub = rows.filter(r => /pu-sp-2-[12]/.test(r.textContent));
 ok(sub.length === 2 && sub.every(r => r.cells.length === 5), '后续行 5 列（计划单元/售卖空间/Function/维度/单元数）');
-ok((d.getElementById('spaceplan-tbody').textContent.match(/未指定/g) || []).length === 1, '仅剩 sp2 未指定');
+ok((d.getElementById('spaceplan-tbody').textContent.match(/未指定/g) || []).length === 0, '全程无未指定行');
 
 // ===== 7. 新 Tab CRUD/发布按钮就位 =====
 ok(d.getElementById('spaceplan-new-btn') && d.getElementById('spaceplan-new-btn').textContent.includes('创建空间计划'), '「创建空间计划」按钮在空间计划 Tab 顶部');
-const firstRow2 = rows.find(r => r.textContent.includes('pu-sp-2-1'));
-ok(firstRow2.innerHTML.includes('publishSpacePlan(1)') && firstRow2.innerHTML.includes('editSpacePlan(1)'), '计划级操作按钮（修改/发布）');
+const firstRow2 = rows.find(r => r.textContent.includes('pu-sp-2-3')); // 该计划首行（携带计划级 td）
+ok(firstRow2.innerHTML.includes('publishSpacePlan(1)') && firstRow2.innerHTML.includes('editSpacePlan(1)'), '计划级操作按钮（修改/发布）——第28轮起排序后新计划（pending）在双11（published）之后，仍可定位');
 
 // ===== 8. vtpm 商品：无 fn 无计划 → 仅 sp1 未指定行 =====
 w.eval('backToList(); openDetailByCode("maas-product-vtpm-std")');
 w.eval('renderSpacePlans()');
 const vt = d.getElementById('spaceplan-tbody').textContent;
-ok(vt.includes('售卖空间1') && vt.includes('未指定') && (vt.match(/未指定/g) || []).length === 1, 'vtpm：sp1 一行未指定');
+ok(vt.includes('暂无空间计划单元'), 'vtpm：无计划占位提示（第28轮纯计划单元口径）');
 
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

@@ -291,7 +291,14 @@
                 <p class="text-[11px] text-slate-400 mt-0.5">售卖空间属于 function（只管维度，不同 function 维度可相同）。每个 function 有一个「默认生效」的售卖空间：无空间计划接管时按默认空间生效；各 function 的定时切换在「空间计划」Tab 管理。</p>
               </div>
               <button type="button" id="space-new-btn" onclick="if(!guardEdit())return; openSpaceBulkModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>批量创建售卖空间</button>
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间</span>
+                <input id="space-tf-point" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-56">
+                <button type="button" onclick="querySpaceAt()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-magnifying-glass mr-1"></i>查询</button>
+                <button type="button" onclick="resetSpaceAt()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">重置</button>
+              </div>
             </div>
+            <p id="space-tf-tip" class="hidden text-[11px] text-violet-600 mb-2"><i class="fa-regular fa-clock mr-1"></i>正在查看 <span class="font-mono font-medium"></span> 时点的空间情况（计划接管按该时刻判定）</p>
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[760px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
@@ -1623,6 +1630,33 @@
       document.getElementById('tf-point').value = '';
       renderSaleUnits();
     }
+    // 售卖空间 Tab 时间点查询（第28轮）：查询指定时刻每个 function 的空间情况（接管按该时刻判定；与售卖单元 Tab 共享 timeFilter）
+    function syncSpaceTfPoint() {
+      const tip = document.getElementById('space-tf-tip');
+      const inp = document.getElementById('space-tf-point');
+      if (timeFilter) {
+        if (inp && inp.value === '') inp.value = timeFilter.point.replace(' ', 'T');
+        if (tip) { tip.classList.remove('hidden'); tip.querySelector('span').textContent = timeFilter.point; }
+      } else {
+        if (inp && inp.value !== '') inp.value = '';
+        if (tip) { tip.classList.add('hidden'); }
+      }
+    }
+    function querySpaceAt() {
+      const p = (document.getElementById('space-tf-point').value || '').replace('T', ' ');
+      if (!p) { alert('请先选择一个时间节点'); return; }
+      timeFilter = { point: p };
+      renderSpaceTab();
+      renderSpacePlans();
+      syncSpaceTfPoint();
+    }
+    function resetSpaceAt() {
+      timeFilter = null;
+      document.getElementById('space-tf-point').value = '';
+      renderSpaceTab();
+      renderSpacePlans();
+      syncSpaceTfPoint();
+    }
     // 售卖单元关联的售卖计划：生效期内的已发布计划优先；有 timeFilter 时取该时刻生效期内的计划，否则取生效期内优先
     function planOfUnit(unitId) {
       const published = planRows.filter((r, i) => (r.units || []).includes(unitId) && planRowStatuses[i] === 'published');
@@ -1877,6 +1911,7 @@
           </td>
         </tr>`;
       }).join('');
+      syncSpaceTfPoint();
     }
     // 设为默认（第27轮新语义）：把该空间设为其所属 fn 的默认生效空间（无空间计划接管时生效；需持有编辑锁）
     function setSpaceActive(spk) {
@@ -1899,58 +1934,43 @@
     function renderSpacePlans() {
       const tbody = document.getElementById('spaceplan-tbody');
       if (!tbody) return;
-      // 构建空间计划单元行：每条空间计划按其 fnSpaces 展开为多行（fn → 目标空间）
+      // 空间计划单元：每条空间计划按其 fnSpaces 展开为多行（fn → 目标空间）；无计划=空列表占位（每个单元必有所属计划）
       const rows = [];
       spacePlans.forEach((r, planIdx) => {
         Object.keys(r.fnSpaces || {}).forEach(f => rows.push({ planIdx, f, k: r.fnSpaces[f], r }));
       });
-      // 未被任何空间计划指定的售卖空间也列出（计划列=—），与售卖计划 Tab「无计划单元也展示」口径一致
-      const covered = new Set(rows.map(x => x.f + '|' + x.k));
-      Object.keys(productSpaces()).sort((a, b) => {
-        const fa = spaces[a].fn || '', fb = spaces[b].fn || '';
+      // 排序（第28轮）：所属状态（已发布→待发布→已停用）→ 生效时间（effStart 降序）→ 所属售卖空间（fn 字典序 + seq 升序）
+      const stRank = { published: 0, pending_publish: 1, stopped: 2 };
+      const seqOf = k => (spaces[k] && spaces[k].seq) || 0;
+      rows.sort((a, b) => {
+        const sa = stRank[spacePlanStatuses[a.planIdx]] ?? 1, sb = stRank[spacePlanStatuses[b.planIdx]] ?? 1;
+        if (sa !== sb) return sa - sb;
+        if (a.r.effStart !== b.r.effStart) return a.r.effStart < b.r.effStart ? 1 : -1;
+        const fa = a.f || '', fb = b.f || '';
         if (fa !== fb) return fa.localeCompare(fb);
-        return (spaces[a].seq || 0) - (spaces[b].seq || 0);
-      }).forEach(k => {
-        const f = spaces[k].fn || '';
-        if (!covered.has(f + '|' + k)) rows.push({ planIdx: -1, f, k, r: null });
-      });
-      // rowspan 合并：同一空间计划的多行在前 8 列合并（首行渲染 td，其余行省略）
-      const planSpanMap = {};
-      rows.forEach(x => { if (x.planIdx >= 0) planSpanMap[x.planIdx] = (planSpanMap[x.planIdx] || 0) + 1; });
-      let prevPlan = -2;
-      rows.forEach(x => {
-        if (x.planIdx < 0 || x.planIdx !== prevPlan) { x._firstOfPlan = true; }
-        x._planSpan = x.planIdx < 0 ? 1 : planSpanMap[x.planIdx];
-        prevPlan = x.planIdx;
+        return seqOf(a.k) - seqOf(b.k);
       });
       if (rows.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" class="px-3 py-8 text-center text-xs text-slate-400">暂无空间计划单元，请先创建空间计划</td></tr>';
         return;
       }
+      // rowspan 合并：同一空间计划的多行在计划级 5 列合并（排序键含状态+effStart，同计划行自然连续；首行渲染 td，其余省略）
+      const planSpanMap = {};
+      rows.forEach(x => { planSpanMap[x.planIdx] = (planSpanMap[x.planIdx] || 0) + 1; });
+      let prevPlan = -2;
+      rows.forEach(x => {
+        x._firstOfPlan = x.planIdx !== prevPlan;
+        x._planSpan = planSpanMap[x.planIdx];
+        prevPlan = x.planIdx;
+      });
       const nowStr = timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' ');
       tbody.innerHTML = rows.map(row => {
         const { planIdx, f, k, r } = row;
         const sp = spaces[k];
         const unitCnt = (saleUnits || []).filter(u => u.spaceKey === k).length;
-        const cell = (content, extraCls = '') => planIdx < 0 || row._firstOfPlan
+        const cell = (content, extraCls = '') => row._firstOfPlan
           ? `<td rowspan="${row._planSpan}" class="px-3 py-2 ${extraCls}">${content}</td>`
           : '';
-        if (planIdx < 0) {
-          // 未被任何计划指定的空间
-          return `
-          <tr class="hover:bg-slate-50">
-            <td class="px-3 py-2 text-xs text-slate-400">—</td>
-            <td class="px-3 py-2"><span class="badge bg-slate-100 text-slate-400">未指定</span></td>
-            <td class="px-3 py-2 text-xs text-slate-400">—</td>
-            <td class="px-3 py-2 text-xs font-medium">${sp ? sp.name : k}<div class="text-[10px] text-slate-400 font-mono">${k}</div></td>
-            <td class="px-3 py-2 text-xs font-medium">${f || '—'}</td>
-            <td class="px-3 py-2 text-xs">${sp ? (sp.dims || []).join(' + ') || '—' : '—'}</td>
-            <td class="px-3 py-2 text-xs text-right">${unitCnt}</td>
-            <td class="px-3 py-2 text-xs text-right">—</td>
-            <td class="px-3 py-2 text-xs">—</td>
-            <td class="px-3 py-2 text-xs"><span class="text-slate-300">—</span></td>
-          </tr>`;
-        }
         const st = spacePlanStatuses[planIdx] || 'pending_publish';
         const meta = planStatusMeta(st);
         const isEff = st === 'published' && r.effStart <= nowStr && nowStr <= r.effEnd;
