@@ -1,7 +1,14 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第27轮（main 4f05bff / gh-pages e33fc26，19 套 661 项 + smoke-r26 32 项全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第28轮（main 1c0bb23 / gh-pages c632369，19 套 686 项 + smoke-r26 32 项全绿）。
+
+## 第28轮（现行口径）：售卖空间时间点查询 + 空间计划单元纯列表排序
+- **售卖空间 Tab 时间点查询**：`#space-tf-point`（datetime-local）+ querySpaceAt/resetSpaceAt + 紫色提示条 `#space-tf-tip`（"正在查看 X 时点的空间情况"）；与售卖单元 Tab **共享 timeFilter**（syncSpaceTfPoint 在 renderSpaceTab 尾部同步正反两个方向）；接管/预告/effectiveSpaceAt 均按查询时刻判定。
+- **空间计划 Tab = 纯空间计划单元列表**：删除第27轮的「未指定空间补尾行」——每个单元必有所属空间计划；无计划时空表占位「暂无空间计划单元」。
+- **排序**：stRank{published:0, pending_publish:1, stopped:2} → effStart 降序 → fn 字典序 → 空间 seq。同状态组内 effStart 可能为不同格式（mock '2026-11-11 00:00:00' vs pcpVal 存的 '2026-12-10 00:00' 无秒）——字符串比较仅在同格式内进行，跨格式前缀比较不受秒影响（分钟级精度足够）。
+- **rowspan 与排序的兼容**：排序键含状态+effStart（计划级），同计划的行必然连续；计划级 5 列（状态/所属空间计划/优先级/起止/操作）在首行 rowspan=N，其余 5 列（pu 编号/售卖空间/Function/维度/单元数）逐行渲染——**注意首行可能是该计划 fn 排序最小的行**（如 cache），pu-sp-N-M 的 M=fnSpaces 键序而非行序。
+- 测试：新增 r28 专项 25 项；r27 九条断言适配（未指定删除/行序变化/pu-sp 首行可能非 -1）。。
 
 ## 第27轮（现行口径）：空间计划独立 Tab + 设为默认语义
 - **新 Tab「空间计划」**：插在售卖空间之后（Tab 序：售卖空间→空间计划→售卖单元→售卖计划→定价计划→折算→SLO）；`#inner-tab-spaceplan` + `#spaceplan-tbody`。
