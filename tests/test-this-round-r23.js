@@ -32,10 +32,10 @@ ok(rows[0].textContent.includes('生效中'), 'sp5（cache）生效中');
 ok(rows[1].textContent.includes('生效中'), 'sp2（input）生效中');
 ok(rows[2].textContent.includes('未生效'), 'sp3（input 第二空间）未生效');
 ok(rows[3].textContent.includes('生效中'), 'sp4（output）生效中');
-// 5. 操作列：生效中显 —，未生效显「设为生效」
-ok(rows[0].cells[rows[0].cells.length-1].textContent.trim() === '—', '生效行操作=—');
-ok(rows[2].cells[rows[2].cells.length-1].textContent.includes('设为生效'), '未生效行=设为生效按钮');
-// 6. setSpaceActive：sp3 设为生效 → 切换
+// 5. 操作列：默认行显 —，非默认行显「设为默认」
+ok(rows[0].cells[rows[0].cells.length-1].textContent.trim() === '—', '默认行操作=—');
+ok(rows[2].cells[rows[2].cells.length-1].textContent.includes('设为默认'), '非默认行=设为默认按钮');
+// 6. setSpaceActive：sp3 设为默认 → 切换
 w.eval('setSpaceActive("sp3")');
 ok(w.eval('currentSpaceOfFn("input")') === 'sp3', 'input 生效空间切到 sp3');
 const rows2 = Array.from(d.querySelectorAll('#space-tbody tr'));
@@ -61,7 +61,7 @@ ok(w.eval('spaces["sp6"].measures') === undefined, '空间无 measures 字段（
 const rows3 = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows3.length === 2, 'vtpm 2 行（sp1 生效 + sp6 未生效）');
 ok(rows3[1].textContent.includes('未生效'), '新空间 sp6 未生效');
-ok(rows3[1].textContent.includes('设为生效'), 'sp6 有设为生效按钮');
+ok(rows3[1].textContent.includes('设为默认'), 'sp6 有设为默认按钮');
 // 9. 重复维度集合拦截（fn='' + 两维度=sp1 重复）
 w.eval('openSpaceBulkModal()');
 const rowD = d.querySelector('.space-row');

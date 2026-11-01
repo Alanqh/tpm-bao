@@ -52,7 +52,7 @@ ok(spRows[1].cells[3].textContent.includes('输入token区间 + 输出token区�
 ok(spRows[0].cells[2].textContent.includes('生效中') && spRows[1].cells[2].textContent.includes('生效中') && spRows[3].cells[2].textContent.includes('生效中'), 'sp5/sp2/sp4 状态=生效中（mock 配置）');
 ok(spRows[2].cells[1].textContent.includes('未生效'), 'sp3（input 第二空间）=未生效');
 ok(spRows[0].cells[5].textContent.trim() === '—' && spRows[1].cells[5].textContent.trim() === '—', '生效中行操作=—');
-ok(spRows[2].cells[4].textContent.includes('设为生效'), '未生效行显示设为生效（浏览态 🔒）');
+ok(spRows[2].cells[4].textContent.includes('设为默认'), '未默认行显示设为默认（浏览态 🔒，第27轮文案）');
 
 // ===== 3. currentSpaceOfFn（配置优先 → 回退最早）与 setSpaceActive =====
 section('3. 生效空间推导与切换');

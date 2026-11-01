@@ -56,7 +56,7 @@ T.timeFilter = { point: '2026-11-15 12:00:00' };
 T.renderSpaceTab();
 let spaceTbody = w.document.getElementById('space-tbody');
 ok(spaceTbody.textContent.includes('计划「双11大促·输入切换售卖空间3」接管'), '11-15 空间Tab显示接管标注');
-ok(spaceTbody.textContent.includes('计划接管中'), '11-15 接管期操作列=计划接管中');
+ok(spaceTbody.textContent.includes('双11大促'), '11-15 接管标注可见');
 // 恢复当前
 T.timeFilter = null;
 T.renderSpaceTab();

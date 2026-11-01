@@ -30,7 +30,7 @@ ok(w.eval('currentSpaceOfFn("cache")') === 'sp5', 'cache 当前 sp5');
 // 4. setSpaceActive 切换 + 回退
 w.eval('setSpaceActive("sp3")');
 ok(w.eval('currentSpaceOfFn("input")') === 'sp3', 'input 切到 sp3');
-ok(alerts[alerts.length - 1].includes('生效售卖空间已切换'), '切换提示: ' + (alerts[alerts.length - 1] || '').slice(0, 18));
+ok(alerts[alerts.length - 1].includes('默认生效售卖空间已设为'), '设为默认提示: ' + (alerts[alerts.length - 1] || '').slice(0, 18));
 w.eval('fnSpaceMap["input"] = ""');
 ok(w.eval('currentSpaceOfFn("input")') === 'sp2', '清配置回退 sp2（seq 最早）');
 // 5. SU 弹窗：input 默认 sp2（生效空间）、度量=全量（3+3=6）
@@ -96,12 +96,12 @@ const vRows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(vRows.length === 1, 'vtpm 单行（sp1）');
 ok(vRows[0].cells[0].textContent.includes('—'), 'Function 列显示 —');
 ok(w.eval('currentSpaceOfFn("")') === 'sp1', 'vtpm 当前 sp1');
-// 12. snapshot 链路：glm4 设为生效 sp3 后返回列表再进入，fnSpaceMap 恢复
+// 12. snapshot 链路：glm4 设为默认 sp3 后返回列表再进入，fnSpaceMap 恢复
 w.eval('openDetailByCode("maas-online-text-glm4")');
 w.eval('setSpaceActive("sp3")');
 w.eval('backToList()');
 w.eval('openDetailByCode("maas-online-text-glm4")');
-ok(w.eval('currentSpaceOfFn("input")') === 'sp3', '快照恢复 input→sp3（设为生效持久）');
+ok(w.eval('currentSpaceOfFn("input")') === 'sp3', '快照恢复 input→sp3（设为默认持久）');
 // 13. 快照还含新建空间：sp6（cache 第二空间）在重进后存在且未生效
 ok(w.eval('spaces["sp6"].fn') === 'cache', '快照恢复新建空间 sp6');
 const rows13 = Array.from(d.querySelectorAll('#space-tbody tr'));

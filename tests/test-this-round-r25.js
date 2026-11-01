@@ -55,8 +55,8 @@ rows = Array.from(d.querySelectorAll('#space-tbody tr'));
 sp3r = rows.find(r => r.textContent.includes('sp3'));
 const sp2r = rows.find(r => r.textContent.includes('sp2'));
 ok(sp3r.textContent.includes('生效中') && sp3r.textContent.includes('计划「双11大促'), '11-15 时 sp3 生效中+计划接管标注');
-ok(sp2r.textContent.includes('未生效') && sp2r.textContent.includes('计划接管中'), '11-15 时 sp2 input 行未生效+操作列=计划接管中（禁手动）');
-ok(sp2r.textContent.includes('设为生效') === false, '接管期操作列不含「设为生效」');
+ok(sp2r.textContent.includes('未生效') && sp2r.textContent.includes('默认'), '11-15 时 sp2 未生效+默认徽标（默认空间被计划接管，第27轮语义）');
+ok(sp2r.textContent.includes('设为默认') === false, '默认行操作列=—（不含设为默认）');
 w.eval('timeFilter = null');
 
 // ===== 6. 空间切换计划列表 DOM =====
@@ -124,10 +124,10 @@ ok(modal.querySelector('.sp-fn-space[data-fn="input"]').value === 'sp3', '回填
 ok(d.getElementById('sp-eff-start').value.indexOf('2026-12-01') === 0, '回填时段');
 w.eval('closeModal("spaceplan")');
 
-// ===== 10. 停用态操作列=— ；快照透传 =====
+// ===== 10. 停用态操作（平铺行内仍可见状态徽标）；快照透传 =====
 w.eval('renderSpacePlans()');
-const lastRow = spTbody.querySelectorAll('tr')[spTbody.querySelectorAll('tr').length - 1];
-ok(lastRow && lastRow.textContent.includes('已停用'), '列表状态=已停用');
+const stoppedRow = Array.from(spTbody.querySelectorAll('tr')).find(r => r.textContent.includes('pu-sp-2-1'));
+ok(stoppedRow && stoppedRow.textContent.includes('已停用'), 'pu-sp-2-1 行状态=已停用');
 w.eval('backToList(); openDetailByCode("maas-online-text-glm4")');
 ok(w.eval('spacePlans.length') === 2 && w.eval('spacePlans[1].name') === 'r26测试计划', '快照恢复空间切换计划');
 ok(w.eval('spacePlanStatuses[1]') === 'stopped', '快照恢复状态=stopped');
