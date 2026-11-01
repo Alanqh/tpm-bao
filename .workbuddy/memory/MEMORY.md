@@ -1,7 +1,17 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第26轮（main 2a557af / gh-pages 4f78248，全套 18 套 633 项测试全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第27轮（main c4e2a92 / gh-pages 85931c8，19 套 661 项 + smoke-r26 32 项全绿）。
+
+## 第27轮（现行口径）：空间计划独立 Tab + 设为默认语义
+- **新 Tab「空间计划」**：插在售卖空间之后（Tab 序：售卖空间→空间计划→售卖单元→售卖计划→定价计划→折算→SLO）；`#inner-tab-spaceplan` + `#spaceplan-tbody`。
+- **平铺空间计划单元（同构售卖计划 Tab）**：每行=计划条目（fn × 售卖空间 × 空间计划）；10 列=计划单元(pu-sp-{plan}-{fn序})/状态徽标(所属计划级,)/所属空间计划(链接开弹窗,rowspan)/售卖空间/Function/空间维度/售卖单元数/优先级(rowspan)/生效起止(rowspan)/操作(rowspan: pending=修改+发布, published=停用, stopped=—)；同一空间计划多行前8列 rowspan 合并（planSpanMap+ _firstOfPlan/_planSpan）；**未被任何计划指定的空间也列出**（计划列=—，状态=未指定徽标）。rows 构建=spacePlans 展开按序 + productSpaces 未覆盖补尾（排序 fn→seq）。
+- **售卖空间 Tab**：`「设为生效」→「设为默认」`（setSpaceActive 函数名不变）；fnSpaceMap 语义=**无空间计划接管时的默认空间**；默认行（currentSpaceOfFn===k）状态列加蓝色「默认」徽标+操作列=—；接管期仍可设默认（不显示「计划接管中」占位，改动只影响计划到期后的回落目标）；状态列仍保留时间点生效态+接管标注+未来预告。
+- **空间切换计划区块从售卖空间 Tab 移除**（整个卡片迁至新 Tab 顶部按钮+说明）。
+- 推导层无改动：effectiveSpaceAt/nextSpaceSwitchOfFn/currentSpaceOfFn/snapshot 链路原样。
+- **测试口径断言（重要踩坑）**：行数/未指定数断言前先想清 productSpaces() 的过滤——glm4 只含 sp2~sp5（sp1 是 vtpm 的、fn 不在池内被滤掉）；textContent 断言 beware 计划名含空间名子串（「双11…切换售卖空间3」使 includes('pu-sp')式匹配误命中），优先用 bg-blue-50 类名或 pu-sp-N-N 定位；jsdom 循环跑批超过 ~150s 会被 SIGKILL（137），分批跑。
+
+## 第26轮（历史）：空间切换计划独立实体（第27轮迁入专属 Tab，实体模型不变）
 
 ## 第24轮（现行口径）：售卖计划售卖单元筛选重设计
 - **fn 筛选=复选组**：`.plan-filter-fn-check`（每 fn 一个）+ `.plan-filter-fn-all` 全选框（onPlanFnFilterToggleAll 联动；子框变化同步全选框 checked）；**全不勾=全部**（非全不显）。旧单选下拉 `#plan-filter-fn` 已删。
@@ -11,7 +21,7 @@
 - **入口重置**：openPlanCreatePage/editPlanRow 均调 planUnitsFilterReset()（置 planUnitsFilterNeedsReset=true，renderPlanUnitsCharge 消费后丢弃旧 fn 复选/空间筛回全量）；修改页勾选回填在 renderPlanCreatePage(true) 之后写 DOM，不受重置影响。
 - renderPlanUnitsCharge 保留 prevFnChecks（fn 复选状态跨重渲）；无 fn 商品不显示 fn 复选组。
 
-## 第26轮（现行口径）：空间切换计划——独立轻量实体（推翻第25轮路径B）
+## 第26轮（历史）：空间切换计划独立实体（推翻第25轮路径B；第27轮迁入专属 Tab，模型不变）
 - **设计决策反转**：用户试用第25轮后反馈「还是单独用一套控制售卖空间生效的计划更好」——售卖计划应纯粹管「卖什么怎么计费」，空间是正交维度。第21轮教训再认识：问题不在「独立实体」而在当时版本带空间计划单元子实体与单元状态纠缠；本轮轻量版=单实体无 units，仲裁只用时段+优先级。
 - **spacePlans 实体**：`{name,priority,effStart,effEnd,fnSpaces:{fn:spaceKey}}`；**一条计划可同时指定多个 fn**（用户确认，非单 fn）；三态 `pending_publish/published/stopped`（复用 planStatusMeta 徽标）；无 units/与售卖单元无关。
 - **effectiveSpaceAt(fn,t)**：数据源=spacePlans（published 且时段命中且 fnSpaces[fn] 有值且空间存在的最高优先级者接管，source='plan'）→ 回落 currentSpaceOfFn（source='manual'）；t 省略=timeFilter.point。nextSpaceSwitchOfFn(fn,t)=t 后首个改变该 fn 空间的已发布计划。
@@ -36,7 +46,7 @@
 - **空间模型极简**：spaces[key]={seq,name:'售卖空间N',fn,dims:[...]}——**无 measures 字段**（第22轮的维度:度量列/编辑度量弹窗全部删除）；名称序号自增不可自定义；key=sp{seq}，spaceSeq 跨 fn 连续计数器。
 - **创建校验**（不变）：空间身份=fn+维度集合排序（spaceDefsKeyOf）；同 fn 维度集合相同→拦截提交（alert 指明已有空间名）；弹窗内多行互相重复拦截；跨 fn 可同维度集合；空维度行拦截。批量创建弹窗=多行 .space-row（fn 下拉+维度复选，**无度量展开**）。
 - **fn 生效空间**：currentSpaceOfFn(fn)=fnSpaceMap[fn] 显式配置优先 → 回退该 fn 最早空间（seq 升序）；defaultFnSpaceMap{code:{fn:spk}}（glm4: input→sp2/output→sp4/cache→sp5；vtpm: ''→sp1）。
-- **setSpaceActive(spk)**（替代 setFnSpace，setFnSpace 已删）：行内「设为生效」按钮，guardEdit 保护；写入 fnSpaceMap[f]=spk 后重渲 renderSpaceTab+renderSaleUnits；生效行操作列=—，未生效行=设为生效（未持锁显 🔒）。
+- **setSpaceActive(spk)**（替代 setFnSpace，setFnSpace 已删）：行内按钮（第27轮起=「设为默认」），guardEdit 保护；写入 fnSpaceMap[f]=spk 后重渲 renderSpaceTab+renderSaleUnits；生效行操作列=—，未生效行=设为生效（未持锁显 🔒）。
 - **售卖空间 Tab 单一合并列表**（fn 配置卡已删）：6 列=Function（fn 字典序分组 rowspan 合并，'' 显示 —）/售卖空间/状态（生效中绿/未生效灰，isEff=effMap[fn]===k）/空间维度（dims 用 + 连接）/售卖单元数/操作。排序：fn.localeCompare → seq 升序（故 cache 在 input 前、'' 在最后）。
 - **SU 弹窗**：fn→空间（候选=fn 归属∪已引用兜底，默认=currentSpaceOfFn）→维度（=空间 dims）×**度量（=measureOptions 全量，非空间配置）**；pair 级只增不减（confirmedPairs 置灰）；confirmSaleUnits 笛卡尔积保留原 id。
 - **锁状态联动**：startEdit/exitEdit 均需调 renderSpaceTab（第23轮修复 bug——操作列按钮随 canEdit 动态变化，否则持锁后仍显 🔒）。
@@ -73,7 +83,7 @@
 ## 技术约定与部署
 - 每页顶部深色「原型导航」栏；后台紫色主色 #7C3AED；管理员「吕」。数据全为页面内 JS mock。
 - **部署（Pages legacy 从分支部署，不用 Actions）**：gh-pages 分支=HTML 根目录直出 + .nojekyll（绝不镜像 prototype/ 结构）。流程：推 main → git worktree add gh-pages → 拷 prototype/*.html 到根 → 推送 → sleep~105s → curl 验证线上 → worktree remove。
-- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：18 套 633 项全绿——plan-page(77)/this-round(31)/data-consistency(28)/r9(25)/r10(32)/r11(22)/r13(30)/r14(50)/r15(38)/r16(29)/r18(28)/r19(33)/r20(78)/r22(29)/r23(34)/r24(16)/r25(47·第26轮重写为 spacePlans 口径)/su-dim-validate(6)；另有 smoke-r26.js(32) 冒烟。jsdom runScripts:'dangerously'；window.confirm/alert 打桩；页面顶层 const 不挂 window 用 window.eval 取；eval 里函数调用写 fn().length 非 fn.length；详情页售卖单元行因 rowspan 合并须按"任意 cell 匹配"取行；勾选联动须 dispatchEvent(new window.Event('change',{bubbles:true})) 而非只改 checked；**合并列表行内 rowspan 导致 cells 索引偏移**（无 fn 列的行状态列=cells[1]）；**跨商品切换测试必须先 backToList()**（否则 snapshot 不触发、编辑丢失）；**筛选交互测试的元素引用必须在每次 applyPlanUnitFilter/renderPlanCreatePage 后重新查询**（prune 重渲使旧引用游离）；**空间切换计划弹窗下拉只能取该 fn 空间池内的 option**（给 output 设 sp2 会静默失败——jsdom 不校验但 value 不落库）；sp-eff-start 回填值经 pcpVal 转 datetime-local 格式（'T' 分隔）。
+- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：19 套 661 项全绿——plan-page(77)/this-round(31)/data-consistency(28)/r9(25)/r10(32)/r11(22)/r13(30)/r14(50)/r15(38)/r16(29)/r18(28)/r19(33)/r20(78)/r22(29)/r23(34)/r24(16)/r25(47·r26口径)/r27(28·新增)/su-dim-validate(6)；另有 smoke-r26.js(32) 冒烟。jsdom runScripts:'dangerously'；window.confirm/alert 打桩；页面顶层 const 不挂 window 用 window.eval 取；eval 里函数调用写 fn().length 非 fn.length；详情页售卖单元行因 rowspan 合并须按"任意 cell 匹配"取行；勾选联动须 dispatchEvent(new window.Event('change',{bubbles:true})) 而非只改 checked；**合并列表行内 rowspan 导致 cells 索引偏移**（无 fn 列的行状态列=cells[1]）；**跨商品切换测试必须先 backToList()**（否则 snapshot 不触发、编辑丢失）；**筛选交互测试的元素引用必须在每次 applyPlanUnitFilter/renderPlanCreatePage 后重新查询**（prune 重渲使旧引用游离）；**空间切换计划弹窗下拉只能取该 fn 空间池内的 option**（给 output 设 sp2 会静默失败——jsdom 不校验但 value 不落库）；sp-eff-start 回填值经 pcpVal 转 datetime-local 格式（'T' 分隔）。
 - 语法校验：node -e 提取 `<script>` 用 new Function()。
 - 修页面后测试同步：先跑全套找红，逐套按新口径改断言；口径根本性失效时整套重写（r22/r23 即重写 r20/r15/r22）。
 - 网络偶发 502（代理 CONNECT tunnel failed）：push 失败等 1-2 分钟重试即可恢复；恢复检测=轮询 `curl https://github.com` 状态码 200。
