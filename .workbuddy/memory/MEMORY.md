@@ -1,7 +1,15 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第23轮（main 780f7c7 / gh-pages ee575d2，全套 16 套 563 项测试全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第24轮（main e8cb9fc / gh-pages 9e9a914，全套 17 套 586 项测试全绿）。
+
+## 第24轮（现行口径）：售卖计划售卖单元筛选重设计
+- **fn 筛选=复选组**：`.plan-filter-fn-check`（每 fn 一个）+ `.plan-filter-fn-all` 全选框（onPlanFnFilterToggleAll 联动；子框变化同步全选框 checked）；**全不勾=全部**（非全不显）。旧单选下拉 `#plan-filter-fn` 已删。
+- **空间筛=两态**：`#plan-filter-space` 只有 ''（全部空间）/'__ACTIVE__'（仅生效中）；仅生效中=currentSpaceOfFn(行fn)===行spaceKey。旧逐空间下拉选项已删。
+- **筛选变更→超范围勾选自动取消**：applyPlanUnitFilter 中行不匹配且已勾选→取消勾选+pruned=true→renderPlanCreatePage() 整体重渲（幂等不递归）；恢复筛选不恢复勾选。旧「已勾选跨 fn 累积保留」语义废除。
+- **toggleAllPlanUnits 只作用于当前可见行**（visible.length>0 ? visible : 全部）。
+- **入口重置**：openPlanCreatePage/editPlanRow 均调 planUnitsFilterReset()（置 planUnitsFilterNeedsReset=true，renderPlanUnitsCharge 消费后丢弃旧 fn 复选/空间筛回全量）；修改页勾选回填在 renderPlanCreatePage(true) 之后写 DOM，不受重置影响。
+- renderPlanUnitsCharge 保留 prevFnChecks（fn 复选状态跨重渲）；无 fn 商品不显示 fn 复选组。
 
 ## 核心业务概念
 - **预留 vTPM 资源包**：按「购买量（万 vTPM step）× 购买周期（天）」售卖，生效期=开始日0点 ~ 开始日+周期+1天。超量路由：超量限流（429）或超量路由 Serverless（交付二选一）。折算系数按三维度（输入长度×cache命中率×输出长度）配 YAML 版本；SLO A类违约按累计违约分钟/月分档赔付。
@@ -25,6 +33,7 @@
 - **第16/18轮计划复制**：三状态均显示「复制」（深拷贝→名称-副本→待发布）；不受状态/编辑锁限制；修改/发布/停用仍受锁。
 - **第19/20轮**：fnOfUnit 直接读 u.fn；formatDimMeasure 过滤 function 维度；售卖单元 Tab 15 列（前三列=function rowspan/售卖空间 rowspan/售卖单元，排序 fn→spaceKey→id）；售卖计划 Tab 19 列/计划详情表 17 列；售卖计划区块2 筛选式（plan-filter-fn/space 只隐藏未勾选行，已勾选跨 fn 累积）。
 - **第22轮**：删空间计划全套（spacePlans/modal-spaceplan/effSpaceOfFn 等）；空间身份校验/弹窗多行互斥拦截/currentSpaceOfFn 显式优先回退最早/snapshot 透传均在该轮奠定（第23轮沿用）。
+- **第20轮旧版区块2筛选**（fn 单选下拉+逐空间下拉+已勾选跨 fn 累积）已被第24轮替换。
 - 早期已废弃：第15~18轮商品售卖维度勾选（productDimSpecs/dims 字段）；第20轮 defaultSpaceByFn/空间自定义名称；第21轮 空间计划/空间计划单元/effSpaceOfFn；**第22轮空间 measures 字段/编辑度量弹窗/fn 配置卡/setFnSpace（第23轮删除）**。
 
 ## 页面地图（prototype/）
@@ -48,7 +57,7 @@
 ## 技术约定与部署
 - 每页顶部深色「原型导航」栏；后台紫色主色 #7C3AED；管理员「吕」。数据全为页面内 JS mock。
 - **部署（Pages legacy 从分支部署，不用 Actions）**：gh-pages 分支=HTML 根目录直出 + .nojekyll（绝不镜像 prototype/ 结构）。流程：推 main → git worktree add gh-pages → 拷 prototype/*.html 到根 → 推送 → sleep~105s → curl 验证线上 → worktree remove。
-- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：16 套 563 项全绿——plan-page(77)/this-round(31)/data-consistency(28)/r9(25)/r10(32)/r11(22)/r13(30)/r14(50)/r15(38)/r16(29)/r18(28)/r19(33)/r20(71)/r22(29)/r23(34)/su-dim-validate(6)。jsdom runScripts:'dangerously'；window.confirm/alert 打桩；页面顶层 const 不挂 window 用 window.eval 取；eval 里函数调用写 fn().length 非 fn.length；详情页售卖单元行因 rowspan 合并须按"任意 cell 匹配"取行；勾选联动须 dispatchEvent(new window.Event('change',{bubbles:true})) 而非只改 checked；**合并列表行内 rowspan 导致 cells 索引偏移**（无 fn 列的行状态列=cells[1]）；**跨商品切换测试必须先 backToList()**（否则 snapshot 不触发、编辑丢失）。
+- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：17 套 586 项全绿——plan-page(77)/this-round(31)/data-consistency(28)/r9(25)/r10(32)/r11(22)/r13(30)/r14(50)/r15(38)/r16(29)/r18(28)/r19(33)/r20(78)/r22(29)/r23(34)/r24(16)/su-dim-validate(6)。jsdom runScripts:'dangerously'；window.confirm/alert 打桩；页面顶层 const 不挂 window 用 window.eval 取；eval 里函数调用写 fn().length 非 fn.length；详情页售卖单元行因 rowspan 合并须按"任意 cell 匹配"取行；勾选联动须 dispatchEvent(new window.Event('change',{bubbles:true})) 而非只改 checked；**合并列表行内 rowspan 导致 cells 索引偏移**（无 fn 列的行状态列=cells[1]）；**跨商品切换测试必须先 backToList()**（否则 snapshot 不触发、编辑丢失）；**筛选交互测试的元素引用必须在每次 applyPlanUnitFilter/renderPlanCreatePage 后重新查询**（prune 重渲使旧引用游离）；glm4 无自有计费项——测试保存计划前需先 chargeItems.push 一个 glm4 前缀计费项并选上。
 - 语法校验：node -e 提取 `<script>` 用 new Function()。
 - 修页面后测试同步：先跑全套找红，逐套按新口径改断言；口径根本性失效时整套重写（r22/r23 即重写 r20/r15/r22）。
 - 网络偶发 502（代理 CONNECT tunnel failed）：push 失败等 1-2 分钟重试即可恢复；恢复检测=轮询 `curl https://github.com` 状态码 200。

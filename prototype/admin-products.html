@@ -991,6 +991,30 @@
       const cand = Object.keys(spaces).filter(k => (spaces[k].fn || '') === f).sort((a, b) => (spaces[a].seq || 0) - (spaces[b].seq || 0));
       return cand[0] || '';
     }
+    // fn 生效售卖空间·定时切换（第25轮路径B）：时刻 t 生效期内（published 且 effStart≤t≤effEnd）的最高优先级计划若指定了该 fn 的生效空间 → 用之；
+    // 否则回落 currentSpaceOfFn（手动配置/最早空间）。返回 { key, source, plan }，source='plan'（计划接管）|'manual'（手动配置）
+    function effectiveSpaceAt(fn, t) {
+      const f = fn || '';
+      const at = t || (timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' '));
+      const active = planRows.filter((r, i) =>
+        planRowStatuses[i] === 'published' && r.fnSpaces && r.fnSpaces[f] && spaces[r.fnSpaces[f]] && r.effStart <= at && at <= r.effEnd
+      );
+      if (active.length > 0) {
+        const top = active.slice().sort((a, b) => (b.priority || 0) - (a.priority || 0))[0];
+        return { key: top.fnSpaces[f], source: 'plan', plan: top };
+      }
+      return { key: currentSpaceOfFn(f), source: 'manual', plan: null };
+    }
+    // 最近的计划级空间切换预告（第25轮）：t 之后第一个会把该 fn 生效空间改掉的计划；无则 null
+    function nextSpaceSwitchOfFn(fn, t) {
+      const f = fn || '';
+      const at = t || (timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' '));
+      const cur = effectiveSpaceAt(f, at).key;
+      const cands = planRows
+        .filter((r, i) => planRowStatuses[i] === 'published' && r.fnSpaces && r.fnSpaces[f] && spaces[r.fnSpaces[f]] && r.effStart > at && r.fnSpaces[f] !== cur)
+        .sort((a, b) => (a.effStart < b.effStart ? -1 : a.effStart > b.effStart ? 1 : (b.priority || 0) - (a.priority || 0)));
+      return cands[0] || null;
+    }
     // 售卖计划（按商品 code 存储：units 关联售卖单元；chargeCodes 为每个售卖单元各自关联的计费项）
     // 自洽性约定：①售卖计划按商品隔离（打开某商品详情只挂该商品自己的计划）②计划名/计费项后缀 = 售卖单元购买周期 ③计费项 code 前缀 = 商品 code ④payloadId 取自全量 payload 候选池（商品不关联 playground，前缀仅提示来源模型）⑤折算/SLO 版本来自该商品的 defaultConfigs ⑥刊例价随周期递增（周期越长单价越低）
     const defaultPlans = {
@@ -1008,13 +1032,19 @@
       // pre：待上架商品，仅有待发布计划（未发布 → 无生效期内已发布计划 → 售卖单元禁售）
       'maas-product-vtpm-pre': [
         { name: 'vTPM 预留·预发布·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.3', slo: 'slo-rule-95 v5.1', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
+      ],
+      // glm4（第25轮演示定时切换）：双11 大促计划——已发布、11-11 起生效，fnSpaces 把 input 切到 sp3（未生效空间）；另有一份 11-20 结束的长尾计划保持 output 在 sp4
+      'maas-online-text-glm4': [
+        { name: '双11大促·输入切换售卖空间3', units: ['su-1', 'su-2'], unitStates: { 'su-1': 'on', 'su-2': 'on' }, chargeCodes: { 'su-1': 'maas-online-text-glm4.30d', 'su-2': 'maas-online-text-glm4.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d', 'su-2': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d', 'su-2': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 500, fnSpaces: { input: 'sp3' }, effStart: '2026-11-11 00:00:00', effEnd: '2026-11-20 00:00:00' },
+        { name: 'GLM4·常规售卖', units: ['su-3', 'su-4'], unitStates: { 'su-3': 'on', 'su-4': 'on' }, chargeCodes: { 'su-3': 'maas-online-text-glm4.60d', 'su-4': 'maas-online-text-glm4.60d' }, quotaCodes: { 'su-3': 'quota-vtpm-60d', 'su-4': 'quota-vtpm-60d' }, inventoryCodes: { 'su-3': 'inv-vtpm-60d', 'su-4': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-002', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ]
     };
     // 各商品售卖计划的状态（与 defaultPlans 一一对应）
     const defaultPlanStatuses = {
       'maas-product-vtpm-std': ['published', 'published', 'published'],
       'maas-product-vtpm-pro': ['published', 'pending_publish'],
-      'maas-product-vtpm-pre': ['pending_publish']
+      'maas-product-vtpm-pre': ['pending_publish'],
+      'maas-online-text-glm4': ['published', 'published']
     };
     let planRows = [];
     let planRowStatuses = [];
@@ -1025,7 +1055,9 @@
       { id: 27293, code: 'maas-product-vtpm-std.90d', name: 'vTPM 预留·标准·90天·计费项', price: 0.0075, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:90天', '计费项', '元', '万 vTPM'] },
       { id: 27294, code: 'maas-product-vtpm-pro.30d', name: 'vTPM 预留·专业·30天·计费项', price: 0.0062, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:30天', '计费项', '元', '万 vTPM'] },
       { id: 27295, code: 'maas-product-vtpm-pro.90d', name: 'vTPM 预留·专业·90天·计费项', price: 0.0058, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:90天', '计费项', '元', '万 vTPM'] },
-      { id: 27296, code: 'maas-product-vtpm-pre.30d', name: 'vTPM 预留·预发布·30天·计费项', price: 0.0081, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:30天', '计费项', '元', '万 vTPM'] }
+      { id: 27296, code: 'maas-product-vtpm-pre.30d', name: 'vTPM 预留·预发布·30天·计费项', price: 0.0081, unit: '万 vTPM', currency: '元', tags: ['maas-product-vtpm', '购买周期:30天', '计费项', '元', '万 vTPM'] },
+      { id: 27297, code: 'maas-online-text-glm4.30d', name: 'GLM-4 在线文本·30天·计费项', price: 0.0060, unit: '百万 token', currency: '元', tags: ['maas-online-text-glm4', '购买周期:30天', '计费项', '元', '百万 token'] },
+      { id: 27298, code: 'maas-online-text-glm4.60d', name: 'GLM-4 在线文本·60天·计费项', price: 0.0055, unit: '百万 token', currency: '元', tags: ['maas-online-text-glm4', '购买周期:60天', '计费项', '元', '百万 token'] }
     ];
     let chargeItems = JSON.parse(JSON.stringify(defaultChargeItems));
     // 配额项池（mock 占位；售卖计划中配额项与售卖单元一一对应）
@@ -1657,14 +1689,14 @@
     function publishPlanRow(idx) {
       if (!guardEdit()) return;
       planRowStatuses[idx] = 'published';
-      renderPlan(); renderSaleUnits(); refreshProductBadge();
+      renderPlan(); renderSaleUnits(); refreshProductBadge(); renderSpaceTab();
       // 详情页打开时同步刷新
       if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
     }
     function stopPlanRow(idx) {
       if (!guardEdit()) return;
       planRowStatuses[idx] = 'stopped';
-      renderPlan(); renderSaleUnits(); refreshProductBadge();
+      renderPlan(); renderSaleUnits(); refreshProductBadge(); renderSpaceTab();
       if (currentPlanDetailIdx === idx) renderPlanDetail(idx);
     }
     // 复制售卖计划（第16轮）：深拷贝生成新的待发布计划；名称加「-副本」后缀（重名自动加序号）；三种状态均可复制
@@ -1699,9 +1731,17 @@
         tbody.innerHTML = '<tr><td colspan="6" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖空间，请先「批量创建售卖空间」</td></tr>';
         return;
       }
-      // 每个 fn 的生效空间（currentSpaceOfFn：显式配置优先 → 回退最早空间）
+      // 每个 fn 的生效空间（第25轮：effectiveSpaceAt 定时切换——生效期内的计划 fnSpaces 优先，回落手动配置/最早空间）
       const effMap = {};
-      Array.from(new Set(keys.map(k => sps[k].fn || ''))).forEach(f => { effMap[f] = currentSpaceOfFn(f); });
+      const effInfo = {};
+      const switchAhead = {};
+      Array.from(new Set(keys.map(k => sps[k].fn || ''))).forEach(f => {
+        const e = effectiveSpaceAt(f);
+        effMap[f] = e.key;
+        effInfo[f] = e;
+        const nx = nextSpaceSwitchOfFn(f);
+        if (nx) switchAhead[f] = nx;
+      });
       let prevFn = null;
       tbody.innerHTML = keys.map(k => {
         const sp = sps[k];
@@ -1714,19 +1754,29 @@
         }
         const isEff = effMap[fn] === k;
         const unitCnt = (saleUnits || []).filter(u => u.spaceKey === k).length;
+        // 状态列附加信息（第25轮）：计划接管标注 + 未来定时切换预告
+        let effExtra = '';
+        if (isEff && effInfo[fn] && effInfo[fn].source === 'plan') {
+          effExtra = `<div class="text-[10px] text-slate-400 mt-0.5" title="由生效期内最高优先级售卖计划的「生效售卖空间」指定">⏱ 计划「${effInfo[fn].plan.name}」指定（${effInfo[fn].plan.effStart.slice(5, 10)} 起）</div>`;
+        }
+        if (!isEff && switchAhead[fn] && switchAhead[fn].fnSpaces[fn] === k) {
+          effExtra = `<div class="text-[10px] text-amber-600 mt-0.5" title="该空间的生效由售卖计划定时接管">⏱ ${switchAhead[fn].effStart.slice(0, 10)} 起生效（计划「${switchAhead[fn].name}」）</div>`;
+        }
         return `
         <tr class="hover:bg-slate-50">
           ${showFn ? `<td rowspan="${fnSpan}" class="px-3 py-2 text-xs font-medium align-top border-r border-slate-100">${fn || '—'}</td>` : ''}
           <td class="px-3 py-2 text-xs font-medium">${sp.name}<div class="text-[10px] text-slate-400 font-mono">${k}</div></td>
-          <td class="px-3 py-2"><span class="badge ${isEff ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}">${isEff ? '生效中' : '未生效'}</span></td>
+          <td class="px-3 py-2"><span class="badge ${isEff ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}">${isEff ? '生效中' : '未生效'}</span>${effExtra}</td>
           <td class="px-3 py-2 text-xs">${(sp.dims || []).join(' + ') || '—'}</td>
           <td class="px-3 py-2 text-xs text-right">${unitCnt}</td>
           <td class="px-3 py-2 text-xs whitespace-nowrap">
             ${isEff
               ? '<span class="text-slate-300 text-xs">—</span>'
-              : (canEdit()
-                ? `<button type="button" onclick="setSpaceActive('${k}')" class="text-violet-600 hover:underline">设为生效</button>`
-                : '<span class="text-slate-300 text-xs" title="需先「发起变更」获得编辑锁">🔒 设为生效</span>')}
+              : (effInfo[fn] && effInfo[fn].source === 'plan'
+                ? '<span class="text-slate-300 text-xs" title="该 fn 的生效空间正被生效期内的售卖计划接管，手动设置仅对无计划覆盖的时段生效">⏱ 计划接管中</span>'
+                : (canEdit()
+                  ? `<button type="button" onclick="setSpaceActive('${k}')" class="text-violet-600 hover:underline">设为生效</button>`
+                  : '<span class="text-slate-300 text-xs" title="需先「发起变更」获得编辑锁">🔒 设为生效</span>'))}
           </td>
         </tr>`;
       }).join('');
@@ -1867,7 +1917,10 @@
       const field = (label, val) => `<div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">${label}</p><p class="text-slate-800 font-medium">${val ?? '—'}</p></div>`;
       document.getElementById('plan-detail-fields').innerHTML = [
         field('名称', r.name),
-        field('优先级', r.priority)
+        field('优先级', r.priority),
+        field('生效售卖空间', r.fnSpaces && Object.keys(r.fnSpaces).length > 0
+          ? Object.entries(r.fnSpaces).map(([f, k]) => (f || '—') + ' → ' + (spaces[k] ? spaces[k].name : k)).join('；')
+          : '不指定（跟随现状）')
       ].join('');
       // 计划单元区（含计费项/配额项/库存项，均与售卖单元一一对应；显示上架/下架）
       const tbody = document.getElementById('plan-detail-tbody');
@@ -1947,7 +2000,7 @@
     // 弹窗内切换 function：默认选中该 fn 的生效售卖空间
     function onSuFnChange() {
       suFnSel = document.getElementById('su-fn-select').value;
-      suSpaceSel = currentSpaceOfFn(suFnSel);
+      suSpaceSel = effectiveSpaceAt(suFnSel).key || currentSpaceOfFn(suFnSel); // 第25轮：计划定时切换优先，回落手动配置
       renderSuConfirmModalBody();
     }
     // 弹窗内切换空间
@@ -2117,7 +2170,8 @@
     // 区块2：生效售卖单元（第24轮：fn 复选组多选/全选 + 空间筛「全部/仅生效中」；筛选改变→超出范围的勾选自动取消）
     // 勾选/切状态时重渲整页区块（保留勾选状态、上架/下架选择、筛选状态）
     let planUnitsFilterNeedsReset = false; // 打开创建/修改页时置 true：重渲时丢弃旧筛选回全量
-    function planUnitsFilterReset() { planUnitsFilterNeedsReset = true; }
+    function planUnitsFilterReset() { planUnitsFilterNeedsReset = true; editingFnSpaces = null; } // 进入新页面同时丢弃上一份计划的 fnSpaces 回填
+    let editingFnSpaces = null; // 修改计划时回填的 fnSpaces（null=创建/未指定）
     function renderPlanUnitsCharge() {
       const box = document.getElementById('plan-units-charge-container');
       if (!box) return;
@@ -2137,6 +2191,30 @@
       // 筛选行（第24轮）：function 多选（复选组+全选） → 售卖空间（全部 / 仅生效中）；筛选变更即收窄勾选范围（超出新的筛选范围的已勾选项自动取消）
       const fns = Array.from(new Set(saleUnits.map(u => fnOfUnit(u) || '')));
       const sps = productSpaces();
+      // 本计划生效售卖空间配置区（第25轮定时切换）：每个 fn 一个空间下拉；默认=当前生效空间；「跟随现状/手动」=不指定
+      const prevFnSpaceSel = {};
+      document.querySelectorAll('#plan-units-charge-container .plan-fnspace-select').forEach(s => { prevFnSpaceSel[s.dataset.fn] = s.value; });
+      const hasFnSpaceSel = box.querySelectorAll('.plan-fnspace-select').length > 0;
+      const fnsReal = fns.filter(f => f);
+      const fnSpacesRow = fnsReal.length === 0 ? '' : `
+        <div class="p-2 mb-2 bg-violet-50/40 border border-violet-200 rounded-md">
+          <p class="text-xs text-slate-600 mb-1.5"><i class="fa-regular fa-clock mr-1 text-violet-500"></i>本计划各 function 生效售卖空间（第25轮定时切换：计划发布且处于生效期内时，此处指定的空间自动生效并覆盖手动配置；未指定则不改变）</p>
+          <div class="flex flex-wrap items-center gap-2">
+            ${fnsReal.map(f => {
+              const spKeys = Object.keys(sps).filter(k => (sps[k].fn || '') === f);
+              const cur = effectiveSpaceAt(f).key;
+              const prev = hasFnSpaceSel ? (prevFnSpaceSel[f] !== undefined ? prevFnSpaceSel[f] : '') : (editingFnSpaces && editingFnSpaces[f] !== undefined ? editingFnSpaces[f] : '');
+              return `<span class="flex items-center gap-1 text-xs">
+                <span class="font-mono text-slate-600">${f}</span>
+                <select class="plan-fnspace-select form-input text-xs px-2 py-1 w-40" data-fn="${f}">
+                  <option value="">不指定（跟随现状）</option>
+                  ${spKeys.map(k => `<option value="${k}" ${prev === k ? 'selected' : ''}>${sps[k].name}（${k}）</option>`).join('')}
+                </select>
+                ${prev && prev === cur ? '<span class="text-[10px] text-slate-400">=当前生效</span>' : ''}
+              </span>`;
+            }).join('')}
+          </div>
+        </div>`;
       const filterRow = `
         <div class="p-2 mb-2 bg-white border border-slate-200 rounded-md">
           <div class="flex flex-wrap items-center gap-2">
@@ -2157,11 +2235,14 @@
             <span class="text-xs text-slate-400 whitespace-nowrap">（勾选范围始终=当前筛选结果；改变筛选会自动取消超出范围的已勾选项）</span>
           </div>
         </div>`;
-      box.innerHTML = filterRow + saleUnits.map(u => {
+      box.innerHTML = fnSpacesRow + filterRow + saleUnits.map(u => {
         const checked = hasPrev ? (prevStates[u.id] !== undefined ? prevStates[u.id] : false) : true;
         const onoff = prevOnOff[u.id] || 'on';
         const fnText = fnOfUnit(u) || '—';
         const spName = spaces[u.spaceKey] ? spaces[u.spaceKey].name : '—';
+        // 空间不匹配提示（第25轮）：单元所在空间 ≠ 当前 fn 生效空间时，在单元行上标注
+        const effSp = effectiveSpaceAt(fnOfUnit(u) || '').key;
+        const spaceMismatch = effSp && u.spaceKey && u.spaceKey !== effSp;
         return `
         <div class="plan-unit-row p-2 bg-slate-50 rounded-md ${checked ? '' : 'opacity-60'}" data-fn="${fnOfUnit(u) || ''}" data-space="${u.spaceKey || ''}">
           <div class="flex flex-wrap items-center gap-2">
@@ -2177,7 +2258,7 @@
           </div>
           <div class="mt-1.5 pt-1.5 border-t border-slate-200/70 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
             <span><span class="text-slate-400">Function：</span><span class="text-slate-600">${fnText}</span></span>
-            <span><span class="text-slate-400">售卖空间：</span><span class="text-slate-600">${spName}</span></span>
+            <span><span class="text-slate-400">售卖空间：</span><span class="text-slate-600">${spName}</span>${spaceMismatch ? '<span class="text-amber-600 text-[10px] ml-1" title="该单元所在空间不是其 function 当前的生效售卖空间">⚠ 非生效空间</span>' : ''}</span>
             <span class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
               <span class="text-slate-400">维度组合：</span>${formatDimMeasure(u)}
             </span>
@@ -2212,7 +2293,7 @@
       let spOk = true;
       if (spSel === '__ACTIVE__') {
         const fn = row.dataset.fn || '';
-        spOk = currentSpaceOfFn(fn) === (row.dataset.space || '');
+        spOk = effectiveSpaceAt(fn).key === (row.dataset.space || ''); // 第25轮：计划定时切换优先
       }
       return fnOk && spOk;
     }
@@ -2481,11 +2562,29 @@
         });
       }
       const qunified = (planDraft.qty.unified && typeof planDraft.qty.unified === 'object') ? planDraft.qty.unified : { min: '100', max: '10000', step: '100' };
+      // 收集本计划 fnSpaces（第25轮）：fn → 生效售卖空间；空值剔除
+      const fnSpaces = {};
+      document.querySelectorAll('.plan-fnspace-select').forEach(s => {
+        if (s.value) fnSpaces[s.dataset.fn] = s.value;
+      });
+      // 校验（第25轮）：已勾选售卖单元所在空间 ≠ 计划为其 fn 指定的生效空间 → 非阻断提示
+      const mismatchUnits = allUnits.map(uid => saleUnits.find(u => u.id === uid)).filter(u => {
+        if (!u) return false;
+        const f = fnOfUnit(u) || '';
+        return fnSpaces[f] && u.spaceKey && u.spaceKey !== fnSpaces[f];
+      });
+      if (mismatchUnits.length > 0) {
+        const okGo = confirm('以下已勾选售卖单元所在售卖空间 ≠ 本计划为其 function 指定的生效售卖空间：\n' +
+          mismatchUnits.map(u => u.id + '（' + (spaces[u.spaceKey] ? spaces[u.spaceKey].name : u.spaceKey) + '）').join('、') +
+          '\n计划生效后这些单元将不在生效空间下，确定保存吗？');
+        if (!okGo) return;
+      }
       const row = {
         name, units: allUnits, unitStates, chargeCodes, quotaCodes, inventoryCodes,
         modes, factor, slo, factors, slos, payloadId, payloads,
         minQty: qunified.min || '100', maxQty: qunified.max || '10000', stepQty: qunified.step || '100',
         qtys,
+        fnSpaces, // 第25轮：本计划各 fn 生效售卖空间（空对象=未指定任何切换）
         priority: parseInt(document.getElementById('plan-priority').value) || 0,
         effStart: pcpVal(document.getElementById('plan-eff-start').value, '2026-11-01T00:00:00'),
         effEnd: pcpVal(document.getElementById('plan-eff-end').value, '2027-11-01T00:00:00')
@@ -2510,6 +2609,7 @@
       if (!guardEdit()) return;
       editingPlanIdx = idx;
       const r = planRows[idx];
+      editingFnSpaces = r.fnSpaces ? JSON.parse(JSON.stringify(r.fnSpaces)) : null; // 第25轮：fnSpaces 回填
       closePlanDetail();
       planUnitsFilterReset(); // 第24轮：进入修改页重置筛选（回填勾选不受影响——重置只筛选不取消勾选的逻辑由 renderPlanUnitsCharge 的默认全过完成）
       document.getElementById('plan-create-page-title').textContent = '修改售卖计划：' + (r.name || '—');

@@ -17,8 +17,8 @@ const evalInPage = (expr) => window.eval(expr);
 section('1. 列表结构');
 const lrows = Array.from(document.querySelectorAll('#listed-tbody tr'));
 const prows = Array.from(document.querySelectorAll('#pending-tbody tr'));
-ok(lrows.length === 4, '已上架 Tab 平铺 4 行（std 3 在售 + pro su-1 在售）: ' + lrows.length);
-ok(prows.length === 10, '未上架 Tab 平铺 10 行（pre 3 + pro su-2/3/4 禁售 + glm4 全部 4 禁售）: ' + prows.length);
+ok(lrows.length === 6, '已上架 Tab 平铺 6 行（std 3 在售 + pro su-1 在售 + glm4 su-3/su-4 在售·第25轮常规售卖计划）: ' + lrows.length);
+ok(prows.length === 8, '未上架 Tab 平铺 8 行（pre 3 + pro su-2/3/4 禁售 + glm4 su-1/su-2 禁售·双11计划未到期）: ' + prows.length);
 const lhead = Array.from(document.querySelectorAll('#top-tab-listed thead th')).map(th => th.textContent.trim());
 ok(lhead.length === 14, '已上架 Tab 表头 14 列: ' + lhead.length);
 ok(lhead[0] === '售卖单元' && lhead[1] === '状态' && lhead[2] === 'SKU', '前3列=售卖单元/状态/SKU（SKU 第三列）');
@@ -78,8 +78,8 @@ window.eval('planRowStatuses[0] = "published"; renderSaleUnits(); refreshProduct
 window.backToList();
 const lrows2 = Array.from(document.querySelectorAll('#listed-tbody tr'));
 const prows2 = Array.from(document.querySelectorAll('#pending-tbody tr'));
-ok(lrows2.length === 5, 'pre 计划发布后 su-1 转在售 → 已上架 Tab 5 行: ' + lrows2.length);
-ok(prows2.length === 9, '未上架 Tab 剩 9 行（pre su-2/su-3 仍禁售 + glm4 4 禁售）：' + prows2.length);
+ok(lrows2.length === 7, 'pre 计划发布后 su-1 转在售 → 已上架 Tab 7 行: ' + lrows2.length);
+ok(prows2.length === 7, '未上架 Tab 剩 7 行（pre su-2/su-3 仍禁售 + glm4 su-1/su-2 禁售）：' + prows2.length);
 
 // ===== 7. 无售卖单元的商品 → 占位行（未上架 Tab） =====
 section('7. 空态占位');
