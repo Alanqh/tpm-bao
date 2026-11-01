@@ -820,7 +820,7 @@
         <button type="button" onclick="closeModal('spaceplan')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 grid grid-cols-1 gap-4">
-        <p class="text-xs text-slate-400">发布且处于生效期内（同时段优先级最高）的空间切换计划，将接管对应 function 的生效售卖空间——覆盖列表上方的手动「设为生效」；计划停用或到期后自动回落手动配置。至少指定一个 function 的目标空间。</p>
+        <p class="text-xs text-slate-400">发布且处于生效期内（同时段优先级最高）的空间计划，将接管对应 function 的生效售卖空间——覆盖该 function 的「默认」空间；计划停用或到期后自动回落默认空间。至少指定一个 function 的目标空间。</p>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="form-label">计划名称</label>
@@ -1878,7 +1878,7 @@
         </tr>`;
       }).join('');
     }
-    // 设为默认（第23轮设为生效→第27轮改为设为默认）：把该空间设为其所属 fn 的默认生效空间（无空间计划接管时生效；需持有编辑锁）
+    // 设为默认（第23轮「设为生效」→第27轮改为「设为默认」）：把该空间设为其所属 fn 的默认生效空间（无空间计划接管时生效；需持有编辑锁）
     function setSpaceActive(spk) {
       if (!guardEdit()) return;
       const sp = spaces[spk];
