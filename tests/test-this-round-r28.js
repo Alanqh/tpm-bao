@@ -86,7 +86,7 @@ w.eval('confirmSpacePlan(); renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
 ok(rows.length === 7, 'P5 双 fn 后 7 行（5 单行计划 + P5 双行），实得 ' + rows.length);
 const p5First = rows.find(r => r.textContent.includes('pu-sp-6-1')); // P5 为第6条计划（planIdx=5）
-ok(p5First && p5First.cells.length === 10 && p5First.innerHTML.includes('rowspan="2"'), 'P5 首行 10 列 rowspan=2');
+ok(p5First && p5First.cells.length === 9 && p5First.innerHTML.includes('rowspan="2"'), 'P5 首行 9 列 rowspan=2（第29轮删操作列）');
 const p5Second = rows.find(r => r.textContent.includes('pu-sp-6-2'));
 ok(p5Second && p5Second.cells.length === 5, 'P5 次行 5 列');
 // P5=pending 12-15，排在 pending 组（P2 12-20 之后）：

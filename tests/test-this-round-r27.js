@@ -29,7 +29,7 @@ ok(txt.includes('已发布'), '双11状态徽标');
 ok((txt.match(/未指定/g) || []).length === 0, '无「未指定」行（每个单元必有所属计划，第28轮口径）');
 ok(txt.includes('sp3'), '目标空间 sp3 列出');
 const head = rows[0];
-ok(head.cells.length === 10, '计前行 10 列（计划单元/状态/所属空间计划/售卖空间/Function/维度/单元数/优先级/起止/操作）');
+ok(head.cells.length === 9, '计前行 9 列（空间计划单元/状态/所属空间计划/售卖空间/Function/维度/单元数/优先级/起止——第29轮删操作列）');
 ok(head.cells[4].textContent.trim() === 'input', 'Function 列=input');
 ok(head.cells[3].textContent.includes('售卖空间3'), '售卖空间列=空间3');
 
@@ -74,15 +74,15 @@ rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr')).filter(r => r.query
 ok(rows.length === 4, '双fn计划加入后 4 行（双11 1 行 + 新计划 3 条目），实得 ' + rows.length);
 // 第28轮排序：pending 组内按 fn 字典序（cache<input），pu-sp-2-3（cache/sp5）为该计划首行（10列+rowspan=3），pu-sp-2-1/2 为后续行（5列）
 const first = rows.find(r => r.textContent.includes('pu-sp-2-3'));
-ok(first && first.cells.length === 10 && first.innerHTML.includes('rowspan="3"'), '计划行首条（cache）10 列 + rowspan=3');
+ok(first && first.cells.length === 9 && first.innerHTML.includes('rowspan="3"'), '计划行首条（cache）9 列 + rowspan=3');
 const sub = rows.filter(r => /pu-sp-2-[12]/.test(r.textContent));
 ok(sub.length === 2 && sub.every(r => r.cells.length === 5), '后续行 5 列（计划单元/售卖空间/Function/维度/单元数）');
 ok((d.getElementById('spaceplan-tbody').textContent.match(/未指定/g) || []).length === 0, '全程无未指定行');
 
-// ===== 7. 新 Tab CRUD/发布按钮就位 =====
+// ===== 7. 新 Tab 顶部按钮 + 操作迁详情页（第29轮）=====
 ok(d.getElementById('spaceplan-new-btn') && d.getElementById('spaceplan-new-btn').textContent.includes('创建空间计划'), '「创建空间计划」按钮在空间计划 Tab 顶部');
 const firstRow2 = rows.find(r => r.textContent.includes('pu-sp-2-3')); // 该计划首行（携带计划级 td）
-ok(firstRow2.innerHTML.includes('publishSpacePlan(1)') && firstRow2.innerHTML.includes('editSpacePlan(1)'), '计划级操作按钮（修改/发布）——第28轮起排序后新计划（pending）在双11（published）之后，仍可定位');
+ok(firstRow2.innerHTML.includes('openSpacePlanDetail(1)'), '所属空间计划=进详情页链接（行内操作已删）');
 
 // ===== 8. vtpm 商品：无 fn 无计划 → 仅 sp1 未指定行 =====
 w.eval('backToList(); openDetailByCode("maas-product-vtpm-std")');
