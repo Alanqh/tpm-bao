@@ -1616,7 +1616,7 @@
     // 置灰/恢复所有变更类控件（创建售卖计划/创建售卖单元 + 发布/停用/修改 + 删除售卖单元）
     function refreshEditControls() {
       const editable = canEdit();
-      // Tab 内顶部按钮：创建售卖单元（售卖单元Tab）、创建售卖计划（售卖计划Tab）、批量创建售卖空间（售卖空间Tab）、创建空间计划（空间计划Tab）
+      // Tab 内顶部按钮：创建售卖单元（售卖单元Tab）、创建售卖计划（售卖计划Tab）、创建空间计划（空间计划Tab，第31轮：空间由空间计划创建）
       ['su-create-btn', 'plan-create-btn', 'spaceplan-new-btn'].forEach(id => {
         const btn = document.getElementById(id);
         if (!btn) return;
@@ -1707,7 +1707,7 @@
 
     // ===== 新增商品 → 创建后直接打开详情页（待上架） =====
     // 弹窗：先选商品类型 → 选模型（仅用于自动生成默认 code/名称，商品不与模型/Playground 建立关联）→ code/名称可手改
-    // 第22轮：新增商品不再勾选售卖维度——创建后先在「售卖空间」Tab 批量创建售卖空间（维度+度量）
+    // 第22轮：新增商品不再勾选售卖维度——第31轮：创建后先在「空间计划」Tab 创建空间计划（勾选 fn+维度，为每个 fn 新建售卖空间）
     function openProductModal() {
       document.getElementById('inp-type').value = 'maas-product-vtpm';
       document.getElementById('inp-playground').innerHTML = modelPlaygrounds.map(m => `<option value="${m.playground}">${m.model}（${m.playground}）</option>`).join('');
@@ -2391,7 +2391,7 @@
       const spKeys = Object.keys(sps);
       if (spKeys.length === 0) {
         spaceLine.classList.add('hidden');
-        box.innerHTML = '<p class="text-xs text-amber-600 py-4 text-center">暂无可用售卖空间，请先在「售卖空间」Tab 批量创建售卖空间</p>';
+        box.innerHTML = '<p class="text-xs text-amber-600 py-4 text-center">暂无可用售卖空间，请先在「空间计划」Tab 创建空间计划（为该 function 新建售卖空间）</p>';
         return;
       }
       if (!suSpaceSel || !sps[suSpaceSel]) suSpaceSel = (currentSpaceOfFn(fnKey) || spKeys[0]);
