@@ -43,52 +43,44 @@ ok(d.querySelectorAll('#su-confirm-body input.su-leaf').length === 6, 'SU 候选
 w.eval('document.getElementById("su-space-select").value = "sp3"; onSuSpaceChange()');
 ok(d.querySelectorAll('#su-confirm-body input.su-leaf').length === 3, 'sp3 候选=全量单维度 3');
 w.eval('closeModal("su-confirm")');
-// 7. 批量创建：与已有 fn 空间维度集合相同 → 拦截
-w.eval('openSpaceBulkModal()');
-const row0 = d.querySelector('.space-row');
-row0.querySelector('.space-row-fn').value = 'input';
+// 7. 空间计划创建（第31轮）：与已有 fn 空间维度集合相同 → 不再拦截（总是新建）
+w.eval('openSpacePlanModal()');
+let box7 = d.querySelector('.sp-fn-check[data-fn="input"]');
+box7.checked = true;
+box7.dispatchEvent(new w.Event('change', { bubbles: true }));
 ['输入token区间', '输出token区间'].forEach(dm => {
-  const c = row0.querySelector('.space-dim-check[value="' + dm + '"]');
-  c.checked = true;
-  c.dispatchEvent(new w.Event('change', { bubbles: true }));
+  d.querySelector('.sp-dim-check[data-fn="input"][value="' + dm + '"]').checked = true;
 });
-w.eval('confirmSpaceBulk()');
-ok(alerts[alerts.length - 1].includes('不可重复创建'), '重复维度集合被拦截: ' + (alerts[alerts.length - 1] || '').slice(0, 24));
-// 8. 弹窗内多行互相重复 → 拦截（两行同为 cache+两 token 维度，均不与 sp5 重复）
-w.eval('openSpaceBulkModal()');
-w.eval('addSpaceRow()');
-const rows8 = Array.from(d.querySelectorAll('.space-row'));
-rows8.forEach(r => {
-  r.querySelector('.space-row-fn').value = 'cache';
-  ['输入token区间', '输出token区间'].forEach(dm => {
-    r.querySelector('.space-dim-check[value="' + dm + '"]').checked = true;
-  });
+d.getElementById('sp-name').value = 'r31 计划甲';
+w.eval('confirmSpacePlan()');
+ok(alerts[alerts.length - 1].includes('已新建售卖空间'), '重复维度集合不拦截（总是新建口径）: ' + (alerts[alerts.length - 1] || '').slice(0, 24));
+ok(w.eval('spaceSeq') === 6, '新建 sp6（input 两 token 维度）');
+// 8. 一份计划多 fn：cache+两 token 维度（跨 fn 可同维度集合）→ sp7
+w.eval('openSpacePlanModal()');
+const box8 = d.querySelector('.sp-fn-check[data-fn="cache"]');
+box8.checked = true;
+box8.dispatchEvent(new w.Event('change', { bubbles: true }));
+['输入token区间', '输出token区间'].forEach(dm => {
+  d.querySelector('.sp-dim-check[data-fn="cache"][value="' + dm + '"]').checked = true;
 });
-w.eval('confirmSpaceBulk()');
-ok(alerts[alerts.length - 1].includes('多行 function 与维度集合相同'), '弹窗内两行互相重复拦截: ' + (alerts[alerts.length - 1] || '').slice(0, 20));
-ok(w.eval('spaceSeq') === 5, '拦截未创建空间');
-// 9. 跨 fn 可同维度集合：cache+两 token 维度（sp5=cache 仅输入token维度，不重复）→ 成功创建 sp6
-const rowA = d.querySelectorAll('.space-row')[0];
-const rowB = d.querySelectorAll('.space-row')[1];
-rowA.querySelector('.space-row-fn').value = 'cache';
-rowB.remove(); // 只留一行 cache+两维度
-w.eval('confirmSpaceBulk()');
-ok(alerts[alerts.length - 1].includes('已创建 1 个售卖空间'), 'cache+两 token 维度创建成功: ' + (alerts[alerts.length - 1] || '').slice(0, 18));
-ok(w.eval('spaceSeq') === 6, 'spaceSeq=6');
-ok(w.eval('spaces["sp6"].fn') === 'cache' && w.eval('spaces["sp6"].dims.length') === 2, 'sp6 fn=cache 两维度');
-ok(w.eval('spaces["sp6"].measures') === undefined, '新空间无 measures（只管维度）');
-// 10. 多行成功创建：sp7（output+购买量区间）+ sp8（input+购买周期）不同 fn 不同维度集合
-w.eval('openSpaceBulkModal()');
-w.eval('addSpaceRow()');
-const r10a = d.querySelectorAll('.space-row')[0];
-const r10b = d.querySelectorAll('.space-row')[1];
-r10a.querySelector('.space-row-fn').value = 'output';
-r10a.querySelector('.space-dim-check[value="购买量区间"]').checked = true;
-r10b.querySelector('.space-row-fn').value = 'input';
-r10b.querySelector('.space-dim-check[value="购买周期"]').checked = true;
-w.eval('confirmSpaceBulk()');
-ok(alerts[alerts.length - 1].includes('已创建 2 个售卖空间'), '两行一次性创建 2 个空间: ' + (alerts[alerts.length - 1] || '').slice(0, 18));
-ok(w.eval('spaces["sp7"].name') === '售卖空间7' && w.eval('spaces["sp8"].name') === '售卖空间8', '名称连续自增 sp7/sp8');
+d.getElementById('sp-name').value = 'r31 计划乙';
+w.eval('confirmSpacePlan()');
+ok(w.eval('spaces["sp7"].fn') === 'cache' && w.eval('spaces["sp7"].dims.length') === 2, 'sp7 fn=cache 两维度（跨 fn 同集合允许）');
+ok(w.eval('spaces["sp7"].measures') === undefined, '新空间无 measures（只管维度）');
+// 8b. 多 fn 单计划：output+购买量区间、input+购买周期 → sp8/sp9 一次创建
+w.eval('openSpacePlanModal()');
+const boxOut9 = d.querySelector('.sp-fn-check[data-fn="output"]');
+boxOut9.checked = true;
+boxOut9.dispatchEvent(new w.Event('change', { bubbles: true }));
+d.querySelector('.sp-dim-check[data-fn="output"][value="购买量区间"]').checked = true;
+const boxIn9 = d.querySelector('.sp-fn-check[data-fn="input"]');
+boxIn9.checked = true;
+boxIn9.dispatchEvent(new w.Event('change', { bubbles: true }));
+d.querySelector('.sp-dim-check[data-fn="input"][value="购买周期"]').checked = true;
+d.getElementById('sp-name').value = 'r31 计划丙';
+w.eval('confirmSpacePlan()');
+ok(alerts[alerts.length - 1].includes('已新建售卖空间：售卖空间8'), '一份计划两 fn 各建一空间: ' + (alerts[alerts.length - 1] || '').slice(0, 30));
+ok(w.eval('spaces["sp8"].name') === '售卖空间8' && w.eval('spaces["sp9"].name') === '售卖空间9', '名称连续自增 sp8/sp9');
 // 11. 返回列表（快照 glm4 编辑结果）→ vtpm 商品：无 fn 单行生效
 w.eval('backToList()');
 w.eval('openDetailByCode("maas-product-vtpm-std")');
@@ -102,10 +94,10 @@ w.eval('setSpaceActive("sp3")');
 w.eval('backToList()');
 w.eval('openDetailByCode("maas-online-text-glm4")');
 ok(w.eval('currentSpaceOfFn("input")') === 'sp3', '快照恢复 input→sp3（设为默认持久）');
-// 13. 快照还含新建空间：sp6（cache 第二空间）在重进后存在且未生效
-ok(w.eval('spaces["sp6"].fn') === 'cache', '快照恢复新建空间 sp6');
+// 13. 快照还含新建空间：sp7（cache 第二空间，r31 计划乙）在重进后存在且未生效
+ok(w.eval('spaces["sp7"].fn') === 'cache', '快照恢复新建空间 sp7');
 const rows13 = Array.from(d.querySelectorAll('#space-tbody tr'));
-const sp6Row = rows13.find(r => r.textContent.includes('sp6'));
-ok(!!sp6Row && sp6Row.textContent.includes('未生效'), 'sp6 重进后未生效（sp5 仍为 cache 生效）');
+const sp7Row = rows13.find(r => r.textContent.includes('sp7'));
+ok(!!sp7Row && sp7Row.textContent.includes('未生效'), 'sp7 重进后未生效（sp5 仍为 cache 生效）');
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

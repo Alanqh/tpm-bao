@@ -48,27 +48,32 @@ ok(vRows.length === 1, 'vtpm 单行（sp1）');
 ok(vRows[0].cells[0].textContent.trim() === '—' || vRows[0].cells[0].textContent.includes('—'), '无 fn 显示 —');
 ok(vRows[0].textContent.includes('生效中'), 'sp1 生效中');
 ok(vRows[0].cells[vRows[0].cells.length-1].textContent.includes('🔒') || vRows[0].cells[vRows[0].cells.length-1].textContent.trim() === '—', '浏览态无操作（唯一空间）');
-// 8. 创建新空间后未生效 + 可设为生效
+// 8. 空间计划创建新空间后未生效 + 可设为生效（第31轮：fn 勾选+维度勾选）
 w.eval('startEdit()');
-w.eval('openSpaceBulkModal()');
-const row0 = d.querySelector('.space-row');
-row0.querySelector('.space-row-fn').value = '';
-['购买量区间'].forEach(dim => { row0.querySelector('.space-dim-check[value="' + dim + '"]').checked = true; });
-w.eval('confirmSpaceBulk()');
-ok(w.eval('spaceSeq') === 6, 'sp6 创建成功');
+w.eval('openSpacePlanModal()');
+const box8 = d.querySelector('.sp-fn-check[data-fn=""]');
+box8.checked = true;
+box8.dispatchEvent(new w.Event('change', { bubbles: true }));
+d.querySelector('.sp-dim-check[data-fn=""][value="购买量区间"]').checked = true;
+d.getElementById('sp-name').value = 'r31 vtpm 计划A';
+w.eval('confirmSpacePlan()');
+ok(w.eval('spaceSeq') === 6, 'sp6 创建成功（计划保存即落地空间）');
 ok(w.eval('spaces["sp6"].dims.length') === 1, 'sp6 单维度');
 ok(w.eval('spaces["sp6"].measures') === undefined, '空间无 measures 字段（只管维度）');
 const rows3 = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows3.length === 2, 'vtpm 2 行（sp1 生效 + sp6 未生效）');
 ok(rows3[1].textContent.includes('未生效'), '新空间 sp6 未生效');
 ok(rows3[1].textContent.includes('设为默认'), 'sp6 有设为默认按钮');
-// 9. 重复维度集合拦截（fn='' + 两维度=sp1 重复）
-w.eval('openSpaceBulkModal()');
-const rowD = d.querySelector('.space-row');
-['购买量区间', '购买周期'].forEach(dim => { rowD.querySelector('.space-dim-check[value="' + dim + '"]').checked = true; });
-w.eval('confirmSpaceBulk()');
-ok(alerts[alerts.length-1].includes('不可重复创建'), '重复拦截: ' + alerts[alerts.length-1].slice(0,20));
-w.eval('closeModal("space-edit")');
+// 9. 重复维度集合不再拦截（第31轮口径：总是新建 sp7）
+w.eval('openSpacePlanModal()');
+const box9 = d.querySelector('.sp-fn-check[data-fn=""]');
+box9.checked = true;
+box9.dispatchEvent(new w.Event('change', { bubbles: true }));
+['购买量区间', '购买周期'].forEach(dim => { d.querySelector('.sp-dim-check[data-fn=""][value="' + dim + '"]').checked = true; });
+d.getElementById('sp-name').value = 'r31 vtpm 计划B';
+w.eval('confirmSpacePlan()');
+ok(w.eval('spaceSeq') === 7 && w.eval('spaces["sp7"].dims.length') === 2, '维度集合与 sp1 相同 → 不拦截，新建 sp7（总是新建）');
+w.eval('closeModal("spaceplan")');
 // 10. 切换 sp6 为生效
 w.eval('setSpaceActive("sp6")');
 ok(w.eval('currentSpaceOfFn("")') === 'sp6', 'vtpm 生效空间切到 sp6');

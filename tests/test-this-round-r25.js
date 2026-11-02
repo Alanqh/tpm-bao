@@ -89,13 +89,13 @@ d.getElementById('sp-name').value = 'r26测试计划';
 alerts.length = 0;
 w.eval('confirmSpacePlan()');
 ok(alerts.some(m => m.includes('至少为一个 function')), '未勾任何 fn 拦截');
-// 勾 input → 选 sp3，时段 12-01~12-10（不动 output——其空间池仅 sp4）
+// 勾 input + 维度=输入token区间（第31轮：维度勾选，保存时新建空间），时段 12-01~12-10
 const inBox = modal.querySelector('.sp-fn-check[data-fn="input"]');
 inBox.checked = true;
 inBox.dispatchEvent(new w.Event('change', { bubbles: true }));
-const inSel = modal.querySelector('.sp-fn-space[data-fn="input"]');
-ok(inSel && !inSel.disabled, '勾选后下拉启用');
-inSel.value = 'sp3';
+const inDimWrap = modal.querySelector('[data-fndims="input"]');
+ok(inDimWrap && !inDimWrap.classList.contains('opacity-50'), '勾选后维度区启用');
+modal.querySelector('.sp-dim-check[data-fn="input"][value="输入token区间"]').checked = true;
 d.getElementById('sp-priority').value = '300';
 d.getElementById('sp-eff-start').value = '2026-12-01 00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-10 00:00:00';
@@ -104,23 +104,25 @@ w.eval('confirmSpacePlan()');
 ok(alerts.some(m => m.includes('r26测试计划') && m.includes('待发布')), '保存成功提示（待发布）: ' + JSON.stringify(alerts.slice(-1)));
 const r26Idx = w.eval('spacePlans.length - 1');
 ok(w.eval('spacePlanStatuses[' + r26Idx + ']') === 'pending_publish', '新计划=pending_publish');
-ok(JSON.stringify(w.eval('spacePlans[' + r26Idx + '].fnSpaces')) === JSON.stringify({ input: 'sp3' }), '落库 fnSpaces={input:sp3}');
+const r26Key = w.eval('spacePlans[' + r26Idx + '].fnSpaces.input');
+ok(r26Key === 'sp6', '落库 fnSpaces.input=sp6（第31轮：保存即新建空间，不引用已有 sp3）');
 ok(w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").source') === 'manual', '待发布不接管');
 // 发布 → 接管
 w.eval('publishSpacePlan(' + r26Idx + ')');
 ok(w.eval('spacePlanStatuses[' + r26Idx + ']') === 'published', '发布后=published');
-ok(w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").key') === 'sp3' && w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").source') === 'plan', '发布后 12-05 input 接管=sp3');
+ok(w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").key') === r26Key && w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").source') === 'plan', '发布后 12-05 input 接管=' + r26Key);
 // 停用 → 回落
 w.eval('stopSpacePlan(' + r26Idx + ')');
 ok(w.eval('spacePlanStatuses[' + r26Idx + ']') === 'stopped', '停用后=stopped');
 ok(w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").source') === 'manual', '停用后 12-05 input 回落 manual（sp2）');
 
-// ===== 9. 修改回填 =====
+// ===== 9. 修改回填（维度复选勾选状态）=====
 w.eval('editSpacePlan(' + r26Idx + ')');
 modal = d.getElementById('modal-spaceplan');
 ok(d.getElementById('sp-name').value === 'r26测试计划', '回填名称');
 ok(modal.querySelector('.sp-fn-check[data-fn="input"]').checked === true, '回填 input 勾选');
-ok(modal.querySelector('.sp-fn-space[data-fn="input"]').value === 'sp3', '回填 input=sp3');
+const r26Dims = Array.from(modal.querySelectorAll('.sp-dim-check[data-fn="input"]:checked')).map(c => c.value);
+ok(r26Dims.join() === '输入token区间', '回填维度勾选=[输入token区间]');
 ok(d.getElementById('sp-eff-start').value.indexOf('2026-12-01') === 0, '回填时段');
 w.eval('closeModal("spaceplan")');
 

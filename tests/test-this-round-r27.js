@@ -59,20 +59,21 @@ const st2 = d.getElementById('space-tbody').textContent;
 ok(st2.includes('计划「双11大促·输入切换售卖空间3」接管'), '11-15 接管标注');
 ok(st2.includes('设为默认'), '接管期非默认行仍可设默认（第27轮：接管不影响默认配置）');
 
-// ===== 6. 创建多 fn 计划 → 平铺 rowspan 合并 =====
-w.eval('timeFilter = null; openSpacePlanModal()');
+// ===== 6. 创建多 fn 计划 → 平铺 rowspan 合并（第31轮：维度勾选，保存为每 fn 新建空间）=====
+w.eval('timeFilter = null; startEdit(); openSpacePlanModal()');
 d.getElementById('sp-name').value = 'r27双fn计划';
 d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-05T00:00:00';
+// 三个 fn 全勾 + 各选一个维度（input→输入token、output→输出token、cache→输入token）
 Array.from(d.querySelectorAll('#modal-spaceplan .sp-fn-check')).forEach(b => { b.checked = true; b.dispatchEvent(new w.Event('change', { bubbles: true })); });
-d.querySelector('.sp-fn-space[data-fn="input"]').value = 'sp3';
-d.querySelector('.sp-fn-space[data-fn="output"]').value = 'sp4';
-d.querySelector('.sp-fn-space[data-fn="cache"]').value = 'sp5';
+d.querySelector('.sp-dim-check[data-fn="input"][value="输入token区间"]').checked = true;
+d.querySelector('.sp-dim-check[data-fn="output"][value="输出token区间"]').checked = true;
+d.querySelector('.sp-dim-check[data-fn="cache"][value="输入token区间"]').checked = true;
 w.eval('confirmSpacePlan()');
 w.eval('renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
 ok(rows.length === 4, '双fn计划加入后 4 行（双11 1 行 + 新计划 3 条目），实得 ' + rows.length);
-// 第28轮排序：pending 组内按 fn 字典序（cache<input），pu-sp-2-3（cache/sp5）为该计划首行（10列+rowspan=3），pu-sp-2-1/2 为后续行（5列）
+// 第28轮排序：pending 组内按 fn 字典序（cache<input），pu-sp-2-3（cache/新空间）为该计划首行（9列+rowspan=3），pu-sp-2-1/2 为后续行（5列）
 const first = rows.find(r => r.textContent.includes('pu-sp-2-3'));
 ok(first && first.cells.length === 9 && first.innerHTML.includes('rowspan="3"'), '计划行首条（cache）9 列 + rowspan=3');
 const sub = rows.filter(r => /pu-sp-2-[12]/.test(r.textContent));

@@ -39,37 +39,48 @@ ok(activeTab && activeTab.textContent.trim() === '售卖空间', '创建后默�
 const tabsOrder = Array.from(document.querySelectorAll('#plan-tabs-card .admin-tab')).map(b => b.textContent.trim());
 ok(tabsOrder[0] === '售卖空间', '售卖空间为第一个 Tab');
 
-// ===== 3. 新商品先批量创建售卖空间（第23轮：弹窗多行 fn + 维度；不涉及度量） =====
-section('3. 批量创建售卖空间');
+// ===== 3. 新商品通过空间计划创建售卖空间（第31轮：fn 勾选+维度勾选，保存总是新建空间） =====
+section('3. 空间计划创建售卖空间');
 window.eval('startEdit()');
-window.eval('openSpaceBulkModal()');
-ok(document.querySelectorAll('.space-row').length === 1, '弹窗默认 1 行');
-ok(document.querySelectorAll('.space-dim-check').length === 4, '维度候选 4 个（dimensionOptions 全量）');
-ok(document.querySelectorAll('.space-msr-check').length === 0, '弹窗无度量勾选区（第23轮空间只管维度）');
-// 第一行：fn=—（vtpm 无 function）+ 仅购买量区间（fn='' 内与 sp1 两维度不同→不重复）
-const rowA = document.querySelectorAll('.space-row')[0];
-rowA.querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买量区间'; });
-// 添加第二行：仅购买周期
-window.eval('addSpaceRow()');
-ok(document.querySelectorAll('.space-row').length === 2, '添加一行后共 2 行');
-const rowB = document.querySelectorAll('.space-row')[1];
-rowB.querySelector('.space-row-fn').value = '';
-rowB.querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买周期'; });
+window.eval('openSpacePlanModal()');
+ok(document.querySelectorAll('.sp-fn-check').length === 1, 'vtpm（无 fn 商品）弹窗单行 fn=""');
+ok(document.querySelectorAll('.sp-dim-check').length === 4, '维度候选 4 个（dimensionOptions 全量）');
+ok(document.querySelectorAll('.space-msr-check').length === 0, '弹窗无度量勾选区（空间只管维度）');
+ok(!document.querySelector('.sp-fn-space'), '第31轮：无空间下拉（改为维度勾选）');
+// 第一份计划：fn='' + 仅购买量区间 → 总是新建 sp6
+const fnBoxA = document.querySelector('.sp-fn-check[data-fn=""]');
+fnBoxA.checked = true;
+fnBoxA.dispatchEvent(new window.Event('change', { bubbles: true }));
+document.querySelectorAll('.sp-dim-check[data-fn=""]').forEach(c => { c.checked = c.value === '购买量区间'; });
+document.getElementById('sp-name').value = 'r31 空间计划A';
 alertMsg = '';
-window.confirmSpaceBulk();
-ok(alertMsg.includes('已创建 2 个售卖空间'), '批量创建 2 个: ' + alertMsg);
+window.confirmSpacePlan();
+ok(alertMsg.includes('已保存') && alertMsg.includes('待发布'), '计划保存成功（待发布）: ' + alertMsg.slice(0, 24));
+ok(alertMsg.includes('已新建售卖空间'), '提示已新建售卖空间');
 ok(evalInPage('Object.keys(spaces).some(k => spaces[k].seq === 6 && spaces[k].dims.join(",") === "购买量区间")'), '新空间（售卖空间6）序号自增+维度正确');
-ok(evalInPage('Object.keys(spaces).some(k => spaces[k].seq === 7 && spaces[k].dims.join(",") === "购买周期")'), '第二行空间（售卖空间7）单维度');
-ok(alertMsg.includes('售卖空间6') && alertMsg.includes('售卖空间7'), '名称按序号自增（售卖空间6/7）');
-ok(evalInPage('spaces["sp6"].measures') === undefined, '空间无 measures 字段（第23轮只管维度）');
-// 重复维度集合 → 拦截（与 sp6 fn='' 单购买量区间重复）
-window.eval('openSpaceBulkModal()');
-const rowDup = document.querySelectorAll('.space-row')[0];
-rowDup.querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买量区间'; });
+ok(evalInPage('spaces["sp6"].measures') === undefined, '空间无 measures 字段（空间只管维度）');
+// 第二份计划：fn='' + 仅购买周期 → 新建 sp7
+window.eval('openSpacePlanModal()');
+const fnBoxB = document.querySelector('.sp-fn-check[data-fn=""]');
+fnBoxB.checked = true;
+fnBoxB.dispatchEvent(new window.Event('change', { bubbles: true }));
+document.querySelectorAll('.sp-dim-check[data-fn=""]').forEach(c => { c.checked = c.value === '购买周期'; });
+document.getElementById('sp-name').value = 'r31 空间计划B';
 alertMsg = '';
-window.confirmSpaceBulk();
-ok(alertMsg.includes('已存在维度集合相同') || alertMsg.includes('不可重复创建'), '同 fn 维度集合相同拦截: ' + alertMsg.slice(0, 20));
-window.eval('closeModal("space-edit")');
+window.confirmSpacePlan();
+ok(evalInPage('Object.keys(spaces).some(k => spaces[k].seq === 7 && spaces[k].dims.join(",") === "购买周期")'), '第二份计划空间（售卖空间7）单维度');
+ok(evalInPage('spacePlans.length') === 2, '两份空间计划');
+// 重复维度集合不再拦截（第31轮口径：总是新建）
+window.eval('openSpacePlanModal()');
+const fnBoxC = document.querySelector('.sp-fn-check[data-fn=""]');
+fnBoxC.checked = true;
+fnBoxC.dispatchEvent(new window.Event('change', { bubbles: true }));
+document.querySelectorAll('.sp-dim-check[data-fn=""]').forEach(c => { c.checked = c.value === '购买量区间'; });
+document.getElementById('sp-name').value = 'r31 空间计划C';
+alertMsg = '';
+window.confirmSpacePlan();
+ok(alertMsg.includes('已新建售卖空间') && evalInPage('Object.keys(spaces).some(k => spaces[k].seq === 8)'), '维度集合与已有空间相同 → 不拦截，总是新建（sp8）');
+window.eval('closeModal("spaceplan")');
 // 设为生效：sp6 设为 fn('') 生效空间 → SU 默认跟随；新空间默认未生效
 ok(evalInPage('currentSpaceOfFn("")') === 'sp1', 'sp1 默认生效（seq 最早回退）');
 window.eval('setSpaceActive("sp6")');

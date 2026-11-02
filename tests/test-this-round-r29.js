@@ -16,16 +16,15 @@ w.eval('openDetailByCode("maas-online-text-glm4")');
 ok(!d.getElementById('inner-tab-space').innerHTML.includes('售卖空间属于 function'), '售卖空间 Tab 提示文案已删');
 ok(!d.getElementById('inner-tab-spaceplan').innerHTML.includes('同售卖计划与售卖单元'), '空间计划 Tab 提示文案已删');
 
-// ===== 2. 按钮在列表左上角 + 未发起变更统一置灰 =====
-ok(d.getElementById('space-new-btn') && d.getElementById('spaceplan-new-btn'), '两个新增按钮存在');
-const firstChildSpace = d.querySelector('#inner-tab-space > div');
-ok(firstChildSpace && firstChildSpace.querySelector('#space-new-btn'), '售卖空间 Tab 新增按钮在顶部第一行容器');
+// ===== 2. 按钮在列表左上角 + 未发起变更统一置灰（第31轮：space-new-btn 已删——售卖空间由空间计划创建） =====
+ok(!d.getElementById('space-new-btn'), '第31轮：售卖空间 Tab 批量创建按钮已删除');
+ok(d.getElementById('spaceplan-new-btn'), '空间计划新增按钮存在');
 const firstChildSp = d.querySelector('#inner-tab-spaceplan > div');
 ok(firstChildSp && firstChildSp.querySelector('#spaceplan-new-btn'), '空间计划 Tab 新增按钮在顶部第一行容器');
-ok(d.getElementById('space-new-btn').disabled && d.getElementById('spaceplan-new-btn').disabled, '浏览态：两按钮均 disabled');
+ok(d.getElementById('spaceplan-new-btn').disabled, '浏览态：按钮 disabled');
 ok(d.getElementById('spaceplan-new-btn').classList.contains('opacity-40'), '浏览态置灰样式');
 w.eval('startEdit()');
-ok(!d.getElementById('spaceplan-new-btn').disabled && !d.getElementById('space-new-btn').disabled, '持锁后恢复可用');
+ok(!d.getElementById('spaceplan-new-btn').disabled, '持锁后恢复可用');
 
 // ===== 3. 计划单元命名区分 =====
 ok(d.getElementById('inner-tab-plan').innerHTML.includes('售卖计划单元'), '售卖计划 Tab 表头=售卖计划单元');

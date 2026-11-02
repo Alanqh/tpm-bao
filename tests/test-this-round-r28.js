@@ -52,36 +52,36 @@ let rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
 ok(rows.length === 1, 'glm4 初始 1 行（pu-sp-1-1），实得 ' + rows.length);
 ok(rows[0].textContent.includes('双11大促') && rows[0].textContent.includes('pu-sp-1-1'), '双11计划单元');
 
-// ===== 6. 排序：已发布(effStart 降序)→待发布→已停用 =====
+// ===== 6. 排序：已发布(effStart 降序)→待发布→已停用（第31轮：维度勾选创建，空间总是新建）=====
 w.eval('startEdit()');
-function mkplan(name, start, fn, spk) {
+function mkplan(name, start, fn) {
   w.eval('openSpacePlanModal()');
   d.getElementById('sp-name').value = name;
   d.getElementById('sp-eff-start').value = start + 'T00:00:00';
   d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
   const b = d.querySelector('.sp-fn-check[data-fn="' + fn + '"]');
   b.checked = true; b.dispatchEvent(new w.Event('change', { bubbles: true }));
-  d.querySelector('.sp-fn-space[data-fn="' + fn + '"]').value = spk;
+  d.querySelector('.sp-dim-check[data-fn="' + fn + '"][value="输入token区间"]').checked = true;
   w.eval('confirmSpacePlan()');
 }
-mkplan('P1晚生效', '2026-12-10', 'input', 'sp2');   // idx1 → publish
-mkplan('P2待发布', '2026-12-20', 'input', 'sp3');   // idx2 → pending
-mkplan('P3已停用', '2026-12-05', 'output', 'sp4');  // idx3 → stop
-mkplan('P4早生效', '2026-12-01', 'cache', 'sp5');   // idx4 → publish（早于 P1）
+mkplan('P1晚生效', '2026-12-10', 'input');   // idx1 → publish
+mkplan('P2待发布', '2026-12-20', 'input');   // idx2 → pending
+mkplan('P3已停用', '2026-12-05', 'output');  // idx3 → stop
+mkplan('P4早生效', '2026-12-01', 'cache');   // idx4 → publish（早于 P1）
 w.eval('publishSpacePlan(1); stopSpacePlan(3); publishSpacePlan(4); renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
 ok(rows.length === 5, '5 行（双11+P1+P2+P3+P4），实得 ' + rows.length);
 const order = rows.map(r => (r.textContent.match(/双11大促|P\d/) || ['?'])[0]);
 ok(order.join(',') === 'P1,P4,双11大促,P2,P3', '排序=published effStart降序(12-10→12-01→11-11)→pending(P2)→stopped(P3)：' + order.join(','));
 
-// ===== 7. 同计划多 fn 行 rowspan 仍正确（相邻 + 首行 10 列）=====
+// ===== 7. 同计划多 fn 行 rowspan 仍正确（相邻 + 首行 9 列）=====
 // P1 只有单 fn；再建一条双 fn 计划验证
-mkplan('P5双fn', '2026-12-15', 'input', 'sp2');
+mkplan('P5双fn', '2026-12-15', 'input');
 w.eval('openSpacePlanModal ? 0 : 0');
 w.eval('editSpacePlan(5)');
 const b2 = d.querySelector('.sp-fn-check[data-fn="output"]');
 b2.checked = true; b2.dispatchEvent(new w.Event('change', { bubbles: true }));
-d.querySelector('.sp-fn-space[data-fn="output"]').value = 'sp4';
+d.querySelector('.sp-dim-check[data-fn="output"][value="输入token区间"]').checked = true;
 w.eval('confirmSpacePlan(); renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
 ok(rows.length === 7, 'P5 双 fn 后 7 行（5 单行计划 + P5 双行），实得 ' + rows.length);

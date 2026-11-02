@@ -33,7 +33,8 @@ ok(activeTab && activeTab.textContent.trim() === '售卖空间', '进入详情�
 ok(!!document.getElementById('spaceplan-tbody'), '空间切换计划列表存在（第26轮：独立实体回归）');
 ok(!document.getElementById('spaceplan-create-btn'), '创建空间计划按钮已移除');
 ok(!!document.getElementById('modal-spaceplan'), '空间切换计划弹窗存在（第26轮：独立实体回归）');
-ok(!!document.getElementById('space-new-btn') && document.getElementById('space-new-btn').textContent.includes('批量创建'), '含批量创建售卖空间按钮');
+ok(!!document.getElementById('spaceplan-new-btn'), '空间计划创建按钮存在（第31轮：唯一空间创建入口）');
+ok(!document.getElementById('space-new-btn'), '第31轮：批量创建售卖空间按钮已删除（空间由空间计划创建）');
 ok(!document.getElementById('fn-space-cards'), 'fn 配置卡已删（第23轮合并进列表）');
 ok(!!document.getElementById('space-tbody'), '含售卖空间列表表');
 
@@ -107,37 +108,49 @@ const dimTitle5 = Array.from(document.querySelectorAll('#su-confirm-body p.text-
 ok(dimTitle5.join(',') === '输入token区间', 'sp3 仅展示空间定义的维度（输入token区间）');
 window.eval('closeModal("su-confirm")');
 
-// ===== 6. 批量创建空间：fn+维度；同 fn 维度集合相同拦截；名称自增 =====
-section('6. 批量创建售卖空间');
-window.eval('openSpaceBulkModal()');
-ok(document.querySelectorAll('.space-row').length === 1, '弹窗默认 1 行');
-// 行1：output + 购买量区间（fn 内唯一组合 → 成功）
-document.querySelectorAll('.space-row')[0].querySelector('.space-row-fn').value = 'output';
-document.querySelectorAll('.space-row')[0].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买量区间'; });
-ok(document.querySelectorAll('.space-row')[0].querySelectorAll('.space-msr-check').length === 0, '创建弹窗只勾维度（无度量勾选，第23轮）');
-// 行2：input + 输入token区间+输出token区间（与 sp2 重复 → 整体拦截）
-window.eval('addSpaceRow()');
-document.querySelectorAll('.space-row')[1].querySelector('.space-row-fn').value = 'input';
-document.querySelectorAll('.space-row')[1].querySelectorAll('.space-dim-check').forEach(c => { c.checked = ['输入token区间', '输出token区间'].includes(c.value); });
+// ===== 6. 空间计划创建空间（第31轮：fn 勾选+维度勾选；总是新建、不再拦截重复维度集合） =====
+section('6. 空间计划创建售卖空间');
+window.eval('openSpacePlanModal()');
+ok(document.querySelectorAll('.sp-fn-check').length === 3, '弹窗含 3 个 fn 复选（input/output/cache）');
+// 勾 output + 购买量区间（fn 内组合无碍，总是新建）
+const box6 = document.querySelector('.sp-fn-check[data-fn="output"]');
+box6.checked = true;
+box6.dispatchEvent(new window.Event('change', { bubbles: true }));
+document.querySelectorAll('.sp-dim-check[data-fn="output"]').forEach(c => { c.checked = c.value === '购买量区间'; });
+ok(document.querySelectorAll('.sp-fn-check[data-fn="input"]:not(:checked)').length === 1, '未勾 fn 不参与');
+document.getElementById('sp-name').value = 'r31 创建计划X';
 alertMsg = '';
-window.confirmSpaceBulk();
-ok(alertMsg.includes('不可重复创建'), '同 fn 维度集合相同 → 拦截提交: ' + alertMsg.slice(0, 24));
-ok(evalInPage('spaceSeq') === 5, '拦截时未创建任何空间');
-// 删除重复行后提交 → 创建 sp6
-document.querySelectorAll('.space-row')[1].remove();
-alertMsg = '';
-window.confirmSpaceBulk();
-ok(alertMsg.includes('已创建 1 个售卖空间'), 'output+购买量区间 创建成功: ' + alertMsg.slice(0, 20));
-ok(alertMsg.includes('售卖空间6'), '名称自增=售卖空间6');
-ok(evalInPage('spaces["sp6"].fn === "output" && spaces["sp6"].dims.join(",") === "购买量区间"'), '新空间 fn=output/dims=[购买量区间]');
+window.confirmSpacePlan();
+ok(alertMsg.includes('已保存') && alertMsg.includes('已新建售卖空间'), 'output+购买量区间 保存并新建空间: ' + alertMsg.slice(0, 30));
+ok(evalInPage('spaces["sp6"].fn === "output" && spaces["sp6"].dims.join(",") === "购买量区间"'), '新空间 sp6 fn=output/dims=[购买量区间]');
 ok(evalInPage('spaces["sp6"].measures === undefined'), '新空间无 measures 字段（只管维度）');
 ok(evalInPage('spaceSeq') === 6, 'spaceSeq=6（跨 fn 连续编号）');
-// 行为空维度拦截
-window.eval('openSpaceBulkModal()');
+// 维度集合与已有空间相同 → 不拦截（第31轮口径：总是新建）
+window.eval('openSpacePlanModal()');
+const box6b = document.querySelector('.sp-fn-check[data-fn="input"]');
+box6b.checked = true;
+box6b.dispatchEvent(new window.Event('change', { bubbles: true }));
+document.querySelectorAll('.sp-dim-check[data-fn="input"]').forEach(c => { c.checked = ['输入token区间', '输出token区间'].includes(c.value); });
+document.getElementById('sp-name').value = 'r31 创建计划Y';
 alertMsg = '';
-window.confirmSpaceBulk();
-ok(alertMsg.includes('至少勾选一个维度'), '空维度行拦截: ' + alertMsg);
-window.eval('closeModal("space-edit")');
+window.confirmSpacePlan();
+ok(alertMsg.includes('已新建售卖空间') && evalInPage('spaceSeq') === 7, '同 fn 维度集合与 sp2 相同 → 不拦截，新建 sp7（总是新建口径）');
+// 空维度拦截（fn 勾选但维度全不选）
+window.eval('openSpacePlanModal()');
+const box6c = document.querySelector('.sp-fn-check[data-fn="input"]');
+box6c.checked = true;
+box6c.dispatchEvent(new window.Event('change', { bubbles: true }));
+document.getElementById('sp-name').value = 'r31 创建计划Z';
+alertMsg = '';
+window.confirmSpacePlan();
+ok(alertMsg.includes('至少选择一个维度'), '空维度拦截: ' + alertMsg);
+// 不勾任何 fn 拦截（维度复选被禁用）
+box6c.checked = false;
+box6c.dispatchEvent(new window.Event('change', { bubbles: true }));
+alertMsg = '';
+window.confirmSpacePlan();
+ok(alertMsg.includes('至少为一个 function') || alertMsg.includes('至少一个'), '空 fn 拦截: ' + alertMsg);
+window.eval('closeModal("spaceplan")');
 
 // ===== 7. 编辑度量功能已删除（第23轮） =====
 section('7. 编辑度量（已删除）');

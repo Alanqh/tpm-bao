@@ -35,22 +35,33 @@ ok(evalInPage('currentProduct.dims') === undefined, '商品无 dims 字段（第
 ok(evalInPage('currentProduct.type') === 'maas-online-text', '商品类型= maas-online-text');
 const activeTab2 = document.querySelector('#plan-tabs-card .admin-tab.active');
 ok(activeTab2 && activeTab2.textContent.trim() === '售卖空间', '创建后默认打开「售卖空间」Tab');
-// 新商品：批量创建空间（input fn 两个空间 + output 一个；第23轮只勾维度）
-window.eval('startEdit(); openSpaceBulkModal()');
-document.querySelectorAll('.space-row')[0].querySelector('.space-row-fn').value = 'input';
-document.querySelectorAll('.space-row')[0].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '输出token区间'; });
-window.eval('addSpaceRow()');
-document.querySelectorAll('.space-row')[1].querySelector('.space-row-fn').value = 'input';
-document.querySelectorAll('.space-row')[1].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '购买量区间'; });
-window.eval('addSpaceRow()');
-document.querySelectorAll('.space-row')[2].querySelector('.space-row-fn').value = 'output';
-document.querySelectorAll('.space-row')[2].querySelectorAll('.space-dim-check').forEach(c => { c.checked = c.value === '输入token区间'; });
+// 新商品：通过空间计划创建空间（第31轮：每份计划为每个勾选 fn 新建一个空间；input 需两个空间 → 两份计划）
+window.eval('startEdit()');
+// 计划一：input（输出token区间）+ output（输入token区间）
+window.eval('openSpacePlanModal()');
+let boxIn = document.querySelector('.sp-fn-check[data-fn="input"]');
+boxIn.checked = true;
+boxIn.dispatchEvent(new window.Event('change', { bubbles: true }));
+document.querySelectorAll('.sp-dim-check[data-fn="input"]').forEach(c => { c.checked = c.value === '输出token区间'; });
+let boxOut = document.querySelector('.sp-fn-check[data-fn="output"]');
+boxOut.checked = true;
+boxOut.dispatchEvent(new window.Event('change', { bubbles: true }));
+document.querySelectorAll('.sp-dim-check[data-fn="output"]').forEach(c => { c.checked = c.value === '输入token区间'; });
+document.getElementById('sp-name').value = 'r31 计划一';
 alertMsg = '';
-window.confirmSpaceBulk();
-ok(alertMsg.includes('已创建 3 个售卖空间'), '批量创建 3 个（input×2 + output×1）: ' + alertMsg);
+window.confirmSpacePlan();
+ok(alertMsg.includes('已保存'), '计划一保存成功: ' + alertMsg.slice(0, 20));
+// 计划二：input（购买量区间）
+window.eval('openSpacePlanModal()');
+boxIn = document.querySelector('.sp-fn-check[data-fn="input"]');
+boxIn.checked = true;
+boxIn.dispatchEvent(new window.Event('change', { bubbles: true }));
+document.querySelectorAll('.sp-dim-check[data-fn="input"]').forEach(c => { c.checked = c.value === '购买量区间'; });
+document.getElementById('sp-name').value = 'r31 计划二';
+window.confirmSpacePlan();
 ok(evalInPage('spaceSeq') === 8, 'spaceSeq=8（售卖空间6/7/8，跨 function 连续编号）');
 ok(evalInPage('spaces["sp6"].measures') === undefined, '空间无 measures（第23轮只管维度）');
-// output 空间与 input 空间维度集合相同 → 允许（不同 fn 可同维度）
+// 不同 fn 的空间维度集合可相同（总是新建互不影响）
 ok(evalInPage('spaces["sp2"].fn === "input" && spaces["sp4"].fn === "output" && spaces["sp2"].dims.join(",") === spaces["sp4"].dims.join(",")'), '不同 function 的空间维度可相同（mock sp2/sp4 同维度集合各自独立）');
 
 // ===== 3. online-text 建售卖单元（第20轮：先选 function → 空间 → 度量） =====
