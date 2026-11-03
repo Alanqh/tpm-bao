@@ -251,15 +251,19 @@
       <!-- 商品详情视图 -->
       <div id="detail-view" class="hidden">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div>
+          <div class="flex items-center gap-2">
             <h2 id="detail-title" class="text-lg font-semibold text-slate-900">商品详情</h2>
-            <p class="text-xs text-slate-500 mt-0.5">上半部分为商品基本信息；下半部分管理上架情况、售卖计划及配置（折算系数/SLO赔付规则）。</p>
+            <button type="button" id="detail-name-edit-btn" onclick="openDetailNameEdit()" class="text-slate-400 hover:text-violet-600" title="编辑商品名称"><i class="fa-solid fa-pen text-xs"></i></button>
+            <span id="detail-name-edit-wrap" class="hidden items-center gap-2">
+              <input id="detail-name-input" class="form-input text-sm px-2 py-1 w-64">
+              <button type="button" onclick="confirmDetailNameEdit()" class="admin-btn-primary text-xs px-2.5 py-1 rounded-md">保存</button>
+              <button type="button" onclick="closeDetailNameEdit()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md">取消</button>
+            </span>
           </div>
-          <div class="flex items-center gap-3">
-            <div id="edit-lock-bar" class="flex items-center gap-2"></div>
-            <button onclick="backToList()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回列表</button>
-          </div>
+          <button onclick="backToList()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回列表</button>
         </div>
+        <!-- 第36轮：编辑锁条提升至基本信息卡片之前，居左 -->
+        <div id="edit-lock-bar" class="flex items-center justify-start gap-2 mb-3"></div>
 
         <!-- 上半：基本信息（紧凑排列） -->
         <div class="admin-card p-4 mb-4">
@@ -289,7 +293,7 @@
                 <button type="button" onclick="resetSpaceAt()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">重置</button>
               </div>
             </div>
-            <p id="space-tf-tip" class="hidden text-[11px] text-violet-600 mb-2"><i class="fa-regular fa-clock mr-1"></i>正在查看 <span class="font-mono font-medium"></span> 时点的空间情况（计划接管按该时刻判定）</p>
+            <p id="space-tf-tip" class="hidden text-[11px] text-violet-600 mb-2"><i class="fa-regular fa-clock mr-1"></i>正在查看 <span class="font-mono font-medium"></span> 时点的空间情况</p>
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[700px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
@@ -428,7 +432,6 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h3 id="plan-detail-title" class="text-lg font-semibold text-slate-900">售卖计划详情</h3>
-            <p class="text-xs text-slate-500 mt-0.5">基础信息与计划单元及配置信息</p>
           </div>
           <div class="flex items-center gap-2">
             <span id="plan-detail-status" class="badge bg-blue-50 text-blue-700">待发布</span>
@@ -478,7 +481,6 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h3 id="spaceplan-detail-title" class="text-lg font-semibold text-slate-900">空间计划详情</h3>
-            <p class="text-xs text-slate-500 mt-0.5">基础信息与空间计划单元</p>
           </div>
           <div class="flex items-center gap-2">
             <span id="spaceplan-detail-status" class="badge bg-blue-50 text-blue-700">待发布</span>
@@ -514,7 +516,6 @@
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h3 id="plan-create-page-title" class="text-lg font-semibold text-slate-900">创建售卖计划</h3>
-            <p class="text-xs text-slate-500 mt-0.5">按区块填写：基础信息（含生效时间）→ 生效售卖单元（勾选 ID，选择上架 / 下架）→ 计划字段配置（全部一致 / 按售卖单元配置）</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="closePlanCreatePage()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回商品详情</button>
@@ -524,14 +525,14 @@
 
         <!-- 区块1：基础信息（名称 + 优先级 + 生效时间） -->
         <div class="admin-card p-4 mb-4">
-          <p class="text-sm font-medium text-slate-900 mb-3">1. 基础信息（含生效时间）</p>
+          <p class="text-sm font-medium text-slate-900 mb-3">1. 基础信息</p>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="form-label">售卖计划名称</label>
               <input id="plan-name" class="form-input" placeholder="如 vTPM 预留·标准·30天">
             </div>
             <div>
-              <label class="form-label">优先级（数字，越大越优先）</label>
+              <label class="form-label">优先级</label>
               <input id="plan-priority" type="number" class="form-input" placeholder="如 100">
             </div>
             <div>
@@ -548,7 +549,7 @@
         <!-- 区块2：生效售卖单元（勾选售卖单元 ID，下方展示 function 与维度组合；上架/下架） -->
         <div class="admin-card p-4 mb-4">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <p class="text-sm font-medium text-slate-900">2. 本售卖计划对哪些售卖单元生效（勾选售卖单元 ID，选择上架 / 下架）</p>
+            <p class="text-sm font-medium text-slate-900">2. 本售卖计划对哪些售卖单元生效</p>
             <div class="flex items-center gap-1.5">
               <button type="button" onclick="toggleAllPlanUnits()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-regular fa-square-check mr-1"></i>全选/全不选</button>
             </div>
@@ -559,7 +560,6 @@
         <!-- 区块3：各字段组（每个都带「全部一致 / 按售卖单元配置」开关） -->
         <div class="admin-card p-4">
           <p class="text-sm font-medium text-slate-900 mb-1">3. 计划字段配置</p>
-          <p class="text-xs text-slate-500 mb-3">每组字段可用开关选择「全部售卖单元一致」或「按售卖单元配置」</p>
           <div class="grid grid-cols-1 gap-5">
 
             <!-- 3.1 计费项 -->
@@ -605,7 +605,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div class="border border-slate-200 rounded-md p-3">
                 <div class="flex flex-wrap items-center gap-3 mb-2">
-                  <p class="text-xs font-semibold text-slate-700">3.4 关联vTPM折算系数配置（版本）</p>
+                  <p class="text-xs font-semibold text-slate-700">3.4 关联vTPM折算系数配置</p>
                   <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                     <input type="checkbox" id="plan-mode-factor" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                     按售卖单元配置
@@ -616,7 +616,7 @@
               </div>
               <div class="border border-slate-200 rounded-md p-3">
                 <div class="flex flex-wrap items-center gap-3 mb-2">
-                  <p class="text-xs font-semibold text-slate-700">3.5 关联SLO赔付规则配置（版本）</p>
+                  <p class="text-xs font-semibold text-slate-700">3.5 关联SLO赔付规则配置</p>
                   <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                     <input type="checkbox" id="plan-mode-slo" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                     按售卖单元配置
@@ -643,7 +643,7 @@
             <!-- 3.7 购买量 -->
             <div class="border border-slate-200 rounded-md p-3">
               <div class="flex flex-wrap items-center gap-3 mb-2">
-                <p class="text-xs font-semibold text-slate-700">3.7 购买量（最小 / 最大 / step，万 vTPM）</p>
+                <p class="text-xs font-semibold text-slate-700">3.7 购买量</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="plan-mode-qty" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                   按售卖单元配置
@@ -671,21 +671,18 @@
         <div>
           <label class="form-label">商品类型</label>
           <select id="inp-type" class="form-input" onchange="onTypeChange()"><option value="maas-product-vtpm">maas-product-vtpm</option><option value="maas-online-text">maas-online-text</option></select>
-          <p class="text-xs text-slate-400 mt-1">可选的售卖维度由商品类型决定</p>
         </div>
         <div>
-          <label class="form-label">模型（用于生成默认 code/名称）</label>
+          <label class="form-label">模型</label>
           <select id="inp-playground" class="form-input" onchange="autogenProductNameCode()"></select>
-          <p class="text-xs text-slate-400 mt-1">选择模型后自动生成商品 code / 名称（商品不与模型/Playground 建立关联关系，可手动修改）</p>
         </div>
         <div>
-          <label class="form-label">商品code（自动生成，可修改）</label>
+          <label class="form-label">商品code</label>
           <input id="inp-code" class="form-input font-mono" placeholder="选择模型后自动生成">
         </div>
         <div>
-          <label class="form-label">商品名称（自动生成，可修改）</label>
+          <label class="form-label">商品名称</label>
           <input id="inp-name" class="form-input" placeholder="选择模型后自动生成">
-          <p class="text-xs text-slate-400 mt-1">创建商品后请先在「空间计划」Tab 创建空间计划（勾选 function 与维度，为每个 function 新建售卖空间），再创建售卖单元（在弹窗中勾选度量）。</p>
         </div>
      </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
@@ -714,7 +711,7 @@
           <input id="quota-name" class="form-input" placeholder="如 vTPM 资源包·30天">
         </div>
         <div>
-          <label class="form-label">数量值（万 vTPM）</label>
+          <label class="form-label">数量值</label>
           <input id="quota-qty" type="number" class="form-input" placeholder="如 30000">
         </div>
         <div>
@@ -746,7 +743,7 @@
           <input id="inventory-name" class="form-input" placeholder="如 vTPM 库存·30天">
         </div>
         <div>
-          <label class="form-label">数量值（万 vTPM）</label>
+          <label class="form-label">数量值</label>
           <input id="inventory-qty" type="number" class="form-input" placeholder="如 50000">
         </div>
         <div>
@@ -812,7 +809,6 @@
         <div class="mb-4" id="su-fn-block">
           <label class="form-label">Function</label>
           <select id="su-fn-select" class="form-input" onchange="onSuFnChange()"><option value="">—（不区分 function）</option></select>
-          <p class="text-xs text-slate-400 mt-1">选择 function 后按其当前生效售卖空间展示可选维度与度量</p>
         </div>
         <div id="su-space-line" class="mb-4 hidden"></div>
         <div id="su-confirm-body" class="space-y-3"></div>
@@ -832,14 +828,13 @@
         <button type="button" onclick="closeModal('spaceplan')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 grid grid-cols-1 gap-4">
-        <p class="text-xs text-slate-400">为每个勾选的 function 新建一个售卖空间（维度可不选=0 维度空间）。计划发布且处于生效期内时，其空间即该 function 的生效售卖空间（多计划按优先级，优先级相同后创建优先）。</p>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="form-label">计划名称</label>
             <input id="sp-name" class="form-input" placeholder="如 双11大促·切换售卖空间">
           </div>
           <div>
-            <label class="form-label">优先级（数字大优先）</label>
+            <label class="form-label">优先级</label>
             <input id="sp-priority" type="number" class="form-input" placeholder="如 100">
           </div>
         </div>
@@ -854,7 +849,7 @@
           </div>
         </div>
         <div>
-          <label class="form-label">各 function 售卖空间定义（勾选 fn 并选择维度，可不选）</label>
+          <label class="form-label">各 function 售卖空间定义</label>
           <div id="sp-fnspaces" class="space-y-2"></div>
         </div>
       </div>
@@ -882,7 +877,7 @@
           <input id="config-sku" class="form-input bg-slate-50 text-slate-500" readonly>
         </div>
         <div>
-          <label class="form-label">版本（自动生成）</label>
+          <label class="form-label">版本</label>
           <input id="config-version" class="form-input bg-slate-50 text-slate-500" readonly>
         </div>
         <div>
@@ -1395,7 +1390,7 @@
     }
     function renderSaleUnits() {
       if (saleUnits.length === 0) {
-        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="15" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元，请先点击「创建售卖单元」</td></tr>`;
+        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="15" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元</td></tr>`;
         return;
       }
       // 第20轮：前三列 = function（合并）/售卖空间（合并）/售卖单元；排序 fn → spaceKey → id（保证同 fn 同空间连续，可 rowspan 合并）
@@ -1438,7 +1433,7 @@
           ? '<span class="text-slate-300 text-xs">—</span>'
           : (canEdit()
             ? `<button type="button" onclick="removeSaleUnit('${u.id}')" class="text-red-500 hover:underline text-xs">删除</button>`
-            : '<span class="text-slate-300 text-xs" title="需先「发起变更」获得编辑锁">🔒 删除</span>');
+            : '<span class="text-slate-300 text-xs">🔒 删除</span>');
         return `
         <tr class="hover:bg-slate-50">
           ${showFn ? `<td rowspan="${fnSpan}" class="px-3 py-2 text-xs font-medium align-top border-r border-slate-100">${fn || '—'}</td>` : ''}
@@ -1589,7 +1584,38 @@
       renderSpaceTab();
       renderSpacePlans();
     }
-    // 详情页头部右侧：发起变更 / 退出变更 按钮 + 他人持锁提示
+    // 第36轮：商品名称快速编辑（标题旁铅笔按钮 → 行内输入 + 保存/取消；不依赖编辑锁）
+    function openDetailNameEdit() {
+      const wrap = document.getElementById('detail-name-edit-wrap');
+      const btn = document.getElementById('detail-name-edit-btn');
+      const input = document.getElementById('detail-name-input');
+      if (!wrap || !btn || !input) return;
+      wrap.classList.remove('hidden');
+      wrap.classList.add('flex');
+      btn.classList.add('hidden');
+      input.value = currentProduct ? currentProduct.name : '';
+    }
+    function closeDetailNameEdit() {
+      const wrap = document.getElementById('detail-name-edit-wrap');
+      const btn = document.getElementById('detail-name-edit-btn');
+      if (!wrap || !btn) return;
+      wrap.classList.add('hidden');
+      wrap.classList.remove('flex');
+      btn.classList.remove('hidden');
+    }
+    function confirmDetailNameEdit() {
+      const input = document.getElementById('detail-name-input');
+      const name = (input.value || '').trim();
+      if (!name) { alert('商品名称不能为空'); return; }
+      if (!currentProduct) return;
+      currentProduct.name = name;
+      document.getElementById('detail-title').textContent = `${currentProduct.name}（${currentProduct.code}）`;
+      // 基本信息卡片同步
+      const infoPs = document.querySelectorAll('#detail-info .font-medium');
+      infoPs.forEach(p => { if (p.parentElement && p.previousElementSibling && p.previousElementSibling.textContent === '商品名称') p.textContent = name; });
+      closeDetailNameEdit();
+    }
+    // 详情页头部右侧：发起变更 / 退出变更 按钮 + 他人持锁提示（第36轮：位置移至基本信息卡片之前居左）
     function renderEditLockBar() {
       const bar = document.getElementById('edit-lock-bar');
       if (!bar || !currentProduct) return;
@@ -1753,6 +1779,7 @@
       document.getElementById('list-view').classList.add('hidden');
       document.getElementById('detail-view').classList.remove('hidden');
       document.getElementById('detail-title').textContent = `${currentProduct.name}（${currentProduct.code}）`;
+      closeDetailNameEdit(); // 第36轮：重置名称行内编辑状态
       // 第10轮编辑锁：进入详情页初始化编辑状态——锁记录若属当前用户则恢复编辑态，否则浏览态（他人持锁显示提示）
       const lock0 = editLocks[currentProduct.code] || null;
       editMode = (lock0 && lock0.passport === currentUser.passport) ? 'owner' : false;
@@ -1975,7 +2002,7 @@
           <label class="flex flex-wrap items-center gap-2 text-xs">
             <input type="checkbox" class="sp-fn-check" data-fn="${f}" ${rDims.length > 0 ? 'checked' : ''} style="accent-color:#7C3AED" onchange="onSpFnCheck(this)">
             <span class="font-mono font-medium text-slate-700">${f || '—（无 function）'}</span>
-            <span class="text-slate-400">当前生效：${curName}（新计划发布生效期内将接管该 fn）</span>
+            <span class="text-slate-400">当前生效：${curName}</span>
           </label>
           <div class="ml-6 mt-1.5 flex flex-wrap gap-x-4 gap-y-1 ${rDims.length > 0 ? '' : 'opacity-50'}" data-fndims="${f}">
             ${dimensionOptions.map(d => `<label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
@@ -2329,7 +2356,7 @@
       // 含 function 商品：必须先选 function
       if (fns.length > 0 && !suFnSel) {
         spaceLine.classList.add('hidden');
-        box.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">请先选择 function，再选择售卖空间并勾选度量</p>';
+        box.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">请先选择 function</p>';
         return;
       }
       // 空间选择行：候选=该 fn 归属的空间（含售卖单元已引用兜底）；默认=该 fn 生效空间
@@ -2340,13 +2367,13 @@
       const spKeys = Object.keys(sps);
       if (spKeys.length === 0) {
         spaceLine.classList.add('hidden');
-        box.innerHTML = '<p class="text-xs text-amber-600 py-4 text-center">暂无可用售卖空间，请先在「空间计划」Tab 创建空间计划（为该 function 新建售卖空间）</p>';
+        box.innerHTML = '<p class="text-xs text-amber-600 py-4 text-center">暂无可用售卖空间，请先创建空间计划</p>';
         return;
       }
       if (!suSpaceSel || !sps[suSpaceSel]) suSpaceSel = (effectiveSpaceAt(fnKey).key || spKeys[0]);
       spaceLine.classList.remove('hidden');
       spaceLine.innerHTML = `
-        <label class="form-label">售卖空间（默认选中${fnKey ? ' ' + fnKey + ' 的生效空间' : '生效空间'}）</label>
+        <label class="form-label">售卖空间</label>
         <select id="su-space-select" class="form-input" onchange="onSuSpaceChange()">
           ${spKeys.map(k => `<option value="${k}" ${k === suSpaceSel ? 'selected' : ''}>${k} · 维度：${(sps[k].dims || []).length ? sps[k].dims.join(' + ') : '--（0 维度）'}</option>`).join('')}
         </select>`;
@@ -2363,12 +2390,12 @@
     // 0 维度空间（第35轮）：该空间下只能创建一个售卖单元——未创建时给「创建单元」按钮，已创建时提示不可再建
     function renderSuZeroDimBody(box, ctx) {
       if ((ctx.createdUnits || []).length > 0) {
-        box.innerHTML = '<p class="text-xs text-amber-600 py-4 text-center">该售卖空间为 0 维度空间，只能创建一个售卖单元（已创建 ' + ctx.createdUnits[0].id + '）</p>';
+        box.innerHTML = '<p class="text-xs text-amber-600 py-4 text-center">0 维度空间仅可创建一个售卖单元（已创建 ' + ctx.createdUnits[0].id + '）</p>';
         return;
       }
       box.innerHTML = `
         <div class="border border-slate-200 rounded-md p-3 bg-slate-50 text-xs text-slate-600">
-          <p><i class="fa-solid fa-cube mr-1 text-violet-500"></i>0 维度售卖空间：不区分售卖维度，只能创建一个售卖单元。</p>
+          <p><i class="fa-solid fa-cube mr-1 text-violet-500"></i>0 维度售卖空间，仅可创建一个售卖单元</p>
           <button type="button" onclick="confirmZeroDimUnit()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md mt-2"><i class="fa-solid fa-plus mr-1"></i>创建售卖单元</button>
         </div>`;
     }
@@ -2394,7 +2421,7 @@
     // 渲染维度×度量勾选区（第23轮：度量候选=全量；该组已确认 pair 置灰只增不减，新 pair 可勾追加）
     function renderSuDimsBody(box, dims, ctx) {
       if (!dims || dims.length === 0) {
-        box.innerHTML = '<p class="text-xs text-slate-400 py-2">该空间未定义售卖维度，请先在「售卖空间」Tab 重建空间</p>';
+        box.innerHTML = '<p class="text-xs text-slate-400 py-2">该空间为 0 维度空间</p>';
         return;
       }
       const anyCreated = ctx.created > 0;
@@ -2405,7 +2432,7 @@
       });
       box.innerHTML = (anyCreated ? `
         <div class="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-          <i class="fa-solid fa-triangle-exclamation mr-1"></i>该${ctx.fnKey ? ' function' : '商品'} + 售卖空间下已创建 ${ctx.created} 个售卖单元（已确认项置灰，只增不减；可继续勾选新度量追加）
+          <i class="fa-solid fa-triangle-exclamation mr-1"></i>该${ctx.fnKey ? ' function' : '商品'} + 售卖空间下已创建 ${ctx.created} 个售卖单元
         </div>` : '') + dims.map(dim => {
         // 度量候选 = 全量 measureOptions（第23轮：空间只管维度）
         const measures = measureOptions[dim] || [];
@@ -2556,7 +2583,6 @@
               <option value="">全部空间</option>
               <option value="__ACTIVE__" ${prevSpFilter === '__ACTIVE__' ? 'selected' : ''}>仅生效中</option>
             </select>
-            <span class="text-xs text-slate-400 whitespace-nowrap">（勾选范围始终=当前筛选结果；改变筛选会自动取消超出范围的已勾选项）</span>
           </div>
         </div>`;
       box.innerHTML = filterRow + saleUnits.map(u => {
@@ -2582,7 +2608,7 @@
           </div>
           <div class="mt-1.5 pt-1.5 border-t border-slate-200/70 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
             <span><span class="text-slate-400">Function：</span><span class="text-slate-600">${fnText}</span></span>
-            <span><span class="text-slate-400">售卖空间：</span><span class="text-slate-600">${spName}</span>${spaceMismatch ? '<span class="text-amber-600 text-[10px] ml-1" title="该单元所在空间不是其 function 当前的生效售卖空间">⚠ 非生效空间</span>' : ''}</span>
+            <span><span class="text-slate-400">售卖空间：</span><span class="text-slate-600">${spName}</span>${spaceMismatch ? '<span class="text-amber-600 text-[10px] ml-1">⚠ 非生效空间</span>' : ''}</span>
             <span class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
               <span class="text-slate-400">维度组合：</span>${formatDimMeasure(u)}
             </span>
@@ -2714,7 +2740,7 @@
       return myCharges.length ? myCharges.map(c => `<option value="${c.code}" ${c.code === selVal ? 'selected' : ''}>${c.code} · ${c.name}（${c.currency}，刊例价 ${c.price.toFixed(4)}/${c.unit}）</option>`).join('') : '<option value="">暂无计费项，请点击「去创建」</option>';
     }
     function itemOptionsHTML(pool, selVal) {
-      return pool.length ? pool.map(q => `<option value="${q.id}" ${q.id === selVal ? 'selected' : ''}>${q.id} · ${q.name}（数量值 ${q.qty}）</option>`).join('') : '<option value="">暂无</option>';
+      return pool.length ? pool.map(q => `<option value="${q.id}" ${q.id === selVal ? 'selected' : ''}>${q.id} · ${q.name}</option>`).join('') : '<option value="">暂无</option>';
     }
     function configOptionsHTML(type, selVal) {
       const config = currentConfigs[type];
@@ -2756,9 +2782,9 @@
         uBox.innerHTML = `
           <select class="${cls} form-input flex-1 text-xs" data-unit="">${isCharge ? chargeOptionsHTML(d.unified) : itemOptionsHTML(pool, d.unified)}</select>
           <button type="button" onclick="${createFn}" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
-          ${isCharge ? '' : '<span class="text-xs text-slate-400">（数量值将随关联项带入）</span>'}`;
+          ${isCharge ? '' : ''}`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元（请先在区块2勾选并设为「上架」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元</p>'
           : onUnits.map(uid => `
             <div class="p-2 bg-slate-50 rounded-md mb-2">
               <div class="text-xs text-slate-600 mb-1.5">${unitLabel(uid)}</div>
@@ -2777,7 +2803,7 @@
           ? `<div class="flex items-center gap-2"><span class="text-xs text-amber-600"><i class="fa-solid fa-triangle-exclamation mr-1"></i>尚未创建${label}配置</span><button type="button" onclick="openConfigCreate('${cfgKey}')" class="text-violet-600 hover:underline text-xs font-medium">去创建</button></div>`
           : `<div class="flex items-center gap-2"><select class="form-input flex-1 text-xs" data-unit="">${configOptionsHTML(cfgKey, d.unified)}</select>${upBtn()}</div>`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元（请先在区块2勾选并设为「上架」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元</p>'
           : onUnits.map(uid => `
             <div class="p-2 bg-slate-50 rounded-md mb-2">
               <div class="text-xs text-slate-600 mb-1.5">${unitLabel(uid)}</div>
@@ -2790,7 +2816,7 @@
       } else if (key === 'payload') {
         uBox.innerHTML = `<select class="plan-payload-select form-input flex-1 text-xs" data-unit="">${payloadOptionsHTML(d.unified)}</select>`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元（请先在区块2勾选并设为「上架」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元</p>'
           : onUnits.map(uid => `
             <div class="p-2 bg-slate-50 rounded-md mb-2">
               <div class="text-xs text-slate-600 mb-1.5">${unitLabel(uid)}</div>
@@ -2801,11 +2827,11 @@
       } else if (key === 'qty') {
         const q = (d.unified && typeof d.unified === 'object') ? d.unified : { min: '', max: '', step: '' };
         uBox.innerHTML = `
-          <div><label class="form-label">最小购买量（万 vTPM）</label><input data-q="min" type="number" class="form-input text-xs" placeholder="如 100" value="${q.min}"></div>
-          <div><label class="form-label">最大购买量（万 vTPM）</label><input data-q="max" type="number" class="form-input text-xs" placeholder="如 10000" value="${q.max}"></div>
-          <div><label class="form-label">购买量step（万 vTPM）</label><input data-q="step" type="number" class="form-input text-xs" placeholder="如 100" value="${q.step}"></div>`;
+          <div><label class="form-label">最小购买量</label><input data-q="min" type="number" class="form-input text-xs" placeholder="如 100" value="${q.min}"></div>
+          <div><label class="form-label">最大购买量</label><input data-q="max" type="number" class="form-input text-xs" placeholder="如 10000" value="${q.max}"></div>
+          <div><label class="form-label">购买量step</label><input data-q="step" type="number" class="form-input text-xs" placeholder="如 100" value="${q.step}"></div>`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元（请先在区块2勾选并设为「上架」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元</p>'
           : onUnits.map(uid => {
             const qv = (d.units[uid] && typeof d.units[uid] === 'object') ? d.units[uid] : { min: '', max: '', step: '' };
             return `
