@@ -1,7 +1,12 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第35轮（main 2a11004 / gh-pages 4a42fc5，21 套 + smoke 全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第36轮（main 981dea1 / gh-pages 9f9144f，21 套 + smoke 全绿）。
+
+## 第36轮（现行口径）：删解释性文案 + 编辑锁移位 + 商品名快编
+- **解释性文案清理（约 30 处）**：各详情/创建页副标题 p、区块标题括注、弹窗 p 提示、title 悬停说明、下拉选项括注全删；空表提示精简。保留：mock 业务名括号、编辑锁徽标人名、—（不区分 function）、--（0 维度）等信息性内容。
+- **编辑锁移位**：#edit-lock-bar 移至基本信息卡片之前独立行（justify-start 居左）；id 不变，renderEditLockBar 零改动。
+- **商品名称快编**：标题旁铅笔按钮 → 行内输入+保存/取消（openDetailNameEdit/closeDetailNameEdit/confirmDetailNameEdit）；更新 currentProduct.name+标题+基本信息卡片；showDetailView 进入复位；不依赖编辑锁。
 
 ## 第35轮（现行口径）：0 维度空间 + code 唯一标识 + 状态列精简
 - **0 维度售卖空间合法**：confirmSpacePlan 勾选 fn 不选维度可保存（fnDims[f]=[]）；SU 弹窗 0 维分支（renderSuZeroDimBody/confirmZeroDimUnit）——只能创建一个售卖单元（dim/measure 空串）；空 fn 拦截文案「至少勾选一个 function」。
@@ -53,7 +58,7 @@
 - 第12轮：商品与模型/Playground 解耦。第13轮：列表页按单元状态平铺两 Tab（第33轮起=在售/禁售）。第11轮 productIsListed 推导（第33轮起不驱动 UI）。
 - 第16/18轮计划复制：三态均可复制（深拷贝→-副本→待发布）不受锁，copySpacePlan 继承。
 - 第19/20轮：售卖单元 Tab 15 列（fn/空间 rowspan）；售卖计划 Tab 19 列/详情表 17 列。
-- 已废弃：第15~18轮维度勾选；第20轮默认空间/自定义名称；第21轮旧空间计划实体；第22轮空间 measures/fn 配置卡；第25轮 path B；第27轮行内操作列（第29轮删）；第28轮前「未指定空间补尾行」；第30轮前售卖空间卡片；第31轮前批量创建空间；第32轮前手动默认空间；第33轮前上架徽标+已上架/未上架 Tab；第34轮前空间计划列表 rowspan 合并；第35轮前空间名称/至少一维拦截/状态列计划标注。
+- 已废弃：第15~18轮维度勾选；第20轮默认空间/自定义名称；第21轮旧空间计划实体；第22轮空间 measures/fn 配置卡；第25轮 path B；第27轮行内操作列（第29轮删）；第28轮前「未指定空间补尾行」；第30轮前售卖空间卡片；第31轮前批量创建空间；第32轮前手动默认空间；第33轮前上架徽标+已上架/未上架 Tab；第34轮前空间计划列表 rowspan 合并；第35轮前空间名称/至少一维拦截/状态列计划标注；第36轮前编辑锁在头部右侧/详情页副标题与括注解释文案。
 
 ## 页面地图（prototype/）
 - index.html 官网首页 / terms.html 购买须知 / wallet.html 前台充值（packages.html 跳转壳）/ monitor.html+monitor-component.html 前台+共用监控组件 / admin-monitor.html 后台监控。
