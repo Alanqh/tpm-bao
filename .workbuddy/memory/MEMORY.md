@@ -1,7 +1,15 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第32轮（main 69786dc / gh-pages 8e15d79，21 套 735 项全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第33轮（main 21269a1 / gh-pages f557355，21 套全绿）。
+
+## 第33轮（现行口径）：删上架徽标 + 列表在售/禁售两 Tab
+- **商品详情页右上角无上架状态标识**（#detail-status 已删；refreshProductBadge 留空壳函数防调用点报错；productIsListed 留给 openPendingDetail 兼容入口）。
+- **列表页 Tab=在售/禁售**（默认在售），语义=售卖单元状态直查：在售 Tab=单元在售行；禁售 Tab=单元禁售行（无计划草稿/计划未生效/单元下架）。原「已上架/未上架（商品级推导）」Tab 语义废弃。
+- **售卖单元=纯前端草稿**（第33轮显性化）：创建单元只写页面内 saleUnits，无售卖计划即禁售、入禁售 Tab、可删除；只有为其创建售卖计划（发布生效）才真正「落库」在售。数据层无需改动（本来就是这个行为）。
+- 列表页标题下说明文字已删；售卖计划创建页「已上架售卖单元」类文案全改「本计划上架」口径；页面 UI 无「已上架/未上架/待上架」字样（仅剩 JS 历史注释）。
+- 测试：r11 整重写 18 项；其余 20 套零改动过。合计 21 套 723 项 + smoke 37。
+- 教训：改 Tab 名要主动 grep 全部测试断言（本轮 r13 恰好没断言 Tab 文本才零适配通过）。
 
 ## 第32轮（现行口径）：空间生效纯计划仲裁——默认空间机制废除
 - **effectiveSpaceAt(fn,t) 重写**：候选=published 且生效期内且 fnSpaces[fn] 空间存在的计划；仲裁 `(b.priority-a.priority)||(seqOf(b)-seqOf(a))`（优先级降序→同优先级后创建=空间 seq 大者胜）；无命中 `{key:'',source:'',plan:null}`=该 fn 无生效空间（**无 manual/默认回落**）。currentSpaceOfFn 保留为 delegate 别名。
@@ -52,7 +60,7 @@
 
 ## 核心业务概念
 - **预留 vTPM 资源包**：按「购买量（万 vTPM step）× 购买周期（天）」售卖，生效期=开始日0点~开始日+周期+1天。超量路由：超量限流（429）或超量路由 Serverless（二选一）。折算系数按三维度配 YAML 版本；SLO A类违约按累计违约分钟/月分档赔付。
-- **关键实体链**：商品（已上架=存在≥1在售售卖单元，纯推导）→ 售卖空间（属 function，只管维度）→ fn 生效空间（第32轮起：纯空间计划仲裁）→ 售卖单元 {id,fn,dim,measure} → 售卖计划（七字段组）→ 空间计划 → 手动交付 → 资源包 → 监控。
+- **关键实体链**：商品 → 售卖空间（属 function，只管维度）→ fn 生效空间（纯空间计划仲裁）→ 售卖单元 {id,fn,dim,measure}（纯前端草稿，有售卖计划才算真正创建）→ 售卖计划（七字段组）→ 空间计划 → 手动交付 → 资源包 → 监控。
 - 后台菜单：预留vTPM管理挂「活动运营」；商品管理挂「商品定价中心」。
 
 ## 第23轮（现行口径）：售卖空间只管维度
@@ -63,10 +71,10 @@
 - mock：sp1('',购买量+周期)/sp2(input,两token)/sp3(input,输入token)/sp4(output,两token)/sp5(cache,输入token)；glm4 su-1/2@sp2、su-3@sp4、su-4@sp5。
 
 ## 历史轮要点（仍有效）
-- 第12轮：商品与模型/Playground 解耦，基本信息三项。第13轮：列表页按单元状态平铺两 Tab；SKU 第三列点击 openDetailByCode。
+- 第12轮：商品与模型/Playground 解耦，基本信息三项。第13轮：列表页按单元状态平铺两 Tab（第33轮起 Tab 名=在售/禁售）；SKU 第三列点击 openDetailByCode。第11轮 productIsListed 推导（第33轮起不再驱动 UI，仅兼容入口）。
 - 第16/18轮计划复制：三态均可复制（深拷贝→-副本→待发布）不受锁。**第29轮 copySpacePlan 继承此口径。**
 - 第19/20轮：售卖单元 Tab 15 列（fn/空间 rowspan）；售卖计划 Tab 19 列/详情表 17 列。
-- 已废弃：第15~18轮商品售卖维度勾选；第20轮 defaultSpaceByFn/空间自定义名称；第21轮旧空间计划实体；第22轮空间 measures/编辑度量弹窗/fn 配置卡/setFnSpace；第25轮 path B；第27轮空间计划行内操作列（第29轮删）+fnSpaceMap/setSpaceActive/默认徽标（第32轮废）；第28轮前「未指定空间补尾行」；第30轮前详情页信息售卖空间卡片；第31轮前批量创建售卖空间。
+- 已废弃：第15~18轮商品售卖维度勾选；第20轮 defaultSpaceByFn/空间自定义名称；第21轮旧空间计划实体；第22轮空间 measures/编辑度量弹窗/fn 配置卡/setFnSpace；第25轮 path B；第27轮空间计划行内操作列（第29轮删）+fnSpaceMap/setSpaceActive/默认徽标（第32轮废）；第28轮前「未指定空间补尾行」；第30轮前详情页信息售卖空间卡片；第31轮前批量创建售卖空间；第32轮前手动默认空间；第33轮前商品上架徽标+已上架/未上架 Tab。
 
 ## 页面地图（prototype/）
 - index.html 官网首页 / terms.html 购买须知 / wallet.html 前台充值（packages.html 跳转壳）/ monitor.html+monitor-component.html 前台+共用监控组件 / admin-monitor.html 后台监控。
@@ -87,7 +95,7 @@
 ## 技术约定与部署
 - 每页顶部深色「原型导航」栏；后台紫色主色 #7C3AED；管理员「吕」。数据全为页面内 JS mock。
 - **部署（Pages legacy 从分支部署）**：gh-pages 分支=HTML 根目录直出+.nojekyll。流程：推 main → git worktree add gh-pages → rm+cp prototype/*.html 到根 → 推送 → sleep~105s → curl 验证线上 → worktree remove。线上 URL：https://alanqh.github.io/tpm-bao/admin-products.html
-- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：21 套全绿（第32轮口径，共 735 项）——plan-page(77)/this-round(31)/data-consistency(28)/r9..r13(25/32/22/30)/r14(50)/r15(38)/r16(29)/r18(28)/r19(33)/r20(74)/r22(27)/r23(36)/r24(16)/r25(51)/r27(31)/r28(24)/r29(39)/su-dim-validate(6)；另有 smoke-r26(37)。
+- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：21 套全绿（第33轮口径，共 723 项）——plan-page(77)/this-round(31)/data-consistency(28)/r9..r13(25/32/18/30)/r14(50)/r15(38)/r16(29)/r18(28)/r19(33)/r20(74)/r22(27)/r23(36)/r24(16)/r25(51)/r27(31)/r28(24)/r29(39)/su-dim-validate(6)；另有 smoke-r26(37)。
 - **jsdom 踩坑汇总**：runScripts:'dangerously'；confirm/alert 打桩；页面顶层 const 用 window.eval 取；eval 里调用写 fn().length；rowspan 合并行按"任意 cell 匹配"取行、cells 索引偏移（无 fn 列行状态列=cells[1]）；勾选联动须 dispatchEvent(new Event('change',{bubbles:true}))；跨商品切换测试先 backToList()；筛选测试元素引用每次重渲后重查（prune 使旧引用游离）；空间计划弹窗下拉只能取该 fn 空间池 option；**jsdom 循环跑批 >150s 被 SIGKILL(137)，分批跑**；断言 beware 计划名含空间名子串（用 bg-blue-50 或 pu-sp-N-N 定位）；行数断言先想清 productSpaces() 按 fnPool 过滤（glm4 无 sp1）。
 - 语法校验：node -e 提取 `<script>` 用 new Function()。修页面后先跑全套找红再逐套改断言；口径根本失效则整套重写。
 - 网络偶发 502：push 失败等 1-2 分钟重试；恢复检测=curl https://github.com 状态码。
