@@ -79,8 +79,9 @@ boxIn9.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-dim-check[data-fn="input"][value="购买周期"]').checked = true;
 d.getElementById('sp-name').value = 'r31 计划丙';
 w.eval('confirmSpacePlan()');
-ok(alerts[alerts.length - 1].includes('已新建售卖空间：售卖空间8'), '一份计划两 fn 各建一空间: ' + (alerts[alerts.length - 1] || '').slice(0, 30));
-ok(w.eval('spaces["sp8"].name') === '售卖空间8' && w.eval('spaces["sp9"].name') === '售卖空间9', '名称连续自增 sp8/sp9');
+ok(alerts[alerts.length - 1].includes('已新建售卖空间：sp8') && alerts[alerts.length - 1].includes('sp9'), '一份计划两 fn 各建一空间（第35轮 alert 用 code）: ' + (alerts[alerts.length - 1] || '').slice(0, 40));
+ok(w.eval('spaces["sp8"].name === undefined && spaces["sp9"].name === undefined') , '第35轮：空间无 name 字段（code 即标识）');
+ok(w.eval('spaces["sp8"].fn') === 'input' && w.eval('spaces["sp9"].fn') === 'output', 'sp8/sp9 归属正确（按 fnPool DOM 序：input 在前）');
 // 11. 返回列表（快照 glm4 编辑结果）→ vtpm 商品：无 fn 单行生效
 w.eval('backToList()');
 w.eval('openDetailByCode("maas-product-vtpm-std")');

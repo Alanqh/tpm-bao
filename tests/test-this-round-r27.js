@@ -24,7 +24,7 @@ let rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr')).filter(r => r.q
 ok(rows.length === 4, '初始 4 行（常规 3 单元 + 双11 1 单元），实得 ' + rows.length);
 const txt = d.getElementById('spaceplan-tbody').textContent;
 ok(txt.includes('pu-sp-1-1') && txt.includes('pu-sp-2-1'), '计划单元 ID pu-sp-1-1/pu-sp-2-1（同构 planUnitId）');
-ok(txt.includes('双11大促·输入切换售卖空间3') && txt.includes('售卖空间3'), '双11条目：计划名+目标空间');
+ok(txt.includes('双11大促·输入切换售卖空间3') && txt.includes('sp3'), '双11条目：计划名+目标空间 code');
 ok(txt.includes('GLM4·常规售卖空间'), '常规计划条目');
 ok(txt.includes('已发布'), '状态徽标');
 ok(txt.includes('input'), 'Function 列=input');
@@ -33,7 +33,7 @@ ok(txt.includes('sp3'), '目标空间 sp3 列出');
 const head = rows.find(r => r.textContent.includes('pu-sp-2-1'));
 ok(head.cells.length === 9, '计前行 9 列（空间计划单元/状态/所属空间计划/售卖空间/Function/维度/单元数/优先级/起止——第29轮删操作列）');
 ok(head.cells[4].textContent.trim() === 'input', 'Function 列=input');
-ok(head.cells[3].textContent.includes('售卖空间3'), '售卖空间列=空间3');
+ok(head.cells[3].textContent.trim() === 'sp3', '售卖空间列=sp3（第35轮：code 即标识）');
 
 // ===== 3. 售卖空间 Tab（第32轮：按时刻过滤，每 fn 一行生效空间，无默认徽标/设为默认）=====
 w.eval('renderSpaceTab()');
@@ -42,7 +42,7 @@ ok(spaceTxt.includes('设为默认') === false && spaceTxt.includes('设为生�
 ok(spaceTxt.includes('默认') === false, '无默认徽标');
 const effRows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(effRows.length === 3, '3 个 fn 各一行生效空间（sp2/sp4/sp5），实得 ' + effRows.length);
-ok(effRows.every(r => /售卖空间[245]/.test(r.textContent)), '生效行=sp2/sp4/sp5（常规计划承载）');
+ok(effRows.every(r => ['sp2','sp4','sp5'].includes(r.cells[1].textContent.trim())), '生效行=sp2/sp4/sp5（常规计划承载；第35轮空间列=code）');
 ok(effRows.every(r => r.cells[2].textContent.includes('生效中')), '均生效中');
 
 // ===== 4. 纯计划仲裁：priority 降序（双11 500 > 常规 100 在 11-15 接管） =====
@@ -53,8 +53,8 @@ ok(w.eval('effectiveSpaceAt("input","2026-10-15 00:00:00").key') === '', '10-15 
 
 // ===== 5. 接管时刻空间 Tab 列表切换（11-15 input 行=sp3 不再显示 sp2）=====
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
-const st2 = d.getElementById('space-tbody').textContent;
-ok(st2.includes('计划「双11大促·输入切换售卖空间3」生效'), '11-15 生效标注（胜出计划=双11）');
+const st2Rows = Array.from(d.querySelectorAll('#space-tbody tr'));
+ok(st2Rows.some(r => r.cells[1].textContent.trim() === 'sp3') && st2Rows.every(r => r.cells[1].textContent.trim() !== 'sp2'), '11-15 input 行=sp3（双11接管，按时刻过滤）');
 w.eval('timeFilter = null; renderSpaceTab()');
 
 // ===== 6. 创建多 fn 计划 → 平铺 rowspan 合并（第31轮：维度勾选，保存为每 fn 新建空间）=====

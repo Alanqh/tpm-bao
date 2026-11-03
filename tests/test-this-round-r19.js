@@ -45,7 +45,7 @@ let rows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(rows.length === 2, '售卖单元 2 行');
 const suRow = rows[0];
 ok(suRow.cells[0].textContent.trim() === 'input' && suRow.cells[0].rowSpan === 1, 'su-1 第一列 Function=input（合并单元格）');
-ok(suRow.cells[1].textContent.includes('演示空间X'), '第二列 售卖空间=演示空间X');
+ok(suRow.cells[1].textContent.trim() === 'sp-x', '第二列 售卖空间=sp-x（第35轮：code 即标识）');
 ok(suRow.cells[2].textContent.trim() === 'su-1', '第三列 售卖单元=su-1');
 // su-2 fn 变化但空间相同 → 保留 fn td（rs1）、空间被合并
 ok(rows[1].cells[0].textContent.trim() === 'output' && rows[1].cells[0].rowSpan >= 1, 'su-2 行 fn td=output');
@@ -61,7 +61,7 @@ ok(planHead[4] === '售卖单元' && planHead[5] === 'Function' && planHead[6] =
 const planRowEl = document.querySelector('#plan-tbody tr');
 ok(planRowEl.cells.length === 19, '计划单元行 19 列（第20轮加售卖空间列）');
 ok(planRowEl.cells[4].textContent.trim() === 'su-1' && planRowEl.cells[5].textContent.trim() === 'input', '计划 Tab Function 列=input（第 6 列）');
-ok(planRowEl.cells[6].textContent.includes('演示空间X'), '计划 Tab 售卖空间列（第 7 列）');
+ok(planRowEl.cells[6].textContent.trim() === 'sp-x', '计划 Tab 售卖空间列（第 7 列；第35轮=code）');
 
 // ===== 4. 售卖计划详情页（第20轮 17 列） =====
 section('4. 计划详情');
@@ -71,7 +71,7 @@ ok(pdHead[1] === '售卖单元' && pdHead[2] === 'Function' && pdHead[3] === '�
 const pdRow = document.querySelector('#plan-detail-tbody tr');
 ok(pdRow.cells.length === 17, '详情行 17 列（第20轮加售卖空间列）');
 ok(pdRow.cells[2].textContent.trim() === 'input', '详情 Function 列=input');
-ok(pdRow.cells[3].textContent.includes('演示空间X'), '详情 售卖空间列=演示空间X');
+ok(pdRow.cells[3].textContent.trim() === 'sp-x', '详情 售卖空间列=sp-x（第35轮=code）');
 
 // ===== 5. 计划创建页区块2（第20轮：function筛选下拉 + 空间筛选 + fn/空间信息行） =====
 section('5. 计划创建页');
@@ -80,7 +80,7 @@ const unitCards = Array.from(document.querySelectorAll('.plan-unit-check')).map(
 ok(unitCards.length === 2, '区块2 渲染 2 个售卖单元');
 const card1 = unitCards[0].textContent;
 ok(card1.includes('input'), '区块2 su-1 Function=input');
-ok(card1.includes('演示空间X'), '区块2 su-1 展示售卖空间');
+ok(card1.includes('sp-x'), '区块2 su-1 展示售卖空间（第35轮=code）');
 ok(!card1.includes('维度组合：function'), '区块2 维度组合不含 function');
 ok(document.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)').length === 2, '区块2 有 function 筛选复选组（第24轮多选，input/output）');
 ok(!!document.getElementById('plan-filter-space'), '区块2 有售卖空间筛选下拉（第20轮）');
@@ -91,7 +91,7 @@ window.eval('closePlanCreatePage(); exitEdit(); backToList()');
 window.openDetailByCode('maas-product-vtpm-std');
 rows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(rows[0].cells[0].textContent.trim() === '—', 'vtpm 第一列 Function=—（无 function，合并单元格）');
-ok(rows[0].cells[1].textContent.includes('售卖空间1'), 'vtpm 第二列 售卖空间=售卖空间1（第21轮序号名）');
+ok(rows[0].cells[1].textContent.trim() === 'sp1', 'vtpm 第二列 售卖空间=sp1（第35轮：code 即标识）');
 ok(rows[0].cells[2].textContent.trim() === 'su-1', 'vtpm 第三列 售卖单元=su-1');
 ok(rows[0].cells[4].textContent.includes('购买量区间') && rows[0].cells[4].textContent.includes('购买周期'), 'vtpm 维度:度量正常展示');
 // vtpm 无 function → 创建售卖单元弹窗无 function 下拉

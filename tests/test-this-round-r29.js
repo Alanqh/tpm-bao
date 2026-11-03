@@ -51,7 +51,7 @@ let act = d.getElementById('spaceplan-detail-actions');
 ok(act.textContent.includes('停用') && act.textContent.includes('复制'), '已发布操作=停用+复制');
 ok(!act.innerHTML.includes('editSpacePlan'), '已发布无修改（对齐售卖计划：发布后不可改）');
 const dtRows = d.querySelectorAll('#spaceplan-detail-tbody tr');
-ok(dtRows.length === 1 && dtRows[0].textContent.includes('pu-sp-2-1') && dtRows[0].textContent.includes('售卖空间3'), '详情页空间计划单元行（pu-sp-2-1）');
+ok(dtRows.length === 1 && dtRows[0].textContent.includes('pu-sp-2-1') && dtRows[0].textContent.includes('sp3'), '详情页空间计划单元行（pu-sp-2-1→sp3；第35轮空间列=code）');
 
 // ===== 6. 复制：生成待发布副本，不受锁限制 =====
 alerts.length = 0;

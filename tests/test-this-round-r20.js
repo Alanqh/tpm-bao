@@ -48,11 +48,10 @@ ok(spRows[0].cells[0].textContent.trim() === 'cache', '首行 fn=cache（字典�
 ok(spRows[0].cells.length === 5, '每行 5 cells（每 fn 一行无 rowspan 合并）');
 ok(spRows[2].cells[0].textContent.trim() === 'output', 'output 独立行');
 const inputRow2 = spRows[1].cells;
-ok(inputRow2[1].textContent.includes('售卖空间2') && inputRow2[4].textContent.trim() === '2', '售卖空间2 行售卖单元数=2');
+ok(inputRow2[1].textContent.trim() === 'sp2' && inputRow2[4].textContent.trim() === '2', 'sp2 行售卖单元数=2（第35轮：空间列只显 code）');
 ok(inputRow2[3].textContent.includes('输入token区间 + 输出token区间'), '维度列展示维度集合（sp2 两 token 维度）');
 ok(spRows[0].cells[2].textContent.includes('生效中') && spRows[1].cells[2].textContent.includes('生效中') && spRows[2].cells[2].textContent.includes('生效中'), 'sp5/sp2/sp4 状态=生效中（常驻计划承载）');
-ok(spRows[1].cells[2].textContent.includes('计划「GLM4·常规售卖空间」生效'), '生效标注含胜出计划名（常规计划）');
-ok(spRows[0].cells[2].textContent.includes('2026-11-11 起切换') || spRows[1].cells[2].textContent.includes('2026-11-11 起切换'), 'input 行含双11切换预告');
+ok(spRows.every(r => !r.cells[2].textContent.includes('计划「') && !r.cells[2].textContent.includes('起切换')), '状态列只留徽标（第35轮：胜出计划/切换预告标注已删）');
 
 // ===== 3. currentSpaceOfFn（第32轮：纯计划仲裁别名）与 effectiveSpaceAt =====
 section('3. 生效空间推导');
@@ -68,7 +67,7 @@ window.eval('switchInnerTab("saleunit"); renderSaleUnits();');
 const suRows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(suRows.length === 4, 'glm4 售卖单元 4 行');
 const r0 = suRows[0].cells;
-ok(r0[0].textContent.trim() === 'cache' && r0[1].textContent.includes('售卖空间5') && r0[2].textContent.trim() === 'su-4', '首行=cache/售卖空间5/su-4（三列结构）');
+ok(r0[0].textContent.trim() === 'cache' && r0[1].textContent.includes('sp5') && r0[2].textContent.trim() === 'su-4', '首行=cache/sp5/su-4（三列结构；第35轮空间列=code）');
 const inputRow = suRows[1].cells;
 ok(inputRow[0].textContent.trim() === 'input' && inputRow[0].rowSpan === 2, 'input fn td rowspan=2（合并）');
 ok(suRows[2].cells[0].textContent.trim() === 'su-2', 'input 第二行（su-2）空间列被合并');
@@ -123,7 +122,7 @@ document.getElementById('sp-name').value = 'r31 创建计划Y';
 alertMsg = '';
 window.confirmSpacePlan();
 ok(alertMsg.includes('已新建售卖空间') && evalInPage('spaceSeq') === 7, '同 fn 维度集合与 sp2 相同 → 不拦截，新建 sp7（总是新建口径）');
-// 空维度拦截（fn 勾选但维度全不选）
+// 0 维度空间合法化（第35轮：fn 勾选但维度全不选 → 保存成功，落地 0 维空间）
 window.eval('openSpacePlanModal()');
 const box6c = document.querySelector('.sp-fn-check[data-fn="input"]');
 box6c.checked = true;
@@ -131,13 +130,15 @@ box6c.dispatchEvent(new window.Event('change', { bubbles: true }));
 document.getElementById('sp-name').value = 'r31 创建计划Z';
 alertMsg = '';
 window.confirmSpacePlan();
-ok(alertMsg.includes('至少选择一个维度'), '空维度拦截: ' + alertMsg);
+ok(alertMsg.includes('已保存') && alertMsg.includes('0 维度'), '0 维度空间正常保存（第35轮）: ' + alertMsg.slice(0, 40));
+ok(evalInPage('spaceSeq') === 8 && evalInPage('spaces["sp8"].dims.length') === 0, 'sp8 落地为 0 维度空间');
 // 不勾任何 fn 拦截（维度复选被禁用）
-box6c.checked = false;
-box6c.dispatchEvent(new window.Event('change', { bubbles: true }));
+window.eval('openSpacePlanModal()');
+document.getElementById('sp-name').value = 'r31 空fn计划';
+document.querySelectorAll('.sp-fn-check').forEach(c => { c.checked = false; });
 alertMsg = '';
 window.confirmSpacePlan();
-ok(alertMsg.includes('至少为一个 function') || alertMsg.includes('至少一个'), '空 fn 拦截: ' + alertMsg);
+ok(alertMsg.includes('至少勾选一个 function'), '空 fn 拦截（第35轮文案）: ' + alertMsg);
 window.eval('closeModal("spaceplan")');
 
 // ===== 7. 编辑度量功能已删除（第23轮） =====
@@ -203,7 +204,7 @@ window.eval('switchInnerTab("space")');
 const vRows = Array.from(document.querySelectorAll('#space-tbody tr'));
 ok(vRows.length === 1, '无 fn 商品空间列表单行（sp1 常驻计划）');
 ok(vRows[0].cells[0].textContent.trim() === '—', 'Function 列显示 —（无 function）');
-ok(vRows[0].textContent.includes('售卖空间1'), '当前空间=售卖空间1');
+ok(vRows[0].cells[1].textContent.trim() === 'sp1', '当前空间=sp1（第35轮：空间列只显 code）');
 ok(vRows[0].cells[2].textContent.includes('生效中'), 'sp1 状态=生效中');
 ok(evalInPage('currentSpaceOfFn("")') === 'sp1', 'currentSpaceOfFn("")=sp1（常驻计划 fn=""→sp1）');
 window.eval('backToList()');

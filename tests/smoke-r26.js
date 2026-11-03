@@ -76,7 +76,7 @@ T.renderSpaceTab();
 let rows = w.document.querySelectorAll('#space-tbody tr');
 ok(rows.length === 3, '当前时刻 3 行（input=sp2/output=sp4/cache=sp5 各一行），实得 ' + rows.length);
 let tabTxt = w.document.getElementById('space-tbody').textContent;
-ok(tabTxt.includes('售卖空间2') && Array.from(rows).every(r => !r.cells[1].textContent.includes('sp3')), '当前时刻 input=sp2（sp3 未来才生效不在列表；计划名含"售卖空间3"子串故按行内空间 key 判定）');
+ok(Array.from(rows).some(r => r.cells[1].textContent.trim() === 'sp2') && Array.from(rows).every(r => r.cells[1].textContent.trim() !== 'sp3'), '当前时刻 input=sp2（sp3 未来才生效不在列表；第35轮空间列只显 code）');
 ok(!tabTxt.includes('设为默认') && !tabTxt.includes('默认'), '第32轮：无默认徽标/设为默认（默认机制已废）');
 const ths = w.document.querySelectorAll('#inner-tab-space thead th');
 ok(ths.length === 5, '售卖空间表头 5 列（删操作列），实得 ' + ths.length);
@@ -86,8 +86,8 @@ T.renderSpaceTab();
 rows = w.document.querySelectorAll('#space-tbody tr');
 tabTxt = w.document.getElementById('space-tbody').textContent;
 ok(Array.from(rows).some(r => r.cells[1].textContent.includes('sp3')) && Array.from(rows).every(r => !r.cells[1].textContent.includes('sp2')), '11-15 时 input=sp3（sp2 按时刻过滤不在列表）');
-ok(tabTxt.includes('计划「双11大促·输入切换售卖空间3」生效'), '生效空间标注胜出计划');
-ok(tabTxt.includes('售卖空间4') && tabTxt.includes('售卖空间5'), '11-15 output=sp4/cache=sp5 仍在列表');
+ok(Array.from(rows).every(r => !r.cells[2].textContent.includes('计划「')), '状态列只留徽标（第35轮：胜出计划标注已删）');
+ok(Array.from(rows).some(r => r.cells[1].textContent.trim() === 'sp4') && Array.from(rows).some(r => r.cells[1].textContent.trim() === 'sp5'), '11-15 output=sp4/cache=sp5 仍在列表');
 T.timeFilter = null;
 T.renderSpaceTab();
 
@@ -134,7 +134,7 @@ T.openDetailByCode('maas-product-vtpm-std');
 ok(T.spacePlans.length === 1 && T.spacePlans[0].fnSpaces[''] === 'sp1' && T.spacePlanStatuses[0] === 'published', 'vtpm std 常驻计划 fn=""→sp1 published');
 ok(T.effectiveSpaceAt('', '2026-11-01 00:00:00').key === 'sp1', 'vtpm 当前生效=sp1（常驻计划）');
 T.renderSpaceTab();
-ok(w.document.getElementById('space-tbody').textContent.includes('售卖空间1'), 'vtpm 列表显示 sp1');
+ok(w.document.getElementById('space-tbody').textContent.includes('sp1'), 'vtpm 列表显示 sp1（code）');
 // pre：常驻计划待发布 → 无生效空间
 T.backToList();
 T.openDetailByCode('maas-product-vtpm-pre');

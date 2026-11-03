@@ -26,11 +26,10 @@ ok(rows[0].cells[0].textContent.trim() === 'cache' && rows[0].cells[0].rowSpan =
 ok(rows[1].cells[0].textContent.trim() === 'input', '第二行 input（无 rowspan 合并，每 fn 一行）');
 ok(rows[1].cells.length === 5, 'input 行 5 cells（无合并）');
 ok(rows[2].cells[0].textContent.trim() === 'output', 'output 第三行');
-ok(rows[0].cells[1].textContent.includes('售卖空间5') && rows[1].cells[1].textContent.includes('售卖空间2') && rows[2].cells[1].textContent.includes('售卖空间4'), '当前时刻 cache=sp5/input=sp2/output=sp4');
-// 4. 状态列（第32轮：均生效中——常驻计划承载；含胜出计划标注）
+ok(rows[0].cells[1].textContent.trim() === 'sp5' && rows[1].cells[1].textContent.trim() === 'sp2' && rows[2].cells[1].textContent.trim() === 'sp4', '当前时刻 cache=sp5/input=sp2/output=sp4（第35轮：空间列只显 code）');
+// 4. 状态列（第35轮：只留「生效中」徽标，胜出计划/切换预告标注已删）
 ok(rows[0].textContent.includes('生效中') && rows[1].textContent.includes('生效中') && rows[2].textContent.includes('生效中'), 'sp5/sp2/sp4 均生效中');
-ok(rows[1].cells[2].textContent.includes('计划「GLM4·常规售卖空间」生效'), 'input 行标注胜出计划=常规计划');
-ok(rows[1].cells[2].textContent.includes('2026-11-11 起切换'), 'input 行含双11切换预告');
+ok(rows.every(r => !r.cells[2].textContent.includes('计划「') && !r.cells[2].textContent.includes('起切换')), '状态列无胜出计划/切换预告文案（第35轮精简）');
 // 5. 无操作列/无默认机制（第32轮）
 ok(!rows[0].innerHTML.includes('设为默认') && !rows[0].innerHTML.includes('设为生效'), '无设为默认/设为生效（默认机制已废）');
 ok(w.eval('typeof setSpaceActive') === 'undefined', 'setSpaceActive 函数已删');
@@ -38,9 +37,8 @@ ok(w.eval('typeof setSpaceActive') === 'undefined', 'setSpaceActive 函数已删
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
 const rows2 = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows2.length === 3, '11-15 仍 3 行（每 fn 一行）');
-ok(rows2.some(r => (r.querySelector('div.font-mono') || {}).textContent === 'sp3'), '11-15 input 行空间=sp3（双11接管）');
-ok(rows2.some(r => (r.querySelector('div.font-mono') || {}).textContent === 'sp2') === false, '11-15 sp2 不在列表（按时刻过滤）');
-ok(rows2.filter(r => r.cells[2].textContent.includes('双11大促')).length === 1, 'sp3 行标注胜出计划=双11');
+ok(rows2.some(r => r.cells[1].textContent.trim() === 'sp3'), '11-15 input 行空间=sp3（双11接管）');
+ok(rows2.some(r => r.cells[1].textContent.trim() === 'sp2') === false, '11-15 sp2 不在列表（按时刻过滤）');
 w.eval('timeFilter = null; renderSpaceTab()');
 // 7. 浏览态：vtpm std（常驻计划 sp1 单行）
 w.eval('backToList()');
@@ -66,12 +64,12 @@ ok(w.eval('spaceSeq') === 6, 'sp6 创建成功（计划保存即落地空间）'
 ok(w.eval('spaces["sp6"].dims.length') === 1, 'sp6 单维度');
 ok(w.eval('spaces["sp6"].measures') === undefined, '空间无 measures 字段（只管维度）');
 let rows3 = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows3.length === 1 && rows3[0].textContent.includes('售卖空间1'), '计划A 待发布 → 不接管，列表仍仅 sp1（第32轮：纯计划仲裁）');
+ok(rows3.length === 1 && rows3[0].cells[1].textContent.trim() === 'sp1', '计划A 待发布 → 不接管，列表仍仅 sp1（第32轮：纯计划仲裁）');
 // 发布后接管：priority 200 > 常驻 100 → sp6 生效
 w.eval('publishSpacePlan(1)');
 ok(w.eval('currentSpaceOfFn("")') === 'sp6', '发布后 priority 200>100 → sp6 接管');
 rows3 = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows3.length === 1 && rows3[0].textContent.includes('售卖空间6'), '列表显示 sp6（按时刻过滤）');
+ok(rows3.length === 1 && rows3[0].cells[1].textContent.trim() === 'sp6', '列表显示 sp6（按时刻过滤）');
 // 9. 重复维度集合不再拦截（第31轮口径：总是新建 sp7）
 w.eval('openSpacePlanModal()');
 const box9 = d.querySelector('.sp-fn-check[data-fn=""]');

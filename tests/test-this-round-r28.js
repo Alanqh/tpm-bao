@@ -22,15 +22,15 @@ w.eval('querySpaceAt()');
 ok(w.eval('timeFilter && timeFilter.point.indexOf("2026-11-15 12:00") === 0'), 'timeFilter 置位: ' + w.eval('JSON.stringify(timeFilter)'));
 ok(!d.getElementById('space-tf-tip').classList.contains('hidden'), '提示显示');
 ok(d.getElementById('space-tf-tip').textContent.includes('2026-11-15 12:00'), '提示含时间点文本');
-const t2 = d.getElementById('space-tbody').textContent;
-ok(t2.includes('计划「双11大促·输入切换售卖空间3」生效'), '11-15 生效标注（胜出计划=双11）');
+const t2Rows = Array.from(d.querySelectorAll('#space-tbody tr'));
+ok(t2Rows.some(r => r.cells[1].textContent.trim() === 'sp3') && t2Rows.every(r => r.cells[1].textContent.trim() !== 'sp2'), '11-15 input 行=sp3（双11接管；第35轮删胜出计划标注，按行断言）');
 ok(w.eval('effectiveSpaceAt("input").key') === 'sp3', 'effectiveSpaceAt 走 timeFilter → sp3');
 
 // ===== 3. 空值查询拦截 / 重置 =====
 w.eval('resetSpaceAt()');
 ok(w.eval('timeFilter') === null, '重置后 timeFilter=null');
 ok(d.getElementById('space-tf-tip').classList.contains('hidden'), '重置后提示隐藏');
-ok(d.getElementById('space-tbody').textContent.includes('2026-11-11 起切换') || d.getElementById('space-tbody').textContent.includes('起生效'), '当前时点显示未来切换预告（第32轮文案：起切换）');
+ok(Array.from(d.querySelectorAll('#space-tbody tr')).every(r => !r.cells[2].textContent.includes('计划「')), '当前时点状态列只留徽标（第35轮：切换预告标注已删）');
 d.getElementById('space-tf-point').value = '';
 alerts.length = 0;
 w.eval('querySpaceAt()');

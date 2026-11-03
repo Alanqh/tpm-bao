@@ -51,15 +51,15 @@ ok(w.eval('nextSpaceSwitchOfFn("input","2026-11-25 00:00:00")') === null, '11-25
 w.eval('renderSpaceTab()');
 let rows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows.length === 3, '当前时刻 3 行（cache=sp5/input=sp2/output=sp4 各一行）');
-const inputRowNow = rows.find(r => (r.querySelector('div.font-mono') || {}).textContent === 'sp2');
-ok(inputRowNow && inputRowNow.textContent.includes('2026-11-11 起切换'), 'input 行（sp2）显示未来切换预告（sp3 将接管）');
+const inputRowNow = rows.find(r => r.cells[1].textContent.trim() === 'sp2');
+ok(inputRowNow && !inputRowNow.cells[2].textContent.includes('起切换'), 'input 行（sp2）状态列只留徽标（第35轮：切换预告标注已删）');
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
 rows = Array.from(d.querySelectorAll('#space-tbody tr'));
-const sp3r = rows.find(r => (r.querySelector('div.font-mono') || {}).textContent === 'sp3');
+const sp3r = rows.find(r => r.cells[1].textContent.trim() === 'sp3');
 ok(rows.length === 3 && !!sp3r, '11-15 时 3 行且 input 行=sp3');
-ok(sp3r.textContent.includes('生效中') && sp3r.textContent.includes('计划「双11大促'), 'sp3 行生效中+胜出计划标注');
-ok(rows.some(r => (r.querySelector('div.font-mono') || {}).textContent === 'sp2') === false, '11-15 时 sp2 不在列表（按时刻过滤）');
-ok(rows.some(r => (r.querySelector('div.font-mono') || {}).textContent === 'sp4'), '11-15 时 output=sp4 仍在列表');
+ok(sp3r.cells[2].textContent.includes('生效中') && !sp3r.cells[2].textContent.includes('计划「'), 'sp3 行生效中（状态列只留徽标，第35轮）');
+ok(rows.some(r => r.cells[1].textContent.trim() === 'sp2') === false, '11-15 时 sp2 不在列表（按时刻过滤）');
+ok(rows.some(r => r.cells[1].textContent.trim() === 'sp4'), '11-15 时 output=sp4 仍在列表');
 w.eval('timeFilter = null');
 
 // ===== 6. 空间切换计划列表 DOM =====
@@ -68,7 +68,7 @@ const spTbody = d.getElementById('spaceplan-tbody');
 ok(spTbody && spTbody.querySelectorAll('tr').length >= 1, 'spaceplan-tbody 有数据行');
 ok(spTbody.textContent.includes('双11大促·输入切换售卖空间3'), '列表含双11计划名');
 ok(spTbody.textContent.includes('已发布'), '列表状态徽标=已发布');
-ok(spTbody.textContent.includes('input') && spTbody.textContent.includes('售卖空间3'), '列表展示 input→售卖空间3');
+ok(spTbody.textContent.includes('input') && spTbody.textContent.includes('sp3'), '列表展示 input→sp3（第35轮空间列=code）');
 
 // ===== 7. 编辑锁保护 =====
 alerts.length = 0;
@@ -91,7 +91,7 @@ ok(boxes.length >= 3, '弹窗按商品 function 渲染复选行，实得 ' + box
 d.getElementById('sp-name').value = 'r26测试计划';
 alerts.length = 0;
 w.eval('confirmSpacePlan()');
-ok(alerts.some(m => m.includes('至少为一个 function')), '未勾任何 fn 拦截');
+ok(alerts.some(m => m.includes('至少勾选一个 function')), '未勾任何 fn 拦截（第35轮文案）');
 // 勾 input + 维度=输入token区间（第31轮：维度勾选，保存时新建空间），时段 12-01~12-10
 const inBox = modal.querySelector('.sp-fn-check[data-fn="input"]');
 inBox.checked = true;
