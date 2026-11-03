@@ -20,7 +20,7 @@ section('页面结构');
 ok(!!document.getElementById('plan-create-view'), '存在独立页面 #plan-create-view');
 ok(!document.getElementById('modal-plan-create'), '原弹窗 #modal-plan-create 已删除');
 const pcView = document.getElementById('plan-create-view');
-ok(pcView.textContent.includes('基础信息（含生效时间）'), '区块1：基础信息（含生效时间）');
+ok(pcView.textContent.includes('基础信息') && pcView.textContent.includes('开始生效时间'), '区块1：基础信息（第36轮去括注）');
 ok(pcView.textContent.includes('本售卖计划对哪些售卖单元生效'), '区块2：生效售卖单元');
 ok(pcView.textContent.includes('3. 计划字段配置'), '区块3：计划字段配置');
 ['3.1 关联计费项', '3.2 关联配额项', '3.3 关联库存项', '3.4 关联vTPM折算系数', '3.5 关联SLO赔付规则', '3.6 关联payload', '3.7 购买量'].forEach(t => {
@@ -52,7 +52,7 @@ ok(pcView.textContent.includes('本计划下上架'), '上架状态文案');
 ok(document.querySelectorAll('#plan-charge-unified select.plan-charge-select').length === 1, '计费项 unified 下拉 1 个');
 ok(document.querySelectorAll('#plan-quota-unified select.plan-quota-select').length === 1, '配额项 unified 下拉 1 个');
 ok(document.querySelectorAll('#plan-inventory-unified select.plan-inventory-select').length === 1, '库存项 unified 下拉 1 个');
-ok(document.querySelector('#plan-inventory-unified option').textContent.includes('数量值'), '库存项选项含数量值');
+ok(document.querySelector('#plan-inventory-unified option').textContent.includes('inv-'), '库存项选项渲染（第36轮选项去括注）');
 // qty/sell unified 输入框
 ok(document.querySelectorAll('#plan-qty-unified input').length === 3, '购买量 unified 三输入框');
 ok(!document.getElementById('plan-sell-unified'), '售卖时间容器已删除');

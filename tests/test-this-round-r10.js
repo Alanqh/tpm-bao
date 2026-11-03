@@ -22,6 +22,10 @@ ok(planBtn.disabled === true, '创建售卖计划按钮置灰');
 ok(suBtn.classList.contains('opacity-40'), '置灰样式 opacity-40');
 const bar = document.getElementById('edit-lock-bar');
 ok(bar.textContent.includes('发起变更'), '锁栏显示「发起变更」按钮');
+// 第36轮：编辑锁位于基本信息卡片之前、居左
+ok(bar.previousElementSibling === null || !bar.previousElementSibling.classList.contains('admin-card'), '锁栏之前无基本信息卡片（位于卡片前）');
+ok(bar.parentElement && bar.parentElement.querySelector('.admin-card') && (bar.compareDocumentPosition(bar.parentElement.querySelector('.admin-card')) & window.Node.DOCUMENT_POSITION_FOLLOWING), '基本信息卡片在锁栏之后');
+ok(bar.className.includes('justify-start'), '锁栏居左（justify-start）');
 // 删除按钮置灰（std 无可删单元；用 pre 商品验证可删单元）
 // 护栏：直接调用操作被拦截
 alertMsg = '';
@@ -103,6 +107,29 @@ ok(delCell2.textContent.includes('删除') && !delCell2.textContent.includes('�
 window.removeSaleUnit('su-3');
 ok(window.eval('saleUnits.length') === 2, '持锁后删除 su-3 成功（剩余 2 个: ' + window.eval('saleUnits.map(u=>u.id).join(",")') + '）');
 window.exitEdit();
+
+// ===== 7. 第36轮：商品名称快速编辑（标题旁铅笔 → 行内输入+保存/取消，无需编辑锁） =====
+section('7. 商品名称快速编辑（第36轮）');
+window.backToList();
+window.openDetailByCode('maas-product-vtpm-pre');
+const editBtn = document.getElementById('detail-name-edit-btn');
+const nameWrap = document.getElementById('detail-name-edit-wrap');
+const nameInput = document.getElementById('detail-name-input');
+ok(!!editBtn && !nameWrap.classList.contains('flex') && nameWrap.classList.contains('hidden'), '初始只显示铅笔按钮');
+window.openDetailNameEdit();
+ok(!nameWrap.classList.contains('hidden') && editBtn.classList.contains('hidden'), '点击后行内输入+保存/取消出现');
+ok(nameInput.value === window.eval('currentProduct.name'), '输入框回填当前名称');
+nameInput.value = '';
+window.confirmDetailNameEdit();
+ok(alertMsg.includes('不能为空'), '空名称拦截');
+nameInput.value = '预发布商品改名版';
+window.confirmDetailNameEdit();
+ok(document.getElementById('detail-title').textContent.includes('预发布商品改名版'), '保存后标题同步新名称');
+ok(window.eval('currentProduct.name') === '预发布商品改名版', 'currentProduct.name 已更新（无需编辑锁）');
+window.openDetailNameEdit();
+window.closeDetailNameEdit();
+ok(nameWrap.classList.contains('hidden') && !editBtn.classList.contains('hidden'), '取消恢复铅笔按钮');
+window.backToList();
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);
