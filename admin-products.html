@@ -182,21 +182,18 @@
       <!-- 列表视图 -->
       <div id="list-view">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div>
-            <h2 class="text-lg font-semibold text-slate-900">商品管理</h2>
-            <p class="text-xs text-slate-500 mt-0.5">已上架/未上架 Tab 分别展示「在售/禁售」状态的售卖单元（按 SKU 与售卖单元 ID 排序），点击 SKU 进入商品详情。</p>
-          </div>
+          <h2 class="text-lg font-semibold text-slate-900">商品管理</h2>
           <button onclick="openProductModal()" class="admin-btn-primary text-sm px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>新增商品</button>
         </div>
 
         <div class="admin-card">
           <div class="flex border-b border-slate-200 px-2">
-            <button type="button" class="admin-tab" data-tab="listed" onclick="switchTopTab('listed')">已上架</button>
-            <button type="button" class="admin-tab active" data-tab="pending" onclick="switchTopTab('pending')">未上架</button>
+            <button type="button" class="admin-tab active" data-tab="listed" onclick="switchTopTab('listed')">在售</button>
+            <button type="button" class="admin-tab" data-tab="pending" onclick="switchTopTab('pending')">禁售</button>
           </div>
 
-          <!-- 已上架 Tab：该组商品下的售卖单元平铺（第13轮：不再展示商品行） -->
-          <div id="top-tab-listed" class="p-4 hidden">
+          <!-- 在售 Tab：该组商品下的售卖单元平铺（有生效中已发布售卖计划且单元上架的单元） -->
+          <div id="top-tab-listed" class="p-4">
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[1500px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
@@ -222,8 +219,8 @@
             </div>
           </div>
 
-          <!-- 未上架 Tab：该组商品下的售卖单元平铺（无任何在售售卖单元的商品，实时推导） -->
-          <div id="top-tab-pending" class="p-4">
+          <!-- 禁售 Tab：全部售卖单元平铺（无生效计划的草稿单元/计划未生效/单元下架） -->
+          <div id="top-tab-pending" class="p-4 hidden">
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[1500px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
@@ -259,7 +256,6 @@
             <p class="text-xs text-slate-500 mt-0.5">上半部分为商品基本信息；下半部分管理上架情况、售卖计划及配置（折算系数/SLO赔付规则）。</p>
           </div>
           <div class="flex items-center gap-3">
-            <span id="detail-status" class="badge bg-slate-100 text-slate-500">未上架</span>
             <div id="edit-lock-bar" class="flex items-center gap-2"></div>
             <button onclick="backToList()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回列表</button>
           </div>
@@ -563,7 +559,7 @@
         <!-- 区块3：各字段组（每个都带「全部一致 / 按售卖单元配置」开关） -->
         <div class="admin-card p-4">
           <p class="text-sm font-medium text-slate-900 mb-1">3. 计划字段配置</p>
-          <p class="text-xs text-slate-500 mb-3">每组字段可用开关选择「全部售卖单元一致」或「按售卖单元配置」（只为已上架售卖单元逐个配置）</p>
+          <p class="text-xs text-slate-500 mb-3">每组字段可用开关选择「全部售卖单元一致」或「按售卖单元配置」</p>
           <div class="grid grid-cols-1 gap-5">
 
             <!-- 3.1 计费项 -->
@@ -936,7 +932,7 @@
       }
     }
 
-    // ===== 顶部 Tab：已上架 / 未上架（默认未上架；第11轮状态推导化） =====
+    // ===== 顶部 Tab：在售 / 禁售（第33轮：按售卖单元状态两 Tab；默认在售） =====
     function switchTopTab(tab) {
       document.querySelectorAll('.admin-tab[data-tab="listed"], .admin-tab[data-tab="pending"]').forEach(t => t.classList.remove('active'));
       document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
@@ -1223,7 +1219,7 @@
     }
 
     // ===== 渲染 =====
-    // 商品状态推导（第11轮）：存在至少一个「在售」售卖单元 → 已上架；否则未上架
+    // 商品状态推导（第11轮）：存在至少一个「在售」售卖单元 → 在售；否则禁售（第33轮：badge 已删，仅供 openPendingDetail 兼容入口使用）
     // plans/statuses/units 不传时用该商品的 mock 默认数据；详情页编辑中则传入当前副本（实时反映发布/停用）
     function productIsListed(code, plans, statuses, units) {
       const ps = plans || defaultPlans[code] || [];
@@ -1255,16 +1251,15 @@
         spacePlanStatuses: JSON.parse(JSON.stringify(spacePlanStatuses))
       };
     }
-    // 详情页头部徽标（第11轮推导）：基于当前编辑副本实时计算
+    // 详情页头部徽标：第33轮已删除（商品不再展示上架状态标识）；保留空函数兼容历史调用点
     function refreshProductBadge() {
       const s = document.getElementById('detail-status');
       if (!s || !currentProduct) return;
       const listed = productIsListed(currentProduct.code, planRows, planRowStatuses, saleUnits);
-      if (listed) { s.className = 'badge bg-green-100 text-green-700'; s.textContent = '已上架'; }
-      else { s.className = 'badge bg-slate-100 text-slate-500'; s.textContent = '未上架'; }
+      if (listed) { s.className = 'badge bg-green-100 text-green-700'; s.textContent = '在售'; }
+      else { s.className = 'badge bg-slate-100 text-slate-500'; s.textContent = '禁售'; }
     }
-    // ===== 列表页（第13轮）：不再展示商品行，直接平铺售卖单元 =====
-    // Tab 语义不变（已上架/未上架 = 商品状态推导）；Tab 内展示该组商品下的全部售卖单元（各带在售/禁售状态）
+    // ===== 列表页（第13轮平铺 + 第33轮两态 Tab）：Tab 直接按售卖单元状态划分 =====
     // 取某商品的完整数据（优先编辑快照）：{ plans, statuses, units }
     function productDataOf(code) {
       const saved = planRowsSnapshot[code];
@@ -1330,7 +1325,7 @@
        </tr>`;
     }
     function renderListed() {
-      // 已上架 Tab：只展示「在售」状态的售卖单元（按 SKU + 售卖单元 ID 排序）
+      // 在售 Tab：只展示「在售」状态的售卖单元（按 SKU + 售卖单元 ID 排序）
       const codes = allProducts.map(p => p.code).sort();
       const rows = codes.flatMap(code => computeUnitRowsOf(code)).filter(row => !row.st.offline);
       document.getElementById('listed-tbody').innerHTML = rows.length === 0
@@ -1338,7 +1333,7 @@
         : rows.map(renderUnitRow).join('');
    }
     function renderPending() {
-      // 未上架 Tab：只展示「禁售」状态的售卖单元；无售卖单元的商品显示占位行（SKU 列点击进详情）
+      // 禁售 Tab：展示「禁售」状态的售卖单元（无生效计划=前端草稿未落库，或计划未生效/单元下架）；无售卖单元的商品显示占位行（SKU 列点击进详情）
       const codes = allProducts.map(p => p.code).sort();
       const parts = [];
       codes.forEach(code => {
@@ -2757,7 +2752,7 @@
           <button type="button" onclick="${createFn}" class="admin-btn-default text-xs px-2 py-1.5 rounded-md whitespace-nowrap"><i class="fa-solid fa-plus mr-1"></i>去创建</button>
           ${isCharge ? '' : '<span class="text-xs text-slate-400">（数量值将随关联项带入）</span>'}`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无已上架售卖单元（请先在区块2勾选并设为「上架」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元（请先在区块2勾选并设为「上架」）</p>'
           : onUnits.map(uid => `
             <div class="p-2 bg-slate-50 rounded-md mb-2">
               <div class="text-xs text-slate-600 mb-1.5">${unitLabel(uid)}</div>
@@ -2776,7 +2771,7 @@
           ? `<div class="flex items-center gap-2"><span class="text-xs text-amber-600"><i class="fa-solid fa-triangle-exclamation mr-1"></i>尚未创建${label}配置</span><button type="button" onclick="openConfigCreate('${cfgKey}')" class="text-violet-600 hover:underline text-xs font-medium">去创建</button></div>`
           : `<div class="flex items-center gap-2"><select class="form-input flex-1 text-xs" data-unit="">${configOptionsHTML(cfgKey, d.unified)}</select>${upBtn()}</div>`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无已上架售卖单元（请先在区块2勾选并设为「上架」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元（请先在区块2勾选并设为「上架」）</p>'
           : onUnits.map(uid => `
             <div class="p-2 bg-slate-50 rounded-md mb-2">
               <div class="text-xs text-slate-600 mb-1.5">${unitLabel(uid)}</div>
@@ -2789,7 +2784,7 @@
       } else if (key === 'payload') {
         uBox.innerHTML = `<select class="plan-payload-select form-input flex-1 text-xs" data-unit="">${payloadOptionsHTML(d.unified)}</select>`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无已上架售卖单元（请先在区块2勾选并设为「上架」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元（请先在区块2勾选并设为「上架」）</p>'
           : onUnits.map(uid => `
             <div class="p-2 bg-slate-50 rounded-md mb-2">
               <div class="text-xs text-slate-600 mb-1.5">${unitLabel(uid)}</div>
@@ -2804,7 +2799,7 @@
           <div><label class="form-label">最大购买量（万 vTPM）</label><input data-q="max" type="number" class="form-input text-xs" placeholder="如 10000" value="${q.max}"></div>
           <div><label class="form-label">购买量step（万 vTPM）</label><input data-q="step" type="number" class="form-input text-xs" placeholder="如 100" value="${q.step}"></div>`;
         pBox.innerHTML = onUnits.length === 0
-          ? '<p class="text-xs text-slate-400 py-2">暂无已上架售卖单元（请先在区块2勾选并设为「上架」）</p>'
+          ? '<p class="text-xs text-slate-400 py-2">暂无本计划上架的售卖单元（请先在区块2勾选并设为「上架」）</p>'
           : onUnits.map(uid => {
             const qv = (d.units[uid] && typeof d.units[uid] === 'object') ? d.units[uid] : { min: '', max: '', step: '' };
             return `
@@ -2852,13 +2847,13 @@
       for (const uid of onUnits) {
         const chargeCode = mapOr('charge', uid, 'charge' in planDraft ? planDraft.charge.unified : undefined);
         const code = chargeCode && chargeCode !== '__perunit__' ? chargeCode : (modes.charge === 'perUnit' ? planDraft.charge.units[uid] : planDraft.charge.unified);
-        if (!code) { alert('请为已上架售卖单元 ' + uid + ' 创建或关联一个计费项'); return; }
+        if (!code) { alert('请为本计划上架的售卖单元 ' + uid + ' 创建或关联一个计费项'); return; }
         chargeCodes[uid] = code;
         const qid = modes.quota === 'perUnit' ? planDraft.quota.units[uid] : planDraft.quota.unified;
-        if (!qid) { alert('请为已上架售卖单元 ' + uid + ' 关联一个配额项'); return; }
+        if (!qid) { alert('请为本计划上架的售卖单元 ' + uid + ' 关联一个配额项'); return; }
         quotaCodes[uid] = qid;
         const iid = modes.inventory === 'perUnit' ? planDraft.inventory.units[uid] : planDraft.inventory.unified;
-        if (!iid) { alert('请为已上架售卖单元 ' + uid + ' 关联一个库存项'); return; }
+        if (!iid) { alert('请为本计划上架的售卖单元 ' + uid + ' 关联一个库存项'); return; }
         inventoryCodes[uid] = iid;
       }
       // factor / slo / payload
