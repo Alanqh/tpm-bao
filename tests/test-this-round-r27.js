@@ -71,16 +71,16 @@ w.eval('confirmSpacePlan()');
 w.eval('renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
 ok(rows.length === 7, '双fn计划加入后 7 行（常规3+双11 1 + 新计划 3），实得 ' + rows.length);
-// 第28轮排序：pending 组内按 fn 字典序（cache<input），pu-sp-3-3（cache/新空间）为该计划首行（9列+rowspan=3），pu-sp-3-1/2 为后续行（5列）
+// 第28轮排序：pending 组内按 fn 字典序（cache<input）；第34轮取消 rowspan 合并，每行完整 9 列（pu-sp-3-3 为 cache 行）
 const first = rows.find(r => r.textContent.includes('pu-sp-3-3'));
-ok(first && first.cells.length === 9 && first.innerHTML.includes('rowspan="3"'), '计划行首条（cache）9 列 + rowspan=3');
+ok(first && first.cells.length === 9 && !first.innerHTML.includes('rowspan'), '计划行（cache）9 列且无 rowspan（第34轮取消合并）');
 const sub = rows.filter(r => /pu-sp-3-[12]/.test(r.textContent));
-ok(sub.length === 2 && sub.every(r => r.cells.length === 5), '后续行 5 列（计划单元/售卖空间/Function/维度/单元数）');
+ok(sub.length === 2 && sub.every(r => r.cells.length === 9), '其余两行也 9 列（取消合并后每行完整渲染）');
 ok((d.getElementById('spaceplan-tbody').textContent.match(/未指定/g) || []).length === 0, '全程无未指定行');
 
 // ===== 7. 新 Tab 顶部按钮 + 操作迁详情页（第29轮）=====
 ok(d.getElementById('spaceplan-new-btn') && d.getElementById('spaceplan-new-btn').textContent.includes('创建空间计划'), '「创建空间计划」按钮在空间计划 Tab 顶部');
-const firstRow2 = rows.find(r => r.textContent.includes('pu-sp-3-3')); // 该计划首行（携带计划级 td）
+const firstRow2 = rows.find(r => r.textContent.includes('pu-sp-3-3')); // cache 行（取消合并后每行都带计划级 td）
 ok(firstRow2.innerHTML.includes('openSpacePlanDetail(2)'), '所属空间计划=进详情页链接（行内操作已删）');
 
 // ===== 8. vtpm 商品：常驻计划单行（第32轮 mock）=====

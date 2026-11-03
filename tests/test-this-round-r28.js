@@ -73,7 +73,7 @@ ok(rows.length === 8, '8 行（常规3+双11+P1+P2+P3+P4），实得 ' + rows.le
 const order = rows.map(r => (r.textContent.match(/GLM4·常规|双11大促|P\d/) || ['?'])[0]);
 ok(order.join(',').startsWith('P1,P4,双11大促,GLM4·常规') && order.join(',').endsWith('P2,P3'), '排序=published effStart降序(12-10→12-01→11-11→11-01)→pending(P2)→stopped(P3)：' + order.join(','));
 
-// ===== 7. 同计划多 fn 行 rowspan 仍正确（相邻 + 首行 9 列）=====
+// ===== 7. 同计划多 fn 行相邻且均 9 列（第34轮取消 rowspan 合并）=====
 // P1 只有单 fn；再建一条双 fn 计划验证
 mkplan('P5双fn', '2026-12-15', 'input');
 w.eval('openSpacePlanModal ? 0 : 0');
@@ -85,9 +85,9 @@ w.eval('confirmSpacePlan(); renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
 ok(rows.length === 10, 'P5 双 fn 后 10 行（常规3+双11+P1~P4 各1 + P5 双行），实得 ' + rows.length);
 const p5First = rows.find(r => r.textContent.includes('pu-sp-7-1')); // P5 为第7条计划（planIdx=6）
-ok(p5First && p5First.cells.length === 9 && p5First.innerHTML.includes('rowspan="2"'), 'P5 首行 9 列 rowspan=2（第29轮删操作列）');
+ok(p5First && p5First.cells.length === 9 && !p5First.innerHTML.includes('rowspan'), 'P5 首行 9 列且无 rowspan（第34轮取消合并）');
 const p5Second = rows.find(r => r.textContent.includes('pu-sp-7-2'));
-ok(p5Second && p5Second.cells.length === 5, 'P5 次行 5 列');
+ok(p5Second && p5Second.cells.length === 9 && !p5Second.innerHTML.includes('rowspan'), 'P5 次行也 9 列（每行完整渲染）');
 // P5=pending 12-15，排在 pending 组（P2 12-20 之后）：
 const order2 = rows.map(r => (r.textContent.match(/GLM4·常规|双11大促|P\d/) || ['?'])[0]);
 ok(order2.join(',').indexOf('P2,P5') >= 0, '同状态组内 effStart 降序（P2 12-20 → P5 12-15）：' + order2.join(','));

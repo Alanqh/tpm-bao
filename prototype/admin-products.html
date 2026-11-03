@@ -1917,7 +1917,7 @@
       syncSpaceTfPoint();
     }
     // ===== 空间计划（第26轮独立实体；第27轮迁入专属 Tab 并平铺「空间计划单元」）=====
-    // 行结构同构售卖计划 Tab：每行=计划条目（fn × 售卖空间 × 空间计划）；同一空间计划的行在前 8 列 rowspan 合并
+    // 行结构同构售卖计划 Tab：每行=计划条目（fn × 售卖空间 × 空间计划）；第34轮取消 rowspan 合并，每行完整渲染 9 列
     let editingSpacePlanIdx = -1; // -1=创建
     let spacePlanUnitSeq = 1; // 计划单元序号（pu-sp-1, pu-sp-2 …全局递增，同构 planUnitId）
     function spacePlanUnitId(planIdx, fn) {
@@ -1946,37 +1946,25 @@
         tbody.innerHTML = '<tr><td colspan="9" class="px-3 py-8 text-center text-xs text-slate-400">暂无空间计划单元，请先创建空间计划</td></tr>';
         return;
       }
-      // rowspan 合并：同一空间计划的多行在计划级 4 列合并（排序键含状态+effStart，同计划行自然连续；首行渲染 td，其余省略）
-      const planSpanMap = {};
-      rows.forEach(x => { planSpanMap[x.planIdx] = (planSpanMap[x.planIdx] || 0) + 1; });
-      let prevPlan = -2;
-      rows.forEach(x => {
-        x._firstOfPlan = x.planIdx !== prevPlan;
-        x._planSpan = planSpanMap[x.planIdx];
-        prevPlan = x.planIdx;
-      });
       const nowStr = timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' ');
       tbody.innerHTML = rows.map(row => {
         const { planIdx, f, k, r } = row;
         const sp = spaces[k];
         const unitCnt = (saleUnits || []).filter(u => u.spaceKey === k).length;
-        const cell = (content, extraCls = '') => row._firstOfPlan
-          ? `<td rowspan="${row._planSpan}" class="px-3 py-2 ${extraCls}">${content}</td>`
-          : '';
         const st = spacePlanStatuses[planIdx] || 'pending_publish';
         const meta = planStatusMeta(st);
         const isEff = st === 'published' && r.effStart <= nowStr && nowStr <= r.effEnd;
         return `
         <tr class="hover:bg-slate-50">
           <td class="px-3 py-2 text-xs font-medium">${spacePlanUnitId(planIdx, f)}</td>
-          ${cell(`<span class="badge ${meta.cls}">${meta.text}</span>`)}
-          ${cell(`<button type="button" onclick="openSpacePlanDetail(${planIdx})" class="text-violet-600 hover:underline font-medium text-xs">${r.name || '—'}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button>`)}
+          <td class="px-3 py-2"><span class="badge ${meta.cls}">${meta.text}</span></td>
+          <td class="px-3 py-2"><button type="button" onclick="openSpacePlanDetail(${planIdx})" class="text-violet-600 hover:underline font-medium text-xs">${r.name || '—'}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
           <td class="px-3 py-2 text-xs font-medium">${sp ? sp.name : k}<div class="text-[10px] text-slate-400 font-mono">${k}</div></td>
           <td class="px-3 py-2 text-xs font-medium">${f || '—'}</td>
           <td class="px-3 py-2 text-xs">${sp ? (sp.dims || []).join(' + ') || '—' : '—'}</td>
           <td class="px-3 py-2 text-xs text-right">${unitCnt}</td>
-          ${cell(`<span class="text-xs">${r.priority}</span>`, 'text-right')}
-          ${cell(`<span class="font-mono text-xs whitespace-nowrap">${r.effStart} ~ ${r.effEnd}</span><div class="text-[10px] mt-0.5">${isEff ? '<span class="text-green-600">生效期内</span>' : '<span class="text-slate-400">生效期外</span>'}</div>`)}
+          <td class="px-3 py-2 text-right"><span class="text-xs">${r.priority}</span></td>
+          <td class="px-3 py-2"><span class="font-mono text-xs whitespace-nowrap">${r.effStart} ~ ${r.effEnd}</span><div class="text-[10px] mt-0.5">${isEff ? '<span class="text-green-600">生效期内</span>' : '<span class="text-slate-400">生效期外</span>'}</div></td>
         </tr>`;
       }).join('');
     }
