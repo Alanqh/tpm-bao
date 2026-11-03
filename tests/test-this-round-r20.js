@@ -21,7 +21,7 @@ ok(evalInPage('defaultSaleUnits["maas-online-text-glm4"].every(u => u.fn && u.sp
 ok(evalInPage('defaultSpaces["sp2"].fn === "input" && defaultSpaces["sp4"].fn === "output" && defaultSpaces["sp5"].fn === "cache"'), '空间模型含 fn 归属（sp2=input/sp4=output/sp5=cache）');
 ok(evalInPage('defaultSpaces["sp2"].dims.join(",") === "输入token区间,输出token区间"'), '空间含维度集合');
 ok(evalInPage('defaultSpaces["sp2"].measures === undefined'), '空间无 measures 字段（第23轮只管维度）');
-ok(evalInPage('defaultFnSpaceMap["maas-online-text-glm4"]["input"] === "sp2"'), 'mock fnSpaceMap：input→sp2');
+ok(evalInPage('defaultSpacePlans["maas-online-text-glm4"][0].fnSpaces.input === "sp2" && defaultSpacePlans["maas-online-text-glm4"][0].fnSpaces.output === "sp4" && defaultSpacePlans["maas-online-text-glm4"][0].fnSpaces.cache === "sp5"'), 'mock 常驻计划：input→sp2/output→sp4/cache→sp5（第32轮）');
 
 // ===== 1. 售卖空间 Tab：第一个 Tab，默认打开；单一合并列表 =====
 section('1. 售卖空间 Tab');
@@ -38,41 +38,29 @@ ok(!document.getElementById('space-new-btn'), '第31轮：批量创建售卖空�
 ok(!document.getElementById('fn-space-cards'), 'fn 配置卡已删（第23轮合并进列表）');
 ok(!!document.getElementById('space-tbody'), '含售卖空间列表表');
 
-// ===== 2. 合并列表渲染：fn 分组 rowspan + 状态列 + 操作列 =====
+// ===== 2. 合并列表渲染（第32轮：按时刻过滤——每 fn 一行生效空间；5 列无操作列） =====
 section('2. 合并空间列表');
 const spRows = Array.from(document.querySelectorAll('#space-tbody tr'));
-ok(spRows.length === 4, '空间列表 4 行（sp2/sp3/sp4/sp5；sp1 属无 fn 不在池）');
+ok(spRows.length === 3, '空间列表 3 行（当前时刻每 fn 至多一行：sp2/sp4/sp5；第32轮按时刻过滤）');
 const spHead = Array.from(document.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(spHead.length === 6 && spHead[0] === 'Function' && spHead[1] === '售卖空间' && spHead[2] === '状态' && spHead[3] === '空间维度', '空间列表 6 列（Function/售卖空间/状态/空间维度/售卖单元数/操作）');
+ok(spHead.length === 5 && spHead[0] === 'Function' && spHead[1] === '售卖空间' && spHead[2] === '状态' && spHead[3] === '空间维度', '空间列表 5 列（Function/售卖空间/状态/空间维度/售卖单元数；第32轮删操作列）');
 ok(spRows[0].cells[0].textContent.trim() === 'cache', '首行 fn=cache（字典序分组在前）');
-ok(spRows[1].cells[0].textContent.trim() === 'input' && spRows[1].cells[0].rowSpan === 2, 'input fn td rowspan=2（sp2+sp3 合并）');
-ok(spRows[2].cells.length === 5, 'input 第二行（sp3）无 fn 列（合并后 5 cells）');
-ok(spRows[3].cells[0].textContent.trim() === 'output', 'output 独立 fn td（新合并组）');
-ok(spRows[1].cells[1].textContent.includes('售卖空间2') && spRows[1].cells[4].textContent.trim() === '2', '售卖空间2 行售卖单元数=2');
-ok(spRows[1].cells[3].textContent.includes('输入token区间 + 输出token区间'), '维度列展示维度集合（sp2 两 token 维度）');
-ok(spRows[0].cells[2].textContent.includes('生效中') && spRows[1].cells[2].textContent.includes('生效中') && spRows[3].cells[2].textContent.includes('生效中'), 'sp5/sp2/sp4 状态=生效中（mock 配置）');
-ok(spRows[2].cells[1].textContent.includes('未生效'), 'sp3（input 第二空间）=未生效');
-ok(spRows[0].cells[5].textContent.trim() === '—' && spRows[1].cells[5].textContent.trim() === '—', '生效中行操作=—');
-ok(spRows[2].cells[4].textContent.includes('设为默认'), '未默认行显示设为默认（浏览态 🔒，第27轮文案）');
+ok(spRows[0].cells.length === 5, '每行 5 cells（每 fn 一行无 rowspan 合并）');
+ok(spRows[2].cells[0].textContent.trim() === 'output', 'output 独立行');
+const inputRow2 = spRows[1].cells;
+ok(inputRow2[1].textContent.includes('售卖空间2') && inputRow2[4].textContent.trim() === '2', '售卖空间2 行售卖单元数=2');
+ok(inputRow2[3].textContent.includes('输入token区间 + 输出token区间'), '维度列展示维度集合（sp2 两 token 维度）');
+ok(spRows[0].cells[2].textContent.includes('生效中') && spRows[1].cells[2].textContent.includes('生效中') && spRows[2].cells[2].textContent.includes('生效中'), 'sp5/sp2/sp4 状态=生效中（常驻计划承载）');
+ok(spRows[1].cells[2].textContent.includes('计划「GLM4·常规售卖空间」生效'), '生效标注含胜出计划名（常规计划）');
+ok(spRows[0].cells[2].textContent.includes('2026-11-11 起切换') || spRows[1].cells[2].textContent.includes('2026-11-11 起切换'), 'input 行含双11切换预告');
 
-// ===== 3. currentSpaceOfFn（配置优先 → 回退最早）与 setSpaceActive =====
-section('3. 生效空间推导与切换');
-ok(evalInPage('currentSpaceOfFn("input")') === 'sp2', 'input 生效空间=sp2（mock 配置）');
+// ===== 3. currentSpaceOfFn（第32轮：纯计划仲裁别名）与 effectiveSpaceAt =====
+section('3. 生效空间推导');
+ok(evalInPage('currentSpaceOfFn("input")') === 'sp2', 'input 生效空间=sp2（常驻计划仲裁）');
 ok(evalInPage('currentSpaceOfFn("cache")') === 'sp5', 'cache 生效空间=sp5');
-window.eval('startEdit()');
-// 清除显式配置 → 回退 input 最早空间
-window.eval('fnSpaceMap["input"] = ""');
-ok(evalInPage('currentSpaceOfFn("input")') === 'sp2', '清配置回退 input 最早空间 sp2');
-// 设为生效：切 sp3 → 再切回 sp2
-window.eval('setSpaceActive("sp3")');
-ok(evalInPage('currentSpaceOfFn("input")') === 'sp3', 'setSpaceActive 切 input→sp3');
-window.eval('setSpaceActive("sp2")');
-ok(evalInPage('currentSpaceOfFn("input")') === 'sp2', 'setSpaceActive 切回 sp2');
-// 未持锁：setSpaceActive 被 guardEdit 拦截
-window.eval('exitEdit()');
-alertMsg = '';
-window.eval('setSpaceActive("sp3")');
-ok(evalInPage('currentSpaceOfFn("input")') === 'sp2' && alertMsg.includes('变更'), '未持锁设为生效被拦截（guardEdit）');
+ok(evalInPage('effectiveSpaceAt("input","2026-11-15 00:00:00").key') === 'sp3' && evalInPage('effectiveSpaceAt("input","2026-11-15 00:00:00").source') === 'plan', '11-15 双11计划接管 input→sp3');
+ok(evalInPage('effectiveSpaceAt("input","2026-11-25 00:00:00").key') === 'sp2', '11-25 双11到期 → 常规计划 sp2 恢复');
+ok(evalInPage('effectiveSpaceAt("input","2026-11-15 00:00:00").plan.name') === '双11大促·输入切换售卖空间3', '胜出计划=双11（priority 500>100）');
 
 // ===== 4. 售卖单元 Tab 前三列合并（fn/空间/单元） =====
 section('4. 售卖单元前三列');
@@ -207,18 +195,17 @@ window.onPlanFnFilterToggleAll(document.querySelector('.plan-filter-fn-all'));
 ok(fnBoxes8().every(c => c.checked), '全选框勾上→fn 子框全选');
 ok(vis8().length === 4, '全选后全部可见');
 
-// ===== 9. vtpm 商品回归（无 function：单一空间 sp1 生效中） =====
+// ===== 9. vtpm 商品回归（无 function：常驻计划 sp1 生效中）=====
 section('9. vtpm 回归');
 window.eval('closePlanCreatePage(); backToList()');
 window.openDetailByCode('maas-product-vtpm-std');
 window.eval('switchInnerTab("space")');
 const vRows = Array.from(document.querySelectorAll('#space-tbody tr'));
-ok(vRows.length === 1, '无 fn 商品空间列表单行（sp1）');
+ok(vRows.length === 1, '无 fn 商品空间列表单行（sp1 常驻计划）');
 ok(vRows[0].cells[0].textContent.trim() === '—', 'Function 列显示 —（无 function）');
 ok(vRows[0].textContent.includes('售卖空间1'), '当前空间=售卖空间1');
 ok(vRows[0].cells[2].textContent.includes('生效中'), 'sp1 状态=生效中');
-ok(vRows[0].cells[5].textContent.trim() === '—', '唯一空间操作列=—（无第二空间可切换）');
-ok(evalInPage('currentSpaceOfFn("")') === 'sp1', 'currentSpaceOfFn("")=sp1（mock 配置）');
+ok(evalInPage('currentSpaceOfFn("")') === 'sp1', 'currentSpaceOfFn("")=sp1（常驻计划 fn=""→sp1）');
 window.eval('backToList()');
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');

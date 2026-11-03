@@ -23,15 +23,14 @@ ok(w.eval('timeFilter && timeFilter.point.indexOf("2026-11-15 12:00") === 0'), '
 ok(!d.getElementById('space-tf-tip').classList.contains('hidden'), '提示显示');
 ok(d.getElementById('space-tf-tip').textContent.includes('2026-11-15 12:00'), '提示含时间点文本');
 const t2 = d.getElementById('space-tbody').textContent;
-ok(t2.includes('计划「双11大促·输入切换售卖空间3」接管'), '11-15 接管标注');
-ok(t2.includes('未生效') === false || true, '（信息行）空间状态随时刻变化');
+ok(t2.includes('计划「双11大促·输入切换售卖空间3」生效'), '11-15 生效标注（胜出计划=双11）');
 ok(w.eval('effectiveSpaceAt("input").key') === 'sp3', 'effectiveSpaceAt 走 timeFilter → sp3');
 
 // ===== 3. 空值查询拦截 / 重置 =====
 w.eval('resetSpaceAt()');
 ok(w.eval('timeFilter') === null, '重置后 timeFilter=null');
 ok(d.getElementById('space-tf-tip').classList.contains('hidden'), '重置后提示隐藏');
-ok(d.getElementById('space-tbody').textContent.includes('2026-11-11 起生效') || d.getElementById('space-tbody').textContent.includes('起生效'), '当前时点显示未来预告');
+ok(d.getElementById('space-tbody').textContent.includes('2026-11-11 起切换') || d.getElementById('space-tbody').textContent.includes('起生效'), '当前时点显示未来切换预告（第32轮文案：起切换）');
 d.getElementById('space-tf-point').value = '';
 alerts.length = 0;
 w.eval('querySpaceAt()');
@@ -46,11 +45,11 @@ w.eval('resetSaleParams(); renderSpaceTab()');
 ok(d.getElementById('space-tf-tip').classList.contains('hidden'), '重置后同步隐藏');
 ok(d.getElementById('space-tf-point').value === '', '输入框跟随清空');
 
-// ===== 5. 空间计划 Tab：纯计划单元（无「未指定」行）=====
+// ===== 5. 空间计划 Tab：纯计划单元（第32轮：glm4 mock 含常规计划 3 单元 + 双11 1 单元）=====
 w.eval('renderSpacePlans()');
 let rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
-ok(rows.length === 1, 'glm4 初始 1 行（pu-sp-1-1），实得 ' + rows.length);
-ok(rows[0].textContent.includes('双11大促') && rows[0].textContent.includes('pu-sp-1-1'), '双11计划单元');
+ok(rows.length === 4, 'glm4 初始 4 行（常规 pu-sp-1-1~3 + 双11 pu-sp-2-1），实得 ' + rows.length);
+ok(rows.some(r => r.textContent.includes('双11大促') && r.textContent.includes('pu-sp-2-1')), '双11计划单元（按 fnSpaces 键序 pu 号=计划 index+1）');
 
 // ===== 6. 排序：已发布(effStart 降序)→待发布→已停用（第31轮：维度勾选创建，空间总是新建）=====
 w.eval('startEdit()');
@@ -64,40 +63,40 @@ function mkplan(name, start, fn) {
   d.querySelector('.sp-dim-check[data-fn="' + fn + '"][value="输入token区间"]').checked = true;
   w.eval('confirmSpacePlan()');
 }
-mkplan('P1晚生效', '2026-12-10', 'input');   // idx1 → publish
-mkplan('P2待发布', '2026-12-20', 'input');   // idx2 → pending
-mkplan('P3已停用', '2026-12-05', 'output');  // idx3 → stop
-mkplan('P4早生效', '2026-12-01', 'cache');   // idx4 → publish（早于 P1）
-w.eval('publishSpacePlan(1); stopSpacePlan(3); publishSpacePlan(4); renderSpacePlans()');
+mkplan('P1晚生效', '2026-12-10', 'input');   // idx2（常规0/双11 1 之后）→ publish
+mkplan('P2待发布', '2026-12-20', 'input');   // idx3 → pending
+mkplan('P3已停用', '2026-12-05', 'output');  // idx4 → stop
+mkplan('P4早生效', '2026-12-01', 'cache');   // idx5 → publish（早于 P1）
+w.eval('publishSpacePlan(2); stopSpacePlan(4); publishSpacePlan(5); renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
-ok(rows.length === 5, '5 行（双11+P1+P2+P3+P4），实得 ' + rows.length);
-const order = rows.map(r => (r.textContent.match(/双11大促|P\d/) || ['?'])[0]);
-ok(order.join(',') === 'P1,P4,双11大促,P2,P3', '排序=published effStart降序(12-10→12-01→11-11)→pending(P2)→stopped(P3)：' + order.join(','));
+ok(rows.length === 8, '8 行（常规3+双11+P1+P2+P3+P4），实得 ' + rows.length);
+const order = rows.map(r => (r.textContent.match(/GLM4·常规|双11大促|P\d/) || ['?'])[0]);
+ok(order.join(',').startsWith('P1,P4,双11大促,GLM4·常规') && order.join(',').endsWith('P2,P3'), '排序=published effStart降序(12-10→12-01→11-11→11-01)→pending(P2)→stopped(P3)：' + order.join(','));
 
 // ===== 7. 同计划多 fn 行 rowspan 仍正确（相邻 + 首行 9 列）=====
 // P1 只有单 fn；再建一条双 fn 计划验证
 mkplan('P5双fn', '2026-12-15', 'input');
 w.eval('openSpacePlanModal ? 0 : 0');
-w.eval('editSpacePlan(5)');
+w.eval('editSpacePlan(6)');
 const b2 = d.querySelector('.sp-fn-check[data-fn="output"]');
 b2.checked = true; b2.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-dim-check[data-fn="output"][value="输入token区间"]').checked = true;
 w.eval('confirmSpacePlan(); renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
-ok(rows.length === 7, 'P5 双 fn 后 7 行（5 单行计划 + P5 双行），实得 ' + rows.length);
-const p5First = rows.find(r => r.textContent.includes('pu-sp-6-1')); // P5 为第6条计划（planIdx=5）
+ok(rows.length === 10, 'P5 双 fn 后 10 行（常规3+双11+P1~P4 各1 + P5 双行），实得 ' + rows.length);
+const p5First = rows.find(r => r.textContent.includes('pu-sp-7-1')); // P5 为第7条计划（planIdx=6）
 ok(p5First && p5First.cells.length === 9 && p5First.innerHTML.includes('rowspan="2"'), 'P5 首行 9 列 rowspan=2（第29轮删操作列）');
-const p5Second = rows.find(r => r.textContent.includes('pu-sp-6-2'));
+const p5Second = rows.find(r => r.textContent.includes('pu-sp-7-2'));
 ok(p5Second && p5Second.cells.length === 5, 'P5 次行 5 列');
 // P5=pending 12-15，排在 pending 组（P2 12-20 之后）：
-const order2 = rows.map(r => (r.textContent.match(/双11大促|P\d/) || ['?'])[0]);
+const order2 = rows.map(r => (r.textContent.match(/GLM4·常规|双11大促|P\d/) || ['?'])[0]);
 ok(order2.join(',').indexOf('P2,P5') >= 0, '同状态组内 effStart 降序（P2 12-20 → P5 12-15）：' + order2.join(','));
 
-// ===== 8. vtpm：无计划 → 占位（无未指定行）=====
+// ===== 8. vtpm：常驻计划单行（第32轮 mock），无「未指定」行 =====
 w.eval('backToList(); openDetailByCode("maas-product-vtpm-std")');
 w.eval('renderSpacePlans()');
 const vt = d.getElementById('spaceplan-tbody').textContent;
-ok(vt.includes('暂无空间计划单元'), 'vtpm 无计划占位提示');
+ok(vt.includes('标准·常驻售卖空间1'), 'vtpm 常驻计划单元（fn=""→sp1，第32轮 mock）');
 ok((vt.match(/未指定/g) || []).length === 0, '不再有「未指定」行');
 
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');

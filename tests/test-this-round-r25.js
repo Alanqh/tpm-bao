@@ -14,28 +14,30 @@ const d = w.document;
 let step = 0, fail = 0;
 function ok(cond, msg) { step++; if (!cond) { fail++; console.log('FAIL[' + step + '] ' + msg); } }
 
-// ===== 1. mock 装载：glm4 双11空间切换计划（published，11-11~11-20，input→sp3，priority 500）=====
+// ===== 1. mock 装载（第32轮）：glm4 常规计划（idx0，input/output/cache 三 fn）+ 双11切换计划（idx1，input→sp3 priority 500）=====
 w.eval('openDetailByCode("maas-online-text-glm4")');
-ok(w.eval('spacePlans.length') === 1, 'glm4 装载 1 份空间切换计划');
-ok(w.eval('spacePlanStatuses[0]') === 'published', '双11计划状态=published');
+ok(w.eval('spacePlans.length') === 2, 'glm4 装载 2 份空间计划（常规+双11）');
+ok(w.eval('spacePlanStatuses[0]') === 'published' && w.eval('spacePlanStatuses[1]') === 'published', '两份计划均 published');
 ok(JSON.stringify(w.eval('planRows[0].fnSpaces || null')) === 'null', '售卖计划已无 fnSpaces 字段（第26轮清除）');
 ok(w.eval('planRows.length') === 2 && w.eval('planRowStatuses[0]') === 'published', 'glm4 售卖计划 mock 保留（双11+常规）');
 
-// ===== 2. effectiveSpaceAt 推导 =====
-ok(w.eval('effectiveSpaceAt("input").key') === 'sp2' && w.eval('effectiveSpaceAt("input").source') === 'manual', '当前(11-01后) input=sp2（manual，双11未到期）');
-ok(w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").key') === 'sp3' && w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").source') === 'plan', '11-15 input=sp3（plan 接管）');
-ok(w.eval('effectiveSpaceAt("input","2026-11-25 00:00:00").key') === 'sp2' && w.eval('effectiveSpaceAt("input","2026-11-25 00:00:00").source') === 'manual', '11-25 双11过期 → 回落 manual sp2');
-ok(w.eval('effectiveSpaceAt("output").key') === 'sp4' && w.eval('effectiveSpaceAt("output").source') === 'manual', 'output 无计划指定 → 一直 manual sp4');
+// ===== 2. effectiveSpaceAt 推导（第32轮：纯计划仲裁，无 manual 回落） =====
+ok(w.eval('effectiveSpaceAt("input").key') === 'sp2' && w.eval('effectiveSpaceAt("input").source') === 'plan', '当前(11-01后) input=sp2（常规计划，plan）');
+ok(w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").key') === 'sp3' && w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").source') === 'plan', '11-15 input=sp3（双11高优先级接管）');
+ok(w.eval('effectiveSpaceAt("input","2026-11-25 00:00:00").key') === 'sp2' && w.eval('effectiveSpaceAt("input","2026-11-25 00:00:00").source') === 'plan', '11-25 双11到期 → 常规计划 sp2 恢复');
+ok(w.eval('effectiveSpaceAt("output").key') === 'sp4' && w.eval('effectiveSpaceAt("output").source') === 'plan', 'output 由常规计划承载 → 一直 plan sp4');
 ok(w.eval('effectiveSpaceAt("input","2026-11-11 00:00:00").source') === 'plan', '边界 11-11 00:00 起接管（含起点）');
 ok(w.eval('effectiveSpaceAt("input","2026-11-20 00:00:00").source') === 'plan', '边界 11-20 00:00 仍接管（含终点）');
+ok(w.eval('effectiveSpaceAt("input","2026-10-15 00:00:00").key') === '' && w.eval('effectiveSpaceAt("input","2026-10-15 00:00:00").source') === '', '10-15 早于常规计划生效 → key=\"\"（无 manual 回落，第32轮）');
 
-// ===== 3. 优先级仲裁：补一份同时段低优先级空间切换计划指定 input=sp2 → 高优先级（500）双11胜 =====
+// ===== 3. 优先级仲裁：再补一份同时段低优先级空间切换计划指定 input=sp2 → 高优先级（500）双11胜 =====
 w.eval('spacePlans.push({name:"低优先级·保持sp2", priority:100, effStart:"2026-11-12 00:00:00", effEnd:"2026-11-18 00:00:00", fnSpaces:{input:"sp2"}}); spacePlanStatuses.push("published")');
-ok(w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").key') === 'sp3', '同时段双计划 → 高优先级（500>100）双11胜: ' + w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").key'));
-// 一条计划可多个 fn：同一优先级计划跨 fn
-w.eval('spacePlans.push({name:"双fn·cache+output", priority:400, effStart:"2026-11-13 00:00:00", effEnd:"2026-11-16 00:00:00", fnSpaces:{cache:"sp5", output:"sp2"}}); spacePlanStatuses.push("published")');
-ok(w.eval('effectiveSpaceAt("cache","2026-11-14 00:00:00").plan.name') === '双fn·cache+output', '一条计划接管 cache');
-ok(w.eval('effectiveSpaceAt("output","2026-11-14 00:00:00").plan.name') === '双fn·cache+output', '同一条计划接管 output（一计划多 fn）');
+ok(w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").key') === 'sp3', '同时段多计划 → 高优先级（500>100）双11胜: ' + w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").key'));
+// 一条计划可多个 fn：同一优先级计划跨 fn（时段延至 11-25 验证 input 侧 400>常规100 胜出）
+w.eval('spacePlans.push({name:"双fn·cache+input", priority:400, effStart:"2026-11-13 00:00:00", effEnd:"2026-11-25 12:00:00", fnSpaces:{cache:"sp5", input:"sp2"}}); spacePlanStatuses.push("published")');
+ok(w.eval('effectiveSpaceAt("cache","2026-11-14 00:00:00").plan.name') === '双fn·cache+input', '一条计划接管 cache');
+ok(w.eval('effectiveSpaceAt("input","2026-11-14 00:00:00").plan.name') === '双11大促·输入切换售卖空间3', '11-14 input 胜出=双11（500>400>100 多级仲裁）');
+ok(w.eval('effectiveSpaceAt("input","2026-11-21 00:00:00").plan.name') === '双fn·cache+input', '11-21 双11过期后 input 由双fn计划接管（400>常规100）');
 // 清理试验数据
 w.eval('spacePlans.pop(); spacePlanStatuses.pop(); spacePlans.pop(); spacePlanStatuses.pop()');
 
@@ -45,18 +47,19 @@ ok(nx && nx.name === '双11大促·输入切换售卖空间3', '预告下一个�
 ok(w.eval('nextSpaceSwitchOfFn("output")') === null, 'output 无未来切换 → null');
 ok(w.eval('nextSpaceSwitchOfFn("input","2026-11-25 00:00:00")') === null, '11-25 后 input 无切换');
 
-// ===== 5. 空间 Tab 标注 =====
+// ===== 5. 空间 Tab（第32轮：按时刻过滤——仅显示该时刻生效空间行）=====
 w.eval('renderSpaceTab()');
 let rows = Array.from(d.querySelectorAll('#space-tbody tr'));
-let sp3r = rows.find(r => r.textContent.includes('sp3'));
-ok(sp3r && sp3r.textContent.includes('11-11') && sp3r.textContent.includes('双11大促'), 'sp3 未生效行显示未来切换预告（含日期+计划名）');
+ok(rows.length === 3, '当前时刻 3 行（cache=sp5/input=sp2/output=sp4 各一行）');
+const inputRowNow = rows.find(r => (r.querySelector('div.font-mono') || {}).textContent === 'sp2');
+ok(inputRowNow && inputRowNow.textContent.includes('2026-11-11 起切换'), 'input 行（sp2）显示未来切换预告（sp3 将接管）');
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
 rows = Array.from(d.querySelectorAll('#space-tbody tr'));
-sp3r = rows.find(r => r.textContent.includes('sp3'));
-const sp2r = rows.find(r => r.textContent.includes('sp2'));
-ok(sp3r.textContent.includes('生效中') && sp3r.textContent.includes('计划「双11大促'), '11-15 时 sp3 生效中+计划接管标注');
-ok(sp2r.textContent.includes('未生效') && sp2r.textContent.includes('默认'), '11-15 时 sp2 未生效+默认徽标（默认空间被计划接管，第27轮语义）');
-ok(sp2r.textContent.includes('设为默认') === false, '默认行操作列=—（不含设为默认）');
+const sp3r = rows.find(r => (r.querySelector('div.font-mono') || {}).textContent === 'sp3');
+ok(rows.length === 3 && !!sp3r, '11-15 时 3 行且 input 行=sp3');
+ok(sp3r.textContent.includes('生效中') && sp3r.textContent.includes('计划「双11大促'), 'sp3 行生效中+胜出计划标注');
+ok(rows.some(r => (r.querySelector('div.font-mono') || {}).textContent === 'sp2') === false, '11-15 时 sp2 不在列表（按时刻过滤）');
+ok(rows.some(r => (r.querySelector('div.font-mono') || {}).textContent === 'sp4'), '11-15 时 output=sp4 仍在列表');
 w.eval('timeFilter = null');
 
 // ===== 6. 空间切换计划列表 DOM =====
@@ -106,15 +109,15 @@ const r26Idx = w.eval('spacePlans.length - 1');
 ok(w.eval('spacePlanStatuses[' + r26Idx + ']') === 'pending_publish', '新计划=pending_publish');
 const r26Key = w.eval('spacePlans[' + r26Idx + '].fnSpaces.input');
 ok(r26Key === 'sp6', '落库 fnSpaces.input=sp6（第31轮：保存即新建空间，不引用已有 sp3）');
-ok(w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").source') === 'manual', '待发布不接管');
-// 发布 → 接管
+ok(w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").key') === 'sp2', '待发布不接管（常规计划继续 sp2）');
+// 发布 → 接管（priority 300 > 常规 100）
 w.eval('publishSpacePlan(' + r26Idx + ')');
 ok(w.eval('spacePlanStatuses[' + r26Idx + ']') === 'published', '发布后=published');
 ok(w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").key') === r26Key && w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").source') === 'plan', '发布后 12-05 input 接管=' + r26Key);
-// 停用 → 回落
+// 停用 → 回落常规计划
 w.eval('stopSpacePlan(' + r26Idx + ')');
 ok(w.eval('spacePlanStatuses[' + r26Idx + ']') === 'stopped', '停用后=stopped');
-ok(w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").source') === 'manual', '停用后 12-05 input 回落 manual（sp2）');
+ok(w.eval('effectiveSpaceAt("input","2026-12-05 00:00:00").key') === 'sp2', '停用后 12-05 input 回落常规计划 sp2（第32轮：无 manual）');
 
 // ===== 9. 修改回填（维度复选勾选状态）=====
 w.eval('editSpacePlan(' + r26Idx + ')');
@@ -128,11 +131,11 @@ w.eval('closeModal("spaceplan")');
 
 // ===== 10. 停用态操作（平铺行内仍可见状态徽标）；快照透传 =====
 w.eval('renderSpacePlans()');
-const stoppedRow = Array.from(spTbody.querySelectorAll('tr')).find(r => r.textContent.includes('pu-sp-2-1'));
-ok(stoppedRow && stoppedRow.textContent.includes('已停用'), 'pu-sp-2-1 行状态=已停用');
+const stoppedRow = Array.from(spTbody.querySelectorAll('tr')).find(r => r.textContent.includes('pu-sp-3-1'));
+ok(stoppedRow && stoppedRow.textContent.includes('已停用'), 'pu-sp-3-1 行状态=已停用（r26测试计划 planIdx=2，第32轮 mock 常规计划占 idx0）');
 w.eval('backToList(); openDetailByCode("maas-online-text-glm4")');
-ok(w.eval('spacePlans.length') === 2 && w.eval('spacePlans[1].name') === 'r26测试计划', '快照恢复空间切换计划');
-ok(w.eval('spacePlanStatuses[1]') === 'stopped', '快照恢复状态=stopped');
+ok(w.eval('spacePlans.length') === 3 && w.eval('spacePlans[2].name') === 'r26测试计划', '快照恢复空间切换计划（常规+双11+r26）');
+ok(w.eval('spacePlanStatuses[2]') === 'stopped', '快照恢复状态=stopped');
 
 // ===== 11. SU 弹窗默认空间挂 effectiveSpaceAt（11-15 input→sp3）=====
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
@@ -142,10 +145,10 @@ w.eval('onSuFnChange()');
 ok(d.getElementById('su-space-select').value === 'sp3', 'SU 弹窗默认空间=effectiveSpaceAt（11-15 → sp3）');
 w.eval('closeModal("su-confirm"); timeFilter = null');
 
-// ===== 12. 新建商品：spacePlans 归零 =====
+// ===== 12. 快照透传（第32轮：glm4 mock 含常规+双11，r26 计划停用后仍在快照） =====
 w.eval('backToList()');
-ok(w.eval('planRowsSnapshot["maas-online-text-glm4"].spacePlans.length') === 2, 'snapshotCurrentProduct 透传 spacePlans');
-ok(JSON.stringify(w.eval('productDataOf("maas-product-vtpm-std").spacePlans')) === '[]' || w.eval('productDataOf("maas-product-vtpm-std").spacePlans.length') === 0, 'productDataOf vtpm 无空间切换计划');
+ok(w.eval('planRowsSnapshot["maas-online-text-glm4"].spacePlans.length') === 3, 'snapshotCurrentProduct 透传 spacePlans（常规+双11+r26）');
+ok(w.eval('productDataOf("maas-product-vtpm-std").spacePlans.length') === 1, 'productDataOf vtpm 含常驻计划 1 份（第32轮 mock）');
 
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

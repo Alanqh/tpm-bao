@@ -13,26 +13,26 @@ const d = w.document;
 let step = 0, fail = 0;
 function ok(cond, msg) { step++; if (!cond) { fail++; console.log('FAIL[' + step + '] ' + msg); } }
 
-// 1. mock 校验（第23轮口径：空间只有 fn+dims）
+// 1. mock 校验（第23轮口径：空间只有 fn+dims；第32轮：常规计划承载默认生效）
 w.eval('openDetailByCode("maas-online-text-glm4")');
 w.eval('startEdit()'); // 持有编辑锁（变更类操作需先发起变更）
 ok(w.eval('spaces["sp2"].measures === undefined'), '空间无 measures 字段');
 ok(w.eval('spaces["sp1"].dims.length') === 2 && w.eval('spaces["sp1"].fn') === '', 'sp1（vtpm）两维度 fn=""');
-// 2. 详情列表（合并列表）
+// 2. 详情列表（第32轮：按时刻过滤，每 fn 一行生效空间）
 const spRows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(spRows.length === 4, '空间列表 4 行（sp2~sp5，sp1 属无 fn 不在池）');
-ok(spRows[1].cells[3].textContent.includes('输入token区间 + 输出token区间'), '维度列展示 dims');
-ok(spRows[2].cells[1].textContent.includes('未生效'), 'sp3 未生效');
-// 3. currentSpaceOfFn（mock 配置优先）
+ok(spRows.length === 3, '空间列表 3 行（当前时刻每 fn 至多一行：input=sp2/output=sp4/cache=sp5）');
+ok(spRows.some(r => r.cells[3].textContent.includes('输入token区间 + 输出token区间')), '维度列展示 dims');
+ok(w.eval('spacePlans.filter(r => r.fnSpaces && r.fnSpaces.input).length') === 2, 'input 有两份计划（常规+双11）指向不同空间');
+// 3. currentSpaceOfFn（第32轮：纯计划仲裁）
 ok(w.eval('currentSpaceOfFn("input")') === 'sp2', 'input 当前 sp2');
 ok(w.eval('currentSpaceOfFn("output")') === 'sp4', 'output 当前 sp4');
 ok(w.eval('currentSpaceOfFn("cache")') === 'sp5', 'cache 当前 sp5');
-// 4. setSpaceActive 切换 + 回退
-w.eval('setSpaceActive("sp3")');
-ok(w.eval('currentSpaceOfFn("input")') === 'sp3', 'input 切到 sp3');
-ok(alerts[alerts.length - 1].includes('默认生效售卖空间已设为'), '设为默认提示: ' + (alerts[alerts.length - 1] || '').slice(0, 18));
-w.eval('fnSpaceMap["input"] = ""');
-ok(w.eval('currentSpaceOfFn("input")') === 'sp2', '清配置回退 sp2（seq 最早）');
+// 4. 时间旅行 11-15：双11高优先级接管 input→sp3；默认机制已废（第32轮）
+w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
+ok(w.eval('currentSpaceOfFn("input")') === 'sp3', '11-15 双11计划接管 input→sp3（纯计划仲裁）');
+const midRows = Array.from(d.querySelectorAll('#space-tbody tr'));
+ok(midRows.length === 3 && midRows.some(r => r.cells[1].textContent.includes('sp3')), '11-15 列表 input 行=sp3');
+w.eval('timeFilter = null; renderSpaceTab()');
 // 5. SU 弹窗：input 默认 sp2（生效空间）、度量=全量（3+3=6）
 w.eval('openSuConfirmModal()');
 d.getElementById('su-fn-select').value = 'input';
@@ -85,19 +85,23 @@ ok(w.eval('spaces["sp8"].name') === '售卖空间8' && w.eval('spaces["sp9"].nam
 w.eval('backToList()');
 w.eval('openDetailByCode("maas-product-vtpm-std")');
 const vRows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(vRows.length === 1, 'vtpm 单行（sp1）');
+ok(vRows.length === 1, 'vtpm 单行（sp1 常驻计划）');
 ok(vRows[0].cells[0].textContent.includes('—'), 'Function 列显示 —');
 ok(w.eval('currentSpaceOfFn("")') === 'sp1', 'vtpm 当前 sp1');
-// 12. snapshot 链路：glm4 设为默认 sp3 后返回列表再进入，fnSpaceMap 恢复
+// 12. snapshot 链路（第32轮）：glm4 新建计划发布后返回列表再进入，spacePlans/fnSpaces 恢复
 w.eval('openDetailByCode("maas-online-text-glm4")');
-w.eval('setSpaceActive("sp3")');
+const spIdxBefore = w.eval('spacePlans.length');
+w.eval('publishSpacePlan(' + (spIdxBefore - 1) + ')'); // 发布 r31 计划丙（output sp8 / input sp9，默认时段 11-11~11-20 生效期内）
+ok(w.eval('currentSpaceOfFn("output")') === 'sp4', '计划丙 priority 0 < 常规 100 → 不接管，output 仍 sp4（优先级仲裁）');
 w.eval('backToList()');
 w.eval('openDetailByCode("maas-online-text-glm4")');
-ok(w.eval('currentSpaceOfFn("input")') === 'sp3', '快照恢复 input→sp3（设为默认持久）');
-// 13. 快照还含新建空间：sp7（cache 第二空间，r31 计划乙）在重进后存在且未生效
+ok(w.eval('spacePlans.length') === spIdxBefore && w.eval('spacePlans[spacePlans.length-1].name') === 'r31 计划丙', '快照恢复空间计划数量与名称');
+ok(w.eval('currentSpaceOfFn("input")') === 'sp2', '重进后 input 仍 sp2（常规计划 priority 100 胜过 priority 0 计划丙）');
+// 13. 快照还含新建空间：sp7（cache 第二空间，r31 计划乙）在重进后存在（第32轮：仅出现在计划单元列表，售卖空间 Tab 只显示生效空间行）
 ok(w.eval('spaces["sp7"].fn') === 'cache', '快照恢复新建空间 sp7');
-const rows13 = Array.from(d.querySelectorAll('#space-tbody tr'));
+w.eval('renderSpacePlans()');
+const rows13 = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
 const sp7Row = rows13.find(r => r.textContent.includes('sp7'));
-ok(!!sp7Row && sp7Row.textContent.includes('未生效'), 'sp7 重进后未生效（sp5 仍为 cache 生效）');
+ok(!!sp7Row && sp7Row.textContent.includes('待发布'), 'sp7 经计划乙（待发布）出现在空间计划 Tab 列表');
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

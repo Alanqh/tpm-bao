@@ -53,6 +53,9 @@ fnBoxA.checked = true;
 fnBoxA.dispatchEvent(new window.Event('change', { bubbles: true }));
 document.querySelectorAll('.sp-dim-check[data-fn=""]').forEach(c => { c.checked = c.value === '购买量区间'; });
 document.getElementById('sp-name').value = 'r31 空间计划A';
+document.getElementById('sp-priority').value = '100';
+document.getElementById('sp-eff-start').value = '2026-11-01T00:00:00';
+document.getElementById('sp-eff-end').value = '2027-11-01T00:00:00';
 alertMsg = '';
 window.confirmSpacePlan();
 ok(alertMsg.includes('已保存') && alertMsg.includes('待发布'), '计划保存成功（待发布）: ' + alertMsg.slice(0, 24));
@@ -81,22 +84,19 @@ alertMsg = '';
 window.confirmSpacePlan();
 ok(alertMsg.includes('已新建售卖空间') && evalInPage('Object.keys(spaces).some(k => spaces[k].seq === 8)'), '维度集合与已有空间相同 → 不拦截，总是新建（sp8）');
 window.eval('closeModal("spaceplan")');
-// 设为生效：sp6 设为 fn('') 生效空间 → SU 默认跟随；新空间默认未生效
-ok(evalInPage('currentSpaceOfFn("")') === 'sp1', 'sp1 默认生效（seq 最早回退）');
-window.eval('setSpaceActive("sp6")');
-ok(evalInPage('currentSpaceOfFn("")') === 'sp6', 'setSpaceActive 后 sp6 生效');
-window.eval('setSpaceActive("sp1")');
-ok(evalInPage('currentSpaceOfFn("")') === 'sp1', '切回 sp1');
+// 第32轮：默认机制已废——生效空间完全由已发布空间计划仲裁（未发布 → 无生效空间；发布后接管）
+ok(evalInPage('currentSpaceOfFn("")') === '', '未发布任何计划 → fn("") 无生效空间（无默认回落）');
+window.eval('publishSpacePlan(0)');
+ok(evalInPage('currentSpaceOfFn("")') === 'sp6', '发布计划A后 sp6 生效（纯计划仲裁）');
 
 // ===== 4. 创建售卖单元：按空间维度 + 全量度量 + pair 只增不减 =====
 section('4. 创建售卖单元');
 window.openSuConfirmModal();
-// vtpm 无 function → fn block 隐藏；空间下拉默认=fn('') 生效空间
+// vtpm 无 function → fn block 隐藏；空间下拉默认=fn('') 生效空间（第32轮：发布计划A后=sp6）
 ok(document.getElementById('su-fn-block').classList.contains('hidden'), '无 function 商品隐藏 fn 下拉');
 ok(!!document.getElementById('su-space-select'), '显示售卖空间下拉');
-ok(evalInPage('suSpaceSel') === 'sp1', '默认选中 fn 生效空间 sp1');
-// 切换到新建的 sp6（单维度空间）
-window.eval('document.getElementById("su-space-select").value = "sp6"; onSuSpaceChange();');
+ok(evalInPage('suSpaceSel') === 'sp6', '默认选中 fn 生效空间 sp6（计划A已发布接管）');
+// sp6 已选中（单维度空间），直接装载
 const suDimTitles = Array.from(document.querySelectorAll('#su-confirm-body p.text-xs.font-semibold')).map(p => p.textContent.trim());
 ok(suDimTitles.join(',').includes('购买量区间') && !suDimTitles.join(',').includes('购买周期'), 'sp6 仅展示空间定义的维度（购买量区间）');
 ok(document.querySelectorAll('#su-confirm-body .su-leaf').length === 3, '度量候选=全量 3 个（第23轮空间不管度量）');
@@ -116,7 +116,7 @@ ok(evalInPage('saleUnits[0].spaceKey') === 'sp6' && evalInPage('saleUnits[0].dim
 section('5. 只增不减');
 window.openSuConfirmModal();
 window.eval('document.getElementById("su-space-select").value = "sp6"; onSuSpaceChange();');
-ok(evalInPage('suSpaceSel') === 'sp6', '切到 sp6');
+ok(evalInPage('suSpaceSel') === 'sp6', '默认=生效空间 sp6（第32轮计划仲裁）');
 const disabledCnt = document.querySelectorAll('#su-confirm-body input.su-leaf:checked[disabled]').length;
 ok(disabledCnt === 1, '已确认 pair（1～100）置灰: ' + disabledCnt);
 // 加勾 500+ → 组合扩展（1～100+500+ 两个单元）
