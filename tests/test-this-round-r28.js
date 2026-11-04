@@ -63,7 +63,7 @@ w.eval(`
     inp.dispatchEvent(new window.Event('change', { bubbles: true }));
   })()
 `);
-ok(d.getElementById('saleunit-tbody').textContent.includes('该时刻无生效中的售卖空间'), 'onchange 选 2026-09-01 → 空态（无需点查询）');
+ok(d.getElementById('saleunit-tbody').textContent.includes('当前时刻无生效中的售卖空间'), 'onchange 选 2026-09-01 → 空态（无需点查询）');
 // 清空 → 回当前时刻全部单元
 w.eval(`
   (function(){
@@ -72,7 +72,7 @@ w.eval(`
     inp.dispatchEvent(new window.Event('change', { bubbles: true }));
   })()
 `);
-ok(d.querySelectorAll('#saleunit-tbody tr').length === 7, '清空时间 → 立即恢复 7 行（当前时刻无需点重置）');
+ok(d.querySelectorAll('#saleunit-tbody tr').length === 4, '清空时间 → 立即恢复当前时刻唯一生效空间 sp1 的 4 行（第42轮默认也过滤）');
 w.eval('switchInnerTab("space")');
 
 // ===== 6. 排序专项：优先级降序 → 创建时间逆序（seq 降序）=====

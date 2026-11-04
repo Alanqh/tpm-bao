@@ -106,8 +106,9 @@ window.openPendingDetail(0);
 ok(!document.getElementById('su-create-btn'), 'SU Tab「创建售卖单元」按钮已删除');
 const suHead = Array.from(document.querySelectorAll('#inner-tab-saleunit thead th')).map(th => th.textContent.trim());
 ok(suHead.length === 14 && !suHead.includes('操作'), 'SU 表头 14 列（操作列已删），实得 ' + suHead.length);
-const delCell = Array.from(document.querySelectorAll('#saleunit-tbody tr')).find(r => r.cells[0].textContent.trim() === 'su-3');
-ok(delCell && !delCell.textContent.includes('删除') && !delCell.textContent.includes('🔒'), '售卖单元行无删除入口');
+// 第42轮：默认时刻只显唯一生效空间——pre 空间待发布 → 空态行；空态行同样无删除入口
+const delCell = Array.from(document.querySelectorAll('#saleunit-tbody tr'))[0];
+ok(delCell && !delCell.textContent.includes('删除') && !delCell.textContent.includes('🔒'), '售卖单元行无删除入口（pre 默认空态行，第42轮）');
 
 // ===== 7. 第38轮：商品名称快速编辑（contenteditable 就地编辑，无独立输入框，无需编辑锁） =====
 section('7. 商品名称快速编辑（第38轮 contenteditable）');

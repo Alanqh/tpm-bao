@@ -57,8 +57,10 @@ window.closePlanDetail();
 window.backToList();
 window.openPendingDetail(0);
 ok(evalInPage('planRows.length') === 1, 'pre 挂载 1 个售卖计划');
-ok(statusOf('su-1') === '禁售', 'pre su-1 禁售（仅待发布计划，无生效中）');
-ok(statusOf('su-2') === '禁售', 'pre su-2 禁售（未配置）');
+// 第42轮：SU Tab 任何时刻只显唯一生效空间——pre 空间待发布 → 无生效空间空态
+const preRows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
+ok(preRows.length === 1 && preRows[0].textContent.includes('当前时刻无生效中的售卖空间'), 'pre SU Tab 空态（空间待发布，无生效空间；第42轮默认也过滤）');
+ok(evalInPage('effectiveSpaceAtAll("")') === '' || evalInPage('effectiveSpaceAtAll(new Date().toISOString().slice(0,19).replace("T"," "))') === '', 'pre 当前时刻 effectiveSpaceAtAll=空');
 
 // ================= 计费项下拉按商品过滤 =================
 section('计费项下拉过滤');
@@ -120,7 +122,7 @@ window.eval(`
   })()
 `);
 const rows0901 = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
-ok(rows0901.length === 1 && rows0901[0].textContent.includes('该时刻无生效中的售卖空间'), '查询 2026-09-01（生效期之前）无生效空间 → 空态提示（第40轮）');
+ok(rows0901.length === 1 && rows0901[0].textContent.includes('当前时刻无生效中的售卖空间'), '查询 2026-09-01（生效期之前）无生效空间 → 空态提示（第40/42轮）');
 ok(evalInPage('effectiveSpaceAtAll("2026-09-01 12:00:00")') === '', 'effectiveSpaceAtAll(2026-09-01)=空');
 // 复位时间点（清空输入框=当前时刻） → su-2/su-3 回到在售，su-1 因只剩停用计划仍禁售
 window.eval(`

@@ -97,17 +97,22 @@ w.eval("stopSpacePlan('sp3')");
 ok(alerts.some(m => m.includes('生效中的售卖计划')), '档期内有生效计划 → 停用拦截');
 w.eval('timeFilter = null');
 
-// ===== 7. SU Tab 空间分组（空间徽标合并展示）=====
+// ===== 7. SU Tab 空间分组（第42轮：任何时刻都只显唯一生效空间——当前 11-04 sp1/sp3 均 100 优先级，后建 sp3 胜出）=====
 w.eval('backToList(); openDetailByCode("maas-online-text-glm4"); switchInnerTab("saleunit")');
 const suRows = Array.from(d.querySelectorAll('#saleunit-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
-ok(suRows.length === 11, 'SU Tab 11 行（sp1×4 + sp2×3 + sp3×4），实得 ' + suRows.length);
+ok(suRows.length === 4, 'SU Tab 默认 4 行（第42轮：只显唯一生效空间 sp3 的单元，sp1/sp2 靠后不展示），实得 ' + suRows.length);
 // 空间列 rowspan 合并：sp key 文本只出现在组首行，按「空间列文本 / su-id 已知分组」两组口径验证
 const suOfRow = r => { const m = Array.from(r.cells).map(c => c.textContent).join(' ').match(/su-\d+/g); return m ? m[0] : ''; };
 const sp3Ids = ['su-8', 'su-9', 'su-10', 'su-11'];
-ok(suRows.filter(r => sp3Ids.includes(suOfRow(r))).length === 4, 'sp3 组 4 个单元（su-8~11）');
+ok(suRows.filter(r => sp3Ids.includes(suOfRow(r))).length === 4, '默认视图=sp3 组 4 个单元（su-8~11，同优先级后建胜出）');
 // 空间列第39轮起最外层合并（空间列在 Function 之上）：sp3 整组一个段首行带徽标
 ok(suRows.filter(r => r.textContent.includes('sp3') && r.textContent.includes('已发布')).length === 1, 'sp3 组单一段首行带空间状态徽标（已发布；第39轮空间列最外层合并）');
-ok(suRows.some(r => r.textContent.includes('sp1') && r.textContent.includes('已发布')) && suRows.some(r => r.textContent.includes('sp2')), 'sp1/sp2 组首行带空间徽标');
+ok(!suRows.some(r => r.textContent.includes('sp1')) && !suRows.some(r => r.textContent.includes('sp2')), '默认视图不含非生效空间 sp1/sp2（第42轮）');
+// 时间旅行 11-15：sp2（500）胜出 → 只显 sp2 三单元
+w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSaleUnits()');
+const suRowsMid = Array.from(d.querySelectorAll('#saleunit-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
+ok(suRowsMid.length === 3 && suRowsMid.every(r => suOfRow(r) >= 'su-5' && suOfRow(r) <= 'su-7'), '11-15 只显 sp2 三单元（su-5~7）');
+w.eval('timeFilter = null; renderSaleUnits()');
 
 // ===== 8. 名称快编写回 allProducts（bug 1 修复回归）=====
 w.eval('switchInnerTab("space")');

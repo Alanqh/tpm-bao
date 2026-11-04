@@ -65,20 +65,25 @@ ok(evalInPage('effectiveSpaceAt("input","2026-11-15 00:00:00").key') === 'sp2' &
 ok(evalInPage('effectiveSpaceAt("input","2026-11-25 00:00:00").key') === 'sp1', '11-25 双11空间过档期 → sp1 恢复');
 ok(evalInPage('effectiveSpaceAt("input","2026-11-15 00:00:00").plan.name') === '双11大促·输入售卖空间', '胜出空间=双11（priority 500）');
 
-// ===== 4. 售卖单元 Tab 前三列合并（第39轮：售卖空间/Function/售卖单元——空间层级在 fn 之上） =====
+// ===== 4. 售卖单元 Tab 前三列合并（第39轮：售卖空间/Function/售卖单元——空间层级在 fn 之上；第42轮：任何时刻只显唯一生效空间） =====
 section('4. 售卖单元前三列');
 window.eval('switchInnerTab("saleunit"); renderSaleUnits();');
 const suRows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
-ok(suRows.length === 7, 'glm4 售卖单元 7 行，实得 ' + suRows.length);
+// 第42轮：默认=当前时刻（11-04），sp2 双11 档期未到 → 只显 sp1 的 4 单元
+ok(suRows.length === 4, 'glm4 售卖单元默认 4 行（唯一生效空间 sp1），实得 ' + suRows.length);
 const suHead = Array.from(document.querySelector('#saleunit-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
 ok(suHead.length === 14 && suHead[0] === '售卖空间' && suHead[1] === 'Function' && suHead[2] === '售卖单元', '售卖单元表头 14 列，前三列=售卖空间/Function/售卖单元（第39轮空间居首）');
 const r0 = suRows[0].cells;
 ok(r0[0].textContent.includes('sp1') && r0[0].rowSpan === 4 && r0[1].textContent.trim() === 'cache' && r0[2].textContent.trim() === 'su-4', 'sp1 空间列 rowspan=4（sp1 全部 4 单元跨 fn 合并；首行=sp1/cache/su-4）');
 ok(suRows[1].cells[0].textContent.trim() === 'input' && suRows[1].cells[0].rowSpan === 2, 'sp1 组内 input fn td rowspan=2');
 ok(suRows[3].cells[0].trim === undefined && suRows[3].cells[0].textContent.trim() === 'output', 'sp1 组内 output 独立 fn td');
-const sp2Idx = suRows.findIndex(r => r.textContent.includes('sp2'));
-ok(sp2Idx === 4 && suRows[4].cells[0].textContent.includes('sp2') && suRows[4].cells[0].rowSpan === 3, 'sp2 空间列 rowspan=3（整组独立，含三态徽标）');
-ok(suRows[4].cells[1].textContent.trim() === 'input' && suRows[4].cells[1].rowSpan === 3, 'sp2 组内 input fn td rowspan=3');
+ok(!suRows.some(r => r.textContent.includes('sp2')), '默认视图不含 sp2（未到档期空间不展示；第42轮）');
+// 时间旅行 11-15：sp2（优先级 500）胜出 → 切显 sp2 三单元
+window.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSaleUnits();');
+const suRowsMid = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
+ok(suRowsMid.length === 3 && suRowsMid[0].cells[0].textContent.includes('sp2') && suRowsMid[0].cells[0].rowSpan === 3, '11-15 切显 sp2 三单元（空间列 rowspan=3，含三态徽标）');
+ok(suRowsMid[0].cells[1].textContent.trim() === 'input' && suRowsMid[0].cells[1].rowSpan === 3, 'sp2 组内 input fn td rowspan=3');
+window.eval('timeFilter = null; renderSaleUnits();');
 
 // ===== 5. SU 创建链路已删（第37轮） =====
 section('5. SU 创建链路已删');
