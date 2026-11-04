@@ -133,14 +133,25 @@ document.querySelectorAll('.sp-fn-check').forEach(c => { c.checked = false; });
 alertMsg = '';
 window.confirmSpacePlan();
 ok(alertMsg.includes('至少勾选一个 function'), '空 fn 拦截: ' + alertMsg);
+// 第45轮：待发布空间 sp3 可编辑且编辑弹窗回填
+window.eval('openSpacePlanModal("sp3")');
+ok(document.getElementById('spaceplan-modal-title').textContent.includes('修改'), '第45轮：待发布空间弹窗为修改模式');
+ok(document.querySelector('.sp-fn-check[data-fn="output"]').checked, '编辑模式回填 fn 勾选（output）');
+ok(document.querySelector('.sp-measure-check[data-dim="购买量区间"][value="1～100"]').checked, '编辑模式回填度量勾选');
+window.eval('closeModal("spaceplan")');
+// 已发布空间编辑拦截
+alertMsg = '';
+window.eval('editSpacePlan("sp1")');
+ok(alertMsg.includes('仅待发布'), '第45轮：已发布空间编辑拦截: ' + alertMsg.slice(0, 20));
 window.eval('closeModal("spaceplan")');
 
 // ===== 7. 编辑度量功能已删除（第23轮） + 空间不可改（第38轮） =====
 section('7. 不可改');
 ok(!document.getElementById('modal-space-measure-edit'), '编辑度量弹窗已移除（第23轮）');
 ok(evalInPage('typeof editSpaceMeasures') === 'undefined', 'editSpaceMeasures 函数已删');
-ok(evalInPage('typeof editSpacePlan') === 'undefined', 'editSpacePlan 函数已删（第38轮：空间不可改）');
 ok(evalInPage('typeof confirmSpaceMeasureEdit') === 'undefined', 'confirmSpaceMeasureEdit 函数已删');
+// 第45轮：待发布空间可编辑（editSpacePlan 恢复，仅 pending_publish）
+ok(evalInPage('typeof editSpacePlan') === 'function', '第45轮：editSpacePlan 恢复（待发布空间可编辑）');
 ok(evalInPage('spaces["sp1"].fnDims.input.length') === 2, 'sp1 input 维度集合不变（2 个）');
 
 // ===== 8. 售卖计划创建：锁空间 + 时间范围（第38轮；旧筛选已删） =====
@@ -148,7 +159,7 @@ section('8. 售卖计划创建');
 window.eval('openPlanCreatePage()');
 ok(document.querySelectorAll('.plan-filter-fn-check').length === 0, 'fn 复选筛选已删（第24轮机制废，改为锁空间）；plan-filter-space=售卖计划 Tab 工具条筛选（第43轮）');
 const sel8 = document.getElementById('plan-space-sel');
-ok(sel8 && sel8.options.length === 5, '空间下拉候选 5（sp1~sp4 + 请选择）: ' + sel8.options.length);
+ok(sel8 && sel8.options.length === 3, '第45轮：空间下拉候选 3（仅已发布 sp1/sp2 + 请选择；sp3/sp4 待发布被过滤）: ' + sel8.options.length);
 // 选 sp1 → 区块2 只展示 sp1 内单元（r43 缺省扩展 12 个）
 sel8.value = 'sp1';
 sel8.dispatchEvent(new window.Event('change', { bubbles: true }));

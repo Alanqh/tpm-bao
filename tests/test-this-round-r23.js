@@ -87,7 +87,7 @@ ok(w.eval('typeof openSuConfirmModal') === 'undefined', 'openSuConfirmModal 已�
 ok(!d.getElementById('modal-space-measure-edit'), '编辑度量弹窗已删');
 ok(w.eval('typeof editSpaceMeasures') === 'undefined', 'editSpaceMeasures 函数已删');
 ok(w.eval('typeof setFnSpace') === 'undefined', 'setFnSpace 已删');
-ok(w.eval('typeof editSpacePlan') === 'undefined', 'editSpacePlan 已删（第38轮：空间不可改）');
+ok(w.eval('typeof editSpacePlan') === 'function', '第45轮：editSpacePlan 恢复（待发布空间可编辑）');
 ok(!d.getElementById('fn-space-cards'), 'fn 配置卡已删');
 // 12. snapshot 恢复（第38轮）：glm4 重进后空间/状态保持
 w.eval('exitEdit(); backToList()');

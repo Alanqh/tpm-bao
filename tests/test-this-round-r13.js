@@ -76,18 +76,26 @@ window.backToList();
 section('6. 状态变化联动');
 window.openDetailByCode('maas-product-vtpm-pre');
 window.startEdit();
-// 第38轮：只发计划不发空间 → su-1 仍禁售
+// 第45轮：pre 空间默认已发布——只发计划（计划发布→在售+档期内）→ su-1 转在售已上架
 window.eval('planRowStatuses[0] = "published"; renderSaleUnits(); refreshProductBadge();');
 window.backToList();
 let lrows2 = Array.from(document.querySelectorAll('#listed-tbody tr'));
-ok(lrows2.length === 19, '第38轮：只发计划不发空间 → su-1 仍禁售 → 已上架 Tab 仍 19 行: ' + lrows2.length);
-// 空间也发布 → su-1 转在售
+ok(lrows2.length === 20, '第45轮：pre 空间默认已发布 → 发计划后 su-1 在售 → 已上架 Tab 20 行: ' + lrows2.length);
+// 停用空间+计划待发布 → su-1 回未配置（计入禁售 Tab）
 window.openDetailByCode('maas-product-vtpm-pre');
 window.startEdit();
-window.eval('publishSpacePlan("sp1"); renderSaleUnits(); refreshProductBadge();');
+window.eval('planRowStatuses[0] = "pending_publish"; spaces["sp1"].status = "stopped"; renderSaleUnits(); refreshProductBadge();');
 window.backToList();
 lrows2 = Array.from(document.querySelectorAll('#listed-tbody tr'));
-const prows2 = Array.from(document.querySelectorAll('#pending-tbody tr'));
+let prows2 = Array.from(document.querySelectorAll('#pending-tbody tr'));
+ok(lrows2.length === 19, '空间停用后 su-1 回未配置 → 已上架 Tab 回 19 行: ' + lrows2.length);
+// 复原：重新发布空间（计划已发布）→ su-1 回在售
+window.openDetailByCode('maas-product-vtpm-pre');
+window.startEdit();
+window.eval('planRowStatuses[0] = "published"; publishSpacePlan("sp1"); renderSaleUnits(); refreshProductBadge();');
+window.backToList();
+lrows2 = Array.from(document.querySelectorAll('#listed-tbody tr'));
+prows2 = Array.from(document.querySelectorAll('#pending-tbody tr'));
 ok(lrows2.length === 20, '空间+计划均发布后 su-1 转在售 → 已上架 Tab 20 行: ' + lrows2.length);
 ok(prows2.length === 21, '未上架 Tab 剩 21 行（pre su-1 转出，其余不动）：' + prows2.length);
 

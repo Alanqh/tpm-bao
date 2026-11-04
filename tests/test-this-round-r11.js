@@ -40,15 +40,15 @@ ok(evalInPage('typeof refreshProductBadge') === 'function', 'refreshProductBadge
 window.eval('refreshProductBadge()'); // 不应报错
 
 // ===== 3. 编辑驱动单元状态变化 → 列表 Tab 联动（第13轮快照回写仍生效）=====
-// 第38轮新语义：单元在售=空间 published 且在档期内 + 生效中最高优先级计划 on；只发计划不发空间仍禁售
+// 第45轮：pre 空间默认已发布——停用空间+发布计划 → su-1 未配置（计入禁售 Tab，不出现在售 Tab）
 section('3. 状态变化联动');
 window.openDetailByCode('maas-product-vtpm-pre');
 window.startEdit();
-window.eval('planRowStatuses[0] = "published"; renderPlan(); renderSaleUnits();');
+window.eval('planRowStatuses[0] = "published"; spaces["sp1"].status = "stopped"; renderPlan(); renderSaleUnits();');
 window.eval('exitEdit()');
 window.backToList();
-ok(!document.getElementById('listed-tbody').textContent.includes('maas-product-vtpm-pre'), '第38轮：只发计划不发空间 → pre 仍在禁售 Tab（空间待发布）');
-// 空间也发布 → 转在售
+ok(!document.getElementById('listed-tbody').textContent.includes('maas-product-vtpm-pre'), '第45轮：空间停用 → pre 仍在禁售 Tab（未配置）');
+// 空间重新发布（计划已发布）→ 转在售
 window.openDetailByCode('maas-product-vtpm-pre');
 window.startEdit();
 window.eval('publishSpacePlan("sp1"); planRowStatuses[0] = "published"; renderPlan(); renderSaleUnits();');

@@ -51,16 +51,20 @@ ok(actBtns.includes('发布'), 'pro 第2个计划（待发布）详情有发布�
 window.publishPlanRow(1);
 ok(statusOf('su-2') === '在售', '发布后 su-2 变在售');
 
-// ================= pre：待上架商品，仅待发布计划 =================
-section('pre 商品（待上架，仅待发布）');
+// ================= pre：待上架商品（第45轮：空间默认已发布，仅计划待发布） =================
+section('pre 商品（待上架，仅待发布计划）');
 window.closePlanDetail();
 window.backToList();
 window.openPendingDetail(0);
 ok(evalInPage('planRows.length') === 1, 'pre 挂载 1 个售卖计划');
-// 第42轮：SU Tab 任何时刻只显唯一生效空间——pre 空间待发布 → 无生效空间空态
+// 第45轮：pre 空间默认已发布 → SU Tab 有生效空间（8 单元）；停用空间后回空态（第42轮过滤仍生效）
 const preRows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
-ok(preRows.length === 1 && preRows[0].textContent.includes('当前时刻无生效中的售卖空间'), 'pre SU Tab 空态（空间待发布，无生效空间；第42轮默认也过滤）');
-ok(evalInPage('effectiveSpaceAtAll("")') === '' || evalInPage('effectiveSpaceAtAll(new Date().toISOString().slice(0,19).replace("T"," "))') === '', 'pre 当前时刻 effectiveSpaceAtAll=空');
+ok(preRows.length === 8, 'pre SU Tab 8 行（第45轮空间默认已发布）');
+window.eval('spaces["sp1"].status = "stopped"; renderSaleUnits()');
+const preRows2 = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
+ok(preRows2.length === 1 && preRows2[0].textContent.includes('当前时刻无生效中的售卖空间'), '停用空间后 SU Tab 空态（无生效空间；第42轮过滤）');
+ok(evalInPage('effectiveSpaceAtAll("")') === '' || evalInPage('effectiveSpaceAtAll(new Date().toISOString().slice(0,19).replace("T"," "))') === '', '停用后 effectiveSpaceAtAll=空');
+window.eval('spaces["sp1"].status = "published"; renderSaleUnits()');
 
 // ================= 计费项下拉按商品过滤 =================
 section('计费项下拉过滤');

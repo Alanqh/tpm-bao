@@ -101,7 +101,7 @@ ok(dims.includes('输入token区间 + 输出token区间=0～128K + 0～4K') && d
 
 // ===== 6. 空间不可改：无修改入口；复制=唯一变更路径（新空间+同构单元，旧空间保留） =====
 section('6. 空间不可改/复制');
-ok(typeof window.editSpacePlan === 'undefined', 'editSpacePlan 函数已删（空间不可改）');
+ok(typeof window.editSpacePlan === 'function', '第45轮：editSpacePlan 恢复（待发布空间可编辑）');
 const spaceCnt = window.eval('Object.keys(spaces).length');
 const unitsInOld = window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length');
 window.copySpacePlan(newKey);

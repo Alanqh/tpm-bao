@@ -76,7 +76,7 @@ window.confirmSpacePlan();
 ok(evalInPage('spaces["sp2"] && spaces["sp2"].fnDims[""].join(",")') === '购买周期', '第二空间 sp2 单维度');
 ok(evalInPage('Object.keys(spaces).length') === 2, '两个空间');
 // 第38轮：空间完全不可改——editSpacePlan 已删，重复创建即新建
-ok(typeof window.editSpacePlan === 'undefined', '无修改空间函数（空间不可改，变更=复制新建）');
+ok(typeof window.editSpacePlan === 'function', '第45轮：待发布空间可编辑（editSpacePlan 恢复）');
 window.eval('openSpacePlanModal()');
 const fnBoxC = document.querySelector('.sp-fn-check[data-fn=""]');
 fnBoxC.checked = true;

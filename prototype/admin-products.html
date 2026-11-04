@@ -864,7 +864,7 @@
  <script>
     // ===== 通用 =====
     function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); document.getElementById('modal-' + id).classList.add('flex'); }
-    function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); }
+    function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); if (id === 'spaceplan') editingSpaceKey = null; }
 
     function toggleMenu(id, el) {
       const menu = document.getElementById(id);
@@ -1015,7 +1015,7 @@
         'sp1': { seq: 1, name: '专业·常驻售卖空间', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100', '500+'], '购买周期': ['30天', '90天'] } } }
       },
       'maas-product-vtpm-pre': {
-        'sp1': { seq: 1, name: '预发布·常驻售卖空间', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'pending_publish', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100'], '购买周期': ['30天', '60天', '90天'] } } }
+        'sp1': { seq: 1, name: '预发布·常驻售卖空间', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100'], '购买周期': ['30天', '60天', '90天'] } } }
       },
       // glm4：常规空间（第44轮：三 fn 共享同一份维度度量勾选——输入[128K～1M]+输出[0～4K]，每 fn 4 组合×3=12 单元）+ 双11高优先级后档空间（仅 input，接管期生效）
       'maas-online-text-glm4': {
@@ -1956,25 +1956,33 @@
       return planRows.filter((r, i) => r.spaceKey === k && planRowStatuses[i] === 'published' && r.effStart <= nowStr && nowStr <= r.effEnd);
     }
     // 弹窗：创建售卖空间（fn→维度→度量三层勾选 + 名称/优先级/生效期；保存时叉乘生成全部售卖单元）
-    function openSpacePlanModal() {
+    // 第45轮：待发布空间可编辑——openSpacePlanModal(k) 编辑模式回填配置；confirmSpacePlan 原地更新 + 差量叉乘
+    let editingSpaceKey = null; // 当前编辑的空间 key（null=创建模式）
+    function openSpacePlanModal(k) {
+      editingSpaceKey = k || null;
+      const sp = k ? spaces[k] : null;
       const fns = fnPool().length > 0 ? fnPool() : [''];
-      document.getElementById('sp-name').value = '';
-      document.getElementById('sp-priority').value = '';
-      document.getElementById('sp-eff-start').value = '2026-11-11T00:00:00';
-      document.getElementById('sp-eff-end').value = '2026-11-20T00:00:00';
+      document.getElementById('sp-name').value = sp ? (sp.name || '') : '';
+      document.getElementById('sp-priority').value = sp ? (sp.priority ?? '') : '';
+      document.getElementById('sp-eff-start').value = sp ? (sp.effStart || '').replace(' ', 'T') : '2026-11-11T00:00:00';
+      document.getElementById('sp-eff-end').value = sp ? (sp.effEnd || '').replace(' ', 'T') : '2026-11-20T00:00:00';
+      document.getElementById('spaceplan-modal-title').textContent = sp ? '修改售卖空间：' + (sp.name || k) : '创建售卖空间';
       // 第44轮：function 与维度度量值分离（不嵌套）——
       // 区块1 勾 function（独立复选）；区块2 勾各维度度量（全局一份，与 fn 无关，共享给全部勾选 fn）
       // 组合 = 每个维度 {勾选度量 ∪ 缺省} 完整叉乘（含全缺省），每组合 × 每勾选 fn 生成一个售卖单元
+      // 第45轮：编辑模式回填——fn 复选按空间 fnDims 键勾选
       document.getElementById('sp-fnspaces').innerHTML = fns.map(f => `<label class="flex items-center gap-1.5 text-xs cursor-pointer text-slate-700 border border-slate-200 rounded-md px-2.5 py-1.5 bg-white">
-          <input type="checkbox" class="sp-fn-check" data-fn="${f}" style="accent-color:#7C3AED">
+          <input type="checkbox" class="sp-fn-check" data-fn="${f}" ${sp && (sp.fnDims || {}).hasOwnProperty(f) ? 'checked' : ''} style="accent-color:#7C3AED">
           <span class="font-mono font-medium">${f || '—（无 function）'}</span></label>`).join('');
+      // 第45轮：编辑模式回填——度量复选按 fnMeasures（各 fn 共享同一份）勾选
+      const editMeas = sp && sp.fnMeasures ? (sp.fnMeasures[Object.keys(sp.fnDims || {})[0]] || {}) : null;
       document.getElementById('sp-dimmeas').innerHTML = dimensionOptions.map(d => {
         const measures = measureOptions[d] || [];
         return `<div class="border border-slate-200 rounded-md px-2 py-1.5 bg-white" data-dimblock="${d}">
           <p class="text-xs font-medium text-slate-700">${d}<span class="ml-1 text-slate-400 font-normal">（缺省=该维度不参与组合）</span></p>
           <div class="ml-1 mt-1 flex flex-wrap gap-x-3 gap-y-1" data-dimmeas-group="${d}">
             ${measures.map(m => `<label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
-              <input type="checkbox" class="sp-measure-check" data-dim="${d}" value="${m}" style="accent-color:#7C3AED">
+              <input type="checkbox" class="sp-measure-check" data-dim="${d}" value="${m}" ${editMeas && (editMeas[d] || []).includes(m) ? 'checked' : ''} style="accent-color:#7C3AED">
               <span>${m}</span></label>`).join('')}
           </div>
         </div>`;
@@ -2000,21 +2008,34 @@
       const dimList = Object.keys(meas); // 有勾选度量的维度才参与组合（未勾度量的维度不参与）
       const fnDims = {}; const fnMeasures = {};
       checkedFns.forEach(f => { fnDims[f] = dimList.slice(); fnMeasures[f] = JSON.parse(JSON.stringify(meas)); });
-      // 新建空间（第38轮：一个空间可含多 fn）
-      spaceSeq += 1;
-      const key = 'sp' + spaceSeq;
-      spaces[key] = { seq: spaceSeq, name, priority, effStart, effEnd, status: 'pending_publish', fnDims, fnMeasures };
-      // 叉乘生成每个 fn 的售卖单元
+      // 新建空间（第38轮：一个空间可含多 fn）；第45轮：待发布空间编辑=原地更新
+      let key; let isEdit = false;
+      if (editingSpaceKey && spaces[editingSpaceKey]) {
+        key = editingSpaceKey;
+        isEdit = true;
+        Object.assign(spaces[key], { name, priority, effStart, effEnd, fnDims, fnMeasures });
+      } else {
+        spaceSeq += 1;
+        key = 'sp' + spaceSeq;
+        spaces[key] = { seq: spaceSeq, name, priority, effStart, effEnd, status: 'pending_publish', fnDims, fnMeasures };
+      }
+      // 叉乘生成每个 fn 的售卖单元（gen 幂等：已有同 fn+空间+组合不重复，永不删除旧单元）
       const createdUnits = [];
       Object.keys(fnDims).forEach(f => {
         createdUnits.push(...genSaleUnitsForSpace(key, f, fnDims[f], fnMeasures[f]));
       });
+      editingSpaceKey = null;
       closeModal('spaceplan');
       renderSpaceTab();
       renderSaleUnits();
       renderPlan();
+      if (currentSpacePlanDetailIdx === key) renderSpacePlanDetail(key);
       const unitMsg = createdUnits.length > 0 ? '；已自动生成售卖单元 ' + createdUnits.length + ' 个（' + createdUnits.slice(0, 8).join('、') + (createdUnits.length > 8 ? ' 等' : '') + '）' : '';
-      alert('售卖空间「' + name + '」（' + key + '）已保存（待发布）' + unitMsg);
+      if (isEdit) {
+        alert('售卖空间「' + name + '」（' + key + '）已更新' + unitMsg);
+      } else {
+        alert('售卖空间「' + name + '」（' + key + '）已保存（待发布）' + unitMsg);
+      }
     }
     // 维度→度量 map 排序序列化（身份比较 helper）
     function mapSort(m) {
@@ -2079,6 +2100,14 @@
       renderSpaceTab(); renderSaleUnits(); renderPlan();
       if (currentSpacePlanDetailIdx === k) renderSpacePlanDetail(k);
     }
+    // 编辑待发布空间（第45轮）：仅 pending_publish 状态可编辑，原空间 fn/维度配置直接原地更新
+    function editSpacePlan(k) {
+      if (!guardEdit()) return;
+      const sp = spaces[k];
+      if (!sp) return;
+      if (sp.status !== 'pending_publish') { alert('仅待发布状态的空间可编辑（已发布/已停用空间请使用复制后新建）'); return; }
+      openSpacePlanModal(k);
+    }
     // 复制空间（第38轮：对齐第29轮复制口径——不受锁；深拷贝→-副本→新建空间+叉乘生成单元→待发布）
     function copySpacePlan(k) {
       const src = spaces[k];
@@ -2124,7 +2153,7 @@
       const stEl = document.getElementById('spaceplan-detail-status');
       stEl.className = 'badge ' + meta.cls;
       stEl.textContent = meta.text;
-      // 操作区：待发布=发布+复制（空间不可改）；已发布=停用+复制；已停用=仅复制
+      // 操作区：待发布=修改+发布+复制（第45轮：待发布可编辑）；已发布=停用+复制；已停用=仅复制
       const actionsEl = document.getElementById('spaceplan-detail-actions');
       const disCls = canEdit() ? '' : 'pointer-events-none opacity-40';
       const copyBtn = `<button type="button" onclick="copySpacePlan('${k}')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-copy mr-1"></i>复制</button>`;
@@ -2132,6 +2161,7 @@
         actionsEl.innerHTML = `
           <div class="flex flex-wrap items-center justify-end gap-2">
             <div class="flex flex-wrap items-center gap-2 ${disCls}">
+              <button type="button" onclick="editSpacePlan('${k}')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
               <button type="button" onclick="publishSpacePlan('${k}')" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-paper-plane mr-1"></i>发布</button>
             </div>
             ${copyBtn}
@@ -2317,13 +2347,12 @@
       document.getElementById('plan-priority').value = '';
       document.getElementById('plan-eff-start').value = '2026-11-01T00:00:00';
       document.getElementById('plan-eff-end').value = '2027-11-01T00:00:00';
-      // 第38轮：空间下拉（候选=该商品全部空间，含状态与档期提示）
+      // 第45轮：空间下拉只列已发布空间（售卖计划只能挂在已发布的售卖空间上）
       const sel = document.getElementById('plan-space-sel');
-      const keys = Object.keys(spaces);
+      const keys = Object.keys(spaces).filter(k => spaces[k].status === 'published');
       sel.innerHTML = '<option value="">请选择售卖空间</option>' + keys.map(k => {
         const sp = spaces[k];
-        const meta = planStatusMeta(sp.status);
-        return `<option value="${k}">${k} · ${sp.name || '—'}（${meta.text}，${sp.effStart} ~ ${sp.effEnd}）</option>`;
+        return `<option value="${k}">${k} · ${sp.name || '—'}（${sp.effStart} ~ ${sp.effEnd}）</option>`;
       }).join('');
       sel.value = '';
       if (document.getElementById('plan-space-info')) document.getElementById('plan-space-info').textContent = '';
@@ -2421,7 +2450,6 @@
           </div>
           <div class="mt-1.5 pt-1.5 border-t border-slate-200/70 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
             <span><span class="text-slate-400">Function：</span><span class="text-slate-600">${fnText}</span></span>
-            <span><span class="text-slate-400">售卖空间：</span><span class="text-slate-600">${u.spaceKey || '—'}</span></span>
             <span class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
               <span class="text-slate-400">维度组合：</span>${formatDimMeasure(u)}
             </span>
@@ -2725,13 +2753,14 @@
       document.getElementById('plan-priority').value = r.priority;
       document.getElementById('plan-eff-start').value = (r.effStart || '').replace(' ', 'T');
       document.getElementById('plan-eff-end').value = (r.effEnd || '').replace(' ', 'T');
-      // 第38轮：空间下拉回填（计划锁定的空间；若空间已不存在则提示）
+      // 第45轮：空间下拉只列已发布空间；若计划原空间已不在候选（如空间被停用）则保底附加并标注状态
       const sel = document.getElementById('plan-space-sel');
-      const keys = Object.keys(spaces);
-      sel.innerHTML = '<option value="">请选择售卖空间</option>' + keys.map(k => {
-        const sp = spaces[k];
+      const keys = Object.keys(spaces).filter(k => spaces[k].status === 'published');
+      const extra = r.spaceKey && !keys.includes(r.spaceKey) ? [r.spaceKey] : [];
+      sel.innerHTML = '<option value="">请选择售卖空间</option>' + [...keys, ...extra].map(k => {
+        const sp = spaces[k] || {};
         const meta = planStatusMeta(sp.status);
-        return `<option value="${k}">${k} · ${sp.name || '—'}（${meta.text}，${sp.effStart} ~ ${sp.effEnd}）</option>`;
+        return `<option value="${k}">${k} · ${sp.name || '—'}${extra.includes(k) ? '（' + meta.text + '）' : ''}（${sp.effStart} ~ ${sp.effEnd}）</option>`;
       }).join('');
       sel.value = r.spaceKey || '';
       onPlanSpaceChange();

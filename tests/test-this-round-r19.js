@@ -90,7 +90,7 @@ const unitCards = Array.from(document.querySelectorAll('.plan-unit-check')).map(
 ok(unitCards.length === 2, '选中 sp-x 后区块2 渲染 2 个售卖单元');
 const card1 = unitCards[0].textContent;
 ok(card1.includes('input'), '区块2 su-1 Function=input');
-ok(card1.includes('sp-x'), '区块2 su-1 展示售卖空间（第35轮=code）');
+ok(!card1.includes('sp-x'), '第45轮：区块2 su-1 不展示售卖空间（只显维度组合+function）');
 ok(!card1.includes('维度组合：function'), '区块2 维度组合不含 function');
 ok(document.getElementById('plan-space-info').textContent.includes('空间生效范围'), '区块1 空间档期提示展示');
 
