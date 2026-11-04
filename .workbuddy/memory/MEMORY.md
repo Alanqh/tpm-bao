@@ -1,11 +1,17 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第39轮（main fb323e3 / gh-pages 081693b，24 套全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第40轮（main 31f66cb / gh-pages f173da0，24 套全绿）。
 
-## 第39轮（现行口径）：售卖空间列表纯列表化 + 新排序 + SU Tab 空间层级上调
+## 第40轮（现行口径）：列表删空间单元列 + 详情页售卖单元清单 + SU Tab 唯一生效空间过滤
+- **售卖空间列表 8 列**：删「空间单元」列（pu-sp-N-M 前缀界面清零），列序=售卖空间/状态/空间名称/Function/空间维度/售卖单元数/优先级/生效起止；空表 colspan=8。
+- **空间详情页**：基本信息（code/名称/优先级/生效起止）+「售卖单元」清单表（3 列：售卖单元/Function/维度:度量），每单元一行，按 fnDims 创建序分组、组内 id 字典序。
+- **SU Tab 时刻过滤（新 effectiveSpaceAtAll(t)）**：timeFilter.point 存在时只显全局唯一生效空间内单元——候选=published 且档期内全部空间，排序 priority 降序→seq 降序（同优先级后创建优先），无命中空态「该时刻无生效中的售卖空间」。与 effectiveSpaceAt(fn,t)（按 fn 仲裁）语义不同。
+- 测试索引左移规律：原 cells[N]（N≥1）左移一位——售卖空间 cells[2]→cells[0]、Function cells[4]→cells[3]、单元数 cells[6]→cells[5]。
+
+## 第39轮（部分被第40轮覆盖）：售卖空间列表纯列表化 + 新排序 + SU Tab 空间层级上调
 - **售卖空间 Tab 无时间点查询**：#space-tf-point/#space-tf-tip/querySpaceAt/resetSpaceAt/syncSpaceTfPoint 全删；timeFilter 保留（售卖单元 Tab #tf-point 维护，函数层共用）。
-- **列表排序**：空间间=状态→优先级降序→创建时间逆序（seq 降序）；空间内 fn 行=fnDims 键序（创建勾选序），pu-sp-N-M 与创建时填写一一对应（第38轮的 effStart 降序+fn 字典序废弃——曾致编号视觉错乱）。
+- **列表排序**：空间间=状态→优先级降序→创建时间逆序（seq 降序）；空间内 fn 行=fnDims 键序（创建勾选序）（第40轮已删 pu-sp 编号列）。
 - **SU Tab 层级**：售卖空间列在 Function 之上——表头 售卖空间|Function|售卖单元；排序 spaceKey→fn→id；spSpan=同空间全部行（跨 fn 最外层）、fnSpan=空间内同 fn；showFn 判定含 showSpace 短路（新空间必起新 fn td）。
 
 ## 第38轮（现行口径核心模型）：售卖空间+空间计划合并为空间聚合根 + 计划锁定空间
