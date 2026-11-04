@@ -262,14 +262,14 @@
           </div>
           <button onclick="backToList()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回列表</button>
         </div>
-        <!-- 第36轮：编辑锁条提升至基本信息卡片之前，居左 -->
-        <div id="edit-lock-bar" class="flex items-center justify-start gap-2 mb-3"></div>
-
         <!-- 上半：基本信息（紧凑排列） -->
         <div class="admin-card p-4 mb-4">
           <p class="text-sm font-medium text-slate-900 mb-2.5">基本信息</p>
           <div id="detail-info" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs"></div>
        </div>
+
+        <!-- 第37轮：编辑锁条位于基本信息卡片之后、Tab 卡片之前，居左 -->
+        <div id="edit-lock-bar" class="flex items-center justify-start gap-2 mb-3"></div>
 
         <!-- 下半：售卖单元（含配置查询）/ 售卖计划 / 定价计划 / 折算系数 / SLO -->
         <div id="plan-tabs-card" class="admin-card">
@@ -335,11 +335,10 @@
             </div>
           </div>
 
-          <!-- 售卖单元 Tab：按钮（弹窗确认）+ 配置查询（时间筛选 + 状态） -->
+          <!-- 售卖单元 Tab（第37轮：纯只读展示——售卖单元由空间计划创建时叉乘自动生成）+ 配置查询（时间筛选 + 状态） -->
           <div id="inner-tab-saleunit" class="p-4 hidden">
-            <!-- 顶部：小按钮「创建售卖单元」打开弹窗（只增不减） -->
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <button type="button" id="su-create-btn" onclick="if(!guardEdit())return; openSuConfirmModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-plus mr-1"></i>创建售卖单元</button>
+            <!-- 顶部：时间筛选查状态 -->
+            <div class="flex flex-wrap items-center justify-end gap-2 mb-3">
               <div class="flex flex-wrap items-center gap-2 text-xs">
                 <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间</span>
                 <input id="tf-point" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-56">
@@ -365,7 +364,6 @@
                   <th class="text-right px-3 py-2 font-medium">最小购买量</th>
                   <th class="text-right px-3 py-2 font-medium">最大购买量</th>
                   <th class="text-right px-3 py-2 font-medium">购买量step</th>
-                  <th class="text-left px-3 py-2 font-medium">操作</th>
                 </tr>
               </thead>
               <tbody id="saleunit-tbody" class="divide-y divide-slate-100"></tbody>
@@ -798,29 +796,7 @@
     </div>
   </div>
 
-  <!-- Modal: 创建售卖单元（第20轮改版：无 function 商品=维度勾选；含 function 商品=先选 function → 空间选择 + 维度勾选） -->
-  <div id="modal-su-confirm" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-900/50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
-      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
-        <h3 class="text-sm font-semibold text-slate-900">创建售卖单元</h3>
-        <button type="button" onclick="closeModal('su-confirm')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="p-5">
-        <div class="mb-4" id="su-fn-block">
-          <label class="form-label">Function</label>
-          <select id="su-fn-select" class="form-input" onchange="onSuFnChange()"><option value="">—（不区分 function）</option></select>
-        </div>
-        <div id="su-space-line" class="mb-4 hidden"></div>
-        <div id="su-confirm-body" class="space-y-3"></div>
-      </div>
-      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
-        <button type="button" onclick="closeModal('su-confirm')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
-        <button type="button" onclick="confirmSaleUnits()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>创建</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: 空间切换计划（第26轮：独立实体；第31轮：fn 勾选+维度复选——保存时为每个勾选 fn 新建一个售卖空间并落地 fnSpaces） -->
+  <!-- Modal: 空间切换计划（第26轮：独立实体；第31轮：fn 勾选+维度复选；第37轮：+维度下度量勾选——保存时新建空间并叉乘自动生成售卖单元） -->
   <div id="modal-spaceplan" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-900/50 p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
@@ -1010,12 +986,12 @@
         { id: 'su-2', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 60天' },
         { id: 'su-3', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 90天' }
       ],
-      // online-text 示例商品（第20轮新增演示）：input 在 sp2、output 在 sp4、cache 在 sp5（第21轮空间模型）
+      // online-text 示例商品（第20轮新增演示）：input 在 sp2、output 在 sp4、cache 在 sp5（第23轮起空间只管维度，su-4 对齐 sp5 单维度）
       'maas-online-text-glm4': [
         { id: 'su-1', fn: 'input', spaceKey: 'sp2', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
         { id: 'su-2', fn: 'input', spaceKey: 'sp2', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 16K+' },
         { id: 'su-3', fn: 'output', spaceKey: 'sp4', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
-        { id: 'su-4', fn: 'cache', spaceKey: 'sp5', dim: '输入token区间 + 输出token区间', measure: '0～128K + 0～4K' }
+        { id: 'su-4', fn: 'cache', spaceKey: 'sp5', dim: '输入token区间', measure: '0～128K' }
       ]
     };
     let saleUnits = [];
@@ -1113,18 +1089,18 @@
     const defaultSpacePlans = {
       // vtpm 类（fn=''）：常驻计划 → sp1（购买量+周期），长生效期
       'maas-product-vtpm-std': [
-        { name: '标准·常驻售卖空间1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { '': ['购买量区间', '购买周期'] }, fnSpaces: { '': 'sp1' } }
+        { name: '标准·常驻售卖空间1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100'], '购买周期': ['30天', '60天', '90天'] } }, fnSpaces: { '': 'sp1' } }
       ],
       'maas-product-vtpm-pro': [
-        { name: '专业·常驻售卖空间1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { '': ['购买量区间', '购买周期'] }, fnSpaces: { '': 'sp1' } }
+        { name: '专业·常驻售卖空间1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100', '500+'], '购买周期': ['30天', '90天'] } }, fnSpaces: { '': 'sp1' } }
       ],
       'maas-product-vtpm-pre': [
-        { name: '预发布·常驻售卖空间1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { '': ['购买量区间', '购买周期'] }, fnSpaces: { '': 'sp1' } }
+        { name: '预发布·常驻售卖空间1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100'], '购买周期': ['30天', '60天', '90天'] } }, fnSpaces: { '': 'sp1' } }
       ],
       // glm4：常规计划（input→sp2/output→sp4/cache→sp5 长生效期）+ 双11切换计划（input→sp3 高优先级 11-11~11-20 接管）
       'maas-online-text-glm4': [
-        { name: 'GLM4·常规售卖空间', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { input: ['输入token区间', '输出token区间'], output: ['输入token区间', '输出token区间'], cache: ['输入token区间'] }, fnSpaces: { input: 'sp2', output: 'sp4', cache: 'sp5' } },
-        { name: '双11大促·输入切换售卖空间3', priority: 500, effStart: '2026-11-11 00:00:00', effEnd: '2026-11-20 00:00:00', fnDims: { input: ['输入token区间'] }, fnSpaces: { input: 'sp3' } }
+        { name: 'GLM4·常规售卖空间', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { input: ['输入token区间', '输出token区间'], output: ['输入token区间', '输出token区间'], cache: ['输入token区间'] }, fnMeasures: { input: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K', '16K+'] }, output: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K'] }, cache: { '输入token区间': ['0～128K'] } }, fnSpaces: { input: 'sp2', output: 'sp4', cache: 'sp5' } },
+        { name: '双11大促·输入切换售卖空间3', priority: 500, effStart: '2026-11-11 00:00:00', effEnd: '2026-11-20 00:00:00', fnDims: { input: ['输入token区间'] }, fnMeasures: { input: { '输入token区间': ['0～128K', '128K～1M', '1M+'] } }, fnSpaces: { input: 'sp3' } }
       ]
     };
     const defaultSpacePlanStatuses = {
@@ -1388,9 +1364,10 @@
     function spaceNameOf(u) {
       return (u && u.spaceKey) ? u.spaceKey : '—';
     }
+    // 售卖单元 Tab（第37轮：纯只读展示——单元由空间计划创建时叉乘自动生成，不可手动创建/删除）
     function renderSaleUnits() {
       if (saleUnits.length === 0) {
-        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="15" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元</td></tr>`;
+        document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元</td></tr>`;
         return;
       }
       // 第20轮：前三列 = function（合并）/售卖空间（合并）/售卖单元；排序 fn → spaceKey → id（保证同 fn 同空间连续，可 rowspan 合并）
@@ -1426,14 +1403,6 @@
         const charge = plan ? (chargeItems.find(c => c.code === (plan.chargeCodes && plan.chargeCodes[u.id]) || c.code === plan.chargeCode) || null) : null;
         // 所选时间执行价（示意）：有 charge 时 = 刊例价 × 0.95 折扣示意
         const execPrice = charge ? (charge.price * 0.95).toFixed(4) : '—';
-        // 未配置（无任何关联售卖计划）的售卖单元可删除；未持有编辑锁时置灰（第10轮编辑锁）
-        const hasAnyPlan = planRows.some(r => (r.units || []).includes(u.id));
-        const deletable = !hasAnyPlan;
-        const action = !deletable
-          ? '<span class="text-slate-300 text-xs">—</span>'
-          : (canEdit()
-            ? `<button type="button" onclick="removeSaleUnit('${u.id}')" class="text-red-500 hover:underline text-xs">删除</button>`
-            : '<span class="text-slate-300 text-xs">🔒 删除</span>');
         return `
         <tr class="hover:bg-slate-50">
           ${showFn ? `<td rowspan="${fnSpan}" class="px-3 py-2 text-xs font-medium align-top border-r border-slate-100">${fn || '—'}</td>` : ''}
@@ -1450,19 +1419,10 @@
           <td class="px-3 py-2 text-right text-xs">${plan ? plan.minQty : '—'}</td>
           <td class="px-3 py-2 text-right text-xs">${plan ? plan.maxQty : '—'}</td>
           <td class="px-3 py-2 text-right text-xs">${plan ? plan.stepQty : '—'}</td>
-          <td class="px-3 py-2 whitespace-nowrap">${action}</td>
         </tr>`;
       }).join('');
     }
-    // 删除售卖单元（有任何售卖计划关联即不可删；需持有编辑锁）
-    function removeSaleUnit(unitId) {
-      if (!guardEdit()) return;
-      const hasPlan = planRows.some(r => (r.units || []).includes(unitId));
-      if (hasPlan) { alert('该售卖单元已关联售卖计划，不可删除'); return; }
-      saleUnits = saleUnits.filter(u => u.id !== unitId);
-      renderSaleUnits();
-      refreshProductBadge();
-    }
+    // 删除售卖单元（第37轮已废除：售卖单元由空间计划叉乘生成，一律不可删除）
     // ===== 售卖计划 Tab：计划单元列表（每个售卖计划为其包含的每个售卖单元生成一个计划单元） =====
     // 计划单元 = 售卖计划 × 售卖单元；状态跟随所属售卖计划
     function planUnitId(planIdx, unitId) { return 'pu-' + (planIdx + 1) + '-' + unitId; }
@@ -1584,24 +1544,39 @@
       renderSpaceTab();
       renderSpacePlans();
     }
-    // 第36轮：商品名称快速编辑（标题旁铅笔按钮 → 行内输入 + 保存/取消；不依赖编辑锁）
-    function openDetailNameEdit() {
+    // 第36/37轮：商品名称快速编辑（标题旁 + 基本信息卡片两处铅笔 → 行内输入 + 保存/取消；不依赖编辑锁）
+    // editSource：'title'（标题旁，默认）/'info'（基本信息卡片）——两处共用同一输入条（渲染在标题旁）
+    let detailNameEditSource = 'title';
+    function openDetailNameEdit(source) {
+      detailNameEditSource = (source === 'info') ? 'info' : 'title';
       const wrap = document.getElementById('detail-name-edit-wrap');
       const btn = document.getElementById('detail-name-edit-btn');
       const input = document.getElementById('detail-name-input');
-      if (!wrap || !btn || !input) return;
+      const infoBtn = document.getElementById('detail-info-name-edit-btn');
+      if (!wrap || !input) return;
       wrap.classList.remove('hidden');
       wrap.classList.add('flex');
-      btn.classList.add('hidden');
+      if (btn) btn.classList.add('hidden');
+      if (infoBtn) infoBtn.classList.add('hidden');
       input.value = currentProduct ? currentProduct.name : '';
+      // 基本信息卡片：名称文本切换为编辑高亮态
+      const infoName = document.getElementById('detail-info-name');
+      if (infoName) infoName.classList.add('text-violet-600');
+      if (detailNameEditSource === 'info') { try { input.focus(); } catch (e) {} }
     }
     function closeDetailNameEdit() {
       const wrap = document.getElementById('detail-name-edit-wrap');
       const btn = document.getElementById('detail-name-edit-btn');
-      if (!wrap || !btn) return;
-      wrap.classList.add('hidden');
-      wrap.classList.remove('flex');
-      btn.classList.remove('hidden');
+      const infoBtn = document.getElementById('detail-info-name-edit-btn');
+      const infoName = document.getElementById('detail-info-name');
+      if (wrap) {
+        wrap.classList.add('hidden');
+        wrap.classList.remove('flex');
+      }
+      if (btn) btn.classList.remove('hidden');
+      if (infoBtn) infoBtn.classList.remove('hidden');
+      if (infoName) infoName.classList.remove('text-violet-600');
+      detailNameEditSource = 'title';
     }
     function confirmDetailNameEdit() {
       const input = document.getElementById('detail-name-input');
@@ -1610,9 +1585,13 @@
       if (!currentProduct) return;
       currentProduct.name = name;
       document.getElementById('detail-title').textContent = `${currentProduct.name}（${currentProduct.code}）`;
-      // 基本信息卡片同步
-      const infoPs = document.querySelectorAll('#detail-info .font-medium');
-      infoPs.forEach(p => { if (p.parentElement && p.previousElementSibling && p.previousElementSibling.textContent === '商品名称') p.textContent = name; });
+      // 基本信息卡片同步（第37轮：span#detail-info-name）
+      const infoName = document.getElementById('detail-info-name');
+      if (infoName) infoName.textContent = name;
+      else {
+        const infoPs = document.querySelectorAll('#detail-info .font-medium');
+        infoPs.forEach(p => { if (p.parentElement && p.previousElementSibling && p.previousElementSibling.textContent === '商品名称') p.textContent = name; });
+      }
       closeDetailNameEdit();
     }
     // 详情页头部右侧：发起变更 / 退出变更 按钮 + 他人持锁提示（第36轮：位置移至基本信息卡片之前居左）
@@ -1637,11 +1616,11 @@
       bar.innerHTML = `
         <button type="button" onclick="startEdit()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>发起变更</button>`;
     }
-    // 置灰/恢复所有变更类控件（创建售卖计划/创建售卖单元 + 发布/停用/修改 + 删除售卖单元）
+    // 置灰/恢复所有变更类控件（创建售卖计划 + 发布/停用/修改；第37轮：创建售卖单元按钮已删）
     function refreshEditControls() {
       const editable = canEdit();
-      // Tab 内顶部按钮：创建售卖单元（售卖单元Tab）、创建售卖计划（售卖计划Tab）、创建空间计划（空间计划Tab，第31轮：空间由空间计划创建）
-      ['su-create-btn', 'plan-create-btn', 'spaceplan-new-btn'].forEach(id => {
+      // Tab 内顶部按钮：创建售卖计划（售卖计划Tab）、创建空间计划（空间计划Tab，第37轮：售卖单元随空间计划叉乘生成）
+      ['plan-create-btn', 'spaceplan-new-btn'].forEach(id => {
         const btn = document.getElementById(id);
         if (!btn) return;
         btn.disabled = !editable;
@@ -1789,7 +1768,10 @@
       document.getElementById('detail-info').innerHTML = `
         <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品类型</p><p class="text-slate-800 font-medium">${currentProduct.type}</p></div>
         <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品code</p><p class="font-mono">${currentProduct.code}</p></div>
-        <div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">商品名称</p><p class="font-medium">${currentProduct.name}</p></div>
+        <div class="bg-slate-50 rounded-md px-2.5 py-1.5">
+          <p class="text-slate-500">商品名称</p>
+          <p class="font-medium flex items-center gap-1.5"><span id="detail-info-name" class="text-slate-800">${currentProduct.name}</span><button type="button" id="detail-info-name-edit-btn" onclick="openDetailNameEdit('info')" class="text-slate-400 hover:text-violet-600 shrink-0" title="编辑商品名称"><i class="fa-solid fa-pen text-[10px]"></i></button></p>
+        </div>
       `;
       renderSaleUnits();
       renderPlan();
@@ -1982,7 +1964,7 @@
         </tr>`;
       }).join('');
     }
-    // 弹窗：创建/修改（第31轮：每 fn 一行 = 勾选 fn + 维度复选组；保存时为每个勾选 fn 新建一个售卖空间）
+    // 弹窗：创建/修改（第31轮：每 fn 一行勾选 fn+维度；第37轮：再加维度下度量勾选——保存时按勾选维度×度量叉乘自动生成该空间全部售卖单元）
     function openSpacePlanModal(idx) {
       editingSpacePlanIdx = (idx === undefined || idx === null) ? -1 : idx;
       const r = editingSpacePlanIdx >= 0 ? spacePlans[editingSpacePlanIdx] : null;
@@ -1996,18 +1978,33 @@
       // 该商品已有空间按 fn 分组（展示「当前生效」提示用；不作为选择目标——新计划总是新建空间）
       document.getElementById('sp-fnspaces').innerHTML = fns.map(f => {
         const rDims = (r && r.fnDims && r.fnDims[f]) || [];
+        const rMeas = (r && r.fnMeasures && r.fnMeasures[f]) || {};
         const cur = effectiveSpaceAt(f).key;
         const curName = cur || '—';
+        const dimBlocks = dimensionOptions.map(d => {
+          const measures = measureOptions[d] || [];
+          const dimChecked = rDims.includes(d);
+          const checkedMeas = (rMeas[d] || []);
+          return `<div class="border border-slate-200 rounded-md px-2 py-1.5 bg-white" data-dimblock="${f}|${d}">
+            <label class="flex items-center gap-1 text-xs font-medium text-slate-700">
+              <input type="checkbox" class="sp-dim-check" data-fn="${f}" value="${d}" ${dimChecked ? 'checked' : ''} ${rDims.length > 0 ? '' : 'disabled'} style="accent-color:#7C3AED" onchange="onSpDimCheck(this)">
+              <span>${d}</span>
+            </label>
+            <div class="ml-5 mt-1 flex flex-wrap gap-x-3 gap-y-1 ${dimChecked ? '' : 'opacity-50 pointer-events-none'}" data-dimmeas="${f}|${d}">
+              ${measures.map(m => `<label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
+                <input type="checkbox" class="sp-measure-check" data-fn="${f}" data-dim="${d}" value="${m}" ${checkedMeas.includes(m) ? 'checked' : ''} ${dimChecked ? '' : 'disabled'} style="accent-color:#7C3AED">
+                <span>${m}</span></label>`).join('')}
+            </div>
+          </div>`;
+        }).join('');
         return `<div class="border border-slate-200 rounded-md px-2.5 py-2 bg-slate-50" data-fnrow="${f}">
           <label class="flex flex-wrap items-center gap-2 text-xs">
             <input type="checkbox" class="sp-fn-check" data-fn="${f}" ${rDims.length > 0 ? 'checked' : ''} style="accent-color:#7C3AED" onchange="onSpFnCheck(this)">
             <span class="font-mono font-medium text-slate-700">${f || '—（无 function）'}</span>
             <span class="text-slate-400">当前生效：${curName}</span>
           </label>
-          <div class="ml-6 mt-1.5 flex flex-wrap gap-x-4 gap-y-1 ${rDims.length > 0 ? '' : 'opacity-50'}" data-fndims="${f}">
-            ${dimensionOptions.map(d => `<label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
-              <input type="checkbox" class="sp-dim-check" data-fn="${f}" value="${d}" ${rDims.includes(d) ? 'checked' : ''} ${rDims.length > 0 ? '' : 'disabled'} style="accent-color:#7C3AED">
-              <span>${d}</span></label>`).join('')}
+          <div class="ml-6 mt-1.5 space-y-1.5 ${rDims.length > 0 ? '' : 'opacity-50'}" data-fndims="${f}">
+            ${dimBlocks}
           </div>
         </div>`;
       }).join('');
@@ -2018,30 +2015,80 @@
       if (!wrap) return;
       wrap.classList.toggle('opacity-50', !box.checked);
       wrap.querySelectorAll('.sp-dim-check').forEach(c => { c.disabled = !box.checked; });
+      if (box.checked) {
+        // fn 勾选时：维度可勾、已勾维度的度量可勾；未勾维度的度量区保持禁用
+        wrap.querySelectorAll('[data-dimblock]').forEach(blk => {
+          const dimCheck = blk.querySelector('.sp-dim-check');
+          const measWrap = blk.querySelector('[data-dimmeas]');
+          const dimOn = dimCheck && dimCheck.checked;
+          if (measWrap) {
+            measWrap.classList.toggle('opacity-50', !dimOn);
+            measWrap.classList.toggle('pointer-events-none', !dimOn);
+          }
+          blk.querySelectorAll('.sp-measure-check').forEach(c => { c.disabled = !dimOn; });
+        });
+      } else {
+        wrap.querySelectorAll('.sp-measure-check').forEach(c => { c.disabled = true; });
+        wrap.querySelectorAll('[data-dimmeas]').forEach(mw => { mw.classList.add('opacity-50', 'pointer-events-none'); });
+      }
+    }
+    // 第37轮：维度勾选联动——勾维度启用该维度度量区；取消勾选清空该维度度量并禁用
+    function onSpDimCheck(box) {
+      const measWrap = document.querySelector('[data-dimmeas="' + box.dataset.fn + '|' + box.value + '"]');
+      if (!measWrap) return;
+      if (box.checked) {
+        measWrap.classList.remove('opacity-50');
+        measWrap.classList.remove('pointer-events-none');
+        measWrap.querySelectorAll('.sp-measure-check').forEach(c => { c.disabled = false; });
+      } else {
+        measWrap.querySelectorAll('.sp-measure-check').forEach(c => { c.checked = false; c.disabled = true; });
+        measWrap.classList.add('opacity-50', 'pointer-events-none');
+      }
     }
     function confirmSpacePlan() {
       if (editingSpacePlanIdx === -1 && !guardEdit()) return;
       if (editingSpacePlanIdx >= 0 && !guardEdit()) return;
       const name = (document.getElementById('sp-name').value || '').trim();
       if (!name) { alert('请填写计划名称'); return; }
-      // 收集勾选 fn 及其维度集合（第31轮：fnDims——保存时为每个勾选 fn 新建售卖空间；第35轮：维度集合可为空=0 维度空间）
+      // 收集勾选 fn 及其维度集合 + 每维度勾选的度量（第37轮：保存时按维度×度量叉乘自动生成售卖单元）
       const fnDims = {};
+      const fnMeasures = {};
       document.querySelectorAll('.sp-fn-check').forEach(c => {
         if (c.checked) {
-          fnDims[c.dataset.fn] = Array.from(document.querySelectorAll('.sp-dim-check[data-fn="' + c.dataset.fn + '"]:checked')).map(x => x.value);
+          const f = c.dataset.fn;
+          fnDims[f] = Array.from(document.querySelectorAll('.sp-dim-check[data-fn="' + f + '"]:checked')).map(x => x.value);
+          const meas = {};
+          fnDims[f].forEach(d => {
+            meas[d] = Array.from(document.querySelectorAll('.sp-measure-check[data-fn="' + f + '"][data-dim="' + d + '"]:checked')).map(x => x.value);
+          });
+          fnMeasures[f] = meas;
         }
       });
-      if (Object.keys(fnDims).length === 0) { alert('至少勾选一个 function（将为其新建售卖空间）'); return; }
+      if (Object.keys(fnDims).length === 0) { alert('至少勾选一个 function'); return; }
+      // 校验（第37轮）：勾了维度则该维度至少勾一个度量（0 维度=不勾维度，保存时生成一个单元）
+      for (const f of Object.keys(fnDims)) {
+        const dims = fnDims[f];
+        if (dims.length === 0) continue;
+        const emptyDims = dims.filter(d => !(fnMeasures[f][d] && fnMeasures[f][d].length));
+        if (emptyDims.length > 0) {
+          alert((f || '无 function') + '：以下维度至少勾选一个度量：' + emptyDims.join('、'));
+          return;
+        }
+      }
       const isEdit = editingSpacePlanIdx >= 0;
       const oldRow = isEdit ? spacePlans[editingSpacePlanIdx] : null;
       // 落地：为每个勾选 fn 总是新建一个售卖空间（不与已有空间合并；第31轮口径）
+      // 第37轮：身份判定=维度+度量集合均一致才沿用原空间；变化即新建（已生成售卖单元永不删除，售卖计划引用不受影响）
       const fnSpaces = {};
       const createdKeys = [];
+      const createdUnits = [];
       Object.keys(fnDims).forEach(f => {
-        // 修改时：该 fn 维度集合与原计划一致 → 沿用原计划创建的空间（否则每次保存都会增殖空间）
         const oldKey = oldRow && oldRow.fnSpaces && oldRow.fnSpaces[f];
         const oldDims = oldRow && oldRow.fnDims && oldRow.fnDims[f];
-        if (oldKey && spaces[oldKey] && JSON.stringify((oldDims || []).slice().sort()) === JSON.stringify(fnDims[f].slice().sort())) {
+        const oldMeas = (oldRow && oldRow.fnMeasures && oldRow.fnMeasures[f]) || {};
+        const sameDims = JSON.stringify((oldDims || []).slice().sort()) === JSON.stringify(fnDims[f].slice().sort());
+        const sameMeas = JSON.stringify(JSON.stringify(mapSort(oldMeas))) === JSON.stringify(JSON.stringify(mapSort(fnMeasures[f])));
+        if (oldKey && spaces[oldKey] && sameDims && sameMeas) {
           fnSpaces[f] = oldKey;
           return;
         }
@@ -2050,6 +2097,8 @@
         spaces[key] = { seq: spaceSeq, fn: f, dims: fnDims[f] };
         fnSpaces[f] = key;
         createdKeys.push(key + '（' + (f || '无 fn') + (fnDims[f].length ? '' : '，0 维度') + '）');
+        // 第37轮：叉乘生成该空间下全部售卖单元（勾选维度的度量笛卡尔积；0 维度→单单元）
+        createdUnits.push(...genSaleUnitsForSpace(key, f, fnDims[f], fnMeasures[f]));
       });
       const row = {
         name,
@@ -2057,6 +2106,7 @@
         effStart: pcpVal(document.getElementById('sp-eff-start').value, '2026-11-11T00:00:00'),
         effEnd: pcpVal(document.getElementById('sp-eff-end').value, '2026-11-20T00:00:00'),
         fnDims,
+        fnMeasures,
         fnSpaces
       };
       if (isEdit && spacePlans[editingSpacePlanIdx]) {
@@ -2070,7 +2120,48 @@
       renderSpacePlans();
       renderSpaceTab(); // 状态列可能即刻变化（若新计划已发布且在生效期）
       renderSaleUnits();
-      alert('空间计划「' + name + '」已保存' + (isEdit ? '' : '（待发布）') + (createdKeys.length > 0 ? '；已新建售卖空间：' + createdKeys.join('、') : ''));
+      renderPlan();
+      const unitMsg = createdUnits.length > 0 ? '；已自动生成售卖单元 ' + createdUnits.length + ' 个（' + createdUnits.slice(0, 8).join('、') + (createdUnits.length > 8 ? ' 等' : '') + '）' : '';
+      alert('空间计划「' + name + '」已保存' + (isEdit ? '' : '（待发布）') + (createdKeys.length > 0 ? '；已新建售卖空间：' + createdKeys.join('、') : '') + unitMsg);
+    }
+    // 维度→度量 map 排序序列化（身份比较 helper）
+    function mapSort(m) {
+      const out = {};
+      Object.keys(m || {}).sort().forEach(k => { out[k] = (m[k] || []).slice().sort(); });
+      return out;
+    }
+    // 第37轮：为空间按维度×度量叉乘生成售卖单元（追加进 saleUnits，不删已有单元；0 维度空间生成唯一单单元）
+    function genSaleUnitsForSpace(spaceKey, fn, dims, fnMeas) {
+      const mea = fnMeas || {};
+      let seq = saleUnits.reduce((m, u) => Math.max(m, parseInt((u.id || '').replace('su-', '')) || 0), 0);
+      // 已有同 fn+空间的 dim|measure 组合（幂等：不重复生成）
+      const existed = new Set(saleUnits.filter(u => (fnOfUnit(u) || '') === (fn || '') && u.spaceKey === spaceKey).map(u => saleUnitKey(u.dim, u.measure)));
+      const created = [];
+      if (!dims || dims.length === 0) {
+        // 0 维度空间（第35轮）：唯一售卖单元（dim/measure 空串）
+        if (!existed.has(saleUnitKey('', ''))) {
+          const u = { id: 'su-' + (++seq), fn: fn || '', spaceKey, dim: '', measure: '' };
+          saleUnits.push(u);
+          created.push(u.id);
+        }
+        return created;
+      }
+      // 笛卡尔积（按维度勾选顺序组合）
+      let combos = [[]];
+      dims.forEach(d => {
+        const next = [];
+        combos.forEach(c => (mea[d] || []).forEach(m => next.push([...c, { dim: d, measure: m }])));
+        combos = next;
+      });
+      combos.forEach(combo => {
+        const dim = combo.map(c => c.dim).join(' + ');
+        const measure = combo.map(c => c.measure).join(' + ');
+        if (existed.has(saleUnitKey(dim, measure))) return;
+        const u = { id: 'su-' + (++seq), fn: fn || '', spaceKey, dim, measure };
+        saleUnits.push(u);
+        created.push(u.id);
+      });
+      return created;
     }
     function editSpacePlan(idx) {
       if (!guardEdit()) return;
@@ -2100,23 +2191,29 @@
       while (spacePlans.some(r => r.name === copyName)) { copyName = (src.name || '空间计划') + '-副本' + n; n++; }
       const copy = JSON.parse(JSON.stringify(src));
       copy.name = copyName;
-      // 为每个 fn 新建空间（维度集合沿用原计划定义）
+      // 为每个 fn 新建空间并叉乘生成售卖单元（第37轮：维度+度量沿用原计划定义）
       const newFnSpaces = {};
+      const createdUnits = [];
       Object.keys(copy.fnSpaces || {}).forEach(f => {
         const oldKey = copy.fnSpaces[f];
         const dims = (spaces[oldKey] && spaces[oldKey].dims) || (copy.fnDims && copy.fnDims[f]) || [];
+        const meas = (copy.fnMeasures && copy.fnMeasures[f]) || {};
         spaceSeq += 1;
         const key = 'sp' + spaceSeq;
-        spaces[key] = { seq: spaceSeq, name: '售卖空间' + spaceSeq, fn: f, dims: JSON.parse(JSON.stringify(dims)) };
+        spaces[key] = { seq: spaceSeq, fn: f, dims: JSON.parse(JSON.stringify(dims)) };
         newFnSpaces[f] = key;
+        createdUnits.push(...genSaleUnitsForSpace(key, f, dims, meas));
       });
       copy.fnSpaces = newFnSpaces;
       if (copy.fnDims) copy.fnDims = JSON.parse(JSON.stringify(copy.fnDims));
+      if (copy.fnMeasures) copy.fnMeasures = JSON.parse(JSON.stringify(copy.fnMeasures));
       spacePlans.push(copy);
       spacePlanStatuses.push('pending_publish');
       renderSpacePlans();
       renderSpaceTab();
-      alert('已复制空间计划「' + (src.name || '—') + '」→「' + copyName + '」（待发布）并为其新建售卖空间，可进入修改后发布。');
+      renderSaleUnits();
+      renderPlan();
+      alert('已复制空间计划「' + (src.name || '—') + '」→「' + copyName + '」（待发布）并为其新建售卖空间' + (createdUnits.length > 0 ? '、自动生成售卖单元 ' + createdUnits.length + ' 个' : '') + '，可进入修改后发布。');
     }
     // ===== 空间计划详情（第29轮）：独立页面，交互对齐售卖计划详情 =====
     let currentSpacePlanDetailIdx = -1;
@@ -2319,195 +2416,8 @@
       return map[st] || map.pending_publish;
     }
 
-    // ===== 创建售卖单元弹窗（第23轮改版） =====
-    // 统一流程：先选 function（无 fn 商品固定 —）→ 选售卖空间（默认其生效空间）→ 按空间维度勾选度量
-    // 第23轮：售卖空间只管维度——度量候选 = measureOptions 全量，勾了哪些就卖哪些
-    // 已有同 fn+空间 的 dim|measure pair 置灰「已确认」（只增不减）
+    // ===== 售卖单元标识（第23轮引入；第37轮：SU 弹窗/手动创建链路已删——单元由空间计划叉乘自动生成） =====
     function saleUnitKey(dim, measure) { return dim + '|' + measure; }
-    // SU 弹窗当前选中状态
-    let suFnSel = '';
-    let suSpaceSel = '';
-    function openSuConfirmModal() {
-      const fns = fnPool();
-      const fnSelect = document.getElementById('su-fn-select');
-      fnSelect.innerHTML = '<option value="">—（不区分 function）</option>' + fns.map(f => `<option value="${f}">${f}</option>`).join('');
-      suFnSel = '';
-      suSpaceSel = '';
-      fnSelect.value = '';
-      document.getElementById('su-fn-block').classList.toggle('hidden', fns.length === 0);
-      renderSuConfirmModalBody();
-      openModal('su-confirm');
-    }
-    // 弹窗内切换 function：默认选中该 fn 的生效售卖空间（第32轮：纯计划仲裁，无生效计划则取池内第一个）
-    function onSuFnChange() {
-      suFnSel = document.getElementById('su-fn-select').value;
-      suSpaceSel = effectiveSpaceAt(suFnSel).key;
-      renderSuConfirmModalBody();
-    }
-    // 弹窗内切换空间
-    function onSuSpaceChange() {
-      suSpaceSel = document.getElementById('su-space-select').value;
-      renderSuConfirmModalBody();
-    }
-    function renderSuConfirmModalBody() {
-      const box = document.getElementById('su-confirm-body');
-      const spaceLine = document.getElementById('su-space-line');
-      const fns = fnPool();
-      // 含 function 商品：必须先选 function
-      if (fns.length > 0 && !suFnSel) {
-        spaceLine.classList.add('hidden');
-        box.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">请先选择 function</p>';
-        return;
-      }
-      // 空间选择行：候选=该 fn 归属的空间（含售卖单元已引用兜底）；默认=该 fn 生效空间
-      const fnKey = suFnSel || '';
-      const sps = {};
-      Object.keys(spaces).forEach(k => { if ((spaces[k].fn || '') === fnKey) sps[k] = spaces[k]; });
-      (saleUnits || []).forEach(u => { if ((fnOfUnit(u) || '') === fnKey && u.spaceKey && spaces[u.spaceKey] && !sps[u.spaceKey]) sps[u.spaceKey] = spaces[u.spaceKey]; });
-      const spKeys = Object.keys(sps);
-      if (spKeys.length === 0) {
-        spaceLine.classList.add('hidden');
-        box.innerHTML = '<p class="text-xs text-amber-600 py-4 text-center">暂无可用售卖空间，请先创建空间计划</p>';
-        return;
-      }
-      if (!suSpaceSel || !sps[suSpaceSel]) suSpaceSel = (effectiveSpaceAt(fnKey).key || spKeys[0]);
-      spaceLine.classList.remove('hidden');
-      spaceLine.innerHTML = `
-        <label class="form-label">售卖空间</label>
-        <select id="su-space-select" class="form-input" onchange="onSuSpaceChange()">
-          ${spKeys.map(k => `<option value="${k}" ${k === suSpaceSel ? 'selected' : ''}>${k} · 维度：${(sps[k].dims || []).length ? sps[k].dims.join(' + ') : '--（0 维度）'}</option>`).join('')}
-        </select>`;
-      const sp = spaces[suSpaceSel];
-      // 该 fn+空间 下已创建的售卖单元（pair 置灰用）
-      const createdUnits = saleUnits.filter(u => (fnOfUnit(u) || '') === fnKey && u.spaceKey === suSpaceSel);
-      // 维度集合 = 空间定义的维度（第23轮：空间只管维度，度量候选=全量；第35轮：0 维度空间走单单元分支）
-      if (!sp.dims || sp.dims.length === 0) {
-        renderSuZeroDimBody(box, { fnKey, spaceKey: suSpaceSel, createdUnits });
-        return;
-      }
-      renderSuDimsBody(box, (sp.dims || []), { fnKey, spaceKey: suSpaceSel, created: createdUnits.length, createdUnits });
-    }
-    // 0 维度空间（第35轮）：该空间下只能创建一个售卖单元——未创建时给「创建单元」按钮，已创建时提示不可再建
-    function renderSuZeroDimBody(box, ctx) {
-      if ((ctx.createdUnits || []).length > 0) {
-        box.innerHTML = '<p class="text-xs text-amber-600 py-4 text-center">0 维度空间仅可创建一个售卖单元（已创建 ' + ctx.createdUnits[0].id + '）</p>';
-        return;
-      }
-      box.innerHTML = `
-        <div class="border border-slate-200 rounded-md p-3 bg-slate-50 text-xs text-slate-600">
-          <p><i class="fa-solid fa-cube mr-1 text-violet-500"></i>0 维度售卖空间，仅可创建一个售卖单元</p>
-          <button type="button" onclick="confirmZeroDimUnit()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md mt-2"><i class="fa-solid fa-plus mr-1"></i>创建售卖单元</button>
-        </div>`;
-    }
-    // 0 维度空间创建唯一售卖单元（第35轮）：dim/measure 均空串（维度展示为 --），同组只此一个
-    function confirmZeroDimUnit() {
-      if (!guardEdit()) return;
-      const spaceSelObj = document.getElementById('su-space-select');
-      const spaceSel = spaceSelObj ? spaceSelObj.value : '';
-      if (!spaceSel || !spaces[spaceSel]) { alert('请选择售卖空间'); return; }
-      const fns = fnPool();
-      const fnSel = fns.length > 0 ? document.getElementById('su-fn-select').value : '';
-      if (fns.length > 0 && !fnSel) { alert('请先选择 function'); return; }
-      const existed = saleUnits.filter(u => (fnOfUnit(u) || '') === fnSel && u.spaceKey === spaceSel);
-      if (existed.length > 0) { alert('该售卖空间下已存在售卖单元（0 维度空间仅可创建一个）'); return; }
-      let seq = saleUnits.reduce((m, u) => Math.max(m, parseInt((u.id || '').replace('su-', '')) || 0), 0);
-      saleUnits.push({ id: 'su-' + (++seq), fn: fnSel, spaceKey: spaceSel, dim: '', measure: '' });
-      closeModal('su-confirm');
-      renderSaleUnits();
-      renderPlan();
-      refreshProductBadge();
-      alert('已创建售卖单元：' + saleUnits.length + ' 个（新增 1 个，维度：--）');
-    }
-    // 渲染维度×度量勾选区（第23轮：度量候选=全量；该组已确认 pair 置灰只增不减，新 pair 可勾追加）
-    function renderSuDimsBody(box, dims, ctx) {
-      if (!dims || dims.length === 0) {
-        box.innerHTML = '<p class="text-xs text-slate-400 py-2">该空间为 0 维度空间</p>';
-        return;
-      }
-      const anyCreated = ctx.created > 0;
-      // 已确认 dim|measure（该 fn+空间下已建单元展开；只增不减）
-      const confirmedPairs = new Set();
-      (ctx.createdUnits || []).forEach(u => {
-        (u.dim || '').split(' + ').forEach((d, i) => { confirmedPairs.add(saleUnitKey(d, ((u.measure || '').split(' + '))[i] || '')); });
-      });
-      box.innerHTML = (anyCreated ? `
-        <div class="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-          <i class="fa-solid fa-triangle-exclamation mr-1"></i>该${ctx.fnKey ? ' function' : '商品'} + 售卖空间下已创建 ${ctx.created} 个售卖单元
-        </div>` : '') + dims.map(dim => {
-        // 度量候选 = 全量 measureOptions（第23轮：空间只管维度）
-        const measures = measureOptions[dim] || [];
-        return `
-        <div class="border border-slate-200 rounded-md p-3 bg-slate-50">
-          <p class="text-xs font-semibold text-slate-700 mb-2"><i class="fa-solid fa-cube mr-1 text-violet-500"></i>${dim}</p>
-          <div class="ml-4 flex flex-wrap gap-x-4 gap-y-1.5">
-            ${measures.map(m => {
-              const pairChecked = confirmedPairs.has(saleUnitKey(dim, m));
-              const disabled = pairChecked;
-              return `<label class="flex items-center gap-1 text-xs ${disabled ? 'cursor-not-allowed text-slate-500' : 'cursor-pointer text-slate-700'}">
-                <input type="checkbox" class="su-leaf" data-dim="${dim}" data-measure="${m}" ${disabled ? 'checked disabled' : ''} style="accent-color:#7C3AED">
-                <span>${m}</span>
-                ${disabled ? '<span class="text-[10px] text-amber-600 ml-0.5">已确认</span>' : ''}
-              </label>`;
-            }).join('')}
-          </div>
-        </div>`;
-      }).join('');
-    }
-    // 创建售卖单元（第21轮）：fn/空间 默认当前生效组 → 按空间维度勾度量 → 笛卡尔积（需持有编辑锁；该组 pair 只增不减）
-    function confirmSaleUnits() {
-      if (!guardEdit()) return;
-      const fns = fnPool();
-      const fnSel = fns.length > 0 ? document.getElementById('su-fn-select').value : '';
-      const spaceSelObj = document.getElementById('su-space-select');
-      const spaceSel = spaceSelObj ? spaceSelObj.value : '';
-      if (fns.length > 0 && !fnSel) { alert('请先选择 function'); return; }
-      if (!spaceSel || !spaces[spaceSel]) { alert('请选择售卖空间'); return; }
-      const checked = Array.from(document.querySelectorAll('.su-leaf:checked')).map(c => ({ dim: c.dataset.dim, measure: c.dataset.measure }));
-      if (checked.length === 0) { alert('请至少勾选一个度量'); return; }
-      // 按维度分组
-      const byDim = {};
-      checked.forEach(({ dim, measure }) => {
-        if (!byDim[dim]) byDim[dim] = [];
-        byDim[dim].push(measure);
-      });
-      // 空间维度都至少选一个度量（disabled 项已 checked 天然计入）
-      const shownDims = spaces[spaceSel].dims || [];
-      const emptyDims = shownDims.filter(dim => !(byDim[dim] && byDim[dim].length));
-      if (emptyDims.length > 0) {
-        alert('以下维度至少需要选择一个度量：' + emptyDims.join('、'));
-        return;
-      }
-      const dims = Object.keys(byDim);
-      if (dims.length === 0) { alert('请至少勾选一个度量'); return; }
-      // 笛卡尔积（单维度时退化为枚举）
-      let combos = [[]];
-      dims.forEach(dim => {
-        const next = [];
-        combos.forEach(c => byDim[dim].forEach(m => next.push([...c, { dim, measure: m }])));
-        combos = next;
-      });
-      // 已有 id 查找表（同 fn + 同空间内按 dim|measure 匹配）
-      const idMap = {};
-      const origUnits = saleUnits.filter(u => (fnOfUnit(u) || '') === fnSel && u.spaceKey === spaceSel);
-      origUnits.forEach(u => { idMap[saleUnitKey(u.dim, u.measure)] = u.id; });
-      let seq = saleUnits.reduce((m, u) => Math.max(m, parseInt((u.id || '').replace('su-', '')) || 0), 0);
-      const before = saleUnits.length;
-      const next = combos.map(combo => {
-        const dim = combo.map(c => c.dim).join(' + ');
-        const measure = combo.map(c => c.measure).join(' + ');
-        const k = saleUnitKey(dim, measure);
-        const id = idMap[k] || ('su-' + (++seq));
-        return { id, fn: fnSel, spaceKey: spaceSel, dim, measure };
-      });
-      // 写回：替换该 fn+空间 组（原组 pair 已 disabled 勾选天然并入笛卡尔积，id 保留）并合并其余组
-      saleUnits = saleUnits.filter(u => !((fnOfUnit(u) || '') === fnSel && u.spaceKey === spaceSel)).concat(next);
-      closeModal('su-confirm');
-      renderSaleUnits();
-      renderPlan();
-      refreshProductBadge();
-      const added = saleUnits.length - before;
-      alert('已创建售卖单元：' + saleUnits.length + ' 个' + (added > 0 ? '（新增 ' + added + ' 个，已创建项不可取消）' : '（无新增）'));
-    }
     // 售卖计划创建/修改页面：当前选中（勾选）的售卖单元 id 列表
     function selectedPlanUnits() {
       return Array.from(document.querySelectorAll('.plan-unit-check')).filter(c => c.checked).map(c => c.value);
@@ -2551,7 +2461,7 @@
       const box = document.getElementById('plan-units-charge-container');
       if (!box) return;
       if (saleUnits.length === 0) {
-        box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>暂无售卖单元，请先在「售卖单元」Tab 确认</p>';
+        box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>暂无售卖单元，请先创建空间计划</p>';
         return;
       }
       const prevStates = {};
