@@ -48,7 +48,7 @@ function boot() {
   window.eval(`openSpacePlanModal()`);
   doc.querySelector('.sp-fn-check[data-fn="input"]').checked = true;
   doc.querySelector('.sp-fn-check[data-fn="cache"]').checked = true;
-  doc.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]').checked = true;
+  doc.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked = true;
   doc.getElementById('sp-name').value = 'r45-edit-me';
   doc.getElementById('sp-eff-start').value = '2026-11-01T00:00:00';
   doc.getElementById('sp-eff-end').value = '2026-12-01T00:00:00';
@@ -65,11 +65,11 @@ function boot() {
   check('② 修改回填名称', doc.getElementById('sp-name').value === 'r45-edit-me');
   check('② 修改弹窗标题含「修改」', doc.getElementById('spaceplan-modal-title').textContent.includes('修改'));
   check('② 修改回填 fn 勾选', doc.querySelector('.sp-fn-check[data-fn="input"]').checked && doc.querySelector('.sp-fn-check[data-fn="cache"]').checked && !doc.querySelector('.sp-fn-check[data-fn="output"]').checked);
-  check('② 修改回填度量勾选', doc.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]').checked);
-  check('② 未勾选度量不回填', !doc.querySelector('.sp-measure-check[data-dim="输入token区间"][value="128K～1M"]').checked);
+  check('② 修改回填度量勾选', doc.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked);
+  check('② 未勾选度量不回填', !doc.querySelector('.sp-measure-check[data-dim="输入区间"][value="128K～1M"]').checked);
   doc.getElementById('sp-name').value = 'r45-edited!';
   doc.querySelector('.sp-fn-check[data-fn="output"]').checked = true;
-  doc.querySelector('.sp-measure-check[data-dim="输出token区间"][value="0～4K"]').checked = true;
+  doc.querySelector('.sp-measure-check[data-dim="费用发生时间"][value="2点～8点"]').checked = true;
   window.eval(`confirmSpacePlan()`);
   check('② 编辑后原 key 不变（原地更新）', window.eval(`spaces['${newKey}'].name`) === 'r45-edited!');
   check('② 仍为待发布', window.eval(`spaces['${newKey}'].status`) === 'pending_publish');
@@ -174,12 +174,11 @@ function boot() {
   window.eval(`openPlanCreatePage()`);
   doc.getElementById('plan-space-sel').value = 'sp1';
   doc.getElementById('plan-space-sel').dispatchEvent(new window.Event('change', { bubbles: true }));
-  const row = doc.querySelector('.plan-unit-row');
-  const info = row.querySelector('.mt-1\\.5, div.mt-1\\.5') || row.children[1];
-  check('⑤ 行信息含 Function', info.textContent.includes('Function'));
-  check('⑤ 行信息含维度组合', info.textContent.includes('维度组合'));
-  check('⑤ 行信息不含售卖空间', !info.textContent.includes('售卖空间'));
-  check('⑤ 行信息含维度度量值（128K～1M）', info.textContent.includes('128K～1M'));
+  const rows = Array.from(doc.querySelectorAll('.plan-unit-row'));
+  check('⑤ 行信息含 Function', rows.some(r => r.textContent.includes('Function')));
+  check('⑤ 行信息含维度组合', rows.some(r => r.textContent.includes('维度组合')));
+  check('⑤ 行信息不含售卖空间', rows.every(r => !r.textContent.includes('售卖空间')));
+  check('⑤ 行信息含维度度量值（128K～1M）', rows.some(r => r.textContent.includes('128K～1M')));
   window.eval(`backToList()`);
 }
 

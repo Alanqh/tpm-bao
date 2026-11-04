@@ -21,7 +21,7 @@ ok(w.eval('spaces["sp1"].status') === 'published' && w.eval('spaces["sp2"].prior
 // 2. 详情列表（第38轮：全空间展示，sp1 三行 + sp2 一行）
 const spRows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(spRows.length === 4, '空间列表 4 行（sp1×3fn + sp2×1）');
-ok(spRows.some(r => r.textContent.includes('输入token区间 + 输出token区间')), '维度列展示 dims');
+ok(spRows.some(r => r.textContent.includes('输入区间 + 费用发生日 + 费用发生时间')), '维度列展示 dims');
 // 3. currentSpaceOfFn（第38轮：纯空间仲裁）
 ok(w.eval('currentSpaceOfFn("input")') === 'sp1', 'input 当前 sp1（sp2 未到档期）');
 ok(w.eval('currentSpaceOfFn("output")') === 'sp1', 'output 当前 sp1');
@@ -42,7 +42,7 @@ let box7 = d.querySelector('.sp-fn-check[data-fn="input"]');
 box7.checked = true;
 box7.dispatchEvent(new w.Event('change', { bubbles: true }));
 ok(!d.querySelector('.sp-dim-check'), '第43轮：维度复选已删');
-ok(d.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]') && !d.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]').disabled, '勾 fn 后度量直接可勾');
+ok(d.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]') && !d.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').disabled, '勾 fn 后度量直接可勾');
 d.getElementById('sp-name').value = 'r43 空间甲（零维）';
 d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
@@ -52,33 +52,33 @@ ok(w.eval('spaceSeq') === 3, '新建 sp3（input 零维）');
 ok(w.eval('spaces["sp3"].fnDims.input.length') === 0, 'sp3 input fnDims 空（未勾度量）');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 1, 'sp3 仅 1 全缺省单元');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3")[0].dim') === '', 'sp3 单元 dim=空（全缺省）');
-// 7b. 两维度度量全勾 → (3+1)×(3+1)=16 组合（含缺省交叉与全缺省）
+// 7b. 两维度度量全勾 → (3+1)×(2+1)=12 组合（含缺省交叉与全缺省）
 w.eval('openSpacePlanModal()');
 box7 = d.querySelector('.sp-fn-check[data-fn="input"]');
 box7.checked = true;
 box7.dispatchEvent(new w.Event('change', { bubbles: true }));
-['输入token区间', '输出token区间'].forEach(dd => {
+['输入区间', '费用发生日'].forEach(dd => {
   d.querySelectorAll('.sp-measure-check[data-dim="' + dd + '"]').forEach(c => { c.checked = true; });
 });
 d.getElementById('sp-name').value = 'r43 空间乙（全勾）';
 d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 w.eval('confirmSpacePlan()');
-ok(w.eval('spaceSeq') === 4, '新建 sp4（input 两 token 维度全勾）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp4").length') === 16, 'sp4 叉乘 16 单元（(3+1)×(3+1) 含缺省）');
+ok(w.eval('spaceSeq') === 4, '新建 sp4（input 输入区间3档×费用发生日2档全勾）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp4").length') === 12, 'sp4 叉乘 12 单元（(3+1)×(2+1) 含缺省）');
 // 8. 独立空间：cache + 两维度各一度量（跨 fn 可同维度集合）→ sp5，(1+1)×(1+1)=4 组合
 w.eval('openSpacePlanModal()');
 const box8 = d.querySelector('.sp-fn-check[data-fn="cache"]');
 box8.checked = true;
 box8.dispatchEvent(new w.Event('change', { bubbles: true }));
-d.querySelectorAll('.sp-measure-check[data-dim="输入token区间"]').forEach(c => { c.checked = c.value === '0～128K'; });
-d.querySelectorAll('.sp-measure-check[data-dim="输出token区间"]').forEach(c => { c.checked = c.value === '0～4K'; });
+d.querySelectorAll('.sp-measure-check[data-dim="输入区间"]').forEach(c => { c.checked = c.value === '0～128K'; });
+d.querySelectorAll('.sp-measure-check[data-dim="费用发生日"]').forEach(c => { c.checked = c.value === '周一至周五'; });
 d.getElementById('sp-name').value = 'r43 空间丙';
 d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 w.eval('confirmSpacePlan()');
 ok(w.eval('spaces["sp5"].fnDims.cache.length') === 2, 'sp5 fnDims.cache 两维度（跨 fn 同集合允许）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp5").length') === 4, 'sp5 叉乘 4 组合（0～128K×0～4K/单缺省/交叉缺省/全缺省）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp5").length') === 4, 'sp5 叉乘 4 组合（0～128K×周一至周五/单缺省/交叉缺省/全缺省）');
 // 8b. 多 fn 共空间（r44：output/input 共享全局度量勾选 量1～100+周期30天）→ 一个空间 sp6，每 fn 4 组合
 w.eval('openSpacePlanModal()');
 const boxOut9 = d.querySelector('.sp-fn-check[data-fn="output"]');

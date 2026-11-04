@@ -46,11 +46,11 @@ ok(T.effectiveSpaceAt('cache', '2026-11-15 00:00:00').key === 'sp1', 'cache=sp1'
 
 // ===== 3. 优先级 + seq 仲裁 =====
 // 造一个 output 的新空间 sp3（同优先级 → 后建 seq 大胜出）
-w.eval('spaceSeq = Math.max(spaceSeq, 3); spaces["sp3"] = { seq: 3, name: "裁决·晚建空间", priority: 100, effStart: "2026-11-14 00:00:00", effEnd: "2026-11-16 00:00:00", status: "published", fnDims: { output: ["输入token区间"] }, fnMeasures: { output: { "输入token区间": ["0～128K"] } } }');
+w.eval('spaceSeq = Math.max(spaceSeq, 3); spaces["sp3"] = { seq: 3, name: "裁决·晚建空间", priority: 100, effStart: "2026-11-14 00:00:00", effEnd: "2026-11-16 00:00:00", status: "published", fnDims: { output: ["输入区间"] }, fnMeasures: { output: { "输入区间": ["0～128K"] } } }');
 const arb1 = T.effectiveSpaceAt('output', '2026-11-15 00:00:00');
 ok(arb1.key === 'sp3' && arb1.plan.name === '裁决·晚建空间', '同优先级（100）→ 后建 sp3 胜出，实得 ' + JSON.stringify({ key: arb1.key, plan: arb1.plan && arb1.plan.name }));
 // 高优先级胜出（input：造 priority 900）
-w.eval('spaces["sp4"] = { seq: 4, name: "裁决·高优先级", priority: 900, effStart: "2026-11-14 00:00:00", effEnd: "2026-11-16 00:00:00", status: "published", fnDims: { input: ["输入token区间"] }, fnMeasures: { input: { "输入token区间": ["0～128K"] } } }');
+w.eval('spaces["sp4"] = { seq: 4, name: "裁决·高优先级", priority: 900, effStart: "2026-11-14 00:00:00", effEnd: "2026-11-16 00:00:00", status: "published", fnDims: { input: ["输入区间"] }, fnMeasures: { input: { "输入区间": ["0～128K"] } } }');
 const arb2 = T.effectiveSpaceAt('input', '2026-11-15 00:00:00');
 ok(arb2.key === 'sp4' && arb2.plan.name === '裁决·高优先级', '优先级 900>500 → sp4 胜出（优先级先于 seq），实得 ' + (arb2.plan && arb2.plan.name));
 w.eval('delete spaces["sp3"]; delete spaces["sp4"]');
@@ -89,8 +89,8 @@ const modal = w.document.getElementById('modal-spaceplan');
 const fnBox = modal.querySelector('.sp-fn-check[data-fn="output"]');
 fnBox.checked = true;
 fnBox.dispatchEvent(new w.Event('change', { bubbles: true }));
-modal.querySelectorAll('.sp-dim-check[data-fn="output"]').forEach(c => { c.checked = c.value === '输入token区间'; c.dispatchEvent(new w.Event('change', { bubbles: true })); });
-const measBox = modal.querySelector('.sp-measure-check[data-dim="输入token区间"][value="1M+"]');
+modal.querySelectorAll('.sp-dim-check[data-fn="output"]').forEach(c => { c.checked = c.value === '输入区间'; c.dispatchEvent(new w.Event('change', { bubbles: true })); });
+const measBox = modal.querySelector('.sp-measure-check[data-dim="输入区间"][value="1M+"]');
 if (measBox) measBox.checked = true;
 w.document.getElementById('sp-name').value = '测试空间A';
 w.document.getElementById('sp-priority').value = '150';
@@ -103,7 +103,7 @@ ok(!!T.spaces[newKey], '保存新建空间 ' + newKey);
 ok(T.spaces[newKey].status === 'pending_publish' && T.spaces[newKey].priority === 150, '新空间待发布 优先级150');
 // 同优先级比较：新空间 150 > 常规 sp1 100
 ok(T.effectiveSpaceAt('output', '2026-12-05 00:00:00').key === 'sp1', '待发布不参与仲裁（12-05 仍 sp1）');
-ok(T.saleUnits.some(u => u.spaceKey === newKey && u.dim === '输入token区间' && u.measure === '1M+'), '新空间自动叉乘生成售卖单元（输入token区间×1M+）');
+ok(T.saleUnits.some(u => u.spaceKey === newKey && u.dim === '输入区间' && u.measure === '1M+'), '新空间自动叉乘生成售卖单元（输入区间×1M+）');
 T.publishSpacePlan(newKey);
 ok(T.effectiveSpaceAt('output', '2026-12-05 00:00:00').key === newKey, '发布后 12-05 output=' + newKey + '（150>100 高优先级胜出）');
 // 停用拦截：先造一个该空间内生效中的售卖计划（时间旅行到空间档期内，activePlansInSpace 按查询时刻判定）
@@ -138,7 +138,7 @@ ok(T.spaces[copyKey] && T.spaces[copyKey].status === 'pending_publish', '快照�
 // glm4 双11计划（idx0）锁定 sp2：时间在 sp2 档期内
 const p0 = T.planRows[0];
 ok(p0.spaceKey === 'sp2' && p0.effStart >= T.spaces.sp2.effStart && p0.effEnd <= T.spaces.sp2.effEnd, '双11计划锁定 sp2 且时间 ⊆ sp2 档期');
-ok(T.planRows[1].spaceKey === 'sp1' && T.planRows[1].units.length === 12 && T.planRows[1].units.every(u => T.saleUnits.find(s => s.id === u).spaceKey === 'sp1'), '常规计划锁定 sp1 十二单元均在 sp1 内（r43 缺省扩展）');
+ok(T.planRows[1].spaceKey === 'sp1' && T.planRows[1].units.length === 24 && T.planRows[1].units.every(u => T.saleUnits.find(s => s.id === u).spaceKey === 'sp1'), '常规计划锁定 sp1 廿四单元均在 sp1 内（r46 缺省扩展）');
 // 创建计划：不选空间 → 拦截（需编辑态）
 T.startEdit();
 T.openPlanCreatePage();

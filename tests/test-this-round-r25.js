@@ -30,10 +30,10 @@ ok(w.eval('effectiveSpaceAt("input","2026-11-20 00:00:00").key') === 'sp2', '边
 ok(w.eval('effectiveSpaceAt("input","2026-10-15 00:00:00").key') === '' && w.eval('effectiveSpaceAt("input","2026-10-15 00:00:00").source') === '', '10-15 早于 sp1 档期 → key=""（无任何回落）');
 
 // ===== 3. 优先级/seq 仲裁：造空间验证 =====
-w.eval('spaces["sp3"] = { seq: 3, name: "低优先级·保持sp1配置", priority: 100, effStart: "2026-11-12 00:00:00", effEnd: "2026-11-18 00:00:00", status: "published", fnDims: { input: ["输入token区间"] }, fnMeasures: {} }; spaceSeq = Math.max(spaceSeq, 3)');
+w.eval('spaces["sp3"] = { seq: 3, name: "低优先级·保持sp1配置", priority: 100, effStart: "2026-11-12 00:00:00", effEnd: "2026-11-18 00:00:00", status: "published", fnDims: { input: ["输入区间"] }, fnMeasures: {} }; spaceSeq = Math.max(spaceSeq, 3)');
 ok(w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").key') === 'sp2', '同时段多空间 → 高优先级（500>100）双11 sp2 胜: ' + w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").key'));
 // seq 仲裁：同优先级后建胜
-w.eval('spaces["sp4"] = { seq: 4, name: "同优先级·晚建", priority: 500, effStart: "2026-11-14 00:00:00", effEnd: "2026-11-16 00:00:00", status: "published", fnDims: { input: ["输入token区间"] }, fnMeasures: {} }; spaceSeq = 4');
+w.eval('spaces["sp4"] = { seq: 4, name: "同优先级·晚建", priority: 500, effStart: "2026-11-14 00:00:00", effEnd: "2026-11-16 00:00:00", status: "published", fnDims: { input: ["输入区间"] }, fnMeasures: {} }; spaceSeq = 4');
 ok(w.eval('effectiveSpaceAt("input","2026-11-15 00:00:00").key') === 'sp4', '同优先级 500 → 后建 sp4 胜（seq 大优先）');
 ok(w.eval('effectiveSpaceAt("input","2026-11-17 00:00:00").key') === 'sp2', '11-17 sp4 过档期 → sp2 继续');
 w.eval('delete spaces["sp3"]; delete spaces["sp4"]; spaceSeq = 2');
@@ -94,8 +94,8 @@ inBox.dispatchEvent(new w.Event('change', { bubbles: true }));
 ok(!modal.querySelector('.sp-dim-check'), '第43轮：维度复选已删');
 // 第44轮：fn 与度量分离不嵌套——度量区块独立于 fn
 ok(!modal.querySelector('#sp-fnspaces .sp-measure-check'), 'fn 区块内无度量（不嵌套）');
-ok(modal.querySelector('.sp-measure-check[data-dim="输入token区间"]') && !modal.querySelector('.sp-measure-check[data-dim="输入token区间"]').disabled, '度量始终可用');
-modal.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]').checked = true;
+ok(modal.querySelector('.sp-measure-check[data-dim="输入区间"]') && !modal.querySelector('.sp-measure-check[data-dim="输入区间"]').disabled, '度量始终可用');
+modal.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked = true;
 d.getElementById('sp-priority').value = '300';
  alerts.length = 0;
 w.eval('confirmSpacePlan()');

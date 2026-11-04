@@ -51,7 +51,7 @@ ok(!act.innerHTML.includes('editSpacePlan'), '第38轮：无修改操作（空�
 const fields = d.getElementById('spaceplan-detail-fields').textContent;
 ok(fields.includes('sp2') && fields.includes('双11大促·输入售卖空间') && fields.includes('500') && fields.includes('2026-11-11 00:00:00 ~ 2026-11-20 00:00:00'), '字段区：code/名称/优先级/生效起止');
 const dtRows = d.querySelectorAll('#spaceplan-detail-tbody tr');
-ok(dtRows.length === 4 && Array.from(dtRows).every(r => r.textContent.includes('input')) && dtRows[0].textContent.includes('su-16') && !dtRows[0].textContent.includes('pu-sp-'), '详情售卖单元清单（r43：sp2 四单元=3 原组合+全缺省 su-16，组合序全缺省居首，无 pu-sp 编号）');
+ok(dtRows.length === 4 && Array.from(dtRows).every(r => r.textContent.includes('input')) && dtRows[0].textContent.includes('su-25') && !dtRows[0].textContent.includes('pu-sp-'), '详情售卖单元清单（r46：sp2 四单元=3 输入组合+全缺省 su-25，组合序全缺省居首，无 pu-sp 编号）');
 
 // ===== 6. 停用拦截：空间内有生效中的售卖计划时不允许停用 =====
 alerts.length = 0;
@@ -79,7 +79,7 @@ ok(alerts.some(m => m.includes('已复制售卖空间')), '复制提示');
 ok(w.eval('spaceSeq') === 3 && w.eval('spaces["sp3"] && spaces["sp3"].name') === '双11大促·输入售卖空间-副本', '副本空间 sp3 入列（-副本命名）');
 ok(w.eval('spaces["sp3"].status') === 'pending_publish', '副本=待发布');
 ok(w.eval('spaces["sp3"].priority') === 500 && w.eval('spaces["sp3"].effStart') === '2026-11-11 00:00:00', '副本继承优先级/档期');
-ok(w.eval('spaces["sp3"].fnDims["input"].join(",")') === '输入token区间', '副本继承 fn 配置');
+ok(w.eval('spaces["sp3"].fnDims["input"].join(",")') === '输入区间', '副本继承 fn 配置');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 4, '副本叉乘生成 4 售卖单元（3 勾选组合 + 全缺省，r43 含缺省）');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2").length') === 4, '原空间 sp2 单元保留（4 个，永不删除）');
 

@@ -37,16 +37,16 @@ const activeTab2 = document.querySelector('#plan-tabs-card .admin-tab.active');
 ok(activeTab2 && activeTab2.textContent.trim() === '售卖空间', '创建后默认打开「售卖空间」Tab');
 // 新商品：通过「创建售卖空间」建空间（第38轮：一个空间可含多个 fn）
 window.eval('startEdit()');
-// 空间一：input（输出token区间×0～4K）+ output（输入token区间×0～128K）——多 fn 共一空间
+// 空间一：input（费用发生日×周末）+ output（输入区间×0～128K）——多 fn 共一空间（r44 后共享勾选：{输入区间:0～128K, 费用发生日:周末}）
 window.eval('openSpacePlanModal()');
 let boxIn = document.querySelector('.sp-fn-check[data-fn="input"]');
 boxIn.checked = true;
 boxIn.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelectorAll('.sp-measure-check[data-dim="输出token区间"]').forEach(c => { c.checked = c.value === '0～4K'; });
+document.querySelectorAll('.sp-measure-check[data-dim="费用发生日"]').forEach(c => { c.checked = c.value === '周末'; });
 let boxOut = document.querySelector('.sp-fn-check[data-fn="output"]');
 boxOut.checked = true;
 boxOut.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelectorAll('.sp-measure-check[data-dim="输入token区间"]').forEach(c => { c.checked = c.value === '0～128K'; });
+document.querySelectorAll('.sp-measure-check[data-dim="输入区间"]').forEach(c => { c.checked = c.value === '0～128K'; });
 document.getElementById('sp-name').value = 'r38 空间一';
 alertMsg = '';
 window.confirmSpacePlan();
@@ -68,11 +68,11 @@ section('3. 叉乘生成售卖单元（第38轮）');
 window.eval('startEdit()');
 ok(!document.getElementById('modal-su-confirm'), 'SU 弹窗已删除');
 ok(!document.getElementById('su-create-btn'), 'SU Tab 创建按钮已删除');
-// 空间一保存时逐 fn 叉乘（r44：两 fn 共享同一份度量勾选 输入{0～128K}+输出{0～4K} → 每 fn (1+1)×(1+1)=4），同属 sp1
+// 空间一保存时逐 fn 叉乘（r44：两 fn 共享同一份度量勾选 输入区间{0～128K}+费用发生日{周末} → 每 fn (1+1)×(1+1)=4），同属 sp1
 ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 8, '空间一（input+output）生成 8 单元（每 fn 4 组合，共享度量勾选）');
 ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="input").length') === 4, 'sp1 input 单元 4 个');
-const suIn = evalInPage('saleUnits.find(u=>u.spaceKey==="sp1" && u.fn==="input" && u.dim === "输出token区间")');
-ok(!!suIn, '售卖单元 dim 不含 function（input 有 dim=输出token区间 单元）');
+const suIn = evalInPage('saleUnits.find(u=>u.spaceKey==="sp1" && u.fn==="input" && u.dim === "费用发生日")');
+ok(!!suIn, '售卖单元 dim 不含 function（input 有 dim=费用发生日 单元）');
 ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="output").length') === 4, 'sp1 output 单元 4 个');
 ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp2").length') === 2, '空间二（input+购买量区间×1～100）生成 2 单元（含全缺省）');
 

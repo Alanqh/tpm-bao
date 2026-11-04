@@ -72,7 +72,7 @@ w.eval(`
     inp.dispatchEvent(new window.Event('change', { bubbles: true }));
   })()
 `);
-ok(d.querySelectorAll('#saleunit-tbody tr').length === 12, '清空时间 → 立即恢复当前时刻唯一生效空间 sp1 的 12 行（r43 缺省扩展；第42轮默认也过滤）');
+ok(d.querySelectorAll('#saleunit-tbody tr').length === 24, '清空时间 → 立即恢复当前时刻唯一生效空间 sp1 的 24 行（r46 缺省扩展；第42轮默认也过滤）');
 w.eval('switchInnerTab("space")');
 
 // ===== 6. 排序专项：优先级降序 → 创建时间逆序（seq 降序）=====
@@ -85,7 +85,7 @@ d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 const b0 = d.querySelector('.sp-fn-check[data-fn="input"]');
 b0.checked = true; b0.dispatchEvent(new w.Event('change', { bubbles: true }));
-d.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]').checked = true;
+d.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked = true;
 w.eval('confirmSpacePlan()');
 rows = dataRows();
 ok(rows.length === 5, '新增空间后 5 行，实得 ' + rows.length);
@@ -100,7 +100,7 @@ d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 const b1 = d.querySelector('.sp-fn-check[data-fn="input"]');
 b1.checked = true; b1.dispatchEvent(new w.Event('change', { bubbles: true }));
-d.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]').checked = true;
+d.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked = true;
 w.eval('confirmSpacePlan()');
 rows = dataRows();
 ok(rows.length === 6, '再增 1 行共 6 行');

@@ -56,7 +56,7 @@ ok(document.querySelectorAll('.sp-dim-check').length === 0, '第43轮：维度�
 ok(document.querySelectorAll('.sp-measure-check').length > 0, '度量复选存在');
 // 第44轮：function 与维度度量分离（不嵌套）——度量始终可用，与 fn 勾选无关
 const inBox = document.querySelector('.sp-fn-check[data-fn="input"]');
-const inMeas = document.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]');
+const inMeas = document.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]');
 ok(!document.getElementById('sp-fnspaces').querySelector('.sp-measure-check'), 'fn 区块内无度量（不嵌套）');
 ok(!document.getElementById('sp-dimmeas').querySelector('.sp-fn-check'), '度量区块内无 fn（不嵌套）');
 ok(inMeas.disabled === false, '度量始终可用（不随 fn 禁用）');
@@ -77,15 +77,15 @@ document.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 window.confirmSpacePlan();
 ok(alertMsg.includes('已保存'), '未勾度量 → 保存成功（生成全缺省组合单元）: ' + alertMsg.slice(0, 30));
 
-// ===== 5. 叉乘生成：输入1度量 × 输出2度量 = (1+1)×(2+1) = 9 组合 =====
+// ===== 5. 叉乘生成：输入1度量 × 费用发生日2度量 = (1+1)×(2+1) = 6 组合 =====
 section('5. 叉乘生成');
 window.openSpacePlanModal();
 const inBox2 = document.querySelector('.sp-fn-check[data-fn="input"]');
 inBox2.checked = true;
 inBox2.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]').checked = true;
-document.querySelector('.sp-measure-check[data-dim="输出token区间"][value="0～4K"]').checked = true;
-document.querySelector('.sp-measure-check[data-dim="输出token区间"][value="16K+"]').checked = true;
+document.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked = true;
+document.querySelector('.sp-measure-check[data-dim="费用发生日"][value="周一至周五"]').checked = true;
+document.querySelector('.sp-measure-check[data-dim="费用发生日"][value="周末"]').checked = true;
 alertMsg = '';
 const keyBefore = window.eval('spaceSeq');
 document.getElementById('sp-name').value = 'r43 叉乘空间';
@@ -95,9 +95,9 @@ window.confirmSpacePlan();
 const newKey = 'sp' + (keyBefore + 1);
 ok(alertMsg.includes('已自动生成售卖单元 6 个'), '保存提示叉乘 6 个（(1+1)×(2+1) 含缺省）: ' + alertMsg.slice(-40));
 ok(window.eval('spaces["' + newKey + '"] && spaces["' + newKey + '"].status') === 'pending_publish', '新空间待发布');
-ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length') === 6, '新空间 6 组合单元（输入2×输出3）');
+ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length') === 6, '新空间 6 组合单元（输入1×费用发生日2）');
 const dims = window.eval('JSON.stringify(saleUnits.filter(u => u.spaceKey === "' + newKey + '").map(u => u.dim + "=" + u.measure).sort())');
-ok(dims.includes('输入token区间 + 输出token区间=0～128K + 0～4K') && dims.includes('输入token区间=0～128K') && dims.includes('输出token区间=0～4K') && dims.includes('"="'), '缺省组合齐备（含全缺省=""）: ' + dims.slice(0, 90));
+ok(dims.includes('输入区间 + 费用发生日=0～128K + 周一至周五') && dims.includes('输入区间=0～128K') && dims.includes('费用发生日=周一至周五') && dims.includes('"="'), '缺省组合齐备（含全缺省=""）: ' + dims.slice(0, 90));
 
 // ===== 6. 空间不可改：无修改入口；复制=唯一变更路径（新空间+同构单元，旧空间保留） =====
 section('6. 空间不可改/复制');
