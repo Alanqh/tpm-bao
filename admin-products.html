@@ -304,13 +304,11 @@
 
           <!-- 售卖单元 Tab（第37轮：纯只读展示——售卖单元由空间计划创建时叉乘自动生成）+ 配置查询（时间筛选 + 状态） -->
           <div id="inner-tab-saleunit" class="p-4 hidden">
-            <!-- 顶部：时间筛选查状态 -->
+            <!-- 顶部：时间筛选查状态（第41轮：删查询/重置按钮——选时间即刷新，清空=当前时刻） -->
             <div class="flex flex-wrap items-center justify-end gap-2 mb-3">
               <div class="flex flex-wrap items-center gap-2 text-xs">
                 <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间</span>
-                <input id="tf-point" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-56">
-                <button type="button" onclick="querySaleParams()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-magnifying-glass mr-1"></i>查询</button>
-                <button type="button" onclick="resetSaleParams()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">重置</button>
+                <input id="tf-point" type="datetime-local" step="1" onchange="onSaleTimeChange(this.value)" class="form-input text-xs px-2 py-1 w-56">
               </div>
             </div>
             <div class="overflow-x-auto">
@@ -1607,19 +1605,14 @@
       if (currentSpacePlanDetailIdx && spaces[currentSpacePlanDetailIdx]) renderSpacePlanDetail(currentSpacePlanDetailIdx);
     }
 
-    function querySaleParams() {
-      const p = (document.getElementById('tf-point').value || '').replace('T', ' ');
-      if (!p) { alert('请先选择一个时间节点'); return; }
-      timeFilter = { point: p };
-      renderSaleUnits();
-    }
-    function resetSaleParams() {
-      timeFilter = null;
-      document.getElementById('tf-point').value = '';
+    // 第41轮：删查询/重置按钮——#tf-point onchange 即时刷新；清空=当前时刻（timeFilter=null）
+    function onSaleTimeChange(v) {
+      const p = (v || '').replace('T', ' ');
+      timeFilter = p ? { point: p } : null;
       renderSaleUnits();
     }
     // 第39轮：售卖空间 Tab 改纯列表——时间点查询（querySpaceAt/resetSpaceAt/syncSpaceTfPoint）已删；
-    // timeFilter 仍由售卖单元 Tab（#tf-point / querySaleParams / resetSaleParams）维护，空间层判定共用。
+    // timeFilter 仍由售卖单元 Tab（#tf-point / onSaleTimeChange）维护，空间层判定共用。
     // 售卖单元关联的售卖计划：生效期内的已发布计划优先；有 timeFilter 时取该时刻生效期内的计划，否则取生效期内优先
     function planOfUnit(unitId) {
       const published = planRows.filter((r, i) => (r.units || []).includes(unitId) && planRowStatuses[i] === 'published');
