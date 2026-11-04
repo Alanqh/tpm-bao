@@ -287,9 +287,8 @@
             <table class="w-full text-sm min-w-[1000px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th class="text-left px-3 py-2 font-medium">空间单元</th>
-                  <th class="text-left px-3 py-2 font-medium">状态</th>
                   <th class="text-left px-3 py-2 font-medium">售卖空间</th>
+                  <th class="text-left px-3 py-2 font-medium">状态</th>
                   <th class="text-left px-3 py-2 font-medium">空间名称</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">空间维度</th>
@@ -458,17 +457,14 @@
           <div id="spaceplan-detail-fields" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs"></div>
         </div>
         <div class="admin-card p-4">
-          <p class="text-sm font-medium text-slate-900 mb-3">空间单元</p>
+          <p class="text-sm font-medium text-slate-900 mb-3">售卖单元</p>
           <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[900px]">
+            <table class="w-full text-sm min-w-[700px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th class="text-left px-3 py-2 font-medium">空间单元</th>
-                  <th class="text-left px-3 py-2 font-medium">售卖空间</th>
+                  <th class="text-left px-3 py-2 font-medium">售卖单元</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
-                  <th class="text-left px-3 py-2 font-medium">空间维度</th>
-                  <th class="text-left px-3 py-2 font-medium">售卖单元数</th>
-                  <th class="text-left px-3 py-2 font-medium">生效起止</th>
+                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                 </tr>
               </thead>
               <tbody id="spaceplan-detail-tbody" class="divide-y divide-slate-100"></tbody>
@@ -1309,14 +1305,31 @@
       return (u && u.spaceKey) ? u.spaceKey : '—';
     }
     // 售卖单元 Tab（第37轮：纯只读展示——单元由空间计划创建时叉乘自动生成，不可手动创建/删除）
+    // 第40轮：查询某一时刻时，只展示该时刻唯一生效售卖空间（已发布生效中，优先级最高、同优先级后创建优先）内的售卖单元
+    function effectiveSpaceAtAll(t) {
+      const at = t || (timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' '));
+      const cands = Object.keys(spaces).filter(k => spaceActiveAt(spaces[k], at));
+      if (cands.length === 0) return '';
+      return cands.sort((a, b) => ((spaces[b].priority || 0) - (spaces[a].priority || 0)) || ((spaces[b].seq || 0) - (spaces[a].seq || 0)))[0];
+    }
     function renderSaleUnits() {
       if (saleUnits.length === 0) {
         document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元</td></tr>`;
         return;
       }
+      // 第40轮：设定查询时刻 → 过滤到唯一生效空间内的单元；未设时刻 → 展示全部
+      let listUnits = saleUnits;
+      if (timeFilter && timeFilter.point) {
+        const actKey = effectiveSpaceAtAll(timeFilter.point);
+        listUnits = actKey ? saleUnits.filter(u => (u.spaceKey || '') === actKey) : [];
+        if (listUnits.length === 0) {
+          document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">该时刻无生效中的售卖空间</td></tr>`;
+          return;
+        }
+      }
       // 第39轮：层级=售卖空间在 Function 之上——前三列 = 售卖空间（最外层合并）/function（空间组内合并）/售卖单元；
       // 排序 spaceKey → fn → id（保证同空间连续，空间内同 fn 连续，两层可 rowspan 合并）
-      const sorted = saleUnits.slice().sort((a, b) => {
+      const sorted = listUnits.slice().sort((a, b) => {
         const sa = a.spaceKey || '', sb = b.spaceKey || '';
         if (sa !== sb) return sa.localeCompare(sb);
         const fa = fnOfUnit(a) || '', fb = fnOfUnit(b) || '';
@@ -1823,7 +1836,7 @@
         });
       });
       if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖空间</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖空间</td></tr>`;
         return;
       }
       // 空间间排序：状态（已发布→待发布→已停用）→ 优先级降序 → 创建时间逆序（seq 降序，后创建在前）
@@ -1851,14 +1864,14 @@
         const isEff = sp.status === 'published' && sp.effStart <= nowStr && nowStr <= sp.effEnd;
         const showSpace = k !== prevKey;
         prevKey = k;
-        // 同空间行数（用于空间级列 rowspan：空间单元/状态/售卖空间/空间名称/优先级/生效起止）
+        // 同空间行数（用于空间级列 rowspan：售卖空间/状态/空间名称/优先级/生效起止）
         const spanCnt = rows.filter(r => r.k === k).length;
         const dims = (sp.fnDims || {})[f] || [];
         const spCell = showSpace ? `<td rowspan="${spanCnt}" class="px-3 py-2 text-right text-xs">${sp.priority ?? '—'}</td>` : '';
+        // 第40轮：删「空间单元」列（pu-sp 编号）——列序=售卖空间/状态/空间名称/…
         const spaceCells = showSpace ? `
-          <td rowspan="${spanCnt}" class="px-3 py-2 font-mono text-xs">${'pu-sp-' + (sp.seq || 0) + '-' + (Object.keys(sp.fnDims || {}).indexOf(f) + 1)}</td>
-          <td rowspan="${spanCnt}" class="px-3 py-2"><span class="badge ${meta.cls}">${meta.text}</span></td>
           <td rowspan="${spanCnt}" class="px-3 py-2"><button type="button" onclick="openSpacePlanDetail('${k}')" class="font-mono text-xs text-violet-600 hover:underline font-medium">${k}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
+          <td rowspan="${spanCnt}" class="px-3 py-2"><span class="badge ${meta.cls}">${meta.text}</span></td>
           <td rowspan="${spanCnt}" class="px-3 py-2 text-xs">${sp.name || '—'}</td>` : '';
         return `
         <tr class="hover:bg-slate-50">
@@ -2137,31 +2150,25 @@
         field('优先级', sp.priority),
         field('生效起止', sp.effStart + ' ~ ' + sp.effEnd)
       ].join('');
-      // 空间单元列表（fn → 维度 → 单元数；生效徽标按空间档期）
+      // 售卖单元列表（第40轮：该空间的售卖单元清单——每单元一行：售卖单元/Function/维度:度量）
       const tbody = document.getElementById('spaceplan-detail-tbody');
-      const fns = Object.keys(sp.fnDims || {});
-      if (fns.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-3 py-6 text-center text-xs text-slate-400">无空间单元</td></tr>`;
+      const units = (saleUnits || []).filter(u => (u.spaceKey || '') === k);
+      if (units.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="px-3 py-6 text-center text-xs text-slate-400">暂无售卖单元</td></tr>`;
       } else {
-        const nowStr = timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' ');
-        const isEff = sp.status === 'published' && sp.effStart <= nowStr && nowStr <= sp.effEnd;
-        const effBadge = isEff
-          ? '<span class="badge bg-green-100 text-green-700">生效期内</span>'
-          : '<span class="badge bg-slate-100 text-slate-500">生效期外</span>';
-        const effSpan = `<div class="flex flex-col gap-0.5"><span class="text-xs font-mono">${sp.effStart} ~ ${sp.effEnd}</span>${effBadge}</div>`;
-        tbody.innerHTML = fns.map((f, i) => {
-          const dims = (sp.fnDims || {})[f] || [];
-          const unitCnt = (saleUnits || []).filter(u => u.spaceKey === k && (fnOfUnit(u) || '') === f).length;
-          return `
+        // 空间内 fn 按创建序（fnDims 键序），fn 内按单元 id
+        const fnOrder = Object.keys(sp.fnDims || {});
+        units.sort((a, b) => {
+          const fa = fnOrder.indexOf(fnOfUnit(a) || ''), fb = fnOrder.indexOf(fnOfUnit(b) || '');
+          if (fa !== fb) return fa - fb;
+          return (a.id || '').localeCompare(b.id || '');
+        });
+        tbody.innerHTML = units.map(u => `
           <tr class="hover:bg-slate-50">
-            <td class="px-3 py-2 font-mono text-xs">${'pu-sp-' + (sp.seq || 0) + '-' + (i + 1)}</td>
-            <td class="px-3 py-2 font-mono text-xs font-medium">${k}</td>
-            <td class="px-3 py-2 text-xs">${f || '—'}</td>
-            <td class="px-3 py-2 text-xs">${dims.length ? dims.join(' + ') : '--'}</td>
-            <td class="px-3 py-2 text-xs text-right">${unitCnt}</td>
-            <td class="px-3 py-2">${effSpan}</td>
-          </tr>`;
-        }).join('');
+            <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
+            <td class="px-3 py-2 text-xs">${fnOfUnit(u) || '—'}</td>
+            <td class="px-3 py-2 text-xs">${formatDimMeasure(u)}</td>
+          </tr>`).join('');
       }
     }
 
