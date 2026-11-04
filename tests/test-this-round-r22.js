@@ -79,23 +79,24 @@ d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 w.eval('confirmSpacePlan()');
 ok(w.eval('spaces["sp5"].fnDims.cache.length') === 2, 'sp5 fnDims.cache 两维度（跨 fn 同集合允许）');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp5").length') === 4, 'sp5 叉乘 4 组合（0～128K×周一至周五/单缺省/交叉缺省/全缺省）');
-// 8b. 多 fn 共空间（r44：output/input 共享全局度量勾选 量1～100+周期30天）→ 一个空间 sp6，每 fn 4 组合
+// 8b. 多 fn 共空间（第47轮嵌套式：output/input 各自卡片独立勾选）→ 一个空间 sp6，每 fn 2 组合
 w.eval('openSpacePlanModal()');
 const boxOut9 = d.querySelector('.sp-fn-check[data-fn="output"]');
 boxOut9.checked = true;
 boxOut9.dispatchEvent(new w.Event('change', { bubbles: true }));
-d.querySelector('.sp-measure-check[data-dim="购买量区间"][value="1～100"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn="output"][data-dim="输入区间"][value="1M+"]').checked = true;
 const boxIn9 = d.querySelector('.sp-fn-check[data-fn="input"]');
 boxIn9.checked = true;
 boxIn9.dispatchEvent(new w.Event('change', { bubbles: true }));
-d.querySelector('.sp-measure-check[data-dim="购买周期"][value="30天"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]').checked = true;
 d.getElementById('sp-name').value = 'r43 空间丁（多fn）';
 d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 w.eval('confirmSpacePlan()');
 ok(alerts[alerts.length - 1].includes('sp6'), '多 fn 共一个空间 sp6: ' + (alerts[alerts.length - 1] || '').slice(0, 40));
 ok(w.eval('Object.keys(spaces["sp6"].fnDims).join(",")') === 'input,output', 'sp6 含 input+output 两 fn（键序=fnPool DOM 序）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp6").length') === 8, 'sp6 两 fn 共享同一份度量勾选（量1～100+周期30天）→ 每 fn (1+1)×(1+1)=4，共 8');
+ok(d.querySelector === d.querySelector && w.eval('spaces["sp6"].fnMeasures.output["输入区间"].join()') === '1M+' && w.eval('spaces["sp6"].fnMeasures.input["输入区间"].join()') === '0～128K', 'sp6 两 fn 度量各自独立（output=1M+ / input=0～128K）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp6").length') === 4, 'sp6 每 fn (1+1)=2 组合，共 4（per-fn 配置）');
 // 11. 返回列表（快照 glm4 编辑结果）→ vtpm 商品：无 fn 单行生效
 w.eval('exitEdit(); backToList()');
 w.eval('openDetailByCode("maas-product-vtpm-std")');

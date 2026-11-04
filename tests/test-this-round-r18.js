@@ -37,44 +37,45 @@ const activeTab2 = document.querySelector('#plan-tabs-card .admin-tab.active');
 ok(activeTab2 && activeTab2.textContent.trim() === '售卖空间', '创建后默认打开「售卖空间」Tab');
 // 新商品：通过「创建售卖空间」建空间（第38轮：一个空间可含多个 fn）
 window.eval('startEdit()');
-// 空间一：input（费用发生日×周末）+ output（输入区间×0～128K）——多 fn 共一空间（r44 后共享勾选：{输入区间:0～128K, 费用发生日:周末}）
+// 空间一：input（费用发生日×周末）+ output（输入区间×0～128K）——多 fn 共一空间（第47轮嵌套式 per-fn 勾选）
 window.eval('openSpacePlanModal()');
 let boxIn = document.querySelector('.sp-fn-check[data-fn="input"]');
 boxIn.checked = true;
 boxIn.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelectorAll('.sp-measure-check[data-dim="费用发生日"]').forEach(c => { c.checked = c.value === '周末'; });
+document.querySelectorAll('.sp-measure-check[data-fn="input"][data-dim="费用发生日"]').forEach(c => { c.checked = c.value === '周末'; });
 let boxOut = document.querySelector('.sp-fn-check[data-fn="output"]');
 boxOut.checked = true;
 boxOut.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelectorAll('.sp-measure-check[data-dim="输入区间"]').forEach(c => { c.checked = c.value === '0～128K'; });
+document.querySelectorAll('.sp-measure-check[data-fn="output"][data-dim="输入区间"]').forEach(c => { c.checked = c.value === '0～128K'; });
 document.getElementById('sp-name').value = 'r38 空间一';
 alertMsg = '';
 window.confirmSpacePlan();
 ok(alertMsg.includes('已保存'), '空间一保存成功: ' + alertMsg.slice(0, 20));
-// 空间二：input（购买量区间×1～100）
+// 空间二：input（输入区间×1M+）（第47轮：维度候选按类型过滤，无购买量区间）
 window.eval('openSpacePlanModal()');
 boxIn = document.querySelector('.sp-fn-check[data-fn="input"]');
 boxIn.checked = true;
 boxIn.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelectorAll('.sp-measure-check[data-dim="购买量区间"]').forEach(c => { c.checked = c.value === '1～100'; });
+ok(document.querySelectorAll('.sp-measure-check[data-dim="购买量区间"]').length === 0, '第47轮：online-text 商品弹窗无购买量区间（按类型过滤）');
+document.querySelectorAll('.sp-measure-check[data-fn="input"][data-dim="输入区间"]').forEach(c => { c.checked = c.value === '1M+'; });
 document.getElementById('sp-name').value = 'r38 空间二';
 window.confirmSpacePlan();
 ok(evalInPage('spaceSeq') === 2, 'spaceSeq=2（空间一/二，跨 function 连续编号）');
 ok(evalInPage('Object.keys(spaces["sp1"].fnDims).join(",")') === 'input,output', '空间一含 input+output 两个 fn（第38轮多 fn 共一空间）');
-ok(evalInPage('spaces["sp2"].fnDims["input"].join(",")') === '购买量区间', '空间二 input 单维度（r44：勾购买量区间的度量）');
+ok(evalInPage('spaces["sp2"].fnDims["input"].join(",")') === '输入区间', '空间二 input 单维度（第47轮：输入区间的度量）');
 
 // ===== 3. online-text：SU 弹窗已删（第37轮）——售卖单元改由空间叉乘生成 =====
 section('3. 叉乘生成售卖单元（第38轮）');
 window.eval('startEdit()');
 ok(!document.getElementById('modal-su-confirm'), 'SU 弹窗已删除');
 ok(!document.getElementById('su-create-btn'), 'SU Tab 创建按钮已删除');
-// 空间一保存时逐 fn 叉乘（r44：两 fn 共享同一份度量勾选 输入区间{0～128K}+费用发生日{周末} → 每 fn (1+1)×(1+1)=4），同属 sp1
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 8, '空间一（input+output）生成 8 单元（每 fn 4 组合，共享度量勾选）');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="input").length') === 4, 'sp1 input 单元 4 个');
+// 空间一保存时逐 fn 叉乘（第47轮 per-fn：input 费用发生日{周末} 2组合 + output 输入区间{0～128K} 2组合 = 4），同属 sp1
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 4, '空间一（input+output per-fn）生成 4 单元（每 fn 2 组合）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="input").length') === 2, 'sp1 input 单元 2 个');
 const suIn = evalInPage('saleUnits.find(u=>u.spaceKey==="sp1" && u.fn==="input" && u.dim === "费用发生日")');
 ok(!!suIn, '售卖单元 dim 不含 function（input 有 dim=费用发生日 单元）');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="output").length') === 4, 'sp1 output 单元 4 个');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp2").length') === 2, '空间二（input+购买量区间×1～100）生成 2 单元（含全缺省）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="output").length') === 2, 'sp1 output 单元 2 个');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp2").length') === 2, '空间二（input+输入区间×1M+）生成 2 单元（含全缺省）');
 
 // ===== 4. 复制不受状态影响 =====
 section('4. 复制不受状态影响');

@@ -27,12 +27,12 @@ ok(sel && sel.options.length === 3, '创建页空间下拉 3 项（请选择+sp1
 // 2. 选 sp1 → 只展示 sp1 内单元
 sel.value = 'sp1';
 sel.dispatchEvent(new w.Event('change', { bubbles: true }));
-ok(vis().sort().join(',') === 'su-1,su-10,su-11,su-12,su-13,su-14,su-15,su-16,su-17,su-18,su-19,su-2,su-20,su-21,su-22,su-23,su-24,su-3,su-4,su-5,su-6,su-7,su-8,su-9', '选 sp1 → 可见 24 单元（r46 缺省扩展）: ' + vis().join(','));
-ok(chk().length === 24, '首次渲染默认全选（24）');
+ok(vis().sort().join(',') === 'su-1,su-10,su-11,su-2,su-3,su-4,su-5,su-6,su-7,su-8,su-9', '选 sp1 → 可见 11 单元（第47轮 per-fn）: ' + vis().join(','));
+ok(chk().length === 11, '首次渲染默认全选（11）');
 // 3. 切 sp2 → 可见切换为双11三单元，勾选不保留
 sel.value = 'sp2';
 sel.dispatchEvent(new w.Event('change', { bubbles: true }));
-ok(vis().sort().join(',') === 'su-25,su-26,su-27,su-28', '切 sp2 → 可见 4 单元（含 su-25 全缺省）');
+ok(vis().sort().join(',') === 'su-12,su-13,su-14,su-15', '切 sp2 → 可见 4 单元（含 su-12 全缺省）');
 ok(chk().length === 4, 'sp2 首次渲染默认全选（4）');
 // 4. 时间范围软提示：计划时间超出 sp2 档期 → info 标红 + planTimeWithinSpace=false
 d.getElementById('plan-name').value = 'r38 锁空间计划';
@@ -51,7 +51,7 @@ d.getElementById('plan-eff-end').value = '2026-11-19T00:00:00';
 w.eval('confirmPlanCreate()');
 const saved = w.eval('planRows[planRows.length-1]');
 ok(saved && saved.name === 'r38 锁空间计划' && saved.spaceKey === 'sp2', '保存成功且锁定 sp2');
-ok(JSON.stringify(saved.units) === JSON.stringify(['su-25','su-26','su-27','su-28']), 'units=sp2 内四单元: ' + saved.units.join(','));
+ok(JSON.stringify(saved.units) === JSON.stringify(['su-12','su-13','su-14','su-15']), 'units=sp2 内四单元: ' + saved.units.join(','));
 // 7. 跨空间单元拦截（直接改数据模拟）：把 su-1 勾上（属于 sp1）→ 保存拦截
 w.eval('openPlanCreatePage()');
 sel.value = 'sp2';
@@ -77,7 +77,7 @@ box.remove();
 const editIdx = w.eval('planRows.length-1');
 w.eval('editPlanRow(' + editIdx + ')');
 ok(d.getElementById('plan-space-sel').value === 'sp2', '修改页回填空间 sp2');
-ok(chk().sort().join(',') === 'su-25,su-26,su-27,su-28', '修改页回填原计划勾选: ' + chk().join(','));
+ok(chk().sort().join(',') === 'su-12,su-13,su-14,su-15', '修改页回填原计划勾选: ' + chk().join(','));
 // 9. 未选空间拦截（清空下拉）
 w.eval('openPlanCreatePage()');
 d.getElementById('plan-name').value = 'r38 无空间计划';

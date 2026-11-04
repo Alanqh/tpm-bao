@@ -46,28 +46,30 @@ window.closeDetailNameEdit();
 ok(infoName.getAttribute('contenteditable') !== 'true', '取消恢复非编辑态');
 window.backToList();
 
-// ===== 3. 创建售卖空间弹窗结构：fn+维度+度量三层勾选 =====
-section('3. 弹窗结构（第44轮：fn 与维度度量分离不嵌套，无维度 checkbox）');
+// ===== 3. 创建售卖空间弹窗结构（第47轮：嵌套式——先勾 function，每 fn 独立卡片） =====
+section('3. 弹窗结构（第47轮：fn 勾选联动渲染 per-fn 卡片）');
 window.openDetailByCode('maas-online-text-glm4');
 window.startEdit();
 window.openSpacePlanModal();
 ok(document.querySelectorAll('.sp-fn-check').length === 3, '3 个 fn 复选行');
-ok(document.querySelectorAll('.sp-dim-check').length === 0, '第43轮：维度复选已删（直接勾度量）');
-ok(document.querySelectorAll('.sp-measure-check').length > 0, '度量复选存在');
-// 第44轮：function 与维度度量分离（不嵌套）——度量始终可用，与 fn 勾选无关
+ok(document.querySelectorAll('.sp-dim-check').length === 0, '维度复选已删（直接勾度量）');
+ok(document.querySelectorAll('.sp-measure-check').length === 0 && document.getElementById('sp-dimmeas').textContent.includes('先勾选'), '未勾 fn 时无度量复选（提示先勾选 function）');
 const inBox = document.querySelector('.sp-fn-check[data-fn="input"]');
-const inMeas = document.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]');
-ok(!document.getElementById('sp-fnspaces').querySelector('.sp-measure-check'), 'fn 区块内无度量（不嵌套）');
-ok(!document.getElementById('sp-dimmeas').querySelector('.sp-fn-check'), '度量区块内无 fn（不嵌套）');
-ok(inMeas.disabled === false, '度量始终可用（不随 fn 禁用）');
-// fn 勾选不影响度量状态
+inBox.checked = true;
+inBox.dispatchEvent(new window.Event('change', { bubbles: true }));
+ok(document.querySelectorAll('[data-fncard="input"]').length === 1, '勾 input → 渲染 input 卡片');
+const inMeas = document.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]');
+ok(!!inMeas, 'input 卡片内度量复选存在');
+ok(inMeas.disabled === false, '度量可用');
 inMeas.checked = true;
 inBox.checked = false;
 inBox.dispatchEvent(new window.Event('change', { bubbles: true }));
-ok(inMeas.checked === true && inMeas.disabled === false, '取消 fn 不清空度量（r44 分离语义）');
+ok(document.querySelectorAll('[data-fncard="input"]').length === 0, '取消 fn → 卡片消失');
 inBox.checked = true;
+inBox.dispatchEvent(new window.Event('change', { bubbles: true }));
+ok(document.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]').checked === true, '重新勾 fn → 已勾度量保留');
 
-// ===== 4. 校验：第43轮未勾任何度量也可保存（全缺省组合合法） =====
+// ===== 4. 校验：未勾任何度量也可保存（0维 fn 生成全缺省组合合法，第47轮嵌套式） =====
 section('4. 校验');
 alertMsg = '';
 document.getElementById('sp-name').value = 'r43 空间A（全缺省）';
@@ -83,9 +85,9 @@ window.openSpacePlanModal();
 const inBox2 = document.querySelector('.sp-fn-check[data-fn="input"]');
 inBox2.checked = true;
 inBox2.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked = true;
-document.querySelector('.sp-measure-check[data-dim="费用发生日"][value="周一至周五"]').checked = true;
-document.querySelector('.sp-measure-check[data-dim="费用发生日"][value="周末"]').checked = true;
+document.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]').checked = true;
+document.querySelector('.sp-measure-check[data-fn="input"][data-dim="费用发生日"][value="周一至周五"]').checked = true;
+document.querySelector('.sp-measure-check[data-fn="input"][data-dim="费用发生日"][value="周末"]').checked = true;
 alertMsg = '';
 const keyBefore = window.eval('spaceSeq');
 document.getElementById('sp-name').value = 'r43 叉乘空间';

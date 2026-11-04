@@ -54,8 +54,8 @@ ok(!spRows[0].textContent.includes('pu-sp-'), '无空间单元编号（pu-sp 已
 const sp1First = spRows[1].cells;
 ok(sp1First[0] && sp1First[0].textContent.trim() === 'sp1' && sp1First[0].rowSpan === 3, 'sp1 空间列 rowspan=3（三 fn 行合并）');
 ok(sp1First[3].textContent.trim() === 'input', 'sp1 首 fn 行=input（创建时勾选序）');
-ok(spRows[2].cells[0].textContent.trim() === 'output' && spRows[2].cells[2].textContent.trim() === '8', 'sp1 output 行单元数=8');
-ok(spRows[3].cells[0].textContent.trim() === 'cache' && spRows[3].cells[2].textContent.trim() === '8', 'sp1 cache 行单元数=8（r46：三 fn 共享度量勾选，各 8 组合）');
+ok(spRows[2].cells[0].textContent.trim() === 'output' && spRows[2].cells[2].textContent.trim() === '2', 'sp1 output 行单元数=2（第47轮 per-fn：输入区间1度量=2组合）');
+ok(spRows[3].cells[0].textContent.trim() === 'cache' && spRows[3].cells[2].textContent.trim() === '1', 'sp1 cache 行单元数=1（第47轮 per-fn：0维=全缺省1个）');
 
 // ===== 3. effectiveSpaceAt（第38轮：纯空间本体仲裁） =====
 section('3. 生效空间推导');
@@ -69,22 +69,22 @@ ok(evalInPage('effectiveSpaceAt("input","2026-11-15 00:00:00").plan.name') === '
 section('4. 售卖单元前三列');
 window.eval('switchInnerTab("saleunit"); renderSaleUnits();');
 const suRows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
-// 第42轮：默认=当前时刻（11-04），sp2 双11 档期未到 → 只显 sp1 的 24 单元（r46 三维缺省叉乘）
-ok(suRows.length === 24, 'glm4 售卖单元默认 24 行（唯一生效空间 sp1，r46 缺省扩展），实得 ' + suRows.length);
+// 第42轮：默认=当前时刻（11-04），sp2 双11 档期未到 → 只显 sp1 的 11 单元（第47轮 per-fn 差异化：input 8+output 2+cache 1）
+ok(suRows.length === 11, 'glm4 售卖单元默认 11 行（唯一生效空间 sp1，第47轮 per-fn），实得 ' + suRows.length);
 const suHead = Array.from(document.querySelector('#saleunit-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
 ok(suHead.length === 14 && suHead[0] === '售卖空间' && suHead[1] === '维度:度量' && suHead[2] === 'Function' && suHead[3] === '售卖单元', '售卖单元表头 14 列，前四列=售卖空间/维度:度量/Function/售卖单元（第43轮组合居次）');
 const r0 = suRows[0].cells;
-ok(r0[0].textContent.includes('sp1') && r0[0].rowSpan === 24 && r0[1].textContent.trim() === '--' && r0[2].textContent.trim() === 'cache' && r0[3].textContent.trim() === 'su-17', 'sp1 空间列 rowspan=24（全部 24 单元跨组合/跨 fn 合并；首行=全缺省组合/—/su-17）');
+ok(r0[0].textContent.includes('sp1') && r0[0].rowSpan === 11 && r0[1].textContent.trim() === '--' && r0[2].textContent.trim() === 'cache' && r0[3].textContent.trim() === 'su-11', 'sp1 空间列 rowspan=11（第47轮 per-fn 全部单元合并；首行=全缺省组合/—/su-11）');
 // 全缺省组合段：三 fn 各一行，组合 td rowspan=3
 ok(r0[1].rowSpan === 3, '全缺省组合 rowspan=3（跨三 fn 合并）');
 ok(suRows[1].cells[0].textContent.trim() === 'input' && suRows[1].cells[1].textContent.trim() === 'su-1', '组内第二行 fn=input/su-1（r44 重排）');
 ok(suRows[2].cells[0].textContent.trim() === 'output' && suRows[2].cells[1].textContent.trim() === 'su-9', '组内第三行 fn=output/su-9（r44 重排）');
 ok(!suRows.some(r => r.textContent.includes('sp2')), '默认视图不含 sp2（未到档期空间不展示；第42轮）');
-// 时间旅行 11-15：sp2（优先级 500）胜出 → 切显 sp2 四单元（含 su-25 全缺省）
+// 时间旅行 11-15：sp2（优先级 500）胜出 → 切显 sp2 四单元（含 su-12 全缺省）
 window.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSaleUnits();');
 const suRowsMid = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(suRowsMid.length === 4 && suRowsMid[0].cells[0].textContent.includes('sp2') && suRowsMid[0].cells[0].rowSpan === 4, '11-15 切显 sp2 四单元（空间列 rowspan=4，含三态徽标）');
-ok(suRowsMid[0].cells[1].textContent.trim() === '--' && suRowsMid[0].cells[1].rowSpan === 1 && suRowsMid[0].cells[3].textContent.trim() === 'su-25', 'sp2 首行=全缺省组合 su-25');
+ok(suRowsMid[0].cells[1].textContent.trim() === '--' && suRowsMid[0].cells[1].rowSpan === 1 && suRowsMid[0].cells[3].textContent.trim() === 'su-12', 'sp2 首行=全缺省组合 su-12');
 window.eval('timeFilter = null; renderSaleUnits();');
 
 // ===== 5. SU 创建链路已删（第37轮） =====
@@ -97,22 +97,23 @@ section('6. 创建售卖空间');
 window.eval('switchInnerTab("space"); startEdit(); openSpacePlanModal()');
 ok(document.querySelectorAll('.sp-fn-check').length === 3, '弹窗含 3 个 fn 复选（input/output/cache）');
 ok(document.querySelectorAll('.sp-dim-check').length === 0, '第43轮：维度复选已删（直接勾度量）');
-// 勾 output + 购买量区间两个度量
+// 勾 output + 输入区间两个度量（第47轮：维度按商品类型过滤，glm4 无购买量区间）
 const box6 = document.querySelector('.sp-fn-check[data-fn="output"]');
 box6.checked = true;
 box6.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelectorAll('.sp-measure-check[data-dim="购买量区间"]').forEach(c => { c.checked = ['1～100', '500+'].includes(c.value); });
+ok(document.querySelectorAll('.sp-measure-check[data-dim="购买量区间"]').length === 0, '第47轮：glm4 弹窗无购买量区间（按类型过滤）');
+document.querySelectorAll('.sp-measure-check[data-fn="output"][data-dim="输入区间"]').forEach(c => { c.checked = ['0～128K', '1M+'].includes(c.value); });
 document.getElementById('sp-name').value = 'r43 创建空间X';
 document.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 document.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 alertMsg = '';
 window.confirmSpacePlan();
-ok(alertMsg.includes('已保存') && alertMsg.includes('待发布'), 'output+购买量区间[1～100,500+] 保存为待发布空间: ' + alertMsg.slice(0, 30));
-ok(evalInPage('spaces["sp3"] && spaces["sp3"].fnDims.output.join(",")') === '购买量区间', '新空间 sp3 fnDims.output=[购买量区间]');
+ok(alertMsg.includes('已保存') && alertMsg.includes('待发布'), 'output+输入区间[0～128K,1M+] 保存为待发布空间: ' + alertMsg.slice(0, 30));
+ok(evalInPage('spaces["sp3"] && spaces["sp3"].fnDims.output.join(",")') === '输入区间', '新空间 sp3 fnDims.output=[输入区间]');
 ok(evalInPage('spaces["sp3"].status') === 'pending_publish', 'sp3 待发布');
 ok(evalInPage('spaceSeq') === 3, 'spaceSeq=3（跨 fn 连续编号）');
 ok(alertMsg.includes('已自动生成售卖单元 3 个'), '叉乘生成 3 个单元（2 勾选+1 全缺省）: ' + alertMsg.slice(-40));
-ok(evalInPage('saleUnits.filter(u => u.spaceKey === "sp3" && u.fn === "output").length') === 3, 'sp3 下 output 单元=3（1～100/500+/全缺省）');
+ok(evalInPage('saleUnits.filter(u => u.spaceKey === "sp3" && u.fn === "output").length') === 3, 'sp3 下 output 单元=3（0～128K/1M+/全缺省）');
 // 未勾任何度量也可保存（生成全缺省组合）
 window.eval('openSpacePlanModal()');
 const box6c = document.querySelector('.sp-fn-check[data-fn="input"]');
@@ -137,7 +138,7 @@ ok(alertMsg.includes('至少勾选一个 function'), '空 fn 拦截: ' + alertMs
 window.eval('openSpacePlanModal("sp3")');
 ok(document.getElementById('spaceplan-modal-title').textContent.includes('修改'), '第45轮：待发布空间弹窗为修改模式');
 ok(document.querySelector('.sp-fn-check[data-fn="output"]').checked, '编辑模式回填 fn 勾选（output）');
-ok(document.querySelector('.sp-measure-check[data-dim="购买量区间"][value="1～100"]').checked, '编辑模式回填度量勾选');
+ok(document.querySelector('.sp-measure-check[data-fn="output"][data-dim="输入区间"][value="0～128K"]').checked, '编辑模式回填度量勾选（第47轮 per-fn）');
 window.eval('closeModal("spaceplan")');
 // 已发布空间编辑拦截
 alertMsg = '';
@@ -164,12 +165,12 @@ ok(sel8 && sel8.options.length === 3, '第45轮：空间下拉候选 3（仅已�
 sel8.value = 'sp1';
 sel8.dispatchEvent(new window.Event('change', { bubbles: true }));
 const vis8 = Array.from(document.querySelectorAll('.plan-unit-check')).map(c => c.value).sort();
-ok(vis8.join(',') === 'su-1,su-10,su-11,su-12,su-13,su-14,su-15,su-16,su-17,su-18,su-19,su-2,su-20,su-21,su-22,su-23,su-24,su-3,su-4,su-5,su-6,su-7,su-8,su-9', '选 sp1 → 区块2 只展示 sp1 内 24 单元: ' + vis8.join(','));
-// 选 sp2 → 切换为双11空间单元（r46 含 su-25 全缺省）
+ok(vis8.join(',') === 'su-1,su-10,su-11,su-2,su-3,su-4,su-5,su-6,su-7,su-8,su-9', '选 sp1 → 区块2 只展示 sp1 内 11 单元（第47轮 per-fn）: ' + vis8.join(','));
+// 选 sp2 → 切换为双11空间单元（第47轮 su-12~15）
 sel8.value = 'sp2';
 sel8.dispatchEvent(new window.Event('change', { bubbles: true }));
 const vis8b = Array.from(document.querySelectorAll('.plan-unit-check')).map(c => c.value).sort();
-ok(vis8b.join(',') === 'su-25,su-26,su-27,su-28', '切 sp2 → 区块2 展示双11空间 4 单元: ' + vis8b.join(','));
+ok(vis8b.join(',') === 'su-12,su-13,su-14,su-15', '切 sp2 → 区块2 展示双11空间 4 单元: ' + vis8b.join(','));
 // 时间范围提示
 document.getElementById('plan-eff-start').value = '2026-11-12T00:00:00';
 document.getElementById('plan-eff-end').value = '2026-11-19T00:00:00';

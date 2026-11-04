@@ -46,12 +46,13 @@ window.eval('startEdit()');
 window.eval('openSpacePlanModal()');
 ok(document.querySelectorAll('.sp-fn-check').length === 1, 'vtpm（无 fn 商品）弹窗单行 fn=""');
 ok(document.querySelectorAll('.sp-dim-check').length === 0, '第43轮：维度复选已删（fn→度量两步）');
-ok(document.querySelectorAll('.sp-measure-check').length > 0, '弹窗度量复选存在（第43轮两步直勾）');
 ok(!document.querySelector('.sp-fn-space'), '无空间下拉（维度勾选模式）');
-// 空间A：fn='' + 仅购买量区间×1～100
+// 空间A：fn='' + 仅购买量区间×1～100（第47轮：勾 fn 后渲染 per-fn 卡片）
 const fnBoxA = document.querySelector('.sp-fn-check[data-fn=""]');
 fnBoxA.checked = true;
 fnBoxA.dispatchEvent(new window.Event('change', { bubbles: true }));
+ok(document.querySelectorAll('.sp-measure-check').length > 0, '勾 fn 后卡片内度量复选存在（第47轮嵌套式）');
+ok(document.querySelectorAll('[data-fncard=""]').length === 1, '渲染「—（无 function）」卡片');
 document.querySelectorAll('.sp-measure-check[data-dim="购买量区间"]').forEach(c => { c.checked = c.value === '1～100'; });
 document.getElementById('sp-name').value = 'r38 空间A';
 document.getElementById('sp-priority').value = '100';

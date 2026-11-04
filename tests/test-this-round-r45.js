@@ -41,22 +41,25 @@ function boot() {
   window.eval(`backToList()`);
 }
 
-// ===== ② 待发布空间可编辑 =====
+// ===== ② 待发布空间可编辑（第47轮嵌套式：per-fn 勾选收集） =====
 {
   const dom = boot(); const { window } = dom; const doc = window.document;
   window.eval(`openDetailByCode('maas-online-text-glm4'); startEdit();`);
   window.eval(`openSpacePlanModal()`);
   doc.querySelector('.sp-fn-check[data-fn="input"]').checked = true;
+  doc.querySelector('.sp-fn-check[data-fn="input"]').dispatchEvent(new window.Event('change', { bubbles: true }));
   doc.querySelector('.sp-fn-check[data-fn="cache"]').checked = true;
-  doc.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked = true;
+  doc.querySelector('.sp-fn-check[data-fn="cache"]').dispatchEvent(new window.Event('change', { bubbles: true }));
+  doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]').checked = true;
   doc.getElementById('sp-name').value = 'r45-edit-me';
   doc.getElementById('sp-eff-start').value = '2026-11-01T00:00:00';
   doc.getElementById('sp-eff-end').value = '2026-12-01T00:00:00';
   window.eval(`confirmSpacePlan()`);
   const newKey = window.eval(`Object.keys(spaces).find(k => spaces[k].name === 'r45-edit-me')`);
   check('② 新建空间为待发布状态', newKey && window.eval(`spaces['${newKey}'].status`) === 'pending_publish');
+  // cache 0维（未勾任何度量）→ 1 全缺省；input 输入区间1度量 → 2 组合
   const cnt1 = window.eval(`saleUnits.filter(u => u.spaceKey === '${newKey}').length`);
-  check('② 新空间叉乘生成单元（2fn×2组合=4）', cnt1 === 4);
+  check('② 新空间叉乘生成单元（input 2组合 + cache 0维1 = 3）', cnt1 === 3);
   const ids1 = window.eval(`JSON.stringify(saleUnits.filter(u => u.spaceKey === '${newKey}').map(u => u.id).sort())`);
   window.eval(`openSpacePlanDetail('${newKey}')`);
   const editBtn = doc.querySelector('#spaceplan-detail-actions button[onclick*="editSpacePlan"]');
@@ -65,19 +68,21 @@ function boot() {
   check('② 修改回填名称', doc.getElementById('sp-name').value === 'r45-edit-me');
   check('② 修改弹窗标题含「修改」', doc.getElementById('spaceplan-modal-title').textContent.includes('修改'));
   check('② 修改回填 fn 勾选', doc.querySelector('.sp-fn-check[data-fn="input"]').checked && doc.querySelector('.sp-fn-check[data-fn="cache"]').checked && !doc.querySelector('.sp-fn-check[data-fn="output"]').checked);
-  check('② 修改回填度量勾选', doc.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked);
-  check('② 未勾选度量不回填', !doc.querySelector('.sp-measure-check[data-dim="输入区间"][value="128K～1M"]').checked);
+  check('② 修改回填度量勾选（per-fn）', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]').checked);
+  check('② 未勾选度量不回填', !doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="128K～1M"]').checked);
   doc.getElementById('sp-name').value = 'r45-edited!';
+  // 加 output（0维）+ input 补勾费用发生时间（2组合 → 4组合）
   doc.querySelector('.sp-fn-check[data-fn="output"]').checked = true;
-  doc.querySelector('.sp-measure-check[data-dim="费用发生时间"][value="2点～8点"]').checked = true;
+  doc.querySelector('.sp-fn-check[data-fn="output"]').dispatchEvent(new window.Event('change', { bubbles: true }));
+  doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="费用发生时间"][value="2点～8点"]').checked = true;
   window.eval(`confirmSpacePlan()`);
   check('② 编辑后原 key 不变（原地更新）', window.eval(`spaces['${newKey}'].name`) === 'r45-edited!');
   check('② 仍为待发布', window.eval(`spaces['${newKey}'].status`) === 'pending_publish');
-  check('② 编辑后 fnDims 补充 output', window.eval(`Object.keys(spaces['${newKey}'].fnDims).sort().join()`) === 'cache,input,output');
+  check('② 编辑后 fnDims 补充 output（0维）', window.eval(`Object.keys(spaces['${newKey}'].fnDims).sort().join()`) === 'cache,input,output');
   const cnt2 = window.eval(`saleUnits.filter(u => u.spaceKey === '${newKey}').length`);
-  check('② 差量叉乘不删原单元（12=原4保留+新生8中重复幂等跳过）', cnt2 === 12);
+  check('② 差量叉乘不删原单元（6=原3保留+input 扩4组合新增2+output 0维1）', cnt2 === 6);
   const ids2 = window.eval(`JSON.stringify(saleUnits.filter(u => u.spaceKey === '${newKey}').map(u => u.id).sort())`);
-  check('② 原 4 个单元 id 保留未删', JSON.parse(ids2).filter(id => JSON.parse(ids1).includes(id)).length === 4);
+  check('② 原 3 个单元 id 保留未删', JSON.parse(ids2).filter(id => JSON.parse(ids1).includes(id)).length === 3);
   // 已发布空间编辑拦截
   const alerted = [];
   window.alert = m => alerted.push(m);

@@ -72,7 +72,7 @@ w.eval(`
     inp.dispatchEvent(new window.Event('change', { bubbles: true }));
   })()
 `);
-ok(d.querySelectorAll('#saleunit-tbody tr').length === 24, '清空时间 → 立即恢复当前时刻唯一生效空间 sp1 的 24 行（r46 缺省扩展；第42轮默认也过滤）');
+ok(d.querySelectorAll('#saleunit-tbody tr').length === 11, '清空时间 → 立即恢复当前时刻唯一生效空间 sp1 的 11 行（第47轮 per-fn；第42轮默认也过滤）');
 w.eval('switchInnerTab("space")');
 
 // ===== 6. 排序专项：优先级降序 → 创建时间逆序（seq 降序）=====

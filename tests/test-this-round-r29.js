@@ -51,7 +51,7 @@ ok(!act.innerHTML.includes('editSpacePlan'), '第38轮：无修改操作（空�
 const fields = d.getElementById('spaceplan-detail-fields').textContent;
 ok(fields.includes('sp2') && fields.includes('双11大促·输入售卖空间') && fields.includes('500') && fields.includes('2026-11-11 00:00:00 ~ 2026-11-20 00:00:00'), '字段区：code/名称/优先级/生效起止');
 const dtRows = d.querySelectorAll('#spaceplan-detail-tbody tr');
-ok(dtRows.length === 4 && Array.from(dtRows).every(r => r.textContent.includes('input')) && dtRows[0].textContent.includes('su-25') && !dtRows[0].textContent.includes('pu-sp-'), '详情售卖单元清单（r46：sp2 四单元=3 输入组合+全缺省 su-25，组合序全缺省居首，无 pu-sp 编号）');
+ok(dtRows.length === 4 && Array.from(dtRows).every(r => r.textContent.includes('input')) && dtRows[0].textContent.includes('su-12') && !dtRows[0].textContent.includes('pu-sp-'), '详情售卖单元清单（r46：sp2 四单元=3 输入组合+全缺省 su-12，组合序全缺省居首，无 pu-sp 编号）');
 
 // ===== 6. 停用拦截：空间内有生效中的售卖计划时不允许停用 =====
 alerts.length = 0;
