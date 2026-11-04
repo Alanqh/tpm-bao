@@ -1,29 +1,32 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第46轮（main 215a665 / gh-pages 2067d03，25 套 948 项全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第47轮（main 8535df1 / gh-pages 6c01f54，26 套 976 项全绿）。
 
-## 第46轮（现行）：示例数据维度体系改造
+## 第47轮（现行）：创建售卖空间弹窗改回嵌套式 + 维度按商品类型过滤
+- **背景**：第44轮「三 fn 共享一份勾选」会叉乘出大量跨 fn 重复的无用单元。用户要求改回嵌套式（先选 function，再给每个 function 单独选维度度量），并指出弹窗维度候选未按商品类型过滤的 bug。
+- **嵌套式弹窗**：区块1 fn 复选 `.sp-fn-check`（onchange=renderSpFnCards 联动）；区块2 #sp-dimmeas 渲染每勾选 fn 的独立卡片 `[data-fncard=f]`，卡片内 `.sp-measure-check` 带 **data-fn**（选择器 `.sp-measure-check[data-fn="X"][data-dim=...][value=...]`）。未勾 fn 显「先勾选 function」提示；不选维度=0维 fn 合法。
+- **勾选暂存 spMeasDraft**（fn→dim→[measure]）：renderSpFnCards 每次重渲前 snapshotSpMeasDraft 暂存在场勾选——取消 fn（卡片消失 DOM 状态丢）再勾回可恢复；openSpacePlanModal 创建模式清空暂存（防上一空间残留，真 bug 被测试抓出）；编辑模式以 space.fnMeasures 覆盖暂存。
+- **维度候选按类型过滤**：renderSpFnCards 用 `productDimSpecs[currentProduct.type].dims`（vtpm=购买量区间/购买周期；online-text=输入区间/费用发生日/费用发生时间），不再用全量 dimensionOptions。旧测试用错维度（如 glm4 勾购买量区间）现选择器为 null。
+- **confirmSpacePlan per-fn 收集**：`document.querySelectorAll('.sp-measure-check[data-fn="f"]:checked')` 逐 fn 收集 → fnDims[f]=Object.keys(meas)、fnMeasures[f]=meas 各自独立。
+- **glm4 mock 重算（per-fn 差异化，用 jsdom 实调 genSaleUnitsForSpace 生成权威序列）**：sp1 input=三维各1度量(8组合 su-1~8)/output=输入区间1度量(2组合 su-9~10)/cache=0维(su-11) 共 11；sp2 input 输入三档=su-12(全缺省)/su-13(0～128K)/su-14(128K～1M)/su-15(1M+)。defaultPlans：双11计划 units=su-12~15，常规计划 units=su-1~11（全 on）。
+- **新序列注意**：SU Tab 首行=全缺省段 cache/su-11（fn 字典序 cache<input<output）；sp1 空间列 rowspan=11；末行=输入区间 su-8/su-10 两行（组合「输入区间:128K～1M」rowspan=2 跨 input/output）。
+- **测试**：新增 test-this-round-r47.js（46 项：①嵌套结构 ②类型过滤 ③per-fn 差异收集 ④编辑 per-fn 回填 ⑤mock 自洽 ⑥数量视图）；适配 13 套（r12 结构反转+选择器加 data-fn、r15 勾 fn 后断言、r18 glm4 维度换成输入区间+per-fn 计数、r20 八处、r22 sp6 per-fn、r24 units su-12~15、r13 31→18 行/32→19、r27 sp3 per-fn 勾选、r28/r29/su-25→su-12、r38 六处 24→11、smoke 24→11、r45 ②段重写 per-fn）。mock 自洽算法（r45/r47 末段）按 fnDims/fnMeasures 逐 fn 重算，天然兼容 per-fn。
+- 踩坑：jsdom 勾 fn 后卡片才存在——测试须先 check+dispatchEvent(change) 再查 .sp-measure-check；Edit 工具改长行可能吞字符（r45 反引号丢失致 SyntaxError，用 node -e "new Function 读文件" 定位）。
+
+## 第46轮（现行，编号已被第47轮取代）：示例数据维度体系改造
 - **维度定义**：measureOptions={'购买量区间':[1～100,100～500,500+], '购买周期':[30/60/90天], 'function':[input,output,cache], '输入区间':[0～128K,128K～1M,1M+], '费用发生日':[周一至周五,周末], '费用发生时间':[2点～8点,其他时间段]}；productDimSpecs：vtpm={购买量区间,购买周期,hasFn:false}，online-text={输入区间,费用发生日,费用发生时间,hasFn:true}。**旧维度「输入token区间/输出token区间」已全站删除**。
-- **glm4 mock 重算**：sp1 三 fn 共享勾选[输入128K～1M+周一至周五+2点～8点]，每 fn (1+1)³=8 组合×3=24 单元（su-1~8 input / su-9~16 output / su-17~24 cache；组内 comboKey 序：全缺省→单维→双维→三维）；sp2（双11）input 单维输入三档全勾+全缺省=4 单元（su-25 全缺省/su-26 0～128K/su-27 128K～1M/su-28 1M+）。defaultPlans：双11计划 units=su-25~28；常规计划 units=su-1~24（全 on）。
-- **mock 自洽纪律**：单元必须严格=「共享勾选∪缺省完整叉乘」——额外造维度档位会 fail 自洽校验（首次尝试 su 含 0～128K/周末等单维项被 r45 自洽抓住）。
-- **组合序注意**：「费」<「输」字典序→sp1 详情清单末行=cache/输入区间单维（su-18）；SU Tab 全缺省段 fn 序=cache su-17/input su-1/output su-9。
-- **测试适配规模**：11 套改断言（r12 叉乘组合、r13 列表 19→31 行/glm4 su-5→su-25、r18 多 fn 空间度量、「smoke/sp2 单元 su-25~28」、r20 12→24 行、r22 sp4 16→12 组合、r24 计划 units、r27 详情 24 行/末行 su-18、r28 清空时间 24 行、r29 sp2 su-25、r38 五处计数）；r45 ⑤改 rows.some 断言（首行变全缺省单元）+ 维度选择器文本替换。25 套 948 项全绿。
-- 全站文本替换技巧：测试文件用 `/usr/bin/sed -i '' -e 's/输入token区间/输入区间/g' -e 's/输出token区间/费用发生日/g'`（shell 内嵌 sed 的 -e 多表达式写法；zsh 下 `timeout` 不存在直接去掉）。
+- **mock 自洽纪律**：单元必须严格=「勾选集合∪缺省完整叉乘」——多造/漏造组合都会被 r45/r47 末段自洽复检抓住。
+- glm4 具体单元编号已被第47轮重算取代（见上条目）。
+- 文本批量替换技巧：测试文件用 `/usr/bin/sed -i '' -e 's/旧/新/g'`（-e 多表达式）；zsh 无 timeout 命令。
 
 ## 第45轮（现行）：空fn必选+待发布空间可编辑+计划选已发布空间+创建项即时入下拉+单元信息精简
-- **①空fn必选**：无 fn 商品（vtpm 类）弹窗渲染「—（无 function）」复选（fnPool 空→[''] 渲染），勾选校验至少一个 fn（既有拦截保留）。此为既有正确行为，测试固化。
-- **②待发布空间可编辑（editSpacePlan 恢复）**：仅 pending_publish 可编辑；详情页操作区 pending=修改+发布+复制 / published=停用+复制 / stopped=仅复制。openSpacePlanModal(k) 编辑模式（editingSpaceKey；标题「修改售卖空间：名称」；回填名称/优先级/档期/fn 勾选（fnDims 键）/度量勾选（fnMeasures 首个 fn 的共享配置））。confirmSpacePlan：editingSpaceKey 命中→Object.assign 原地更新（key/seq/status 不变）；否则新建。差异叉乘走 genSaleUnitsForSpace 幂等（原单元永不删除，仅补新组合）。closeModal('spaceplan') 清 editingSpaceKey；已发布/停用调用拦截「仅待发布状态的空间可编辑」。
-- **③计划只选已发布空间**：openPlanCreatePage/editPlanRow 空间下拉候选=spaces.filter(status==='published')，选项不再显示状态括注；editPlanRow 若计划原空间不在候选（如已停用）保底附加并标注状态。pre 演示空间 sp1 改 status:'published'（演示「商品待上架但空间已就绪」）。
-- **④创建项即时入下拉（既有行为，测试固化）**：confirmCreateBilling/confirmItemCreate/confirmConfigEdit 末尾都 collectDraftFromDOM→写 draft→renderPlanCreateSections(true)——新计费项/配额项/库存项/折算配置新版本即时出现在 unified 与 perUnit 下拉并选中。
+- **①空fn必选**：无 fn 商品（vtpm 类）弹窗渲染「—（无 function）」复选（fnPool 空→[''] 渲染），勾选校验至少一个 fn。
+- **②待发布空间可编辑（editSpacePlan 恢复）**：仅 pending_publish 可编辑；详情页操作区 pending=修改+发布+复制 / published=停用+复制 / stopped=仅复制。openSpacePlanModal(k) 编辑模式（editingSpaceKey；标题「修改售卖空间：名称」；回填名称/优先级/档期/fn 勾选（fnDims 键）/度量勾选（第47轮起 per-fn 按 fnMeasures[f] 回填））。confirmSpacePlan：editingSpaceKey 命中→Object.assign 原地更新；否则新建。差异叉乘走 genSaleUnitsForSpace 幂等（原单元永不删除）。已发布/停用调用拦截「仅待发布状态的空间可编辑」。
+- **③计划只选已发布空间**：openPlanCreatePage/editPlanRow 空间下拉候选=published；editPlanRow 原空间已停用时保底附加。pre 演示空间 sp1 改 status:'published'。
+- **④创建项即时入下拉（既有行为，测试固化）**：confirmCreateBilling/confirmItemCreate/confirmConfigEdit 末尾都 collectDraftFromDOM→写 draft→renderPlanCreateSections(true)。
 - **⑤计划创建页单元行信息**：Function+维度组合，删「售卖空间」行。
-- 踩坑：r38 测试第 6 段重启 sp3 发布后须在 6d 结尾 stopSpacePlan("sp3") 清理，否则同优先级后建胜出把第 7 段 SU Tab 断言打红；jsdom DOMException{}（querySelector 合法选择器匹配失败导致节点闭包抛错）与 window.eval 顶层异常会被 runScripts 吞掉只显示 evaluator 崩溃——隔离 try/catch + VirtualConsole('jsdomError') 定位。
-- 测试：test-this-round-r45.js（40 项：五点断言+四商品 mock 自洽复检）；25 套 948 项全绿。
-
-## 第44轮（现行）：fn 与维度度量值分离不嵌套
-- **弹窗分离式**：区块1「售卖 function」独立复选（#sp-fnspaces，.sp-fn-check 无 onchange）；区块2「维度度量值」全局一份（#sp-dimmeas，.sp-measure-check 只有 data-dim/value、无 data-fn、始终可用）；onSpFnCheck 已删。confirmSpacePlan：checkedFns 空→拦截「至少勾选一个 function」；全部勾选 fn 共享同一份 meas 收集（fnDims[f]=dimList.slice()、fnMeasures[f]=深拷贝）。
-- mock 自洽复检在 test-this-round-r45.js 末段（四商品每空间按「共享勾选+缺省叉乘」重算对照 defaultSaleUnits，第46轮口径 std 8/pro 9/pre 8/glm4 28）。
-- 第44轮的 glm4 具体单元编号已被第46轮重算取代（见第46轮条目）。
+- 踩坑：r38 测试第 6 段 sp3 发布后须 stopSpacePlan("sp3") 清理，否则第 7 段断言打红；DOMException{} 与 window.eval 顶层异常会被 runScripts 吞——VirtualConsole('jsdomError') 定位。
 
 ## 第43轮（现行）：两步创建+缺省完整叉乘+单元三态+计划空间筛选
 - **两步创建**：①勾 fn（.sp-fn-check）②每维度直勾度量（**.sp-dim-check 维度复选已删**）；不勾 fn 拦截；未勾度量可保存（生成全缺省组合）。
@@ -95,12 +98,12 @@ renderSpacePlans 每行完整渲染（用户嫌合并难看）；排序：状态
 - 第12轮：商品与模型/Playground 解耦。第16/18轮：计划三态均可复制（深拷贝→-副本→待发布）不受锁。
 
 ## 已废弃链路（防止复建）
-第37轮前编辑锁在基本信息上方/手动 SU 创建弹窗/.sp-dim-check 维度复选/data-fn 度量勾选；第38轮前独立空间计划实体/计划跨空间勾选单元；**第45轮前「空间完全不可改」口径（现=待发布可编辑原地更新，编辑弹窗=创建弹窗复用）**/计划下拉含待发布停用空间/计划页单元信息含售卖空间；第39轮前售卖空间 Tab 时间点查询；第40轮前 pu-sp-N-M 界面前缀；第33轮前「已上架」文案。
+**第44~46轮的「fn 与度量分离共享勾选」弹窗（.sp-measure-check 无 data-fn、fn 复选无 onchange）——第47轮已改回嵌套式**；第37轮前编辑锁在基本信息上方/手动 SU 创建弹窗/.sp-dim-check 维度复选；第38轮前独立空间计划实体/计划跨空间勾选单元；**第45轮前「空间完全不可改」口径（现=待发布可编辑原地更新，编辑弹窗=创建弹窗复用）**/计划下拉含待发布停用空间/计划页单元信息含售卖空间；第39轮前售卖空间 Tab 时间点查询；第40轮前 pu-sp-N-M 界面前缀；第33轮前「已上架」文案。
 
 ## 技术约定与部署
 - 每页顶部深色「原型导航」栏；后台紫色主色 #7C3AED；管理员「吕」。数据全为页面内 JS mock。
 - **部署（Pages legacy 从分支部署）**：gh-pages 分支=HTML 根直出+.nojekyll。流程：推 main → git worktree add gh-pages → rm+cp prototype/*.html → 推送 → sleep~105s → curl 验证线上 md5 → worktree remove。URL：https://alanqh.github.io/tpm-bao/admin-products.html
-- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules，r11/r28/r38 须从仓库根目录跑其余任意）**：25 套全绿（第46轮口径，948 项）——this-round(31)/r9(26)/r10(51)/r11(19)/r12(38)/r13(33)/r14(50)/r15(38)/r16(29)/r18(27)/r19(38)/r20(73)/r22(33)/r23(34)/r24(18)/r25(49)/r27(33)/r28(33)/r29(45)/r38(43)/r45(40) + smoke-r26(46)/plan-page(78)/data-consistency(30)/su-dim-validate(13)。第46轮适配要点：glm4 sp1=24 单元（rowspan=24、列表 31 行、计划 units su-1~24）、sp2=su-25~28（su-25 全缺省居首）、详情清单末行=cache/输入区间 su-18（「费」<「输」）；旧维度文本批量 sed 替换。第45轮适配要点：editSpacePlan 恢复（断言 typeof==='function'）；计划下拉候选=已发布空间数+1；pre 空间默认已发布。第44轮遗留口径：.sp-measure-check 选择器一律无 data-fn；多 fn 共享度量组合数=每 fn ∏(nᵢ+1)。
+- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules，r11/r28/r38 须从仓库根目录跑其余任意）**：26 套全绿（第47轮口径，976 项）——this-round(31)/r9(26)/r10(51)/r11(19)/r12(39)/r13(33)/r14(50)/r15(39)/r16(29)/r18(28)/r19(38)/r20(74)/r22(34)/r23(34)/r24(18)/r25(49)/r27(33)/r28(33)/r29(45)/r38(43)/r45(40)/r47(46) + smoke-r26(46)/plan-page(78)/data-consistency(30)/su-dim-validate(13)。第47轮适配要点：.sp-measure-check 选择器一律带 data-fn；glm4 sp1=11 单元（SU Tab rowspan=11、列表已上架 18 行、计划 units su-1~11）、sp2=su-12~15（su-12 全缺省居首）、详情清单末行=输出 su-10/输入 su-8；创建/编辑弹窗须先勾 fn（check+dispatchEvent change）再操作度量。
 - **jsdom 踩坑汇总**：runScripts:'dangerously'；confirm/alert 打桩；页面顶层 const 用 window.eval 取；rowspan 合并行 cells 索引偏移（空间级列只首行有）；勾选联动须 dispatchEvent(change,{bubbles:true})；跨商品切换先 backToList()；筛选元素重渲后重查；跑批 >150s 被 SIGKILL(137) 分批跑；保存成功路径无 alert（断言数据变化）。
 - 语法校验：node -e 提取 `<script>` 用 new Function()。修页面后先跑全套找红再逐套改断言。
 - 网络偶发 502：push 失败等 1-2 分钟重试；恢复检测=curl https://github.com
