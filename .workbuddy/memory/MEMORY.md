@@ -1,7 +1,17 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第42轮（main a5ad3fe / gh-pages dd91be3，24 套全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第43轮（main 762f193 / gh-pages f703f52，24 套全绿）。
+
+## 第43轮（现行口径）：两步创建+缺省完整叉乘+售卖单元三态+计划空间筛选
+- **创建售卖空间两步**：①勾 function（.sp-fn-check）②每维度直接勾度量（.sp-measure-check，**.sp-dim-check 维度复选已删**）；勾 fn 启用度量，取消 fn 清空度量；不勾任何 fn 拦截；**未勾度量也可保存**（生成全缺省组合）。
+- **缺省完整叉乘（genSaleUnitsForSpace 重写）**：每维度候选=勾选度量∪{缺省空对}，笛卡尔积全组合（**含全缺省**）；如 input 勾输入{0～128K}+输出{0～4K,16K+}→(1+1)×(2+1)=6；每组合×每勾选 fn 各一个售卖单元；组合排序 comboKey（dim+'||'+measure）字典序，组合内按 fnDims 键序（fnPool DOM 序）→id。
+- **售卖单元三态（unitStatusOf）**：空间未生效/最高优先级计划 off→禁售红（bg-red-100 text-red-700）；无生效中计划覆盖→未配置灰（bg-slate-100 text-slate-400, unconf:true）；否则在售绿。列表 Tab 在售/禁售=直查（灰计入禁售 Tab 展示）。
+- **售卖计划 Tab 空间筛选**：工具条 #plan-filter-space（onchange=onPlanSpaceFilter）；planSpaceFilter(null=未初始化)；syncPlanSpaceFilterOptions 首次定位 effectiveSpaceAtAll(当前时刻)；renderPlan 过滤 r.spaceKey!==fk 跳过；showDetailView 进入商品重置 null。默认 glm4 只显 sp1 计划。
+- **SU Tab 列序（组合在 Function 之上）**：售卖空间/维度:度量/Function/售卖单元/状态…共 14 列；排序 spaceKey→comboKey→fn→id；spSpan(空间)>cbSpan(组合)>fnSpan(组合内换 fn 才起新 td)三层 rowspan。全缺省组合 comboKey='' 最小排最前。
+- **空间详情页清单排序**：comboKey 字典序→fnDims 键序→id（全缺省三 fn 行居首）。
+- **mock 单元重算**：std 8（su-1~3 原两维+su-4~7 单维+su-8 全缺省；su-7 计划 off 演示禁售红）/pro 9/pre 8/glm4 sp1 12+sp2 4（sp2 加 su-16 全缺省）；glm4 常规计划覆盖 sp1 全部 12 单元；std 30/60/90d 计划扩对应缺省单元。
+- 踩坑：jsdom 下 switchInnerTab 不重渲表格——timeFilter 改后须显式调 renderSaleUnits()；confirmSpacePlan 成功后弹窗关闭，再来一轮须重新 openSpacePlanModal()；std 首行 su-8（全缺省 --）在售状态正常。
 
 ## 第42轮（现行口径）：售卖单元任何时刻（含默认=当前时刻）只显唯一生效空间
 - renderSaleUnits 去掉 timeFilter 条件分支：`at = timeFilter.point || 当前时间` → effectiveSpaceAtAll(at) 过滤；空间待发布/无生效 → 空态「当前时刻无生效中的售卖空间」。glm4 默认只显 sp1 4 单元；11-15 只显 sp2 3 单元；r38 语境同优先级后建 sp3 胜出。
@@ -111,7 +121,7 @@
 ## 技术约定与部署
 - 每页顶部深色「原型导航」栏；后台紫色主色 #7C3AED；管理员「吕」。数据全为页面内 JS mock。
 - **部署（Pages legacy 从分支部署）**：gh-pages 分支=HTML 根直出+.nojekyll。流程：推 main → git worktree add gh-pages → rm+cp prototype/*.html → 推送 → sleep~105s → curl 验证线上 → worktree remove。URL：https://alanqh.github.io/tpm-bao/admin-products.html
-- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：24 套全绿（第39轮口径；项数以各套最新输出为准）——this-round(31)/r38(38)/smoke-r26(46)/plan-page(78)/data-consistency(28)/su-dim-validate(14)/r9(26)/r10(51)/r11(19)/r12(41)/r13(32)/r14(50)/r15(38)/r16(29)/r18(27)/r19(37)/r20(66)/r22(28)/r23(32)/r24(17)/r25(47)/r27(30)/r28(30)/r29(45)。
+- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：24 套全绿（第43轮口径）——this-round(31)/r38(39)/smoke-r26(46)/plan-page(78)/data-consistency(29)/su-dim-validate(13)/r9(26)/r10(51)/r11(19)/r12(37)/r13(32)/r14(50)/r15(38)/r16(29)/r18(27)/r19(38)/r20(69)/r22(33)/r23(34)/r24(18)/r25(48)/r27(33)/r28(33)/r29(45)。第43轮测试适配要点：删所有 .sp-dim-check 交互（jsdom 下 null 崩溃）；glm4 SU Tab 默认 12 行/11-15 sp2 4 行；std sp1 单元数 3→8；rowspan 断言三层（spSpan/cbSpan）；三态断言（pro su-2/3/4 未配置、std 停用计划→未配置灰非红）。
 - **jsdom 踩坑汇总**：runScripts:'dangerously'；confirm/alert 打桩；页面顶层 const 用 window.eval 取；rowspan 合并行按"任意 cell 匹配"取行、cells 索引偏移（第38轮：空间级列只首行有，续行 cells 少）；勾选联动须 dispatchEvent(change,{bubbles:true})；跨商品切换先 backToList()；筛选测试元素引用重渲后重查；**jsdom 跑批 >150s 被 SIGKILL(137) 分批跑**；断言 beware 计划名含空间名子串；测试造的空间/计划结尾清理（delete+游标复位）；保存成功路径无 alert（断言数据变化）。
 - 语法校验：node -e 提取 `<script>` 用 new Function()。修页面后先跑全套找红再逐套改断言。
 - 网络偶发 502：push 失败等 1-2 分钟重试；恢复检测=curl https://github.com
