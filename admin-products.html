@@ -316,10 +316,10 @@
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th class="text-left px-3 py-2 font-medium">售卖空间</th>
+                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元</th>
                   <th class="text-left px-3 py-2 font-medium">状态</th>
-                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">关联计费项</th>
                   <th class="text-right px-3 py-2 font-medium">刊例价</th>
                   <th class="text-right px-3 py-2 font-medium">所选时间执行价</th>
@@ -340,6 +340,10 @@
           <div id="inner-tab-plan" class="p-4 hidden">
             <div class="flex flex-wrap items-center gap-3 mb-3">
               <button type="button" id="plan-create-btn" onclick="if(!guardEdit())return; openPlanCreatePage()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-calendar-plus mr-1"></i>创建售卖计划</button>
+              <div class="flex flex-wrap items-center gap-2 text-xs ml-auto">
+                <span class="text-slate-500">售卖空间</span>
+                <select id="plan-filter-space" onchange="onPlanSpaceFilter(this.value)" class="form-input text-xs px-2 py-1 w-56"></select>
+              </div>
             </div>
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[1700px]">
@@ -936,26 +940,42 @@
     // 注意：默认数据必须是"已勾选度量集合的完整笛卡尔积"，保证售卖单元列表与确认弹窗勾选状态一致
     // 售卖单元（第20轮：fn=function（空=显示 —）、spaceKey=归属售卖空间、dim/measure=维度组合（不含 function）；确认后只增不减）
     const defaultSaleUnits = {
-      // std：购买量区间[1～100] × 购买周期[30天,60天,90天] = 3 个组合（无 function → —）
+      // 第43轮：组合=每维度{勾选度量∪缺省}完整叉乘（含全缺省）；旧组合 id 沿用，新组合按 gen 序追加
+      // std：(量1～100×周期30/60/90)旧3 + (量缺省×周期30/60/90)3 + (量1～100×周期缺省)1 + 全缺省1 = 8
       'maas-product-vtpm-std': [
         { id: 'su-1', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 30天' },
         { id: 'su-2', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 60天' },
-        { id: 'su-3', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 90天' }
+        { id: 'su-3', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 90天' },
+        { id: 'su-4', fn: '', spaceKey: 'sp1', dim: '购买量区间', measure: '1～100' },
+        { id: 'su-5', fn: '', spaceKey: 'sp1', dim: '购买周期', measure: '30天' },
+        { id: 'su-6', fn: '', spaceKey: 'sp1', dim: '购买周期', measure: '60天' },
+        { id: 'su-7', fn: '', spaceKey: 'sp1', dim: '购买周期', measure: '90天' },
+        { id: 'su-8', fn: '', spaceKey: 'sp1', dim: '', measure: '' }
       ],
-      // pro：购买量区间[1～100, 500+] × 购买周期[30天, 90天] = 4 个组合
+      // pro：(量1～100/500+×周期30/90)旧4 + 量缺省×周期2 + 量2×周期缺省 + 全缺省 = 9
       'maas-product-vtpm-pro': [
         { id: 'su-1', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 30天' },
         { id: 'su-2', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 90天' },
         { id: 'su-3', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '500+ + 30天' },
-        { id: 'su-4', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '500+ + 90天' }
+        { id: 'su-4', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '500+ + 90天' },
+        { id: 'su-5', fn: '', spaceKey: 'sp1', dim: '购买量区间', measure: '1～100' },
+        { id: 'su-6', fn: '', spaceKey: 'sp1', dim: '购买量区间', measure: '500+' },
+        { id: 'su-7', fn: '', spaceKey: 'sp1', dim: '购买周期', measure: '30天' },
+        { id: 'su-8', fn: '', spaceKey: 'sp1', dim: '购买周期', measure: '90天' },
+        { id: 'su-9', fn: '', spaceKey: 'sp1', dim: '', measure: '' }
       ],
-      // pre：购买量区间[1～100] × 购买周期[30天,60天,90天] = 3 个组合（与售卖计划 chargeCodes 后缀 30d/60d/90d 对应）
+      // pre：与 std 同构 8 单元（fnMeasures 同 std；空间待发布）
       'maas-product-vtpm-pre': [
         { id: 'su-1', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 30天' },
         { id: 'su-2', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 60天' },
-        { id: 'su-3', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 90天' }
+        { id: 'su-3', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 90天' },
+        { id: 'su-4', fn: '', spaceKey: 'sp1', dim: '购买量区间', measure: '1～100' },
+        { id: 'su-5', fn: '', spaceKey: 'sp1', dim: '购买周期', measure: '30天' },
+        { id: 'su-6', fn: '', spaceKey: 'sp1', dim: '购买周期', measure: '60天' },
+        { id: 'su-7', fn: '', spaceKey: 'sp1', dim: '购买周期', measure: '90天' },
+        { id: 'su-8', fn: '', spaceKey: 'sp1', dim: '', measure: '' }
       ],
-      // online-text 示例商品（第38轮）：sp1=常规空间（input 2 + output 1 + cache 1 = 4 单元）；sp2=双11空间（input 单维 3 度量 = 3 单元）
+      // glm4：sp1（input 6 + output 4 + cache 2 = 12）+ sp2（3 度量 + 全缺省 = 4）
       'maas-online-text-glm4': [
         { id: 'su-1', fn: 'input', spaceKey: 'sp1', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
         { id: 'su-2', fn: 'input', spaceKey: 'sp1', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 16K+' },
@@ -963,7 +983,16 @@
         { id: 'su-4', fn: 'cache', spaceKey: 'sp1', dim: '输入token区间', measure: '0～128K' },
         { id: 'su-5', fn: 'input', spaceKey: 'sp2', dim: '输入token区间', measure: '0～128K' },
         { id: 'su-6', fn: 'input', spaceKey: 'sp2', dim: '输入token区间', measure: '128K～1M' },
-        { id: 'su-7', fn: 'input', spaceKey: 'sp2', dim: '输入token区间', measure: '1M+' }
+        { id: 'su-7', fn: 'input', spaceKey: 'sp2', dim: '输入token区间', measure: '1M+' },
+        { id: 'su-8', fn: 'input', spaceKey: 'sp1', dim: '输入token区间', measure: '128K～1M' },
+        { id: 'su-9', fn: 'input', spaceKey: 'sp1', dim: '输出token区间', measure: '0～4K' },
+        { id: 'su-10', fn: 'input', spaceKey: 'sp1', dim: '输出token区间', measure: '16K+' },
+        { id: 'su-11', fn: 'input', spaceKey: 'sp1', dim: '', measure: '' },
+        { id: 'su-12', fn: 'output', spaceKey: 'sp1', dim: '输入token区间', measure: '128K～1M' },
+        { id: 'su-13', fn: 'output', spaceKey: 'sp1', dim: '输出token区间', measure: '0～4K' },
+        { id: 'su-14', fn: 'output', spaceKey: 'sp1', dim: '', measure: '' },
+        { id: 'su-15', fn: 'cache', spaceKey: 'sp1', dim: '', measure: '' },
+        { id: 'su-16', fn: 'input', spaceKey: 'sp2', dim: '', measure: '' }
       ]
     };
     let saleUnits = [];
@@ -1032,14 +1061,14 @@
     const defaultPlans = {
       // std：3 个售卖单元各挂一个 30/60/90 天售卖计划（全部已发布且处于生效期内）
       'maas-product-vtpm-std': [
-        { name: 'vTPM 预留·标准·30天', spaceKey: 'sp1', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-std.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
-        { name: 'vTPM 预留·标准·60天', spaceKey: 'sp1', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-std.60d' }, quotaCodes: { 'su-2': 'quota-vtpm-60d' }, inventoryCodes: { 'su-2': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
-        { name: 'vTPM 预留·标准·90天', spaceKey: 'sp1', units: ['su-3'], unitStates: { 'su-3': 'on' }, chargeCodes: { 'su-3': 'maas-product-vtpm-std.90d' }, quotaCodes: { 'su-3': 'quota-vtpm-90d' }, inventoryCodes: { 'su-3': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-vtpm-003', priority: 300, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
+        { name: 'vTPM 预留·标准·30天', spaceKey: 'sp1', units: ['su-1', 'su-5'], unitStates: { 'su-1': 'on', 'su-5': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-std.30d', 'su-5': 'maas-product-vtpm-std.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d', 'su-5': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d', 'su-5': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+        { name: 'vTPM 预留·标准·60天', spaceKey: 'sp1', units: ['su-2', 'su-6'], unitStates: { 'su-2': 'on', 'su-6': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-std.60d', 'su-6': 'maas-product-vtpm-std.60d' }, quotaCodes: { 'su-2': 'quota-vtpm-60d', 'su-6': 'quota-vtpm-60d' }, inventoryCodes: { 'su-2': 'inv-vtpm-60d', 'su-6': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+        { name: 'vTPM 预留·标准·90天', spaceKey: 'sp1', units: ['su-3', 'su-7'], unitStates: { 'su-3': 'on', 'su-7': 'off' }, chargeCodes: { 'su-3': 'maas-product-vtpm-std.90d', 'su-7': 'maas-product-vtpm-std.90d' }, quotaCodes: { 'su-3': 'quota-vtpm-90d', 'su-7': 'quota-vtpm-90d' }, inventoryCodes: { 'su-3': 'inv-vtpm-90d', 'su-7': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-vtpm-003', priority: 300, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ],
       // pro：payload 取 payload-glm-00x（payload 前缀仅提示来源模型，商品不关联 playground）；su-3(500+·30天)/su-4(500+·90天) 无计划 → 未配置
       'maas-product-vtpm-pro': [
-        { name: 'vTPM 预留·专业·30天', spaceKey: 'sp1', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pro.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
-        { name: 'vTPM 预留·专业·90天', spaceKey: 'sp1', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-pro.90d' }, quotaCodes: { 'su-2': 'quota-vtpm-90d' }, inventoryCodes: { 'su-2': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', priority: 200, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
+        { name: 'vTPM 预留·专业·30天', spaceKey: 'sp1', units: ['su-1', 'su-5'], unitStates: { 'su-1': 'on', 'su-5': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pro.30d', 'su-5': 'maas-product-vtpm-pro.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d', 'su-5': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d', 'su-5': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+        { name: 'vTPM 预留·专业·90天', spaceKey: 'sp1', units: ['su-2', 'su-6'], unitStates: { 'su-2': 'on', 'su-6': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-pro.90d', 'su-6': 'maas-product-vtpm-pro.90d' }, quotaCodes: { 'su-2': 'quota-vtpm-90d', 'su-6': 'quota-vtpm-90d' }, inventoryCodes: { 'su-2': 'inv-vtpm-90d', 'su-6': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', priority: 200, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ],
       // pre：待上架商品，仅有待发布计划（未发布 → 无生效期内已发布计划 → 售卖单元禁售）
       'maas-product-vtpm-pre': [
@@ -1047,8 +1076,8 @@
       ],
       // glm4（第25/26轮演示定时切换）：售卖计划锁定空间（sp2 双11高优先级空间在档期内接管 input）；空间即档期，第38轮起空间本体携带优先级/生效期
       'maas-online-text-glm4': [
-        { name: '双11大促·输入售卖计划', spaceKey: 'sp2', units: ['su-5', 'su-6'], unitStates: { 'su-5': 'on', 'su-6': 'on' }, chargeCodes: { 'su-5': 'maas-online-text-glm4.30d', 'su-6': 'maas-online-text-glm4.30d' }, quotaCodes: { 'su-5': 'quota-vtpm-30d', 'su-6': 'quota-vtpm-30d' }, inventoryCodes: { 'su-5': 'inv-vtpm-30d', 'su-6': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 500, effStart: '2026-11-11 00:00:00', effEnd: '2026-11-20 00:00:00' },
-        { name: 'GLM4·常规售卖', spaceKey: 'sp1', units: ['su-1', 'su-2', 'su-3', 'su-4'], unitStates: { 'su-1': 'on', 'su-2': 'on', 'su-3': 'on', 'su-4': 'on' }, chargeCodes: { 'su-1': 'maas-online-text-glm4.60d', 'su-2': 'maas-online-text-glm4.60d', 'su-3': 'maas-online-text-glm4.60d', 'su-4': 'maas-online-text-glm4.60d' }, quotaCodes: { 'su-1': 'quota-vtpm-60d', 'su-2': 'quota-vtpm-60d', 'su-3': 'quota-vtpm-60d', 'su-4': 'quota-vtpm-60d' }, inventoryCodes: { 'su-1': 'inv-vtpm-60d', 'su-2': 'inv-vtpm-60d', 'su-3': 'inv-vtpm-60d', 'su-4': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-002', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
+        { name: '双11大促·输入售卖计划', spaceKey: 'sp2', units: ['su-5', 'su-6', 'su-7', 'su-16'], unitStates: { 'su-5': 'on', 'su-6': 'on', 'su-7': 'on', 'su-16': 'on' }, chargeCodes: { 'su-5': 'maas-online-text-glm4.30d', 'su-6': 'maas-online-text-glm4.30d', 'su-7': 'maas-online-text-glm4.30d', 'su-16': 'maas-online-text-glm4.30d' }, quotaCodes: { 'su-5': 'quota-vtpm-30d', 'su-6': 'quota-vtpm-30d', 'su-7': 'quota-vtpm-30d', 'su-16': 'quota-vtpm-30d' }, inventoryCodes: { 'su-5': 'inv-vtpm-30d', 'su-6': 'inv-vtpm-30d', 'su-7': 'inv-vtpm-30d', 'su-16': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 500, effStart: '2026-11-11 00:00:00', effEnd: '2026-11-20 00:00:00' },
+        { name: 'GLM4·常规售卖', spaceKey: 'sp1', units: ['su-1', 'su-2', 'su-3', 'su-4', 'su-8', 'su-9', 'su-10', 'su-11', 'su-12', 'su-13', 'su-14', 'su-15'], unitStates: { 'su-1': 'on', 'su-2': 'on', 'su-3': 'on', 'su-4': 'on', 'su-8': 'on', 'su-9': 'on', 'su-10': 'on', 'su-11': 'on', 'su-12': 'on', 'su-13': 'on', 'su-14': 'on', 'su-15': 'on' }, chargeCodes: { 'su-1': 'maas-online-text-glm4.60d', 'su-2': 'maas-online-text-glm4.60d', 'su-3': 'maas-online-text-glm4.60d', 'su-4': 'maas-online-text-glm4.60d', 'su-8': 'maas-online-text-glm4.60d', 'su-9': 'maas-online-text-glm4.60d', 'su-10': 'maas-online-text-glm4.60d', 'su-11': 'maas-online-text-glm4.60d', 'su-12': 'maas-online-text-glm4.60d', 'su-13': 'maas-online-text-glm4.60d', 'su-14': 'maas-online-text-glm4.60d', 'su-15': 'maas-online-text-glm4.60d' }, quotaCodes: { 'su-1': 'quota-vtpm-60d', 'su-2': 'quota-vtpm-60d', 'su-3': 'quota-vtpm-60d', 'su-4': 'quota-vtpm-60d', 'su-8': 'quota-vtpm-60d', 'su-9': 'quota-vtpm-60d', 'su-10': 'quota-vtpm-60d', 'su-11': 'quota-vtpm-60d', 'su-12': 'quota-vtpm-60d', 'su-13': 'quota-vtpm-60d', 'su-14': 'quota-vtpm-60d', 'su-15': 'quota-vtpm-60d' }, inventoryCodes: { 'su-1': 'inv-vtpm-60d', 'su-2': 'inv-vtpm-60d', 'su-3': 'inv-vtpm-60d', 'su-4': 'inv-vtpm-60d', 'su-8': 'inv-vtpm-60d', 'su-9': 'inv-vtpm-60d', 'su-10': 'inv-vtpm-60d', 'su-11': 'inv-vtpm-60d', 'su-12': 'inv-vtpm-60d', 'su-13': 'inv-vtpm-60d', 'su-14': 'inv-vtpm-60d', 'su-15': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-002', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ]
     };
 
@@ -1326,33 +1355,41 @@
           return;
         }
       }
-      // 第39轮：层级=售卖空间在 Function 之上——前三列 = 售卖空间（最外层合并）/function（空间组内合并）/售卖单元；
-      // 排序 spaceKey → fn → id（保证同空间连续，空间内同 fn 连续，两层可 rowspan 合并）
+      // 第43轮：组合在 Function 之上——列序 售卖空间/维度:度量组合/Function/售卖单元；排序 spaceKey → dim|measure 组合 → fn → id
+      const comboKey = u => (u.dim || '') + '||' + (u.measure || '');
       const sorted = listUnits.slice().sort((a, b) => {
         const sa = a.spaceKey || '', sb = b.spaceKey || '';
         if (sa !== sb) return sa.localeCompare(sb);
+        const ca = comboKey(a), cb = comboKey(b);
+        if (ca !== cb) return ca.localeCompare(cb);
         const fa = fnOfUnit(a) || '', fb = fnOfUnit(b) || '';
         if (fa !== fb) return fa.localeCompare(fb);
         return (a.id || '').localeCompare(b.id || '');
       });
-      let prevFn = null, prevSpace = null, fnSpan = 0, spSpan = 0;
+      let prevFn = null, prevSpace = null, prevCombo = null, fnSpan = 0, spSpan = 0, cbSpan = 0;
       document.getElementById('saleunit-tbody').innerHTML = sorted.map((u, i) => {
         const fn = fnOfUnit(u) || '';
         const spaceKey = u.spaceKey || '';
+        const combo = comboKey(u);
         const showSpace = spaceKey !== prevSpace || prevSpace === null;
-        const showFn = showSpace || fn !== prevFn || prevFn === null;
-        if (showSpace) { fnSpan = 0; }
-        if (showSpace || showFn) { spSpan = 0; }
-        // 统计连续相同段长度（向后看）：空间段=同空间全部行（跨 fn）；fn 段=空间内同 fn 行
+        const showCombo = showSpace || combo !== prevCombo || prevCombo === null;
+        const showFn = showCombo || fn !== prevFn || prevFn === null;
+        if (showSpace) { cbSpan = 0; fnSpan = 0; }
+        if (showCombo) { fnSpan = 0; }
+        // 统计连续相同段长度（向后看）：空间段=同空间全部行；组合段=空间内同组合行；fn 段=组合内同 fn 行
         if (showSpace) {
           let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey) j++;
           spSpan = j - i;
         }
+        if (showCombo) {
+          let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey && comboKey(sorted[j]) === combo) j++;
+          cbSpan = j - i;
+        }
         if (showFn) {
-          let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey && (fnOfUnit(sorted[j]) || '') === fn) j++;
+          let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey && comboKey(sorted[j]) === combo && (fnOfUnit(sorted[j]) || '') === fn) j++;
           fnSpan = j - i;
         }
-        prevFn = fn; prevSpace = spaceKey;
+        prevFn = fn; prevSpace = spaceKey; prevCombo = combo;
         const st = unitStatusOf(u.id);
         // 禁售状态（无生效中计划或最高优先级为下架）查不出额外信息：一律展示 —
         const plan = st.offline ? null : (st.plan || planOfUnit(u.id));
@@ -1365,10 +1402,10 @@
         return `
         <tr class="hover:bg-slate-50">
           ${showSpace ? `<td rowspan="${spSpan}" class="px-3 py-2 align-top border-r border-slate-100"><div class="font-mono text-xs">${spaceKey || '—'}</div>${spSt ? `<span class="badge ${spSt.cls} mt-1 inline-block">${spSt.text}</span>` : ''}</td>` : ''}
+          ${showCombo ? `<td rowspan="${cbSpan}" class="px-3 py-2 text-xs align-top border-r border-slate-100">${formatDimMeasure(u)}</td>` : ''}
           ${showFn ? `<td rowspan="${fnSpan}" class="px-3 py-2 text-xs font-medium align-top border-r border-slate-100">${fn || '—'}</td>` : ''}
           <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
           <td class="px-3 py-2"><span class="badge ${st.cls}">${st.text}</span></td>
-          <td class="px-3 py-2">${formatDimMeasure(u)}</td>
           <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code + '<button type="button" onclick="copyChargeCode(\'' + charge.code + '\', this)" class="ml-1 text-slate-400 hover:text-slate-600" title="复制code"><i class="fa-solid fa-copy"></i></button>' : '—'}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${charge ? charge.price.toFixed(4) : '—'}</td>
           <td class="px-3 py-2 text-right font-mono text-xs">${execPrice}</td>
@@ -1396,10 +1433,34 @@
       }
       return r[scalar];
     }
+    // 第43轮：售卖计划 Tab 按售卖空间筛选——''（全部）或空间 key；默认=当前生效空间（无则全部）
+    let planSpaceFilter = null; // null=未初始化（进入 Tab 时自动定位当前生效空间）
+    function onPlanSpaceFilter(v) {
+      planSpaceFilter = v || '';
+      renderPlan();
+    }
+    function syncPlanSpaceFilterOptions() {
+      const sel = document.getElementById('plan-filter-space');
+      if (!sel) return;
+      // 默认值：null=首次进入 → 当前生效空间（effectiveSpaceAtAll 当前时刻）；无生效空间 → ''
+      if (planSpaceFilter === null) {
+        const at = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        planSpaceFilter = effectiveSpaceAtAll(at) || '';
+      }
+      const opts = ['<option value="">全部</option>'].concat(
+        Object.keys(spaces).map(k => `<option value="${k}">${k}${spaces[k].name ? '（' + spaces[k].name + '）' : ''}</option>`)
+      ).join('');
+      sel.innerHTML = opts;
+      sel.value = planSpaceFilter;
+    }
     function renderPlan() {
+      syncPlanSpaceFilterOptions();
+      // 第43轮：按售卖空间筛选计划单元（默认只展示当前生效空间的计划单元；''=全部）
+      const fk = planSpaceFilter || '';
       // 先构建全部计划单元行
       const rows = [];
       planRows.forEach((r, planIdx) => {
+        if (fk && r.spaceKey !== fk) return;
         (r.units || []).forEach(uid => {
         const u = saleUnits.find(x => x.id === uid) || {};
         const charge = chargeItems.find(c => c.code === (r.chargeCodes && r.chargeCodes[uid]));
@@ -1631,20 +1692,22 @@
       // 第38轮：单元所在空间未生效（非 published 或不在档期内）→ 禁售
       const su = (saleUnits || []).find(u => u.id === unitId);
       const sp = su ? (spaces[su.spaceKey] || null) : null;
+      // 第43轮三态：未配置=无任何生效中计划覆盖（灰）；在售=生效中计划上架；禁售=空间未生效或最高优先级计划下架（红）
+      const notConf = { text: '未配置', cls: 'bg-slate-100 text-slate-400', offline: true, unconf: true };
       if (sp && !spaceActiveAt(sp, now)) {
-        return { text: '禁售', cls: 'bg-slate-100 text-slate-500', offline: true };
+        return { text: '禁售', cls: 'bg-red-100 text-red-700', offline: true };
       }
       // 该时刻生效期内的计划（状态=已发布 且 生效起止命中时间点）
       const active = planRows.filter((r, i) =>
         (r.units || []).includes(unitId) && planRowStatuses[i] === 'published' && r.effStart <= now && now <= r.effEnd
       );
       if (active.length === 0) {
-        return { text: '禁售', cls: 'bg-slate-100 text-slate-500', offline: true };
+        return notConf;
       }
       // 生效期内的最高优先级已发布计划 → 计划单元类型（上架/下架）
       const top = active.slice().sort((a, b) => (b.priority || 0) - (a.priority || 0))[0];
       const unitState = (top.unitStates || {})[unitId] || 'on';
-      if (unitState === 'off') return { text: '禁售', cls: 'bg-slate-100 text-slate-500', offline: true };
+      if (unitState === 'off') return { text: '禁售', cls: 'bg-red-100 text-red-700', offline: true };
       return { text: '在售', cls: 'bg-green-100 text-green-700', offline: false, plan: top };
     }
     function copyChargeCode(code, btn) {
@@ -1707,6 +1770,7 @@
       document.getElementById('detail-title-name').textContent = currentProduct.name;
       document.getElementById('detail-title-code').textContent = `（${currentProduct.code}）`;
       closeDetailNameEdit(); // 第38轮：重置名称就地编辑状态
+      planSpaceFilter = null; // 第43轮：进入商品详情重置计划空间筛选（重新定位当前生效空间）
       // 第10轮编辑锁：进入详情页初始化编辑状态——锁记录若属当前用户则恢复编辑态，否则浏览态（他人持锁显示提示）
       const lock0 = editLocks[currentProduct.code] || null;
       editMode = (lock0 && lock0.passport === currentUser.passport) ? 'owner' : false;
@@ -1894,15 +1958,14 @@
       document.getElementById('sp-priority').value = '';
       document.getElementById('sp-eff-start').value = '2026-11-11T00:00:00';
       document.getElementById('sp-eff-end').value = '2026-11-20T00:00:00';
+      // 第43轮两步：①勾 function ②直接勾各维度的度量（无维度 checkbox）——
+      // 组合 = 每个维度 {勾选度量 ∪ 缺省} 完整叉乘（含全缺省），每组合 × 每勾选 fn 生成一个售卖单元
       document.getElementById('sp-fnspaces').innerHTML = fns.map(f => {
         const dimBlocks = dimensionOptions.map(d => {
           const measures = measureOptions[d] || [];
           return `<div class="border border-slate-200 rounded-md px-2 py-1.5 bg-white" data-dimblock="${f}|${d}">
-            <label class="flex items-center gap-1 text-xs font-medium text-slate-700">
-              <input type="checkbox" class="sp-dim-check" data-fn="${f}" value="${d}" disabled style="accent-color:#7C3AED" onchange="onSpDimCheck(this)">
-              <span>${d}</span>
-            </label>
-            <div class="ml-5 mt-1 flex flex-wrap gap-x-3 gap-y-1 opacity-50 pointer-events-none" data-dimmeas="${f}|${d}">
+            <p class="text-xs font-medium text-slate-700">${d}<span class="ml-1 text-slate-400 font-normal">（缺省=该维度不参与组合）</span></p>
+            <div class="ml-1 mt-1 flex flex-wrap gap-x-3 gap-y-1" data-dimmeas="${f}|${d}">
               ${measures.map(m => `<label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
                 <input type="checkbox" class="sp-measure-check" data-fn="${f}" data-dim="${d}" value="${m}" disabled style="accent-color:#7C3AED">
                 <span>${m}</span></label>`).join('')}
@@ -1925,38 +1988,13 @@
       const wrap = document.querySelector('[data-fndims="' + box.dataset.fn + '"]');
       if (!wrap) return;
       wrap.classList.toggle('opacity-50', !box.checked);
-      wrap.querySelectorAll('.sp-dim-check').forEach(c => { c.disabled = !box.checked; });
       if (box.checked) {
-        wrap.querySelectorAll('[data-dimblock]').forEach(blk => {
-          const dimCheck = blk.querySelector('.sp-dim-check');
-          const measWrap = blk.querySelector('[data-dimmeas]');
-          const dimOn = dimCheck && dimCheck.checked;
-          if (measWrap) {
-            measWrap.classList.toggle('opacity-50', !dimOn);
-            measWrap.classList.toggle('pointer-events-none', !dimOn);
-          }
-          blk.querySelectorAll('.sp-measure-check').forEach(c => { c.disabled = dimOn ? false : true; });
-        });
+        wrap.querySelectorAll('.sp-measure-check').forEach(c => { c.disabled = false; });
       } else {
         wrap.querySelectorAll('.sp-measure-check').forEach(c => { c.checked = false; c.disabled = true; });
-        wrap.querySelectorAll('[data-dimmeas]').forEach(mw => { mw.classList.add('opacity-50', 'pointer-events-none'); });
-        wrap.querySelectorAll('.sp-dim-check').forEach(c => { c.checked = false; });
       }
     }
-    // 维度勾选联动——勾维度启用该维度度量区；取消勾选清空该维度度量并禁用
-    function onSpDimCheck(box) {
-      const measWrap = document.querySelector('[data-dimmeas="' + box.dataset.fn + '|' + box.value + '"]');
-      if (!measWrap) return;
-      if (box.checked) {
-        measWrap.classList.remove('opacity-50');
-        measWrap.classList.remove('pointer-events-none');
-        measWrap.querySelectorAll('.sp-measure-check').forEach(c => { c.disabled = false; });
-      } else {
-        measWrap.querySelectorAll('.sp-measure-check').forEach(c => { c.checked = false; c.disabled = true; });
-        measWrap.classList.add('opacity-50', 'pointer-events-none');
-      }
-    }
-    // 保存：收集 fn→维度→度量 → 新建一个空间（多 fn 共一个空间）→ 叉乘生成全部售卖单元 → 待发布
+        // 保存：收集 fn→维度→度量 → 新建一个空间（多 fn 共一个空间）→ 叉乘生成全部售卖单元 → 待发布
     function confirmSpacePlan() {
       if (!guardEdit()) return;
       const name = (document.getElementById('sp-name').value || '').trim();
@@ -1965,31 +2003,21 @@
       const effStart = pcpVal(document.getElementById('sp-eff-start').value, '2026-11-11T00:00:00');
       const effEnd = pcpVal(document.getElementById('sp-eff-end').value, '2026-11-20T00:00:00');
       if (effStart > effEnd) { alert('生效开始不能晚于生效结束'); return; }
-      // 收集勾选 fn 及其维度集合 + 每维度勾选的度量
+      // 第43轮：直接收集勾选 fn 及其每维度勾选的度量（fnDims[f]=有勾选度量的维度列表）
       const fnDims = {};
       const fnMeasures = {};
       document.querySelectorAll('.sp-fn-check').forEach(c => {
         if (c.checked) {
           const f = c.dataset.fn;
-          fnDims[f] = Array.from(document.querySelectorAll('.sp-dim-check[data-fn="' + f + '"]:checked')).map(x => x.value);
           const meas = {};
-          fnDims[f].forEach(d => {
-            meas[d] = Array.from(document.querySelectorAll('.sp-measure-check[data-fn="' + f + '"][data-dim="' + d + '"]:checked')).map(x => x.value);
+          document.querySelectorAll('.sp-measure-check[data-fn="' + f + '"]:checked').forEach(x => {
+            (meas[x.dataset.dim] = meas[x.dataset.dim] || []).push(x.value);
           });
           fnMeasures[f] = meas;
+          fnDims[f] = Object.keys(meas); // 有勾选度量的维度才进列表（未勾度量的维度不参与）
         }
       });
       if (Object.keys(fnDims).length === 0) { alert('至少勾选一个 function'); return; }
-      // 校验：勾了维度则该维度至少勾一个度量（0 维度 fn=不勾维度，生成一个单元）
-      for (const f of Object.keys(fnDims)) {
-        const dims = fnDims[f];
-        if (dims.length === 0) continue;
-        const emptyDims = dims.filter(d => !(fnMeasures[f][d] && fnMeasures[f][d].length));
-        if (emptyDims.length > 0) {
-          alert((f || '无 function') + '：以下维度至少勾选一个度量：' + emptyDims.join('、'));
-          return;
-        }
-      }
       // 新建空间（第38轮：一个空间可含多 fn）
       spaceSeq += 1;
       const key = 'sp' + spaceSeq;
@@ -2012,34 +2040,35 @@
       Object.keys(m || {}).sort().forEach(k => { out[k] = (m[k] || []).slice().sort(); });
       return out;
     }
-    // 为空间按维度×度量叉乘生成售卖单元（追加进 saleUnits，不删已有单元；0 维度空间生成唯一单单元）
+    // 第43轮：为空间生成售卖单元——组合 = 每维度 {勾选度量 ∪ 缺省} 完整叉乘（含全缺省组合），
+    // 每个组合 × 每个勾选 fn 各生成一个售卖单元（追加，不删已有单元，幂等去重）
+    // 例：维度A勾{m1}、维度B勾{n1} → 组合 (A=m1,B=n1)(A=m1,B缺省)(A缺省,B=n1)(A缺省,B缺省)
     function genSaleUnitsForSpace(spaceKey, fn, dims, fnMeas) {
       const mea = fnMeas || {};
       let seq = saleUnits.reduce((m, u) => Math.max(m, parseInt((u.id || '').replace('su-', '')) || 0), 0);
       // 已有同 fn+空间的 dim|measure 组合（幂等：不重复生成）
       const existed = new Set(saleUnits.filter(u => (fnOfUnit(u) || '') === (fn || '') && u.spaceKey === spaceKey).map(u => saleUnitKey(u.dim, u.measure)));
       const created = [];
-      if (!dims || dims.length === 0) {
-        // 0 维度空间（第35轮）：唯一售卖单元（dim/measure 空串）
-        if (!existed.has(saleUnitKey('', ''))) {
-          const u = { id: 'su-' + (++seq), fn: fn || '', spaceKey, dim: '', measure: '' };
-          saleUnits.push(u);
-          created.push(u.id);
-        }
-        return created;
-      }
-      // 笛卡尔积（按维度勾选顺序组合）
+      // 每维度的候选值 = 勾选度量 ∪ {缺省}；全缺省组合（纯 function 单元）也生成
+      const dimList = dims || [];
       let combos = [[]];
-      dims.forEach(d => {
+      dimList.forEach(d => {
         const next = [];
-        combos.forEach(c => (mea[d] || []).forEach(m => next.push([...c, { dim: d, measure: m }])));
+        const vals = (mea[d] || []).map(m => ({ dim: d, measure: m })).concat([{ dim: '', measure: '' }]); // 缺省记为空对
+        combos.forEach(c => vals.forEach(v => next.push([...c, v])));
         combos = next;
       });
-      combos.forEach(combo => {
-        const dim = combo.map(c => c.dim).join(' + ');
-        const measure = combo.map(c => c.measure).join(' + ');
-        if (existed.has(saleUnitKey(dim, measure))) return;
-        const u = { id: 'su-' + (++seq), fn: fn || '', spaceKey, dim, measure };
+      // 排序组合（稳定展示序：缺省项排后）：按「维度:度量」文本排序
+      combos.map(combo => {
+        const pairs = dimList
+          .map(d => combo.find(p => p.dim === d))
+          .filter(p => p && p.measure);
+        const dim = pairs.map(p => p.dim).join(' + ');
+        const measure = pairs.map(p => p.measure).join(' + ');
+        return { dim, measure };
+      }).sort((a, b) => (a.dim + '||' + a.measure).localeCompare(b.dim + '||' + b.measure)).forEach(cmb => {
+        if (existed.has(saleUnitKey(cmb.dim, cmb.measure))) return;
+        const u = { id: 'su-' + (++seq), fn: fn || '', spaceKey, dim: cmb.dim, measure: cmb.measure };
         saleUnits.push(u);
         created.push(u.id);
       });
@@ -2150,9 +2179,12 @@
       if (units.length === 0) {
         tbody.innerHTML = `<tr><td colspan="3" class="px-3 py-6 text-center text-xs text-slate-400">暂无售卖单元</td></tr>`;
       } else {
-        // 空间内 fn 按创建序（fnDims 键序），fn 内按单元 id
+        // 第43轮：维度:度量组合序（组合在 fn 之上），组合内按 fn 创建序（fnDims 键序），fn 内按单元 id
         const fnOrder = Object.keys(sp.fnDims || {});
+        const comboKey = u => (u.dim || '') + '||' + (u.measure || '');
         units.sort((a, b) => {
+          const ca = comboKey(a), cb = comboKey(b);
+          if (ca !== cb) return ca.localeCompare(cb);
           const fa = fnOrder.indexOf(fnOfUnit(a) || ''), fb = fnOrder.indexOf(fnOfUnit(b) || '');
           if (fa !== fb) return fa - fb;
           return (a.id || '').localeCompare(b.id || '');
