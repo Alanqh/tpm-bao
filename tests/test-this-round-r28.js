@@ -50,10 +50,29 @@ w.eval('timeFilter = null');
 ok(w.eval('nextSpaceSwitchOfFn("input")') === 'sp2', '当前时点 input 下一切换预告=sp2（11-11 起接管）');
 ok(w.eval('nextSpaceSwitchOfFn("output")') === null, 'output 无切换预告（sp2 不含 output）');
 
-// ===== 5. 售卖单元 Tab 仍保留时间查询（第39轮只删空间 Tab 的）=====
+// ===== 5. 售卖单元 Tab 仍保留时间查询（第39轮只删空间 Tab 的；第41轮删查询/重置按钮改为 onchange 即时刷新）=====
 ok(!!d.getElementById('tf-point'), '售卖单元 Tab 时间查询控件仍在（共享 timeFilter）');
 w.eval('switchInnerTab("saleunit")');
 ok(!!d.getElementById('tf-point') && !d.getElementById('space-tf-point'), '空间 Tab 无查询、单元 Tab 有查询');
+ok(w.eval('typeof onSaleTimeChange') === 'function' && w.eval('typeof querySaleParams') === 'undefined' && w.eval('typeof resetSaleParams') === 'undefined', '第41轮：查询/重置按钮已删，onSaleTimeChange 即时刷新');
+// onchange 即时刷新验证：选 2026-09-01（生效期之前）→ 无生效空间空态
+w.eval(`
+  (function(){
+    const inp = document.getElementById('tf-point');
+    inp.value = '2026-09-01T12:00';
+    inp.dispatchEvent(new window.Event('change', { bubbles: true }));
+  })()
+`);
+ok(d.getElementById('saleunit-tbody').textContent.includes('该时刻无生效中的售卖空间'), 'onchange 选 2026-09-01 → 空态（无需点查询）');
+// 清空 → 回当前时刻全部单元
+w.eval(`
+  (function(){
+    const inp = document.getElementById('tf-point');
+    inp.value = '';
+    inp.dispatchEvent(new window.Event('change', { bubbles: true }));
+  })()
+`);
+ok(d.querySelectorAll('#saleunit-tbody tr').length === 7, '清空时间 → 立即恢复 7 行（当前时刻无需点重置）');
 w.eval('switchInnerTab("space")');
 
 // ===== 6. 排序专项：优先级降序 → 创建时间逆序（seq 降序）=====
