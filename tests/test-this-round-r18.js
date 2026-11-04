@@ -42,12 +42,10 @@ window.eval('openSpacePlanModal()');
 let boxIn = document.querySelector('.sp-fn-check[data-fn="input"]');
 boxIn.checked = true;
 boxIn.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelectorAll('.sp-dim-check[data-fn="input"]').forEach(c => { if (c.value === '输出token区间') { c.checked = true; c.dispatchEvent(new window.Event('change', { bubbles: true })); } });
 document.querySelectorAll('.sp-measure-check[data-fn="input"][data-dim="输出token区间"]').forEach(c => { c.checked = c.value === '0～4K'; });
 let boxOut = document.querySelector('.sp-fn-check[data-fn="output"]');
 boxOut.checked = true;
 boxOut.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelectorAll('.sp-dim-check[data-fn="output"]').forEach(c => { if (c.value === '输入token区间') { c.checked = true; c.dispatchEvent(new window.Event('change', { bubbles: true })); } });
 document.querySelectorAll('.sp-measure-check[data-fn="output"][data-dim="输入token区间"]').forEach(c => { c.checked = c.value === '0～128K'; });
 document.getElementById('sp-name').value = 'r38 空间一';
 alertMsg = '';
@@ -58,7 +56,6 @@ window.eval('openSpacePlanModal()');
 boxIn = document.querySelector('.sp-fn-check[data-fn="input"]');
 boxIn.checked = true;
 boxIn.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelectorAll('.sp-dim-check[data-fn="input"]').forEach(c => { if (c.value === '购买量区间') { c.checked = true; c.dispatchEvent(new window.Event('change', { bubbles: true })); } });
 document.querySelectorAll('.sp-measure-check[data-fn="input"][data-dim="购买量区间"]').forEach(c => { c.checked = c.value === '1～100'; });
 document.getElementById('sp-name').value = 'r38 空间二';
 window.confirmSpacePlan();
@@ -71,13 +68,13 @@ section('3. 叉乘生成售卖单元（第38轮）');
 window.eval('startEdit()');
 ok(!document.getElementById('modal-su-confirm'), 'SU 弹窗已删除');
 ok(!document.getElementById('su-create-btn'), 'SU Tab 创建按钮已删除');
-// 空间一保存时逐 fn 叉乘：input 1 个 + output 1 个，同属 sp1
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 2, '空间一（input+output）生成 2 个单元');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="input").length') === 1, 'sp1 input 单元 1 个');
-const suIn = evalInPage('saleUnits.find(u=>u.spaceKey==="sp1" && u.fn==="input")');
-ok(suIn && suIn.dim === '输出token区间', '售卖单元 dim 不含 function（input 单元 dim=输出token区间）');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="output").length') === 1, 'sp1 output 单元 1 个');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp2").length') === 1, '空间二（input+购买量区间×1～100）生成 1 个单元');
+// 空间一保存时逐 fn 叉乘（r43：每 fn 组合=勾选度量∪全缺省 → 每 fn 2 个），同属 sp1
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 4, '空间一（input+output）生成 4 单元（每 fn 勾选+全缺省）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="input").length') === 2, 'sp1 input 单元 2 个（勾选+全缺省）');
+const suIn = evalInPage('saleUnits.find(u=>u.spaceKey==="sp1" && u.fn==="input" && u.dim === "输出token区间")');
+ok(!!suIn, '售卖单元 dim 不含 function（input 有 dim=输出token区间 单元）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="output").length') === 2, 'sp1 output 单元 2 个（勾选+全缺省）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp2").length') === 2, '空间二（input+购买量区间×1～100）生成 2 单元（含全缺省）');
 
 // ===== 4. 复制不受状态影响 =====
 section('4. 复制不受状态影响');

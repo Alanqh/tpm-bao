@@ -43,16 +43,13 @@ const vRows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(vRows.length === 1, 'vtpm 单行（sp1 常驻空间）');
 ok(vRows[0].cells[3].textContent.includes('—'), '无 fn 显示 —');
 ok(vRows[0].textContent.includes('已发布'), 'sp1 已发布');
-ok(vRows[0].cells[5].textContent.trim() === '3', 'sp1 售卖单元数=3（std mock su-1~3）');
-// 8. 创建新空间：未发布 → 不参与仲裁；发布且高优先级 → 生效
+ok(vRows[0].cells[5].textContent.trim() === '8', 'sp1 售卖单元数=8（std mock su-1~8，第43轮缺省扩展）');
+// 8. 创建新空间：未发布 → 不参与仲裁；发布且高优先级 → 生效（第43轮两步：fn→直接勾度量）
 w.eval('startEdit()');
 w.eval('openSpacePlanModal()');
 const box8 = d.querySelector('.sp-fn-check[data-fn=""]');
 box8.checked = true;
 box8.dispatchEvent(new w.Event('change', { bubbles: true }));
-const dimBox8 = d.querySelector('.sp-dim-check[data-fn=""][value="购买量区间"]');
-dimBox8.checked = true;
-dimBox8.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-measure-check[data-fn=""][data-dim="购买量区间"][value="1～100"]').checked = true;
 d.getElementById('sp-name').value = 'r38 vtpm 空间A';
 d.getElementById('sp-priority').value = '200';
@@ -61,19 +58,19 @@ d.getElementById('sp-eff-end').value = '2027-11-01T00:00:00';
 w.eval('confirmSpacePlan()');
 ok(w.eval('spaceSeq') === 2, 'sp2 创建成功（保存即落地空间）');
 ok(w.eval('spaces["sp2"].fnDims[""].length') === 1, 'sp2 单维度');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2" && u.measure === "1～100").length') === 1, 'sp2 叉乘 1 单元（购买量区间×1～100）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2" && u.measure === "1～100").length') === 1, 'sp2 含 1～100 单元');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2").length') === 2, 'sp2 叉乘 (1+1)=2 组合（1～100 + 全缺省）');
 ok(w.eval('currentSpaceOfFn("")') === 'sp1', 'sp2 待发布 → 不接管，仍 sp1');
 // 发布后接管：priority 200 > 常驻 100 → sp2 生效
 w.eval('publishSpacePlan("sp2")');
 ok(w.eval('currentSpaceOfFn("")') === 'sp2', '发布后 priority 200>100 → sp2 接管');
 let rows3 = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows3.length === 2 && rows3[0].cells[0].textContent.trim() === 'sp2', '列表显示 sp2（排序在前：同 published，priority 200 > 100）');
-// 9. 重复维度集合不再拦截（总是新建 sp3）
+// 9. 重复维度集合不再拦截（总是新建 sp3）；r43：勾1～100+30天 → (1+1)×(1+1)=4 组合
 w.eval('openSpacePlanModal()');
 const box9 = d.querySelector('.sp-fn-check[data-fn=""]');
 box9.checked = true;
 box9.dispatchEvent(new w.Event('change', { bubbles: true }));
-['购买量区间', '购买周期'].forEach(dim => { const c = d.querySelector('.sp-dim-check[data-fn=""][value="' + dim + '"]'); c.checked = true; c.dispatchEvent(new w.Event('change', { bubbles: true })); });
 d.getElementById('sp-name').value = 'r38 vtpm 空间B';
 d.getElementById('sp-eff-start').value = '2026-11-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2027-11-01T00:00:00';
@@ -81,7 +78,7 @@ d.querySelector('.sp-measure-check[data-fn=""][data-dim="购买量区间"][value
 d.querySelector('.sp-measure-check[data-fn=""][data-dim="购买周期"][value="30天"]').checked = true;
 w.eval('confirmSpacePlan()');
 ok(w.eval('spaceSeq') === 3 && w.eval('spaces["sp3"].fnDims[""].length') === 2, '维度集合与 sp1 相同 → 不拦截，新建 sp3（总是新建）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 1, 'sp3 叉乘 1 单元（1～100×30天）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 4, 'sp3 叉乘 (1+1)×(1+1)=4 组合（含 1～100×30天/单缺省×2/全缺省）');
 w.eval('closeModal("spaceplan")');
 // 10. SU 弹窗已删（第37轮）
 ok(!d.getElementById('modal-su-confirm'), 'SU 弹窗已删');

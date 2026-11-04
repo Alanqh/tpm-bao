@@ -87,15 +87,13 @@ d.getElementById('sp-eff-end').value = '2026-12-10T00:00:00';
 alerts.length = 0;
 w.eval('confirmSpacePlan()');
 ok(alerts.some(m => m.includes('至少勾选一个 function')), '未勾任何 fn 拦截');
-// 勾 input + 维度 + 度量，时段 12-01~12-10
+// 勾 input + 度量（第43轮两步：无维度复选），时段 12-01~12-10
 const inBox = modal.querySelector('.sp-fn-check[data-fn="input"]');
 inBox.checked = true;
 inBox.dispatchEvent(new w.Event('change', { bubbles: true }));
 const inDimWrap = modal.querySelector('[data-fndims="input"]');
-ok(inDimWrap && !inDimWrap.classList.contains('opacity-50'), '勾选后维度区启用');
-const dimBox = modal.querySelector('.sp-dim-check[data-fn="input"][value="输入token区间"]');
-dimBox.checked = true;
-dimBox.dispatchEvent(new w.Event('change', { bubbles: true }));
+ok(inDimWrap && !inDimWrap.classList.contains('opacity-50'), '勾选后度量区启用');
+ok(!modal.querySelector('.sp-dim-check'), '第43轮：维度复选已删');
 modal.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入token区间"][value="0～128K"]').checked = true;
 d.getElementById('sp-priority').value = '300';
  alerts.length = 0;

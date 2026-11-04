@@ -15,7 +15,7 @@ const ok = (c, msg) => { c ? (pass++, console.log('  ✓ ' + msg)) : (fail++, co
 const section = (t) => console.log('\n== ' + t + ' ==');
 // 第20轮：售卖单元详情行前三列=function（合并）/售卖空间（合并）/售卖单元，su-1 为首行完整呈现
 const rowOf = (id) => Array.from(document.querySelectorAll('#saleunit-tbody tr')).find(r => Array.from(r.cells).some(c => c.textContent.trim() === id));
-const statusOf = (id) => { const r = rowOf(id); return r ? Array.from(r.cells).find(c => ['在售','禁售'].includes(c.textContent.trim())).textContent.trim() : '(无行)'; };
+const statusOf = (id) => { const r = rowOf(id); return r ? Array.from(r.cells).find(c => ['在售','禁售','未配置'].includes(c.textContent.trim())).textContent.trim() : '(无行)'; };
 
 // ================= std：3 个生效中计划 → 全部在售 =================
 section('std 商品（3 计划全部生效中）');
@@ -26,18 +26,18 @@ ok(statusOf('su-1') === '在售' && statusOf('su-2') === '在售' && statusOf('s
 ok(rowOf('su-1').textContent.includes('maas-product-vtpm-std.30d'), 'su-1 关联计费项 std.30d');
 ok(rowOf('su-1').textContent.includes('0.0084'), 'su-1 刊例价 0.0084');
 
-// ================= pro：1 生效中 + 1 待发布 + 2 未配置（两态下后三者全为禁售） =================
-section('pro 商品（生效中/待发布/未配置 → 两态）');
+// ================= pro：1 生效中 + 1 待发布 + 未覆盖单元（第43轮三态：无生效中计划覆盖=未配置灰） =================
+section('pro 商品（生效中/待发布/未配置 → 三态）');
 window.backToList();
 window.openDetailFromListed('maas-product-vtpm-pro');
 ok(evalInPage('planRows.length') === 2, 'pro 挂载 2 个售卖计划');
 ok(statusOf('su-1') === '在售', 'pro su-1 在售（生效中计划且上架）');
-ok(statusOf('su-2') === '禁售', 'pro su-2 禁售（仅待发布计划，无生效中计划）: ' + statusOf('su-2'));
-ok(statusOf('su-3') === '禁售' && statusOf('su-4') === '禁售', 'pro su-3/su-4 禁售（未配置，无任何计划）');
-// 禁售行查不出额外信息：关联计费项/刊例价显示 —
+ok(statusOf('su-2') === '未配置', 'pro su-2 未配置（第43轮：仅待发布计划=无生效中计划覆盖 → 灰而非红）: ' + statusOf('su-2'));
+ok(statusOf('su-3') === '未配置' && statusOf('su-4') === '未配置', 'pro su-3/su-4 未配置（无任何计划覆盖）');
+// 未配置行查不出额外信息：关联计费项/刊例价显示 —
 const su2Row = rowOf('su-2');
-ok(su2Row.textContent.includes('—') && !su2Row.textContent.includes('maas-product-vtpm-pro.90d'), '禁售 su-2 不展示关联计费项（—）');
-ok(!su2Row.textContent.includes('0.0058'), '禁售 su-2 不展示刊例价');
+ok(su2Row.textContent.includes('—') && !su2Row.textContent.includes('maas-product-vtpm-pro.90d'), '未配置 su-2 不展示关联计费项（—）');
+ok(!su2Row.textContent.includes('0.0058'), '未配置 su-2 不展示刊例价');
 // payload 归属
 ok(evalInPage('planRows.every(r => r.payloadId.startsWith("payload-glm-"))'), 'pro 计划 payload 全部属于 glm playground');
 
@@ -89,7 +89,7 @@ window.openPlanDetail(0);
 window.stopPlanRow(0);
 const allStopped = evalInPage('planRowStatuses.join(",")');
 // std 三个计划：0 被停用，1/2 仍生效中 → su-1 无生效中计划 → 禁售
-ok(statusOf('su-1') === '禁售', '停用后 su-1 禁售（仅有停用计划，无生效中）: ' + statusOf('su-1') + ' | ' + allStopped);
+ok(statusOf('su-1') === '未配置', '停用后 su-1 未配置（第43轮：无生效中计划覆盖 → 灰；红仅=生效中计划下架或空间未生效）: ' + statusOf('su-1') + ' | ' + allStopped);
 ok(statusOf('su-2') === '在售' && statusOf('su-3') === '在售', 'su-2/su-3 仍在售（其他计划仍生效中）');
 
 // ================= 两态判定：最高优先级下架 → 禁售（时间点查询） =================
@@ -102,7 +102,7 @@ window.eval(`
   })()
 `);
 ok(statusOf('su-2') === '禁售', '生效中最高优先级计划单元下架 → su-2 禁售: ' + statusOf('su-2'));
-ok(statusOf('su-1') === '禁售' && statusOf('su-3') === '在售', 'su-1 仍禁售（前面停用）、su-3 仍在售');
+ok(statusOf('su-1') === '未配置' && statusOf('su-3') === '在售', 'su-1 仍未配置（前面停用）、su-3 仍在售');
 // 恢复上架 → su-2 回到在售
 window.eval(`
   (function(){
@@ -133,7 +133,7 @@ window.eval(`
   })()
 `);
 ok(statusOf('su-2') === '在售' && statusOf('su-3') === '在售', '复位时间点后 su-2/su-3 在售');
-ok(statusOf('su-1') === '禁售', 'su-1 仍禁售（计划已停用）');
+ok(statusOf('su-1') === '未配置', 'su-1 仍未配置（计划已停用，无生效中覆盖）');
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

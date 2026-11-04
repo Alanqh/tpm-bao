@@ -72,7 +72,7 @@ w.eval(`
     inp.dispatchEvent(new window.Event('change', { bubbles: true }));
   })()
 `);
-ok(d.querySelectorAll('#saleunit-tbody tr').length === 4, '清空时间 → 立即恢复当前时刻唯一生效空间 sp1 的 4 行（第42轮默认也过滤）');
+ok(d.querySelectorAll('#saleunit-tbody tr').length === 12, '清空时间 → 立即恢复当前时刻唯一生效空间 sp1 的 12 行（r43 缺省扩展；第42轮默认也过滤）');
 w.eval('switchInnerTab("space")');
 
 // ===== 6. 排序专项：优先级降序 → 创建时间逆序（seq 降序）=====
@@ -85,8 +85,6 @@ d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 const b0 = d.querySelector('.sp-fn-check[data-fn="input"]');
 b0.checked = true; b0.dispatchEvent(new w.Event('change', { bubbles: true }));
-const db0 = d.querySelector('.sp-dim-check[data-fn="input"][value="输入token区间"]');
-db0.checked = true; db0.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入token区间"][value="0～128K"]').checked = true;
 w.eval('confirmSpacePlan()');
 rows = dataRows();
@@ -102,8 +100,6 @@ d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 const b1 = d.querySelector('.sp-fn-check[data-fn="input"]');
 b1.checked = true; b1.dispatchEvent(new w.Event('change', { bubbles: true }));
-const db1 = d.querySelector('.sp-dim-check[data-fn="input"][value="输入token区间"]');
-db1.checked = true; db1.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入token区间"][value="0～128K"]').checked = true;
 w.eval('confirmSpacePlan()');
 rows = dataRows();

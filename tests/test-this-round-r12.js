@@ -47,70 +47,62 @@ ok(infoName.getAttribute('contenteditable') !== 'true', '取消恢复非编辑�
 window.backToList();
 
 // ===== 3. 创建售卖空间弹窗结构：fn+维度+度量三层勾选 =====
-section('3. 弹窗结构');
+section('3. 弹窗结构（第43轮两步：fn → 度量直勾，无维度 checkbox）');
 window.openDetailByCode('maas-online-text-glm4');
 window.startEdit();
 window.openSpacePlanModal();
 ok(document.querySelectorAll('.sp-fn-check').length === 3, '3 个 fn 复选行');
-ok(document.querySelectorAll('.sp-dim-check').length === 12, '维度复选 12 个（3 fn × 4 维度）');
+ok(document.querySelectorAll('.sp-dim-check').length === 0, '第43轮：维度复选已删（直接勾度量）');
 ok(document.querySelectorAll('.sp-measure-check').length > 0, '度量复选存在');
-// 未勾 fn 时维度+度量禁用
+// 未勾 fn 时度量禁用
 const inBox = document.querySelector('.sp-fn-check[data-fn="input"]');
-const inDim = document.querySelector('.sp-dim-check[data-fn="input"][value="输入token区间"]');
 const inMeas = document.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入token区间"][value="0～128K"]');
-ok(inDim.disabled === true && inMeas.disabled === true, '未勾 fn 时维度/度量禁用');
-// 勾 fn → 维度可用、度量仍禁用（维度未勾）
+ok(inMeas.disabled === true, '未勾 fn 时度量禁用');
+// 勾 fn → 度量可用
 inBox.checked = true;
 inBox.dispatchEvent(new window.Event('change', { bubbles: true }));
-ok(inDim.disabled === false, '勾 fn 后维度可用');
-ok(inMeas.disabled === true, '维度未勾时度量仍禁用');
-// 勾维度 → 度量可用；取消维度 → 度量清空+禁用
-inDim.checked = true;
-inDim.dispatchEvent(new window.Event('change', { bubbles: true }));
-ok(inMeas.disabled === false, '勾维度后度量可用');
+ok(inMeas.disabled === false, '勾 fn 后度量直接可用（无维度层）');
 inMeas.checked = true;
-inDim.checked = false;
-inDim.dispatchEvent(new window.Event('change', { bubbles: true }));
-ok(inMeas.checked === false && inMeas.disabled === true, '取消维度 → 度量清空并禁用（联动回收）');
-// 取消 fn → 维度+度量全清空禁用（第38轮 onSpFnCheck 新增联动）
-inDim.checked = true;
-inDim.dispatchEvent(new window.Event('change', { bubbles: true }));
-inMeas.checked = true;
+// 取消 fn → 度量清空禁用
 inBox.checked = false;
 inBox.dispatchEvent(new window.Event('change', { bubbles: true }));
-ok(inDim.checked === false && inMeas.checked === false, '取消 fn → 维度+度量全清空');
-ok(inDim.disabled === true, '取消 fn → 维度禁用');
+ok(inMeas.checked === false && inMeas.disabled === true, '取消 fn → 度量清空并禁用');
 // 重新勾回继续后续测试
 inBox.checked = true;
 inBox.dispatchEvent(new window.Event('change', { bubbles: true }));
-inDim.checked = true;
-inDim.dispatchEvent(new window.Event('change', { bubbles: true }));
+inMeas.checked = true;
 
-// ===== 4. 校验：勾维度不勾度量拦截 =====
+// ===== 4. 校验：第43轮未勾任何度量也可保存（全缺省组合合法） =====
 section('4. 校验');
 alertMsg = '';
-document.getElementById('sp-name').value = 'r38 测试空间';
-document.getElementById('sp-priority').value = '100';
+document.getElementById('sp-name').value = 'r43 空间A（全缺省）';
+document.getElementById('sp-priority').value = '50';
+document.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
+document.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 window.confirmSpacePlan();
-ok(alertMsg.includes('至少勾选一个度量'), '勾维度漏度量 → 拦截: ' + alertMsg);
+ok(alertMsg.includes('已保存'), '未勾度量 → 保存成功（生成全缺省组合单元）: ' + alertMsg.slice(0, 30));
 
-// ===== 5. 叉乘生成：输入1度量 × 输出2度量 = 2 个单元（一个空间含一个 fn） =====
+// ===== 5. 叉乘生成：输入1度量 × 输出2度量 = (1+1)×(2+1) = 9 组合 =====
 section('5. 叉乘生成');
+window.openSpacePlanModal();
+const inBox2 = document.querySelector('.sp-fn-check[data-fn="input"]');
+inBox2.checked = true;
+inBox2.dispatchEvent(new window.Event('change', { bubbles: true }));
 document.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入token区间"][value="0～128K"]').checked = true;
-const outDim = document.querySelector('.sp-dim-check[data-fn="input"][value="输出token区间"]');
-outDim.checked = true;
-outDim.dispatchEvent(new window.Event('change', { bubbles: true }));
 document.querySelector('.sp-measure-check[data-fn="input"][data-dim="输出token区间"][value="0～4K"]').checked = true;
 document.querySelector('.sp-measure-check[data-fn="input"][data-dim="输出token区间"][value="16K+"]').checked = true;
 alertMsg = '';
 const keyBefore = window.eval('spaceSeq');
+document.getElementById('sp-name').value = 'r43 叉乘空间';
+document.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
+document.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 window.confirmSpacePlan();
 const newKey = 'sp' + (keyBefore + 1);
-ok(alertMsg.includes('已自动生成售卖单元 2 个'), '保存提示叉乘 2 个（输入1×输出2）: ' + alertMsg.slice(-30));
+ok(alertMsg.includes('已自动生成售卖单元 6 个'), '保存提示叉乘 6 个（(1+1)×(2+1) 含缺省）: ' + alertMsg.slice(-40));
 ok(window.eval('spaces["' + newKey + '"] && spaces["' + newKey + '"].status') === 'pending_publish', '新空间待发布');
-ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length') === 2, '新空间 2 个单元');
-const dims = window.eval('JSON.stringify(saleUnits.filter(u => u.spaceKey === "' + newKey + '").map(u => u.measure).sort())');
-ok(dims.includes('0～128K + 0～4K') && dims.includes('0～128K + 16K+'), '笛卡尔积组合正确: ' + dims);
+ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length') === 6, '新空间 6 组合单元（输入2×输出3）');
+const dims = window.eval('JSON.stringify(saleUnits.filter(u => u.spaceKey === "' + newKey + '").map(u => u.dim + "=" + u.measure).sort())');
+ok(dims.includes('输入token区间 + 输出token区间=0～128K + 0～4K') && dims.includes('输入token区间=0～128K') && dims.includes('输出token区间=0～4K') && dims.includes('"="'), '缺省组合齐备（含全缺省=""）: ' + dims.slice(0, 90));
 
 // ===== 6. 空间不可改：无修改入口；复制=唯一变更路径（新空间+同构单元，旧空间保留） =====
 section('6. 空间不可改/复制');

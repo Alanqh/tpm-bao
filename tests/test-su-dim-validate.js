@@ -24,35 +24,24 @@ alertMsg = '';
 window.confirmSpacePlan();
 ok(alertMsg.includes('请填写空间名称'), '空名称 → 拦截: ' + alertMsg);
 
-// 场景2：新弹窗——勾 fn('')，购买量区间勾选但漏选度量，购买周期勾 30天 → 拦截（购买量区间漏选度量）
+// 场景2（第43轮两步弹窗）：勾 fn('') 后直接勾度量（无维度复选框）；两维各勾一度量 → (1+1)×(1+1)=4 组合（含缺省交叉与全缺省）
+ok(document.querySelectorAll('.sp-dim-check').length === 0, '第43轮：维度复选框已删（直接勾度量）');
 window.openSpacePlanModal();
 const fnBox2 = document.querySelector('.sp-fn-check[data-fn=""]');
 fnBox2.checked = true;
 fnBox2.dispatchEvent(new window.Event('change', { bubbles: true }));
 document.getElementById('sp-name').value = '校验空间甲';
-const dcA = document.querySelector('.sp-dim-check[data-fn=""][value="购买量区间"]');
-dcA.checked = true;
-dcA.dispatchEvent(new window.Event('change', { bubbles: true }));
-const dcB = document.querySelector('.sp-dim-check[data-fn=""][value="购买周期"]');
-dcB.checked = true;
-dcB.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelector('.sp-measure-check[data-fn=""][data-dim="购买周期"][value="30天"]').checked = true;
-const suCount0 = window.eval('saleUnits.length');
-alertMsg = '';
-window.confirmSpacePlan();
-ok(alertMsg.includes('购买量区间') && alertMsg.includes('至少勾选一个度量'), '勾维度漏选度量 → 拦截并提示: ' + alertMsg);
-ok(window.eval('saleUnits.length') === suCount0, '售卖单元未生成');
-
-// 场景3：补勾购买量区间 1～100 → 成功（1×1=1 个单元叉乘生成）
 document.querySelector('.sp-measure-check[data-fn=""][data-dim="购买量区间"][value="1～100"]').checked = true;
+document.querySelector('.sp-measure-check[data-fn=""][data-dim="购买周期"][value="30天"]').checked = true;
 alertMsg = '';
 window.confirmSpacePlan();
-ok(alertMsg.includes('已保存') && alertMsg.includes('已自动生成售卖单元 1 个'), '两维各一 → 叉乘 1 个: ' + alertMsg.slice(-30));
+ok(alertMsg.includes('已保存') && alertMsg.includes('已自动生成售卖单元 4 个'), '两维各勾一度量 → 完整叉乘 4 组合（含缺省）: ' + alertMsg.slice(-30));
 const newKey = window.eval('"sp" + spaceSeq'); // 最新创建的空间 key
 ok(window.eval('spaces["' + newKey + '"].name') === '校验空间甲', '新空间入 spaces（聚合根）');
 ok(window.eval('spaces["' + newKey + '"].fnDims[""].join(",")') === '购买量区间,购买周期', '空间携带 fnDims 配置');
-ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length') === 1, '新空间下 1 个单元');
-ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '")[0].dim') === '购买量区间 + 购买周期', '生成二元售卖单元（dim 顺序=勾选维度序）');
+ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length') === 4, '新空间下 4 个单元');
+const dimsOf = window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").map(u => u.dim).join("|")');
+ok(dimsOf.includes('购买量区间 + 购买周期'), '含完整二元组合（1～100×30天）: ' + dimsOf);
 
 // 场景4：fn 不勾 → 拦截（至少勾选一个 function）
 window.openSpacePlanModal();
@@ -70,7 +59,7 @@ alertMsg = '';
 window.confirmSpacePlan();
 ok(alertMsg.includes('生效开始不能晚于生效结束'), '起止倒置 → 拦截: ' + alertMsg);
 
-// 场景6：0 维度（fn 勾选+维度不选）→ 生成唯一单元（第35/37轮）
+// 场景6（第43轮）：勾 fn 但不勾任何度量 → 全缺省组合=唯一单元（0 维度空间）
 window.openSpacePlanModal();
 const fnBox6 = document.querySelector('.sp-fn-check[data-fn=""]');
 fnBox6.checked = true;

@@ -138,7 +138,7 @@ ok(T.spaces[copyKey] && T.spaces[copyKey].status === 'pending_publish', '快照�
 // glm4 双11计划（idx0）锁定 sp2：时间在 sp2 档期内
 const p0 = T.planRows[0];
 ok(p0.spaceKey === 'sp2' && p0.effStart >= T.spaces.sp2.effStart && p0.effEnd <= T.spaces.sp2.effEnd, '双11计划锁定 sp2 且时间 ⊆ sp2 档期');
-ok(T.planRows[1].spaceKey === 'sp1' && T.planRows[1].units.length === 4 && T.planRows[1].units.every(u => T.saleUnits.find(s => s.id === u).spaceKey === 'sp1'), '常规计划锁定 sp1 四单元均在 sp1 内');
+ok(T.planRows[1].spaceKey === 'sp1' && T.planRows[1].units.length === 12 && T.planRows[1].units.every(u => T.saleUnits.find(s => s.id === u).spaceKey === 'sp1'), '常规计划锁定 sp1 十二单元均在 sp1 内（r43 缺省扩展）');
 // 创建计划：不选空间 → 拦截（需编辑态）
 T.startEdit();
 T.openPlanCreatePage();
