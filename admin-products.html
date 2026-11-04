@@ -252,13 +252,9 @@
       <div id="detail-view" class="hidden">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div class="flex items-center gap-2">
-            <h2 id="detail-title" class="text-lg font-semibold text-slate-900">商品详情</h2>
-            <button type="button" id="detail-name-edit-btn" onclick="openDetailNameEdit()" class="text-slate-400 hover:text-violet-600" title="编辑商品名称"><i class="fa-solid fa-pen text-xs"></i></button>
-            <span id="detail-name-edit-wrap" class="hidden items-center gap-2">
-              <input id="detail-name-input" class="form-input text-sm px-2 py-1 w-64">
-              <button type="button" onclick="confirmDetailNameEdit()" class="admin-btn-primary text-xs px-2.5 py-1 rounded-md">保存</button>
-              <button type="button" onclick="closeDetailNameEdit()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md">取消</button>
-            </span>
+            <!-- 第38轮：名称快编改为 contenteditable 就地编辑（铅笔点击后在原文本位置编辑，回车/失焦保存、Esc 取消） -->
+            <h2 id="detail-title" class="text-lg font-semibold text-slate-900"><span id="detail-title-name">商品详情</span><span id="detail-title-code" class="ml-1 font-normal text-slate-500"></span></h2>
+            <button type="button" id="detail-name-edit-btn" onclick="openDetailNameEdit('title')" class="text-slate-400 hover:text-violet-600" title="编辑商品名称"><i class="fa-solid fa-pen text-xs"></i></button>
           </div>
           <button onclick="backToList()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回列表</button>
         </div>
@@ -275,7 +271,6 @@
         <div id="plan-tabs-card" class="admin-card">
           <div class="flex border-b border-slate-200 px-2 overflow-x-auto">
             <button type="button" class="admin-tab" data-tab="space" onclick="switchInnerTab('space')">售卖空间</button>
-            <button type="button" class="admin-tab" data-tab="spaceplan" onclick="switchInnerTab('spaceplan')">空间计划</button>
             <button type="button" class="admin-tab active" data-tab="saleunit" onclick="switchInnerTab('saleunit')">售卖单元</button>
             <button type="button" class="admin-tab" data-tab="plan" onclick="switchInnerTab('plan')">售卖计划</button>
             <button type="button" class="admin-tab" data-tab="pricing" onclick="switchInnerTab('pricing')">定价计划</button>
@@ -283,9 +278,10 @@
             <button type="button" class="admin-tab" data-tab="slo-config" onclick="switchInnerTab('slo-config')">SLO赔付规则配置</button>
           </div>
 
-          <!-- 售卖空间 Tab（第23轮/第27轮；第31轮：创建入口移至空间计划——空间由空间计划创建）：单一合并列表 -->
+          <!-- 售卖空间 Tab（第38轮：吸收空间计划——空间本体携带优先级/生效期/三态，创建确认时按维度×度量叉乘生成售卖单元；每行=空间×fn） -->
           <div id="inner-tab-space" class="p-4">
-            <div class="flex flex-wrap items-center justify-end gap-2 mb-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <button type="button" id="spaceplan-new-btn" onclick="if(!guardEdit())return; openSpacePlanModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-layer-group mr-1"></i>创建售卖空间</button>
               <div class="flex flex-wrap items-center gap-2 text-xs">
                 <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间</span>
                 <input id="space-tf-point" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-56">
@@ -295,34 +291,13 @@
             </div>
             <p id="space-tf-tip" class="hidden text-[11px] text-violet-600 mb-2"><i class="fa-regular fa-clock mr-1"></i>正在查看 <span class="font-mono font-medium"></span> 时点的空间情况</p>
             <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[700px]">
+            <table class="w-full text-sm min-w-[1000px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th class="text-left px-3 py-2 font-medium">Function</th>
-                  <th class="text-left px-3 py-2 font-medium">售卖空间</th>
+                  <th class="text-left px-3 py-2 font-medium">空间单元</th>
                   <th class="text-left px-3 py-2 font-medium">状态</th>
-                  <th class="text-left px-3 py-2 font-medium">空间维度</th>
-                  <th class="text-left px-3 py-2 font-medium">售卖单元数</th>
-                </tr>
-              </thead>
-              <tbody id="space-tbody" class="divide-y divide-slate-100"></tbody>
-            </table>
-            </div>
-          </div>
-
-          <!-- 空间计划 Tab（第27轮）：空间计划单元列表（空间计划 × 售卖空间 展开，同构售卖计划 Tab） -->
-          <div id="inner-tab-spaceplan" class="p-4 hidden">
-            <div class="flex flex-wrap items-center gap-3 mb-3">
-              <button type="button" id="spaceplan-new-btn" onclick="if(!guardEdit())return; openSpacePlanModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-regular fa-clock mr-1"></i>创建空间计划</button>
-            </div>
-            <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[900px]">
-              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th class="text-left px-3 py-2 font-medium">空间计划单元</th>
-                  <th class="text-left px-3 py-2 font-medium">状态</th>
-                  <th class="text-left px-3 py-2 font-medium">所属空间计划</th>
                   <th class="text-left px-3 py-2 font-medium">售卖空间</th>
+                  <th class="text-left px-3 py-2 font-medium">空间名称</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">空间维度</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元数</th>
@@ -330,7 +305,7 @@
                   <th class="text-left px-3 py-2 font-medium">生效起止</th>
                 </tr>
               </thead>
-              <tbody id="spaceplan-tbody" class="divide-y divide-slate-100"></tbody>
+              <tbody id="space-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
             </div>
           </div>
@@ -474,11 +449,11 @@
           <div id="plan-detail-actions" class="flex flex-wrap items-center justify-end gap-2 mt-3"></div>
         </div>
       </div>
-      <!-- 空间计划详情（第29轮：独立页面，从空间计划单元「所属空间计划」进入；交互对齐售卖计划详情） -->
+      <!-- 售卖空间详情（第38轮：由空间计划详情演化——空间本体即实体，携带档期/优先级/三态） -->
       <div id="spaceplan-detail-view" class="hidden">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
-            <h3 id="spaceplan-detail-title" class="text-lg font-semibold text-slate-900">空间计划详情</h3>
+            <h3 id="spaceplan-detail-title" class="text-lg font-semibold text-slate-900">售卖空间详情</h3>
           </div>
           <div class="flex items-center gap-2">
             <span id="spaceplan-detail-status" class="badge bg-blue-50 text-blue-700">待发布</span>
@@ -490,12 +465,12 @@
           <div id="spaceplan-detail-fields" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs"></div>
         </div>
         <div class="admin-card p-4">
-          <p class="text-sm font-medium text-slate-900 mb-3">空间计划单元</p>
+          <p class="text-sm font-medium text-slate-900 mb-3">空间单元</p>
           <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[900px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th class="text-left px-3 py-2 font-medium">空间计划单元</th>
+                  <th class="text-left px-3 py-2 font-medium">空间单元</th>
                   <th class="text-left px-3 py-2 font-medium">售卖空间</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">空间维度</th>
@@ -521,10 +496,17 @@
           </div>
         </div>
 
-        <!-- 区块1：基础信息（名称 + 优先级 + 生效时间） -->
+        <!-- 区块1：基础信息（售卖空间锁定 + 名称 + 优先级 + 生效时间，时间须在空间生效范围内） -->
         <div class="admin-card p-4 mb-4">
           <p class="text-sm font-medium text-slate-900 mb-3">1. 基础信息</p>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="form-label">售卖空间</label>
+              <select id="plan-space-sel" class="form-input" onchange="onPlanSpaceChange()">
+                <option value="">请选择售卖空间</option>
+              </select>
+              <p id="plan-space-info" class="text-[11px] text-slate-400 mt-1"></p>
+            </div>
             <div>
               <label class="form-label">售卖计划名称</label>
               <input id="plan-name" class="form-input" placeholder="如 vTPM 预留·标准·30天">
@@ -535,16 +517,16 @@
             </div>
             <div>
               <label class="form-label">开始生效时间</label>
-              <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00">
+              <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00" onchange="onPlanSpaceChange()">
             </div>
             <div>
               <label class="form-label">结束生效时间</label>
-              <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" value="2027-11-01T00:00:00">
+              <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" value="2027-11-01T00:00:00" onchange="onPlanSpaceChange()">
             </div>
           </div>
         </div>
 
-        <!-- 区块2：生效售卖单元（勾选售卖单元 ID，下方展示 function 与维度组合；上架/下架） -->
+        <!-- 区块2：售卖空间内的售卖单元（第38轮：计划锁定单空间——只展示所选空间内叉乘生成的单元） -->
         <div class="admin-card p-4 mb-4">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <p class="text-sm font-medium text-slate-900">2. 本售卖计划对哪些售卖单元生效</p>
@@ -796,18 +778,18 @@
     </div>
   </div>
 
-  <!-- Modal: 空间切换计划（第26轮：独立实体；第31轮：fn 勾选+维度复选；第37轮：+维度下度量勾选——保存时新建空间并叉乘自动生成售卖单元） -->
+  <!-- Modal: 售卖空间创建（第38轮：由空间计划弹窗演化——空间本体携带优先级/生效期/维度度量配置，保存时叉乘生成该空间全部售卖单元） -->
   <div id="modal-spaceplan" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-900/50 p-4">
     <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
-        <h3 id="spaceplan-modal-title" class="text-sm font-semibold text-slate-900">创建空间计划</h3>
+        <h3 id="spaceplan-modal-title" class="text-sm font-semibold text-slate-900">创建售卖空间</h3>
         <button type="button" onclick="closeModal('spaceplan')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="p-5 grid grid-cols-1 gap-4">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="form-label">计划名称</label>
-            <input id="sp-name" class="form-input" placeholder="如 双11大促·切换售卖空间">
+            <label class="form-label">空间名称</label>
+            <input id="sp-name" class="form-input" placeholder="如 常规售卖空间 / 双11大促空间">
           </div>
           <div>
             <label class="form-label">优先级</label>
@@ -825,7 +807,7 @@
           </div>
         </div>
         <div>
-          <label class="form-label">各 function 售卖空间定义</label>
+          <label class="form-label">空间内各 function 售卖配置（维度 × 度量确认后叉乘生成售卖单元）</label>
           <div id="sp-fnspaces" class="space-y-2"></div>
         </div>
       </div>
@@ -915,7 +897,7 @@
     function switchInnerTab(tab) {
       document.querySelectorAll('#detail-view .admin-tab[data-tab]').forEach(t => t.classList.remove('active'));
       document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
-      ['saleunit', 'plan', 'space', 'spaceplan', 'pricing', 'factor-config', 'slo-config'].forEach(id => {
+      ['saleunit', 'plan', 'space', 'pricing', 'factor-config', 'slo-config'].forEach(id => {
         document.getElementById('inner-tab-' + id).classList.toggle('hidden', tab !== id);
       });
    }
@@ -986,131 +968,103 @@
         { id: 'su-2', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 60天' },
         { id: 'su-3', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 90天' }
       ],
-      // online-text 示例商品（第20轮新增演示）：input 在 sp2、output 在 sp4、cache 在 sp5（第23轮起空间只管维度，su-4 对齐 sp5 单维度）
+      // online-text 示例商品（第38轮）：sp1=常规空间（input 2 + output 1 + cache 1 = 4 单元）；sp2=双11空间（input 单维 3 度量 = 3 单元）
       'maas-online-text-glm4': [
-        { id: 'su-1', fn: 'input', spaceKey: 'sp2', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
-        { id: 'su-2', fn: 'input', spaceKey: 'sp2', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 16K+' },
-        { id: 'su-3', fn: 'output', spaceKey: 'sp4', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
-        { id: 'su-4', fn: 'cache', spaceKey: 'sp5', dim: '输入token区间', measure: '0～128K' }
+        { id: 'su-1', fn: 'input', spaceKey: 'sp1', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
+        { id: 'su-2', fn: 'input', spaceKey: 'sp1', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 16K+' },
+        { id: 'su-3', fn: 'output', spaceKey: 'sp1', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
+        { id: 'su-4', fn: 'cache', spaceKey: 'sp1', dim: '输入token区间', measure: '0～128K' },
+        { id: 'su-5', fn: 'input', spaceKey: 'sp2', dim: '输入token区间', measure: '0～128K' },
+        { id: 'su-6', fn: 'input', spaceKey: 'sp2', dim: '输入token区间', measure: '128K～1M' },
+        { id: 'su-7', fn: 'input', spaceKey: 'sp2', dim: '输入token区间', measure: '1M+' }
       ]
     };
     let saleUnits = [];
-    // ===== 第23轮：售卖空间数据层（简化；第35轮起空间无名称，code 即唯一标识） =====
-    // 空间属于 function，只管维度（不涉及度量——度量在「创建售卖单元」时从全量候选勾选）；
-    // key（sp{N}，seq 跨 function 连续）即唯一标识，无 name 字段（第35轮）；
-    // 维度集合可为空=0 维度空间（第35轮：只能创建一个售卖单元，维度展示为 --）；
-    // 每个 fn 在任一时刻的生效空间由空间计划决定（第32轮：已发布生效期内计划创建的空间；无计划则无生效空间）
-    // spaces: { 'sp1': { seq: 1, fn: 'input', dims: ['输入token区间','输出token区间'] } }
+    // ===== 第38轮：售卖空间数据层（吸收空间计划——空间本体携带优先级/生效期/三态） =====
+    // spaces 按商品 code 存储：defaultSpaces[code] = { 'spN': { seq, name, priority, effStart, effEnd, status, fnDims, fnMeasures } }
+    // 同一空间可含多个 function（fnDims/fnMeasures 为 fn → 维度集合 / fn → 维度→度量组）；
+    // 确认创建时按维度×度量叉乘生成该空间全部售卖单元；
+    // 三态 pending_publish/published/stopped；fn 当前生效空间 = 已发布且生效期内的空间按（优先级降序→seq 降序）仲裁；
+    // 空间完全不可改（第38轮口径）——任何变更走复制新建；停用需其内无生效中的售卖计划。
     const defaultSpaces = {
-      // vtpm 类（无 function，fn=''）：仅一个空间承载 购买量区间+购买周期
-      'sp1': { seq: 1, fn: '', dims: ['购买量区间', '购买周期'] },
-      // online-text（glm4 演示）：input 两个空间、output 一个、cache 一个（fn 内维度集合去重，跨 fn 维度可相同）
-      'sp2': { seq: 2, fn: 'input', dims: ['输入token区间', '输出token区间'] },
-      'sp3': { seq: 3, fn: 'input', dims: ['输入token区间'] },
-      'sp4': { seq: 4, fn: 'output', dims: ['输入token区间', '输出token区间'] },
-      'sp5': { seq: 5, fn: 'cache', dims: ['输入token区间'] }
+      // vtpm 类（fn=''）：常驻空间 sp1（购买量×周期）
+      'maas-product-vtpm-std': {
+        'sp1': { seq: 1, name: '标准·常驻售卖空间', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100'], '购买周期': ['30天', '60天', '90天'] } } }
+      },
+      'maas-product-vtpm-pro': {
+        'sp1': { seq: 1, name: '专业·常驻售卖空间', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100', '500+'], '购买周期': ['30天', '90天'] } } }
+      },
+      'maas-product-vtpm-pre': {
+        'sp1': { seq: 1, name: '预发布·常驻售卖空间', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'pending_publish', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100'], '购买周期': ['30天', '60天', '90天'] } } }
+      },
+      // glm4：常规空间（一个空间同时含 input/output/cache 三 fn 配置）+ 双11高优先级后档空间（仅 input，接管期生效）
+      'maas-online-text-glm4': {
+        'sp1': { seq: 1, name: 'GLM4·常规售卖空间', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { input: ['输入token区间', '输出token区间'], output: ['输入token区间', '输出token区间'], cache: ['输入token区间'] }, fnMeasures: { input: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K', '16K+'] }, output: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K'] }, cache: { '输入token区间': ['0～128K'] } } },
+        'sp2': { seq: 2, name: '双11大促·输入售卖空间', priority: 500, effStart: '2026-11-11 00:00:00', effEnd: '2026-11-20 00:00:00', status: 'published', fnDims: { input: ['输入token区间'] }, fnMeasures: { input: { '输入token区间': ['0～128K', '128K～1M', '1M+'] } } }
+      }
     };
-    let spaces = {}; // 运行时副本（进入详情页面时从 defaultSpaces 装载）
-    let spaceSeq = 0; // 空间 code 序号游标（sp{N} 全局连续自增）
-    // 第32轮：废除「默认空间」（defaultFnSpaceMap/fnSpaceMap/setSpaceActive 全删）——
-    // function 的生效售卖空间完全由空间计划决定：任一时刻=已发布且生效中的空间计划创建的空间，
-    // 多个时优先级降序 → 优先级相同按创建时间（空间 seq 大=后创建）优先；无生效计划 → 该 fn 无生效空间。
-    // 空间维度集合标识（fn 内去重/创建校验用）：fn + 维度排序拼接（第21轮起：不同 fn 维度可相同；度量不参与身份判定）
-    function spaceDefsKeyOf(spk) {
-      const sp = spaces[spk];
-      if (!sp) return '';
-      return (sp.fn || '') + '||' + (sp.dims || []).slice().sort().join(',');
-    }
+    let spaces = {}; // 运行时副本（进入详情页面时从 defaultSpaces[code] 装载）
+    let spaceSeq = 0; // 空间 code 序号游标（sp{N} 商品内自增）
     // 当前商品可用的空间池：该商品涉及 function（含 ''=无 fn）已建空间 + 售卖单元已引用空间（兜底）
     function productSpaces() {
       const out = {};
-      const fns = new Set(fnPool());
-      if (fns.size === 0) fns.add('');
-      Object.keys(spaces).forEach(k => { if (fns.has(spaces[k].fn || '')) out[k] = spaces[k]; });
-      (saleUnits || []).forEach(u => { if (u.spaceKey && spaces[u.spaceKey] && !out[u.spaceKey]) out[u.spaceKey] = spaces[u.spaceKey]; });
+      Object.keys(spaces).forEach(k => { out[k] = spaces[k]; });
       return out;
     }
-    // function 当前（时刻 t）生效售卖空间（第32轮重写：纯计划仲裁，无手动默认回落）：
-    // 候选=已发布(published) 且生效期内(effStart≤t≤effEnd) 且为该 fn 创建了空间(fnSpaces[fn] 存在)的空间计划；
-    // 仲裁：优先级(priority)降序 → 同优先级按创建时间（计划内空间 seq 大=后创建）优先；无候选 → ''（空=该 fn 无生效空间）。
-    // 返回 spaceKey（'' 表示无）；source 仅作兼容展示：'plan'=计划生效 / ''=无生效
+    // 某空间在时刻 t 是否生效：状态=published 且生效期内（第38轮：直接看空间本体档期）
+    function spaceActiveAt(sp, t) {
+      return !!(sp && sp.status === 'published' && sp.effStart <= t && t <= sp.effEnd);
+    }
+    // function 当前（时刻 t）生效售卖空间（第38轮：纯空间仲裁——候选=published 且生效期内且 fnDims 含该 fn 的空间）：
+    // 仲裁：优先级(priority)降序 → 同优先级 seq 降序（后创建优先）；无候选 → ''（该 fn 无生效空间）
     function currentSpaceOfFn(fn, t) {
       return effectiveSpaceAt(fn, t).key;
     }
-    // 时刻 t 生效的空间计划查询（第32轮）：返回 { key, source, plan }——key='' 无生效空间；plan=胜出的空间计划
     function effectiveSpaceAt(fn, t) {
       const f = fn || '';
       const at = t || (timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' '));
-      const cands = spacePlans.filter((r, i) =>
-        spacePlanStatuses[i] === 'published' && r.fnSpaces && r.fnSpaces[f] && spaces[r.fnSpaces[f]] && r.effStart <= at && at <= r.effEnd
-      );
+      const cands = Object.keys(spaces).filter(k => {
+        const sp = spaces[k];
+        return sp && (sp.fnDims || {}).hasOwnProperty(f) && spaceActiveAt(sp, at);
+      });
       if (cands.length === 0) return { key: '', source: '', plan: null };
-      // 优先级降序 → 同优先级：后创建的空间优先（seq 降序）
-      const seqOf = r => (spaces[r.fnSpaces[f]] && spaces[r.fnSpaces[f]].seq) || 0;
-      const top = cands.slice().sort((a, b) => ((b.priority || 0) - (a.priority || 0)) || (seqOf(b) - seqOf(a)))[0];
-      return { key: top.fnSpaces[f], source: 'plan', plan: top };
+      const top = cands.sort((a, b) => ((spaces[b].priority || 0) - (spaces[a].priority || 0)) || ((spaces[b].seq || 0) - (spaces[a].seq || 0)))[0];
+      return { key: top, source: 'plan', plan: spaces[top] };
     }
-    // 最近的计划级空间切换预告（第26轮；第32轮适配纯计划口径）：t 之后第一个会把该 fn 生效空间改掉的已发布计划；无则 null
+    // 最近的 fn 空间切换预告：t 之后第一个改变该 fn 生效空间的已发布空间；无则 null
     function nextSpaceSwitchOfFn(fn, t) {
       const f = fn || '';
       const at = t || (timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' '));
       const cur = effectiveSpaceAt(f, at).key;
-      const cands = spacePlans
-        .filter((r, i) => spacePlanStatuses[i] === 'published' && r.fnSpaces && r.fnSpaces[f] && spaces[r.fnSpaces[f]] && r.effStart > at && r.fnSpaces[f] !== cur)
-        .sort((a, b) => (a.effStart < b.effStart ? -1 : a.effStart > b.effStart ? 1 : (b.priority || 0) - (a.priority || 0)));
+      const cands = Object.keys(spaces)
+        .filter(k => { const sp = spaces[k]; return sp && sp.status === 'published' && (sp.fnDims || {}).hasOwnProperty(f) && sp.effStart > at && k !== cur; })
+        .sort((a, b) => (spaces[a].effStart < spaces[b].effStart ? -1 : spaces[a].effStart > spaces[b].effStart ? 1 : (spaces[b].priority || 0) - (spaces[a].priority || 0)));
       return cands[0] || null;
     }
-    // 售卖计划（按商品 code 存储：units 关联售卖单元；chargeCodes 为每个售卖单元各自关联的计费项）
-    // 自洽性约定：①售卖计划按商品隔离（打开某商品详情只挂该商品自己的计划）②计划名/计费项后缀 = 售卖单元购买周期 ③计费项 code 前缀 = 商品 code ④payloadId 取自全量 payload 候选池（商品不关联 playground，前缀仅提示来源模型）⑤折算/SLO 版本来自该商品的 defaultConfigs ⑥刊例价随周期递增（周期越长单价越低）
+    // 售卖计划（第38轮：spaceKey 锁定唯一售卖空间；units 只能取该空间内单元；生效时间须在空间生效范围内）
     const defaultPlans = {
       // std：3 个售卖单元各挂一个 30/60/90 天售卖计划（全部已发布且处于生效期内）
       'maas-product-vtpm-std': [
-        { name: 'vTPM 预留·标准·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-std.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
-        { name: 'vTPM 预留·标准·60天', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-std.60d' }, quotaCodes: { 'su-2': 'quota-vtpm-60d' }, inventoryCodes: { 'su-2': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-10-01 00:00:00', effEnd: '2028-02-01 00:00:00' },
-        { name: 'vTPM 预留·标准·90天', units: ['su-3'], unitStates: { 'su-3': 'on' }, chargeCodes: { 'su-3': 'maas-product-vtpm-std.90d' }, quotaCodes: { 'su-3': 'quota-vtpm-90d' }, inventoryCodes: { 'su-3': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-vtpm-003', priority: 300, effStart: '2026-10-01 00:00:00', effEnd: '2028-05-01 00:00:00' }
+        { name: 'vTPM 预留·标准·30天', spaceKey: 'sp1', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-std.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+        { name: 'vTPM 预留·标准·60天', spaceKey: 'sp1', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-std.60d' }, quotaCodes: { 'su-2': 'quota-vtpm-60d' }, inventoryCodes: { 'su-2': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 500, payloadId: 'payload-vtpm-002', priority: 200, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+        { name: 'vTPM 预留·标准·90天', spaceKey: 'sp1', units: ['su-3'], unitStates: { 'su-3': 'on' }, chargeCodes: { 'su-3': 'maas-product-vtpm-std.90d' }, quotaCodes: { 'su-3': 'quota-vtpm-90d' }, inventoryCodes: { 'su-3': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.4', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-vtpm-003', priority: 300, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ],
       // pro：payload 取 payload-glm-00x（payload 前缀仅提示来源模型，商品不关联 playground）；su-3(500+·30天)/su-4(500+·90天) 无计划 → 未配置
       'maas-product-vtpm-pro': [
-        { name: 'vTPM 预留·专业·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pro.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
-        { name: 'vTPM 预留·专业·90天', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-pro.90d' }, quotaCodes: { 'su-2': 'quota-vtpm-90d' }, inventoryCodes: { 'su-2': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', priority: 200, effStart: '2026-10-01 00:00:00', effEnd: '2028-02-01 00:00:00' }
+        { name: 'vTPM 预留·专业·30天', spaceKey: 'sp1', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pro.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' },
+        { name: 'vTPM 预留·专业·90天', spaceKey: 'sp1', units: ['su-2'], unitStates: { 'su-2': 'on' }, chargeCodes: { 'su-2': 'maas-product-vtpm-pro.90d' }, quotaCodes: { 'su-2': 'quota-vtpm-90d' }, inventoryCodes: { 'su-2': 'inv-vtpm-90d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', priority: 200, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ],
       // pre：待上架商品，仅有待发布计划（未发布 → 无生效期内已发布计划 → 售卖单元禁售）
       'maas-product-vtpm-pre': [
-        { name: 'vTPM 预留·预发布·30天', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.3', slo: 'slo-rule-95 v5.1', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
+        { name: 'vTPM 预留·预发布·30天', spaceKey: 'sp1', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.3', slo: 'slo-rule-95 v5.1', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ],
-      // glm4（第25/26轮演示定时切换）：售卖计划不再携带空间字段——空间切换由独立的「空间切换计划」（defaultSpacePlans）承载
+      // glm4（第25/26轮演示定时切换）：售卖计划锁定空间（sp2 双11高优先级空间在档期内接管 input）；空间即档期，第38轮起空间本体携带优先级/生效期
       'maas-online-text-glm4': [
-        { name: '双11大促·输入售卖计划', units: ['su-1', 'su-2'], unitStates: { 'su-1': 'on', 'su-2': 'on' }, chargeCodes: { 'su-1': 'maas-online-text-glm4.30d', 'su-2': 'maas-online-text-glm4.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d', 'su-2': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d', 'su-2': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 500, effStart: '2026-11-11 00:00:00', effEnd: '2026-11-20 00:00:00' },
-        { name: 'GLM4·常规售卖', units: ['su-3', 'su-4'], unitStates: { 'su-3': 'on', 'su-4': 'on' }, chargeCodes: { 'su-3': 'maas-online-text-glm4.60d', 'su-4': 'maas-online-text-glm4.60d' }, quotaCodes: { 'su-3': 'quota-vtpm-60d', 'su-4': 'quota-vtpm-60d' }, inventoryCodes: { 'su-3': 'inv-vtpm-60d', 'su-4': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-002', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
+        { name: '双11大促·输入售卖计划', spaceKey: 'sp2', units: ['su-5', 'su-6'], unitStates: { 'su-5': 'on', 'su-6': 'on' }, chargeCodes: { 'su-5': 'maas-online-text-glm4.30d', 'su-6': 'maas-online-text-glm4.30d' }, quotaCodes: { 'su-5': 'quota-vtpm-30d', 'su-6': 'quota-vtpm-30d' }, inventoryCodes: { 'su-5': 'inv-vtpm-30d', 'su-6': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 500, effStart: '2026-11-11 00:00:00', effEnd: '2026-11-20 00:00:00' },
+        { name: 'GLM4·常规售卖', spaceKey: 'sp1', units: ['su-1', 'su-2', 'su-3', 'su-4'], unitStates: { 'su-1': 'on', 'su-2': 'on', 'su-3': 'on', 'su-4': 'on' }, chargeCodes: { 'su-1': 'maas-online-text-glm4.60d', 'su-2': 'maas-online-text-glm4.60d', 'su-3': 'maas-online-text-glm4.60d', 'su-4': 'maas-online-text-glm4.60d' }, quotaCodes: { 'su-1': 'quota-vtpm-60d', 'su-2': 'quota-vtpm-60d', 'su-3': 'quota-vtpm-60d', 'su-4': 'quota-vtpm-60d' }, inventoryCodes: { 'su-1': 'inv-vtpm-60d', 'su-2': 'inv-vtpm-60d', 'su-3': 'inv-vtpm-60d', 'su-4': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-002', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ]
     };
-    // 空间计划（第26轮独立实体；第31轮：fnDims 定义维度——保存时为每个勾选 fn 新建售卖空间落地 fnSpaces）：三态 pending_publish/published/stopped
-    // 第32轮：空间生效完全由空间计划决定（无默认回落）——每个 fn 的常规生效也需要常驻计划承载
-    const defaultSpacePlans = {
-      // vtpm 类（fn=''）：常驻计划 → sp1（购买量+周期），长生效期
-      'maas-product-vtpm-std': [
-        { name: '标准·常驻售卖空间1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100'], '购买周期': ['30天', '60天', '90天'] } }, fnSpaces: { '': 'sp1' } }
-      ],
-      'maas-product-vtpm-pro': [
-        { name: '专业·常驻售卖空间1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100', '500+'], '购买周期': ['30天', '90天'] } }, fnSpaces: { '': 'sp1' } }
-      ],
-      'maas-product-vtpm-pre': [
-        { name: '预发布·常驻售卖空间1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100'], '购买周期': ['30天', '60天', '90天'] } }, fnSpaces: { '': 'sp1' } }
-      ],
-      // glm4：常规计划（input→sp2/output→sp4/cache→sp5 长生效期）+ 双11切换计划（input→sp3 高优先级 11-11~11-20 接管）
-      'maas-online-text-glm4': [
-        { name: 'GLM4·常规售卖空间', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00', fnDims: { input: ['输入token区间', '输出token区间'], output: ['输入token区间', '输出token区间'], cache: ['输入token区间'] }, fnMeasures: { input: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K', '16K+'] }, output: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K'] }, cache: { '输入token区间': ['0～128K'] } }, fnSpaces: { input: 'sp2', output: 'sp4', cache: 'sp5' } },
-        { name: '双11大促·输入切换售卖空间3', priority: 500, effStart: '2026-11-11 00:00:00', effEnd: '2026-11-20 00:00:00', fnDims: { input: ['输入token区间'] }, fnMeasures: { input: { '输入token区间': ['0～128K', '128K～1M', '1M+'] } }, fnSpaces: { input: 'sp3' } }
-      ]
-    };
-    const defaultSpacePlanStatuses = {
-      'maas-product-vtpm-std': ['published'],
-      'maas-product-vtpm-pro': ['published'],
-      'maas-product-vtpm-pre': ['pending_publish'],
-      'maas-online-text-glm4': ['published', 'published']
-    };
-    let spacePlans = []; // 运行时副本（进入详情时按商品装载）
-    let spacePlanStatuses = [];
+
     // 各商品售卖计划的状态（与 defaultPlans 一一对应）
     const defaultPlanStatuses = {
       'maas-product-vtpm-std': ['published', 'published', 'published'],
@@ -1201,12 +1155,15 @@
       const p2 = plans ? ps : (saved ? saved.planRows : ps);
       const s2 = statuses ? sts : (saved ? saved.planRowStatuses : sts);
       const u2 = units ? us : (saved ? saved.saleUnits : us);
-      const bakRows = planRows, bakSts = planRowStatuses, bakUnits = saleUnits, bakNow = timeFilter;
-      planRows = p2; planRowStatuses = s2; saleUnits = u2; timeFilter = null;
+      // 第38轮：unitStatusOf 校验空间档期——须同步切换 spaces（mock 默认或快照）
+      const defaultSp = JSON.parse(JSON.stringify(defaultSpaces[code] || {}));
+      const sp2 = saved ? JSON.parse(JSON.stringify(saved.spaces || defaultSp)) : defaultSp;
+      const bakRows = planRows, bakSts = planRowStatuses, bakUnits = saleUnits, bakNow = timeFilter, bakSpaces = spaces;
+      planRows = p2; planRowStatuses = s2; saleUnits = u2; spaces = sp2; timeFilter = null;
       let listed = false;
       try { listed = u2.some(u => !unitStatusOf(u.id).offline); }
       catch (e) { listed = false; }
-      planRows = bakRows; planRowStatuses = bakSts; saleUnits = bakUnits; timeFilter = bakNow;
+      planRows = bakRows; planRowStatuses = bakSts; saleUnits = bakUnits; spaces = bakSpaces; timeFilter = bakNow;
       return listed;
     }
     // 列表回写快照：详情页编辑后返回列表时保存（key=商品code），保证列表推导用的是最新操作结果
@@ -1218,9 +1175,7 @@
         planRowStatuses: JSON.parse(JSON.stringify(planRowStatuses)),
         saleUnits: JSON.parse(JSON.stringify(saleUnits)),
         spaces: JSON.parse(JSON.stringify(spaces)),
-        spaceSeq: spaceSeq,
-        spacePlans: JSON.parse(JSON.stringify(spacePlans)),
-        spacePlanStatuses: JSON.parse(JSON.stringify(spacePlanStatuses))
+        spaceSeq: spaceSeq
       };
     }
     // 详情页头部徽标：第33轮已删除（商品不再展示上架状态标识）；保留空函数兼容历史调用点
@@ -1232,24 +1187,20 @@
       else { s.className = 'badge bg-slate-100 text-slate-500'; s.textContent = '禁售'; }
     }
     // ===== 列表页（第13轮平铺 + 第33轮两态 Tab）：Tab 直接按售卖单元状态划分 =====
-    // 取某商品的完整数据（优先编辑快照）：{ plans, statuses, units }
+    // 取某商品的完整数据（优先编辑快照）：{ plans, statuses, units, spaces }
     function productDataOf(code) {
       const saved = planRowsSnapshot[code];
       if (saved) {
         return {
           plans: saved.planRows, statuses: saved.planRowStatuses, units: saved.saleUnits,
-          spaces: saved.spaces || JSON.parse(JSON.stringify(defaultSpaces)),
-          spaceSeq: saved.spaceSeq || Object.keys(saved.spaces || defaultSpaces).length,
-          spacePlans: saved.spacePlans || [],
-          spacePlanStatuses: saved.spacePlanStatuses || []
+          spaces: saved.spaces || JSON.parse(JSON.stringify(defaultSpaces[code] || {})),
+          spaceSeq: saved.spaceSeq || 0
         };
       }
       return {
         plans: defaultPlans[code] || [], statuses: defaultPlanStatuses[code] || [], units: defaultSaleUnits[code] || [],
-        spaces: JSON.parse(JSON.stringify(defaultSpaces)),
-        spaceSeq: Math.max.apply(null, [0].concat(Object.values(defaultSpaces).map(x => x.seq || 0))),
-        spacePlans: JSON.parse(JSON.stringify(defaultSpacePlans[code] || [])),
-        spacePlanStatuses: JSON.parse(JSON.stringify(defaultSpacePlanStatuses[code] || []))
+        spaces: JSON.parse(JSON.stringify(defaultSpaces[code] || {})),
+        spaceSeq: Object.keys(defaultSpaces[code] || {}).reduce((m, k) => Math.max(m, defaultSpaces[code][k].seq || 0), 0)
       };
     }
     // 计算某商品在某时间点的售卖单元行（status 遵循第8轮两态口径），并按售卖单元 ID 排序
@@ -1257,9 +1208,9 @@
       const d = productDataOf(code);
       const { plans, statuses, units } = d;
       const bakRows = planRows, bakSts = planRowStatuses, bakUnits = saleUnits, bakNow = timeFilter;
-      const bakSpaces = spaces, bakSP = spacePlans, bakSPSS = spacePlanStatuses;
+      const bakSpaces = spaces;
       planRows = plans; planRowStatuses = statuses; saleUnits = units; timeFilter = null;
-      spaces = d.spaces; spacePlans = d.spacePlans; spacePlanStatuses = d.spacePlanStatuses;
+      spaces = d.spaces;
       let rows;
       try {
         rows = units.slice().sort((a, b) => a.id.localeCompare(b.id)).map(u => {
@@ -1271,7 +1222,7 @@
         });
       } catch (e) { rows = []; }
       planRows = bakRows; planRowStatuses = bakSts; saleUnits = bakUnits; timeFilter = bakNow;
-      spaces = bakSpaces; spacePlans = bakSP; spacePlanStatuses = bakSPSS;
+      spaces = bakSpaces;
       return rows;
     }
     // 列表页售卖单元行渲染（列结构与详情页售卖单元 Tab 一致 + 第三列 SKU；无操作列）
@@ -1403,10 +1354,12 @@
         const charge = plan ? (chargeItems.find(c => c.code === (plan.chargeCodes && plan.chargeCodes[u.id]) || c.code === plan.chargeCode) || null) : null;
         // 所选时间执行价（示意）：有 charge 时 = 刊例价 × 0.95 折扣示意
         const execPrice = charge ? (charge.price * 0.95).toFixed(4) : '—';
+        // 第38轮：空间列带三态徽标（空间=带档期实体）
+        const spSt = spaces[spaceKey] ? planStatusMeta(spaces[spaceKey].status) : null;
         return `
         <tr class="hover:bg-slate-50">
           ${showFn ? `<td rowspan="${fnSpan}" class="px-3 py-2 text-xs font-medium align-top border-r border-slate-100">${fn || '—'}</td>` : ''}
-          ${showSpace ? `<td rowspan="${spSpan}" class="px-3 py-2 font-mono text-xs align-top border-r border-slate-100">${spaceKey || '—'}</td>` : ''}
+          ${showSpace ? `<td rowspan="${spSpan}" class="px-3 py-2 align-top border-r border-slate-100"><div class="font-mono text-xs">${spaceKey || '—'}</div>${spSt ? `<span class="badge ${spSt.cls} mt-1 inline-block">${spSt.text}</span>` : ''}</td>` : ''}
           <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
           <td class="px-3 py-2"><span class="badge ${st.cls}">${st.text}</span></td>
           <td class="px-3 py-2">${formatDimMeasure(u)}</td>
@@ -1528,7 +1481,6 @@
       renderSaleUnits();
       renderPlan();
       renderSpaceTab();
-      renderSpacePlans();
     }
     // 退出变更：主动释放锁（仅持锁人可退）
     function exitEdit() {
@@ -1542,56 +1494,71 @@
       renderSaleUnits();
       renderPlan();
       renderSpaceTab();
-      renderSpacePlans();
     }
-    // 第36/37轮：商品名称快速编辑（标题旁 + 基本信息卡片两处铅笔 → 行内输入 + 保存/取消；不依赖编辑锁）
-    // editSource：'title'（标题旁，默认）/'info'（基本信息卡片）——两处共用同一输入条（渲染在标题旁）
+    // 第38轮：商品名称快速编辑（就地 contenteditable，无独立输入框）——标题旁 + 基本信息卡片两处铅笔：
+    // 点击铅笔 → 对应名称 span 变为可编辑就地输入（回车/失焦保存，Esc 取消）；保存后同步另一处；不依赖编辑锁
     let detailNameEditSource = 'title';
+    function detailNameEditTargets() {
+      return {
+        title: document.getElementById('detail-title-name'),
+        info: document.getElementById('detail-info-name')
+      };
+    }
     function openDetailNameEdit(source) {
       detailNameEditSource = (source === 'info') ? 'info' : 'title';
-      const wrap = document.getElementById('detail-name-edit-wrap');
-      const btn = document.getElementById('detail-name-edit-btn');
-      const input = document.getElementById('detail-name-input');
-      const infoBtn = document.getElementById('detail-info-name-edit-btn');
-      if (!wrap || !input) return;
-      wrap.classList.remove('hidden');
-      wrap.classList.add('flex');
-      if (btn) btn.classList.add('hidden');
-      if (infoBtn) infoBtn.classList.add('hidden');
-      input.value = currentProduct ? currentProduct.name : '';
-      // 基本信息卡片：名称文本切换为编辑高亮态
-      const infoName = document.getElementById('detail-info-name');
-      if (infoName) infoName.classList.add('text-violet-600');
-      if (detailNameEditSource === 'info') { try { input.focus(); } catch (e) {} }
+      const targets = detailNameEditTargets();
+      const el = targets[detailNameEditSource];
+      const other = detailNameEditSource === 'title' ? targets.info : targets.title;
+      if (!el) return;
+      // 编辑态：就地可编辑 + 高亮描边；另一处同步显示不可编辑
+      el.setAttribute('contenteditable', 'true');
+      el.classList.add('outline', 'outline-2', 'outline-violet-400', 'rounded', 'px-1', '-ml-1');
+      el.focus();
+      try {
+        const range = document.createRange(); range.selectNodeContents(el);
+        const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      } catch (e) {}
+      if (other) { other.classList.add('text-violet-600'); }
+      el.onkeydown = (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); confirmDetailNameEdit(); }
+        else if (e.key === 'Escape') { e.preventDefault(); closeDetailNameEdit(); }
+      };
+      el.onblur = () => {
+        // jsdom 无 blur 事件冒泡问题：校验内容非空即保存，空则恢复
+        setTimeout(() => {
+          if (el.getAttribute('contenteditable') === 'true') confirmDetailNameEdit();
+        }, 0);
+      };
     }
     function closeDetailNameEdit() {
-      const wrap = document.getElementById('detail-name-edit-wrap');
-      const btn = document.getElementById('detail-name-edit-btn');
-      const infoBtn = document.getElementById('detail-info-name-edit-btn');
-      const infoName = document.getElementById('detail-info-name');
-      if (wrap) {
-        wrap.classList.add('hidden');
-        wrap.classList.remove('flex');
-      }
-      if (btn) btn.classList.remove('hidden');
-      if (infoBtn) infoBtn.classList.remove('hidden');
-      if (infoName) infoName.classList.remove('text-violet-600');
+      const targets = detailNameEditTargets();
+      ['title', 'info'].forEach(k => {
+        const el = targets[k];
+        if (!el) return;
+        el.removeAttribute('contenteditable');
+        el.classList.remove('outline', 'outline-2', 'outline-violet-400', 'rounded', 'px-1', '-ml-1', 'text-violet-600');
+        el.onkeydown = null; el.onblur = null;
+      });
       detailNameEditSource = 'title';
     }
     function confirmDetailNameEdit() {
-      const input = document.getElementById('detail-name-input');
-      const name = (input.value || '').trim();
-      if (!name) { alert('商品名称不能为空'); return; }
-      if (!currentProduct) return;
-      currentProduct.name = name;
-      document.getElementById('detail-title').textContent = `${currentProduct.name}（${currentProduct.code}）`;
-      // 基本信息卡片同步（第37轮：span#detail-info-name）
-      const infoName = document.getElementById('detail-info-name');
-      if (infoName) infoName.textContent = name;
-      else {
-        const infoPs = document.querySelectorAll('#detail-info .font-medium');
-        infoPs.forEach(p => { if (p.parentElement && p.previousElementSibling && p.previousElementSibling.textContent === '商品名称') p.textContent = name; });
+      const targets = detailNameEditTargets();
+      const el = targets[detailNameEditSource];
+      if (!el || !currentProduct) return;
+      const name = (el.textContent || '').trim();
+      if (!name) {
+        alert('商品名称不能为空');
+        el.textContent = currentProduct.name;
+        closeDetailNameEdit();
+        return;
       }
+      currentProduct.name = name;
+      // 同步写回商品池（openDetailByCode 重新装载时从 allProducts 取 name，否则改名会被默认值覆盖）
+      const poolP = allProducts.find(p => p.code === currentProduct.code);
+      if (poolP) poolP.name = name;
+      // 两处同步
+      if (targets.title) targets.title.textContent = name;
+      if (targets.info) targets.info.textContent = name;
       closeDetailNameEdit();
     }
     // 详情页头部右侧：发起变更 / 退出变更 按钮 + 他人持锁提示（第36轮：位置移至基本信息卡片之前居左）
@@ -1630,7 +1597,7 @@
       });
       // 详情页操作区（发布/修改/停用）与计划单元表重渲（删除按钮）由 renderPlanDetail/renderSaleUnits 内部按 canEdit() 处理
       if (currentPlanDetailIdx >= 0 && planRows[currentPlanDetailIdx]) renderPlanDetail(currentPlanDetailIdx);
-      if (currentSpacePlanDetailIdx >= 0 && spacePlans[currentSpacePlanDetailIdx]) renderSpacePlanDetail(currentSpacePlanDetailIdx);
+      if (currentSpacePlanDetailIdx && spaces[currentSpacePlanDetailIdx]) renderSpacePlanDetail(currentSpacePlanDetailIdx);
     }
 
     function querySaleParams() {
@@ -1661,14 +1628,12 @@
       if (!p) { alert('请先选择一个时间节点'); return; }
       timeFilter = { point: p };
       renderSpaceTab();
-      renderSpacePlans();
       syncSpaceTfPoint();
     }
     function resetSpaceAt() {
       timeFilter = null;
       document.getElementById('space-tf-point').value = '';
       renderSpaceTab();
-      renderSpacePlans();
       syncSpaceTfPoint();
     }
     // 售卖单元关联的售卖计划：生效期内的已发布计划优先；有 timeFilter 时取该时刻生效期内的计划，否则取生效期内优先
@@ -1685,6 +1650,12 @@
     // 时间点取 timeFilter.point（未选择时按当前时间）；状态与生效解耦（是否生效只看 effStart/effEnd）
     function unitStatusOf(unitId) {
       const now = timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' ');
+      // 第38轮：单元所在空间未生效（非 published 或不在档期内）→ 禁售
+      const su = (saleUnits || []).find(u => u.id === unitId);
+      const sp = su ? (spaces[su.spaceKey] || null) : null;
+      if (sp && !spaceActiveAt(sp, now)) {
+        return { text: '禁售', cls: 'bg-slate-100 text-slate-500', offline: true };
+      }
       // 该时刻生效期内的计划（状态=已发布 且 生效起止命中时间点）
       const active = planRows.filter((r, i) =>
         (r.units || []).includes(unitId) && planRowStatuses[i] === 'published' && r.effStart <= now && now <= r.effEnd
@@ -1747,18 +1718,17 @@
       planRows = [];
       planRowStatuses = [];
       saleUnits = JSON.parse(JSON.stringify(defaultSaleUnits[currentProduct.code] || []));
-      spaces = JSON.parse(JSON.stringify(defaultSpaces));
-      spaceSeq = Math.max.apply(null, [0].concat(Object.values(spaces).map(x => x.seq || 0)));
-      spacePlans = [];
-      spacePlanStatuses = [];
+      spaces = {};
+      spaceSeq = 0;
      closeModal('product');
      showDetailView();
    }
     function showDetailView() {
       document.getElementById('list-view').classList.add('hidden');
       document.getElementById('detail-view').classList.remove('hidden');
-      document.getElementById('detail-title').textContent = `${currentProduct.name}（${currentProduct.code}）`;
-      closeDetailNameEdit(); // 第36轮：重置名称行内编辑状态
+      document.getElementById('detail-title-name').textContent = currentProduct.name;
+      document.getElementById('detail-title-code').textContent = `（${currentProduct.code}）`;
+      closeDetailNameEdit(); // 第38轮：重置名称就地编辑状态
       // 第10轮编辑锁：进入详情页初始化编辑状态——锁记录若属当前用户则恢复编辑态，否则浏览态（他人持锁显示提示）
       const lock0 = editLocks[currentProduct.code] || null;
       editMode = (lock0 && lock0.passport === currentUser.passport) ? 'owner' : false;
@@ -1776,7 +1746,6 @@
       renderSaleUnits();
       renderPlan();
       renderSpaceTab();
-      renderSpacePlans();
       renderConfig('factor');
       renderConfig('slo');
       // 复位售卖计划详情独立页面与创建/修改页面
@@ -1789,7 +1758,7 @@
    }
     function backToList() {
       // 第29轮：空间计划详情页同样复位（否则从详情页直接返回列表后视图残留）
-      if (currentSpacePlanDetailIdx >= 0) closeSpacePlanDetail();
+      if (currentSpacePlanDetailIdx) closeSpacePlanDetail();
       // 第11轮：返回列表前回写当前商品的编辑数据快照 + 新建商品入列，保证列表推导使用最新状态
       snapshotCurrentProduct();
       if (currentProduct && !allProducts.some(p => p.code === currentProduct.code)) {
@@ -1809,10 +1778,8 @@
       planRows = JSON.parse(JSON.stringify(defaultPlans[code] || []));
      planRowStatuses = JSON.parse(JSON.stringify(defaultPlanStatuses[code] || []));
      saleUnits = JSON.parse(JSON.stringify(defaultSaleUnits[code] || []));
-     spaces = JSON.parse(JSON.stringify(defaultSpaces));
-     spaceSeq = Math.max.apply(null, [0].concat(Object.values(spaces).map(x => x.seq || 0)));
-     spacePlans = JSON.parse(JSON.stringify(defaultSpacePlans[code] || []));
-     spacePlanStatuses = JSON.parse(JSON.stringify(defaultSpacePlanStatuses[code] || []));
+     spaces = JSON.parse(JSON.stringify(defaultSpaces[code] || {}));
+     spaceSeq = Object.keys(spaces).reduce((m, k) => Math.max(m, spaces[k].seq || 0), 0);
      // 恢复编辑快照（若有）：上次编辑的结果优先于 mock 默认
      const snap = planRowsSnapshot[code];
      if (snap) {
@@ -1821,7 +1788,6 @@
        saleUnits = JSON.parse(JSON.stringify(snap.saleUnits));
        if (snap.spaces) spaces = JSON.parse(JSON.stringify(snap.spaces));
        if (snap.spaceSeq) spaceSeq = snap.spaceSeq;
-       if (snap.spacePlans) { spacePlans = JSON.parse(JSON.stringify(snap.spacePlans)); spacePlanStatuses = JSON.parse(JSON.stringify(snap.spacePlanStatuses || [])); }
      }
      showDetailView();
    }
@@ -1835,6 +1801,15 @@
     // ===== 售卖计划：状态操作（需持有编辑锁） =====
     function publishPlanRow(idx) {
       if (!guardEdit()) return;
+      // 第38轮：所属空间未发布 → 计划不可发布（计划依赖空间档期）
+      const r = planRows[idx];
+      if (r && r.spaceKey) {
+        const sp = spaces[r.spaceKey];
+        if (!sp || sp.status !== 'published') {
+          alert('所属售卖空间 ' + r.spaceKey + ' 未发布，请先发布售卖空间');
+          return;
+        }
+      }
       planRowStatuses[idx] = 'published';
       renderPlan(); renderSaleUnits(); refreshProductBadge(); renderSpaceTab();
       // 详情页打开时同步刷新
@@ -1863,147 +1838,99 @@
       alert('已复制售卖计划「' + (src.name || '—') + '」→「' + copyName + '」（待发布），可进入修改后发布。');
     }
 
-    // ===== 售卖空间 Tab（第32轮）：按查询时刻过滤——只显示该时刻生效的空间计划为每个 function 创建的售卖空间；无生效计划的 fn 不展示 =====
+    // ===== 售卖空间 Tab（第38轮）：空间=带档期的单元集合——列表展示全部空间（按 状态→effStart 降序→seq），每行=空间×fn =====
     function renderSpaceTab() {
       const tbody = document.getElementById('space-tbody');
       if (!tbody) return;
-      // 每个 fn 在查询时刻的生效空间（第32轮：纯计划仲裁——无命中则该 fn 不展示）
-      const fns = new Set(fnPool());
-      if (fns.size === 0) fns.add('');
-      const effInfo = {};
-      let anyEff = false;
-      Array.from(fns).forEach(f => {
-        const e = effectiveSpaceAt(f);
-        if (e.key) { effInfo[f] = e; anyEff = true; }
+      // 展开行：每个空间按其 fnDims 的 fn 展开（一空间多 fn 多行）
+      const rows = [];
+      Object.keys(spaces).forEach(k => {
+        const sp = spaces[k];
+        Object.keys(sp.fnDims || {}).forEach(f => {
+          const unitCnt = (saleUnits || []).filter(u => u.spaceKey === k && (fnOfUnit(u) || '') === f).length;
+          rows.push({ k, f, sp, unitCnt });
+        });
       });
-      if (!anyEff) {
-        tbody.innerHTML = `<tr><td colspan="5" class="px-3 py-8 text-center text-xs text-slate-400">该时刻无生效中的售卖空间</td></tr>`;
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖空间</td></tr>`;
         syncSpaceTfPoint();
         return;
       }
-      // 行=各 fn 该时刻生效的空间（每 fn 至多一行）
-      const keys = Object.keys(effInfo).map(f => effInfo[f].key).filter(k => spaces[k]);
-      const fnOf = k => spaces[k].fn || '';
-      keys.sort((a, b) => {
-        const fa = fnOf(a), fb = fnOf(b);
-        if (fa !== fb) return fa.localeCompare(fb);
-        return (spaces[a].seq || 0) - (spaces[b].seq || 0);
+      // 排序：状态（已发布→待发布→已停用）→ effStart 降序 → 空间 seq → fn 字典序
+      const stRank = { published: 0, pending_publish: 1, stopped: 2 };
+      rows.sort((a, b) => {
+        const sa = stRank[a.sp.status] ?? 1, sb = stRank[b.sp.status] ?? 1;
+        if (sa !== sb) return sa - sb;
+        if (a.sp.effStart !== b.sp.effStart) return a.sp.effStart < b.sp.effStart ? 1 : -1;
+        if ((a.sp.seq || 0) !== (b.sp.seq || 0)) return (a.sp.seq || 0) - (b.sp.seq || 0);
+        return (a.f || '').localeCompare(b.f || '');
       });
-      let prevFn = null;
-      tbody.innerHTML = keys.map(k => {
-        const sp = spaces[k];
-        const fn = sp.fn || '';
-        const showFn = fn !== prevFn || prevFn === null;
-        prevFn = fn;
-        let fnSpan = 1;
-        if (showFn) {
-          fnSpan = keys.filter(kk => fnOf(kk) === fn).length;
-        }
-        const unitCnt = (saleUnits || []).filter(u => u.spaceKey === k).length;
-        // 第35轮：状态列只留徽标（胜出计划/切换预告标注移交空间计划 Tab）；空间列只显 code（无名称）；0 维度空间展示 --
+      const nowStr = timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' ');
+      let prevKey = null;
+      tbody.innerHTML = rows.map(row => {
+        const { k, f, sp, unitCnt } = row;
+        const meta = planStatusMeta(sp.status);
+        const isEff = sp.status === 'published' && sp.effStart <= nowStr && nowStr <= sp.effEnd;
+        const showSpace = k !== prevKey;
+        prevKey = k;
+        // 同空间行数（用于空间级列 rowspan：空间单元/状态/售卖空间/空间名称/优先级/生效起止）
+        const spanCnt = rows.filter(r => r.k === k).length;
+        const dims = (sp.fnDims || {})[f] || [];
+        const spCell = showSpace ? `<td rowspan="${spanCnt}" class="px-3 py-2 text-right text-xs">${sp.priority ?? '—'}</td>` : '';
+        const spaceCells = showSpace ? `
+          <td rowspan="${spanCnt}" class="px-3 py-2 font-mono text-xs">${'pu-sp-' + (sp.seq || 0) + '-' + (Object.keys(sp.fnDims || {}).indexOf(f) + 1)}</td>
+          <td rowspan="${spanCnt}" class="px-3 py-2"><span class="badge ${meta.cls}">${meta.text}</span></td>
+          <td rowspan="${spanCnt}" class="px-3 py-2"><button type="button" onclick="openSpacePlanDetail('${k}')" class="font-mono text-xs text-violet-600 hover:underline font-medium">${k}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
+          <td rowspan="${spanCnt}" class="px-3 py-2 text-xs">${sp.name || '—'}</td>` : '';
         return `
         <tr class="hover:bg-slate-50">
-          ${showFn ? `<td rowspan="${fnSpan}" class="px-3 py-2 text-xs font-medium align-top border-r border-slate-100">${fn || '—'}</td>` : ''}
-          <td class="px-3 py-2 font-mono text-xs">${k}</td>
-          <td class="px-3 py-2"><span class="badge bg-green-100 text-green-700">生效中</span></td>
-          <td class="px-3 py-2 text-xs">${sp.dims && sp.dims.length ? sp.dims.join(' + ') : '--'}</td>
+          ${spaceCells}
+          <td class="px-3 py-2 text-xs font-medium">${f || '—'}</td>
+          <td class="px-3 py-2 text-xs">${dims.length ? dims.join(' + ') : '--'}</td>
           <td class="px-3 py-2 text-xs text-right">${unitCnt}</td>
+          ${spCell}
+          ${showSpace ? `<td rowspan="${spanCnt}" class="px-3 py-2"><span class="font-mono text-xs whitespace-nowrap">${sp.effStart} ~ ${sp.effEnd}</span><div class="text-[10px] mt-0.5">${isEff ? '<span class="text-green-600">生效期内</span>' : '<span class="text-slate-400">生效期外</span>'}</div></td>` : ''}
         </tr>`;
       }).join('');
       syncSpaceTfPoint();
     }
-    // ===== 空间计划（第26轮独立实体；第27轮迁入专属 Tab 并平铺「空间计划单元」）=====
-    // 行结构同构售卖计划 Tab：每行=计划条目（fn × 售卖空间 × 空间计划）；第34轮取消 rowspan 合并，每行完整渲染 9 列
-    let editingSpacePlanIdx = -1; // -1=创建
-    let spacePlanUnitSeq = 1; // 计划单元序号（pu-sp-1, pu-sp-2 …全局递增，同构 planUnitId）
-    function spacePlanUnitId(planIdx, fn) {
-      return 'pu-sp-' + (planIdx + 1) + '-' + (Object.keys(spacePlans[planIdx].fnSpaces || {}).indexOf(fn) + 1);
-    }
-    function renderSpacePlans() {
-      const tbody = document.getElementById('spaceplan-tbody');
-      if (!tbody) return;
-      // 空间计划单元：每条空间计划按其 fnSpaces 展开为多行（fn → 目标空间）；无计划=空列表占位（每个单元必有所属计划）
-      const rows = [];
-      spacePlans.forEach((r, planIdx) => {
-        Object.keys(r.fnSpaces || {}).forEach(f => rows.push({ planIdx, f, k: r.fnSpaces[f], r }));
-      });
-      // 排序（第28轮）：所属状态（已发布→待发布→已停用）→ 生效时间（effStart 降序）→ 所属售卖空间（fn 字典序 + seq 升序）
-      const stRank = { published: 0, pending_publish: 1, stopped: 2 };
-      const seqOf = k => (spaces[k] && spaces[k].seq) || 0;
-      rows.sort((a, b) => {
-        const sa = stRank[spacePlanStatuses[a.planIdx]] ?? 1, sb = stRank[spacePlanStatuses[b.planIdx]] ?? 1;
-        if (sa !== sb) return sa - sb;
-        if (a.r.effStart !== b.r.effStart) return a.r.effStart < b.r.effStart ? 1 : -1;
-        const fa = a.f || '', fb = b.f || '';
-        if (fa !== fb) return fa.localeCompare(fb);
-        return seqOf(a.k) - seqOf(b.k);
-      });
-      if (rows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="px-3 py-8 text-center text-xs text-slate-400">暂无空间计划单元，请先创建空间计划</td></tr>';
-        return;
-      }
+    // ===== 售卖空间（第38轮）：创建弹窗/发布/停用/复制/详情 =====
+    // 空间完全不可改（第38轮口径）：无「修改」操作；任何变更=复制出待发布新空间（旧空间原样归档，单元永不删除）
+    // 停用拦截：空间内有生效中的售卖计划（published 且计划生效期命中当前时刻）时不允许停用，需先停掉其内生效中的计划
+    function spaceOfKey(k) { return spaces[k] || null; }
+    // 空间内生效中的售卖计划（用于停用拦截提示）
+    function activePlansInSpace(k) {
       const nowStr = timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' ');
-      tbody.innerHTML = rows.map(row => {
-        const { planIdx, f, k, r } = row;
-        const sp = spaces[k];
-        const unitCnt = (saleUnits || []).filter(u => u.spaceKey === k).length;
-        const st = spacePlanStatuses[planIdx] || 'pending_publish';
-        const meta = planStatusMeta(st);
-        const isEff = st === 'published' && r.effStart <= nowStr && nowStr <= r.effEnd;
-        return `
-        <tr class="hover:bg-slate-50">
-          <td class="px-3 py-2 text-xs font-medium">${spacePlanUnitId(planIdx, f)}</td>
-          <td class="px-3 py-2"><span class="badge ${meta.cls}">${meta.text}</span></td>
-          <td class="px-3 py-2"><button type="button" onclick="openSpacePlanDetail(${planIdx})" class="text-violet-600 hover:underline font-medium text-xs">${r.name || '—'}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
-          <td class="px-3 py-2 font-mono text-xs font-medium">${k}</td>
-          <td class="px-3 py-2 text-xs font-medium">${f || '—'}</td>
-          <td class="px-3 py-2 text-xs">${sp && sp.dims && sp.dims.length ? sp.dims.join(' + ') : '--'}</td>
-          <td class="px-3 py-2 text-xs text-right">${unitCnt}</td>
-          <td class="px-3 py-2 text-right"><span class="text-xs">${r.priority}</span></td>
-          <td class="px-3 py-2"><span class="font-mono text-xs whitespace-nowrap">${r.effStart} ~ ${r.effEnd}</span><div class="text-[10px] mt-0.5">${isEff ? '<span class="text-green-600">生效期内</span>' : '<span class="text-slate-400">生效期外</span>'}</div></td>
-        </tr>`;
-      }).join('');
+      return planRows.filter((r, i) => r.spaceKey === k && planRowStatuses[i] === 'published' && r.effStart <= nowStr && nowStr <= r.effEnd);
     }
-    // 弹窗：创建/修改（第31轮：每 fn 一行勾选 fn+维度；第37轮：再加维度下度量勾选——保存时按勾选维度×度量叉乘自动生成该空间全部售卖单元）
-    function openSpacePlanModal(idx) {
-      editingSpacePlanIdx = (idx === undefined || idx === null) ? -1 : idx;
-      const r = editingSpacePlanIdx >= 0 ? spacePlans[editingSpacePlanIdx] : null;
-      document.getElementById('spaceplan-modal-title').textContent = r ? '修改空间计划：' + (r.name || '—') : '创建空间计划';
-      document.getElementById('sp-name').value = r ? (r.name || '') : '';
-      document.getElementById('sp-priority').value = r ? r.priority : '';
-      document.getElementById('sp-eff-start').value = r ? (r.effStart || '').replace(' ', 'T') : '2026-11-11T00:00:00';
-      document.getElementById('sp-eff-end').value = r ? (r.effEnd || '').replace(' ', 'T') : '2026-11-20T00:00:00';
-      // fn 候选（第31轮：fnPool——hasFn 类型=input/output/cache；无 fn 商品=单行 ''）
+    // 弹窗：创建售卖空间（fn→维度→度量三层勾选 + 名称/优先级/生效期；保存时叉乘生成全部售卖单元）
+    function openSpacePlanModal() {
       const fns = fnPool().length > 0 ? fnPool() : [''];
-      // 该商品已有空间按 fn 分组（展示「当前生效」提示用；不作为选择目标——新计划总是新建空间）
+      document.getElementById('sp-name').value = '';
+      document.getElementById('sp-priority').value = '';
+      document.getElementById('sp-eff-start').value = '2026-11-11T00:00:00';
+      document.getElementById('sp-eff-end').value = '2026-11-20T00:00:00';
       document.getElementById('sp-fnspaces').innerHTML = fns.map(f => {
-        const rDims = (r && r.fnDims && r.fnDims[f]) || [];
-        const rMeas = (r && r.fnMeasures && r.fnMeasures[f]) || {};
-        const cur = effectiveSpaceAt(f).key;
-        const curName = cur || '—';
         const dimBlocks = dimensionOptions.map(d => {
           const measures = measureOptions[d] || [];
-          const dimChecked = rDims.includes(d);
-          const checkedMeas = (rMeas[d] || []);
           return `<div class="border border-slate-200 rounded-md px-2 py-1.5 bg-white" data-dimblock="${f}|${d}">
             <label class="flex items-center gap-1 text-xs font-medium text-slate-700">
-              <input type="checkbox" class="sp-dim-check" data-fn="${f}" value="${d}" ${dimChecked ? 'checked' : ''} ${rDims.length > 0 ? '' : 'disabled'} style="accent-color:#7C3AED" onchange="onSpDimCheck(this)">
+              <input type="checkbox" class="sp-dim-check" data-fn="${f}" value="${d}" disabled style="accent-color:#7C3AED" onchange="onSpDimCheck(this)">
               <span>${d}</span>
             </label>
-            <div class="ml-5 mt-1 flex flex-wrap gap-x-3 gap-y-1 ${dimChecked ? '' : 'opacity-50 pointer-events-none'}" data-dimmeas="${f}|${d}">
+            <div class="ml-5 mt-1 flex flex-wrap gap-x-3 gap-y-1 opacity-50 pointer-events-none" data-dimmeas="${f}|${d}">
               ${measures.map(m => `<label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
-                <input type="checkbox" class="sp-measure-check" data-fn="${f}" data-dim="${d}" value="${m}" ${checkedMeas.includes(m) ? 'checked' : ''} ${dimChecked ? '' : 'disabled'} style="accent-color:#7C3AED">
+                <input type="checkbox" class="sp-measure-check" data-fn="${f}" data-dim="${d}" value="${m}" disabled style="accent-color:#7C3AED">
                 <span>${m}</span></label>`).join('')}
             </div>
           </div>`;
         }).join('');
         return `<div class="border border-slate-200 rounded-md px-2.5 py-2 bg-slate-50" data-fnrow="${f}">
           <label class="flex flex-wrap items-center gap-2 text-xs">
-            <input type="checkbox" class="sp-fn-check" data-fn="${f}" ${rDims.length > 0 ? 'checked' : ''} style="accent-color:#7C3AED" onchange="onSpFnCheck(this)">
+            <input type="checkbox" class="sp-fn-check" data-fn="${f}" style="accent-color:#7C3AED" onchange="onSpFnCheck(this)">
             <span class="font-mono font-medium text-slate-700">${f || '—（无 function）'}</span>
-            <span class="text-slate-400">当前生效：${curName}</span>
           </label>
-          <div class="ml-6 mt-1.5 space-y-1.5 ${rDims.length > 0 ? '' : 'opacity-50'}" data-fndims="${f}">
+          <div class="ml-6 mt-1.5 space-y-1.5 opacity-50" data-fndims="${f}">
             ${dimBlocks}
           </div>
         </div>`;
@@ -2016,7 +1943,6 @@
       wrap.classList.toggle('opacity-50', !box.checked);
       wrap.querySelectorAll('.sp-dim-check').forEach(c => { c.disabled = !box.checked; });
       if (box.checked) {
-        // fn 勾选时：维度可勾、已勾维度的度量可勾；未勾维度的度量区保持禁用
         wrap.querySelectorAll('[data-dimblock]').forEach(blk => {
           const dimCheck = blk.querySelector('.sp-dim-check');
           const measWrap = blk.querySelector('[data-dimmeas]');
@@ -2025,14 +1951,15 @@
             measWrap.classList.toggle('opacity-50', !dimOn);
             measWrap.classList.toggle('pointer-events-none', !dimOn);
           }
-          blk.querySelectorAll('.sp-measure-check').forEach(c => { c.disabled = !dimOn; });
+          blk.querySelectorAll('.sp-measure-check').forEach(c => { c.disabled = dimOn ? false : true; });
         });
       } else {
-        wrap.querySelectorAll('.sp-measure-check').forEach(c => { c.disabled = true; });
+        wrap.querySelectorAll('.sp-measure-check').forEach(c => { c.checked = false; c.disabled = true; });
         wrap.querySelectorAll('[data-dimmeas]').forEach(mw => { mw.classList.add('opacity-50', 'pointer-events-none'); });
+        wrap.querySelectorAll('.sp-dim-check').forEach(c => { c.checked = false; });
       }
     }
-    // 第37轮：维度勾选联动——勾维度启用该维度度量区；取消勾选清空该维度度量并禁用
+    // 维度勾选联动——勾维度启用该维度度量区；取消勾选清空该维度度量并禁用
     function onSpDimCheck(box) {
       const measWrap = document.querySelector('[data-dimmeas="' + box.dataset.fn + '|' + box.value + '"]');
       if (!measWrap) return;
@@ -2045,12 +1972,16 @@
         measWrap.classList.add('opacity-50', 'pointer-events-none');
       }
     }
+    // 保存：收集 fn→维度→度量 → 新建一个空间（多 fn 共一个空间）→ 叉乘生成全部售卖单元 → 待发布
     function confirmSpacePlan() {
-      if (editingSpacePlanIdx === -1 && !guardEdit()) return;
-      if (editingSpacePlanIdx >= 0 && !guardEdit()) return;
+      if (!guardEdit()) return;
       const name = (document.getElementById('sp-name').value || '').trim();
-      if (!name) { alert('请填写计划名称'); return; }
-      // 收集勾选 fn 及其维度集合 + 每维度勾选的度量（第37轮：保存时按维度×度量叉乘自动生成售卖单元）
+      if (!name) { alert('请填写空间名称'); return; }
+      const priority = parseInt(document.getElementById('sp-priority').value) || 0;
+      const effStart = pcpVal(document.getElementById('sp-eff-start').value, '2026-11-11T00:00:00');
+      const effEnd = pcpVal(document.getElementById('sp-eff-end').value, '2026-11-20T00:00:00');
+      if (effStart > effEnd) { alert('生效开始不能晚于生效结束'); return; }
+      // 收集勾选 fn 及其维度集合 + 每维度勾选的度量
       const fnDims = {};
       const fnMeasures = {};
       document.querySelectorAll('.sp-fn-check').forEach(c => {
@@ -2065,7 +1996,7 @@
         }
       });
       if (Object.keys(fnDims).length === 0) { alert('至少勾选一个 function'); return; }
-      // 校验（第37轮）：勾了维度则该维度至少勾一个度量（0 维度=不勾维度，保存时生成一个单元）
+      // 校验：勾了维度则该维度至少勾一个度量（0 维度 fn=不勾维度，生成一个单元）
       for (const f of Object.keys(fnDims)) {
         const dims = fnDims[f];
         if (dims.length === 0) continue;
@@ -2075,54 +2006,21 @@
           return;
         }
       }
-      const isEdit = editingSpacePlanIdx >= 0;
-      const oldRow = isEdit ? spacePlans[editingSpacePlanIdx] : null;
-      // 落地：为每个勾选 fn 总是新建一个售卖空间（不与已有空间合并；第31轮口径）
-      // 第37轮：身份判定=维度+度量集合均一致才沿用原空间；变化即新建（已生成售卖单元永不删除，售卖计划引用不受影响）
-      const fnSpaces = {};
-      const createdKeys = [];
+      // 新建空间（第38轮：一个空间可含多 fn）
+      spaceSeq += 1;
+      const key = 'sp' + spaceSeq;
+      spaces[key] = { seq: spaceSeq, name, priority, effStart, effEnd, status: 'pending_publish', fnDims, fnMeasures };
+      // 叉乘生成每个 fn 的售卖单元
       const createdUnits = [];
       Object.keys(fnDims).forEach(f => {
-        const oldKey = oldRow && oldRow.fnSpaces && oldRow.fnSpaces[f];
-        const oldDims = oldRow && oldRow.fnDims && oldRow.fnDims[f];
-        const oldMeas = (oldRow && oldRow.fnMeasures && oldRow.fnMeasures[f]) || {};
-        const sameDims = JSON.stringify((oldDims || []).slice().sort()) === JSON.stringify(fnDims[f].slice().sort());
-        const sameMeas = JSON.stringify(JSON.stringify(mapSort(oldMeas))) === JSON.stringify(JSON.stringify(mapSort(fnMeasures[f])));
-        if (oldKey && spaces[oldKey] && sameDims && sameMeas) {
-          fnSpaces[f] = oldKey;
-          return;
-        }
-        spaceSeq += 1;
-        const key = 'sp' + spaceSeq;
-        spaces[key] = { seq: spaceSeq, fn: f, dims: fnDims[f] };
-        fnSpaces[f] = key;
-        createdKeys.push(key + '（' + (f || '无 fn') + (fnDims[f].length ? '' : '，0 维度') + '）');
-        // 第37轮：叉乘生成该空间下全部售卖单元（勾选维度的度量笛卡尔积；0 维度→单单元）
         createdUnits.push(...genSaleUnitsForSpace(key, f, fnDims[f], fnMeasures[f]));
       });
-      const row = {
-        name,
-        priority: parseInt(document.getElementById('sp-priority').value) || 0,
-        effStart: pcpVal(document.getElementById('sp-eff-start').value, '2026-11-11T00:00:00'),
-        effEnd: pcpVal(document.getElementById('sp-eff-end').value, '2026-11-20T00:00:00'),
-        fnDims,
-        fnMeasures,
-        fnSpaces
-      };
-      if (isEdit && spacePlans[editingSpacePlanIdx]) {
-        spacePlans[editingSpacePlanIdx] = row;
-      } else {
-        spacePlans.push(row);
-        spacePlanStatuses.push('pending_publish');
-      }
-      editingSpacePlanIdx = -1;
       closeModal('spaceplan');
-      renderSpacePlans();
-      renderSpaceTab(); // 状态列可能即刻变化（若新计划已发布且在生效期）
+      renderSpaceTab();
       renderSaleUnits();
       renderPlan();
       const unitMsg = createdUnits.length > 0 ? '；已自动生成售卖单元 ' + createdUnits.length + ' 个（' + createdUnits.slice(0, 8).join('、') + (createdUnits.length > 8 ? ' 等' : '') + '）' : '';
-      alert('空间计划「' + name + '」已保存' + (isEdit ? '' : '（待发布）') + (createdKeys.length > 0 ? '；已新建售卖空间：' + createdKeys.join('、') : '') + unitMsg);
+      alert('售卖空间「' + name + '」（' + key + '）已保存（待发布）' + unitMsg);
     }
     // 维度→度量 map 排序序列化（身份比较 helper）
     function mapSort(m) {
@@ -2130,7 +2028,7 @@
       Object.keys(m || {}).sort().forEach(k => { out[k] = (m[k] || []).slice().sort(); });
       return out;
     }
-    // 第37轮：为空间按维度×度量叉乘生成售卖单元（追加进 saleUnits，不删已有单元；0 维度空间生成唯一单单元）
+    // 为空间按维度×度量叉乘生成售卖单元（追加进 saleUnits，不删已有单元；0 维度空间生成唯一单单元）
     function genSaleUnitsForSpace(spaceKey, fn, dims, fnMeas) {
       const mea = fnMeas || {};
       let seq = saleUnits.reduce((m, u) => Math.max(m, parseInt((u.id || '').replace('su-', '')) || 0), 0);
@@ -2163,99 +2061,91 @@
       });
       return created;
     }
-    function editSpacePlan(idx) {
+    // 发布空间（待发布→已发布）
+    function publishSpacePlan(k) {
       if (!guardEdit()) return;
-      if (currentSpacePlanDetailIdx >= 0) closeSpacePlanDetail(); // 从详情页进入修改：先回商品详情
-      openSpacePlanModal(idx);
+      const sp = spaces[k];
+      if (!sp) return;
+      sp.status = 'published';
+      renderSpaceTab(); renderSaleUnits(); renderPlan();
+      if (currentSpacePlanDetailIdx === k) renderSpacePlanDetail(k);
     }
-    function publishSpacePlan(idx) {
+    // 停用空间（已发布→已停用；有生效计划时拦截）
+    function stopSpacePlan(k) {
       if (!guardEdit()) return;
-      spacePlanStatuses[idx] = 'published';
-      renderSpacePlans(); renderSpaceTab(); renderSaleUnits();
-      // 详情页打开时同步刷新
-      if (currentSpacePlanDetailIdx === idx) renderSpacePlanDetail(idx);
+      const sp = spaces[k];
+      if (!sp) return;
+      const activePlans = activePlansInSpace(k);
+      if (activePlans.length > 0) {
+        alert('该售卖空间内有 ' + activePlans.length + ' 个生效中的售卖计划（' + activePlans.map(r => r.name).join('、') + '），请先停用后再停用空间');
+        return;
+      }
+      sp.status = 'stopped';
+      renderSpaceTab(); renderSaleUnits(); renderPlan();
+      if (currentSpacePlanDetailIdx === k) renderSpacePlanDetail(k);
     }
-    function stopSpacePlan(idx) {
-      if (!guardEdit()) return;
-      spacePlanStatuses[idx] = 'stopped';
-      renderSpacePlans(); renderSpaceTab(); renderSaleUnits();
-      if (currentSpacePlanDetailIdx === idx) renderSpacePlanDetail(idx);
-    }
-    // 复制空间计划（第29轮，对齐售卖计划第18轮口径）：三种状态均可复制且不受编辑锁限制（生成待发布副本，不改变现有计划）
-    // 第31轮：副本的 fnSpaces 不与原计划共享空间——为每个 fn 按原维度集合新建一个售卖空间
-    function copySpacePlan(idx) {
-      const src = spacePlans[idx];
+    // 复制空间（第38轮：对齐第29轮复制口径——不受锁；深拷贝→-副本→新建空间+叉乘生成单元→待发布）
+    function copySpacePlan(k) {
+      const src = spaces[k];
       if (!src) return;
-      let copyName = (src.name || '空间计划') + '-副本';
+      let copyName = (src.name || '售卖空间') + '-副本';
       let n = 2;
-      while (spacePlans.some(r => r.name === copyName)) { copyName = (src.name || '空间计划') + '-副本' + n; n++; }
+      while (Object.values(spaces).some(sp => sp.name === copyName)) { copyName = (src.name || '售卖空间') + '-副本' + n; n++; }
+      spaceSeq += 1;
+      const newKey = 'sp' + spaceSeq;
       const copy = JSON.parse(JSON.stringify(src));
       copy.name = copyName;
-      // 为每个 fn 新建空间并叉乘生成售卖单元（第37轮：维度+度量沿用原计划定义）
-      const newFnSpaces = {};
+      copy.seq = spaceSeq;
+      copy.status = 'pending_publish';
+      spaces[newKey] = copy;
+      // 为每个 fn 叉乘生成售卖单元（沿用原空间维度度量定义）
       const createdUnits = [];
-      Object.keys(copy.fnSpaces || {}).forEach(f => {
-        const oldKey = copy.fnSpaces[f];
-        const dims = (spaces[oldKey] && spaces[oldKey].dims) || (copy.fnDims && copy.fnDims[f]) || [];
-        const meas = (copy.fnMeasures && copy.fnMeasures[f]) || {};
-        spaceSeq += 1;
-        const key = 'sp' + spaceSeq;
-        spaces[key] = { seq: spaceSeq, fn: f, dims: JSON.parse(JSON.stringify(dims)) };
-        newFnSpaces[f] = key;
-        createdUnits.push(...genSaleUnitsForSpace(key, f, dims, meas));
+      Object.keys(copy.fnDims || {}).forEach(f => {
+        createdUnits.push(...genSaleUnitsForSpace(newKey, f, copy.fnDims[f], (copy.fnMeasures || {})[f] || {}));
       });
-      copy.fnSpaces = newFnSpaces;
-      if (copy.fnDims) copy.fnDims = JSON.parse(JSON.stringify(copy.fnDims));
-      if (copy.fnMeasures) copy.fnMeasures = JSON.parse(JSON.stringify(copy.fnMeasures));
-      spacePlans.push(copy);
-      spacePlanStatuses.push('pending_publish');
-      renderSpacePlans();
       renderSpaceTab();
       renderSaleUnits();
       renderPlan();
-      alert('已复制空间计划「' + (src.name || '—') + '」→「' + copyName + '」（待发布）并为其新建售卖空间' + (createdUnits.length > 0 ? '、自动生成售卖单元 ' + createdUnits.length + ' 个' : '') + '，可进入修改后发布。');
+      alert('已复制售卖空间「' + (src.name || '—') + '」→「' + copyName + '」（' + newKey + '，待发布）' + (createdUnits.length > 0 ? '并自动生成售卖单元 ' + createdUnits.length + ' 个' : '') + '。');
     }
-    // ===== 空间计划详情（第29轮）：独立页面，交互对齐售卖计划详情 =====
-    let currentSpacePlanDetailIdx = -1;
-    function openSpacePlanDetail(idx) {
-      currentSpacePlanDetailIdx = idx;
+    // ===== 售卖空间详情（第38轮）：独立页面，从售卖空间 Tab 空间 code 进入 =====
+    let currentSpacePlanDetailIdx = null; // 当前详情空间 key（''=无）
+    function openSpacePlanDetail(k) {
+      currentSpacePlanDetailIdx = k;
       document.getElementById('detail-view').classList.add('hidden');
       document.getElementById('spaceplan-detail-view').classList.remove('hidden');
-      renderSpacePlanDetail(idx);
+      renderSpacePlanDetail(k);
     }
     function closeSpacePlanDetail() {
-      currentSpacePlanDetailIdx = -1;
+      currentSpacePlanDetailIdx = null;
       document.getElementById('spaceplan-detail-view').classList.add('hidden');
       document.getElementById('detail-view').classList.remove('hidden');
     }
-    function renderSpacePlanDetail(idx) {
-      const r = spacePlans[idx];
-      if (!r) return;
-      const st = spacePlanStatuses[idx];
-      const meta = planStatusMeta(st);
-      document.getElementById('spaceplan-detail-title').textContent = `空间计划详情：${r.name || '—'}（${currentProduct.name}）`;
+    function renderSpacePlanDetail(k) {
+      const sp = spaces[k];
+      if (!sp) return;
+      const meta = planStatusMeta(sp.status);
+      document.getElementById('spaceplan-detail-title').textContent = `售卖空间详情：${sp.name || k}（${currentProduct.name}）`;
       const stEl = document.getElementById('spaceplan-detail-status');
       stEl.className = 'badge ' + meta.cls;
       stEl.textContent = meta.text;
-      // 操作区（对齐售卖计划详情）：待发布=修改+发布+复制；已发布=停用+复制；已停用=复制
-      // 复制不受编辑锁限制（第29轮）；修改/发布/停用受锁（未持锁置灰）
+      // 操作区：待发布=发布+复制（空间不可改）；已发布=停用+复制；已停用=仅复制
       const actionsEl = document.getElementById('spaceplan-detail-actions');
       const disCls = canEdit() ? '' : 'pointer-events-none opacity-40';
-      const copyBtn = `<button type="button" onclick="copySpacePlan(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-copy mr-1"></i>复制</button>`;
-      if (st === 'pending_publish') {
+      const copyBtn = `<button type="button" onclick="copySpacePlan('${k}')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-copy mr-1"></i>复制</button>`;
+      if (sp.status === 'pending_publish') {
         actionsEl.innerHTML = `
           <div class="flex flex-wrap items-center justify-end gap-2">
             <div class="flex flex-wrap items-center gap-2 ${disCls}">
-              <button type="button" onclick="editSpacePlan(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-pen-to-square mr-1"></i>修改</button>
-              <button type="button" onclick="publishSpacePlan(${idx})" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-paper-plane mr-1"></i>发布</button>
+              <button type="button" onclick="publishSpacePlan('${k}')" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-paper-plane mr-1"></i>发布</button>
             </div>
             ${copyBtn}
           </div>`;
-      } else if (st === 'published') {
+      } else if (sp.status === 'published') {
         actionsEl.innerHTML = `
           <div class="flex flex-wrap items-center justify-end gap-2">
             <div class="flex flex-wrap items-center gap-2 ${disCls}">
-              <button type="button" onclick="stopSpacePlan(${idx})" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-ban mr-1"></i>停用</button>
+              <button type="button" onclick="stopSpacePlan('${k}')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-ban mr-1"></i>停用</button>
             </div>
             ${copyBtn}
           </div>`;
@@ -2265,42 +2155,38 @@
       // 字段区：名称 + 优先级 + 生效起止
       const field = (label, val) => `<div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">${label}</p><p class="text-slate-800 font-medium">${val ?? '—'}</p></div>`;
       document.getElementById('spaceplan-detail-fields').innerHTML = [
-        field('名称', r.name),
-        field('优先级', r.priority),
-        field('生效起止', r.effStart + ' ~ ' + r.effEnd)
+        field('空间code', k),
+        field('名称', sp.name),
+        field('优先级', sp.priority),
+        field('生效起止', sp.effStart + ' ~ ' + sp.effEnd)
       ].join('');
-      // 空间计划单元列表
+      // 空间单元列表（fn → 维度 → 单元数；生效徽标按空间档期）
       const tbody = document.getElementById('spaceplan-detail-tbody');
-      const fns = Object.keys(r.fnSpaces || {});
+      const fns = Object.keys(sp.fnDims || {});
       if (fns.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-3 py-6 text-center text-xs text-slate-400">无空间计划单元</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="px-3 py-6 text-center text-xs text-slate-400">无空间单元</td></tr>`;
       } else {
         const nowStr = timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' ');
-        const isEff = st === 'published' && r.effStart <= nowStr && nowStr <= r.effEnd;
+        const isEff = sp.status === 'published' && sp.effStart <= nowStr && nowStr <= sp.effEnd;
         const effBadge = isEff
           ? '<span class="badge bg-green-100 text-green-700">生效期内</span>'
           : '<span class="badge bg-slate-100 text-slate-500">生效期外</span>';
-        const effSpan = `<div class="flex flex-col gap-0.5"><span class="text-xs font-mono">${r.effStart} ~ ${r.effEnd}</span>${effBadge}</div>`;
-        tbody.innerHTML = fns.map(f => {
-          const k = r.fnSpaces[f];
-          const sp = spaces[k] || {};
-          const unitCnt = (saleUnits || []).filter(u => u.spaceKey === k).length;
+        const effSpan = `<div class="flex flex-col gap-0.5"><span class="text-xs font-mono">${sp.effStart} ~ ${sp.effEnd}</span>${effBadge}</div>`;
+        tbody.innerHTML = fns.map((f, i) => {
+          const dims = (sp.fnDims || {})[f] || [];
+          const unitCnt = (saleUnits || []).filter(u => u.spaceKey === k && (fnOfUnit(u) || '') === f).length;
           return `
           <tr class="hover:bg-slate-50">
-            <td class="px-3 py-2 font-mono text-xs">${spacePlanUnitId(idx, f)}</td>
+            <td class="px-3 py-2 font-mono text-xs">${'pu-sp-' + (sp.seq || 0) + '-' + (i + 1)}</td>
             <td class="px-3 py-2 font-mono text-xs font-medium">${k}</td>
             <td class="px-3 py-2 text-xs">${f || '—'}</td>
-            <td class="px-3 py-2 text-xs">${sp.dims && sp.dims.length ? sp.dims.join(' + ') : '--'}</td>
+            <td class="px-3 py-2 text-xs">${dims.length ? dims.join(' + ') : '--'}</td>
             <td class="px-3 py-2 text-xs text-right">${unitCnt}</td>
             <td class="px-3 py-2">${effSpan}</td>
           </tr>`;
         }).join('');
       }
     }
-    // ===== 售卖空间（第31轮：创建入口移至空间计划）=====
-    // 售卖空间不再手动批量创建——由空间计划创建：计划中勾选 function 并选择该 fn 的维度集合，
-    // 保存计划时为每个勾选的 fn 新建一个售卖空间（总是新建、不与已有空间合并），落地在计划的 fnSpaces（fn → 新空间 key）。
-    // 发布且处于生效期内的计划创建的空间即该 fn 的生效售卖空间（多计划仲裁：优先级降序→创建时间后创建优先）。
 
     // ===== 售卖计划详情页（独立页面）：从计划单元「所属售卖计划」进入；发布/停用/修改 =====
     let currentPlanDetailIdx = -1;
@@ -2354,11 +2240,14 @@
       } else {
         actionsEl.innerHTML = `<div class="flex flex-wrap items-center justify-end gap-2">${copyBtn}</div>`;
       }
-      // 字段区（第9轮：基础信息仅名称 + 优先级（+状态徽标已在头部）；其余信息见计划单元）
+      // 字段区（第38轮：+所属售卖空间；名称 + 优先级）
       const field = (label, val) => `<div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">${label}</p><p class="text-slate-800 font-medium">${val ?? '—'}</p></div>`;
+      const planSpace = r.spaceKey ? (spaces[r.spaceKey] || null) : null;
       document.getElementById('plan-detail-fields').innerHTML = [
         field('名称', r.name),
-        field('优先级', r.priority)
+        field('优先级', r.priority),
+        field('售卖空间', r.spaceKey || '—'),
+        field('空间名称', planSpace ? (planSpace.name || '—') : '—')
       ].join('');
       // 计划单元区（含计费项/配额项/库存项，均与售卖单元一一对应；显示上架/下架）
       const tbody = document.getElementById('plan-detail-tbody');
@@ -2431,18 +2320,31 @@
     // 页面打开入口（创建模式）
     function openPlanCreatePage() {
       editingPlanIdx = -1;
-      planUnitsFilterReset(); // 第24轮：进入创建页重置筛选（fn 全选 + 全部空间）
       document.getElementById('plan-create-page-title').textContent = '创建售卖计划';
       document.getElementById('plan-name').value = '';
       document.getElementById('plan-priority').value = '';
       document.getElementById('plan-eff-start').value = '2026-11-01T00:00:00';
       document.getElementById('plan-eff-end').value = '2027-11-01T00:00:00';
+      // 第38轮：空间下拉（候选=该商品全部空间，含状态与档期提示）
+      const sel = document.getElementById('plan-space-sel');
+      const keys = Object.keys(spaces);
+      sel.innerHTML = '<option value="">请选择售卖空间</option>' + keys.map(k => {
+        const sp = spaces[k];
+        const meta = planStatusMeta(sp.status);
+        return `<option value="${k}">${k} · ${sp.name || '—'}（${meta.text}，${sp.effStart} ~ ${sp.effEnd}）</option>`;
+      }).join('');
+      sel.value = '';
+      if (document.getElementById('plan-space-info')) document.getElementById('plan-space-info').textContent = '';
       // 全部开关复位为「全部一致」
       ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty'].forEach(k => {
         const m = document.getElementById('plan-mode-' + k);
         if (m) m.checked = false;
       });
-      renderPlanCreatePage();
+      // 复位区块2（未选空间时提示）
+      document.getElementById('plan-units-charge-container').innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>请先在区块1选择售卖空间</p>';
+      // 复位区块3字段组（创建模式：draft 清空后渲染 unified 默认选中项）
+      resetPlanDraft();
+      renderPlanCreateSections(true);
       document.getElementById('detail-view').classList.add('hidden');
       document.getElementById('plan-detail-view').classList.add('hidden');
       document.getElementById('plan-create-view').classList.remove('hidden');
@@ -2453,56 +2355,65 @@
       document.getElementById('detail-view').classList.remove('hidden');
       renderPlan(); renderSaleUnits();
     }
-    // 区块2：生效售卖单元（第24轮：fn 复选组多选/全选 + 空间筛「全部/仅生效中」；筛选改变→超出范围的勾选自动取消）
-    // 勾选/切状态时重渲整页区块（保留勾选状态、上架/下架选择、筛选状态）
-    let planUnitsFilterNeedsReset = false; // 打开创建/修改页时置 true：重渲时丢弃旧筛选回全量
-    function planUnitsFilterReset() { planUnitsFilterNeedsReset = true; }
+    // 区块2：售卖空间内售卖单元（第38轮：计划锁定单空间——先在区块1选择空间，区块2 只展示该空间内叉乘生成的单元）
+    // 勾选/切状态时重渲整页区块（保留勾选状态、上架/下架选择）
+    // 当前创建/修改页选中的空间（''=未选）
+    function planSpaceKey() {
+      const sel = document.getElementById('plan-space-sel');
+      return sel ? (sel.value || '') : '';
+    }
+    // 空间选择变化：重渲单元清单 + 时间范围校验提示
+    function onPlanSpaceChange() {
+      const k = planSpaceKey();
+      const sp = k ? spaces[k] : null;
+      const info = document.getElementById('plan-space-info');
+      if (info) {
+        if (sp) {
+          info.textContent = '空间生效范围：' + sp.effStart + ' ~ ' + sp.effEnd + '（计划时间须在此范围内）';
+          info.className = 'text-[11px] mt-1 ' + (planTimeWithinSpace() ? 'text-slate-400' : 'text-red-500');
+        } else {
+          info.textContent = '';
+        }
+      }
+      renderPlanUnitsCharge();
+    }
+    // 校验：计划生效时间 ⊆ 所选空间生效范围
+    function planTimeWithinSpace() {
+      const k = planSpaceKey();
+      const sp = k ? spaces[k] : null;
+      if (!sp) return false;
+      const s = pcpVal(document.getElementById('plan-eff-start').value, '');
+      const e = pcpVal(document.getElementById('plan-eff-end').value, '');
+      if (!s || !e) return true; // 未填写则不标红（保存时强校验）
+      return s >= sp.effStart && e <= sp.effEnd;
+    }
     function renderPlanUnitsCharge() {
       const box = document.getElementById('plan-units-charge-container');
       if (!box) return;
-      if (saleUnits.length === 0) {
-        box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>暂无售卖单元，请先创建空间计划</p>';
+      const k = planSpaceKey();
+      if (!k) {
+        box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>请先在区块1选择售卖空间</p>';
+        return;
+      }
+      // 该空间内的单元（第38轮：计划只能在该空间单元集合内勾选）
+      const spaceUnits = saleUnits.filter(u => (u.spaceKey || '') === k);
+      if (spaceUnits.length === 0) {
+        box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>该售卖空间内暂无售卖单元</p>';
         return;
       }
       const prevStates = {};
       const prevOnOff = {};
-      const prevFnChecks = {};
-      document.querySelectorAll('#plan-units-charge-container .plan-filter-fn-check').forEach(c => { prevFnChecks[c.value] = c.checked; });
-      const prevSpFilter = planUnitsFilterNeedsReset ? '' : (document.getElementById('plan-filter-space') ? document.getElementById('plan-filter-space').value : '');
-      const keepFnFilter = !planUnitsFilterNeedsReset;
-      planUnitsFilterNeedsReset = false;
-      const hasPrev = box.querySelectorAll('.plan-unit-check').length > 0;
+      // 保留勾选状态只对「同一空间」的历史单元生效：切换空间时新空间单元默认全选（避免跨空间残留状态导致全不勾）
+      let prevSpace = '';
+      const prevWrap = box.querySelector('.plan-unit-row');
+      if (prevWrap) prevSpace = prevWrap.dataset.space || '';
+      const hasPrev = prevSpace === k && box.querySelectorAll('.plan-unit-check').length > 0;
       box.querySelectorAll('.plan-unit-check').forEach(c => { prevStates[c.value] = c.checked; prevOnOff[c.value] = c.dataset.state || 'on'; });
-      // 筛选行（第24轮）：function 多选（复选组+全选） → 售卖空间（全部 / 仅生效中）；筛选变更即收窄勾选范围（超出新的筛选范围的已勾选项自动取消）
-      const fns = Array.from(new Set(saleUnits.map(u => fnOfUnit(u) || '')));
-      const sps = productSpaces();
-      const filterRow = `
-        <div class="p-2 mb-2 bg-white border border-slate-200 rounded-md">
-          <div class="flex flex-wrap items-center gap-2">
-            ${fns.filter(f => f).length > 0 ? `
-              <span class="text-xs text-slate-500 whitespace-nowrap"><i class="fa-solid fa-filter mr-1"></i>Function：</span>
-              <label class="flex items-center gap-1 text-xs cursor-pointer text-violet-700 font-medium border border-violet-200 bg-violet-50 rounded px-1.5 py-0.5">
-                <input type="checkbox" class="plan-filter-fn-check plan-filter-fn-all" value="${fns.filter(f => f).join(',')}" style="accent-color:#7C3AED" onchange="onPlanFnFilterToggleAll(this)">
-                <span>全选</span>
-              </label>
-              ${fns.filter(f => f).map(f => `<label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
-                <input type="checkbox" class="plan-filter-fn-check" value="${f}" style="accent-color:#7C3AED" onchange="applyPlanUnitFilter()">
-                <span>${f}</span></label>`).join('')}` : ''}
-            <span class="text-xs text-slate-500 whitespace-nowrap ${fns.filter(f => f).length > 0 ? 'ml-3' : ''}">售卖空间：</span>
-            <select id="plan-filter-space" class="form-input text-xs px-2 py-1 w-36" onchange="applyPlanUnitFilter()">
-              <option value="">全部空间</option>
-              <option value="__ACTIVE__" ${prevSpFilter === '__ACTIVE__' ? 'selected' : ''}>仅生效中</option>
-            </select>
-          </div>
-        </div>`;
-      box.innerHTML = filterRow + saleUnits.map(u => {
+      box.innerHTML = spaceUnits.map(u => {
         const checked = hasPrev ? (prevStates[u.id] !== undefined ? prevStates[u.id] : false) : true;
         const onoff = prevOnOff[u.id] || 'on';
         const fnText = fnOfUnit(u) || '—';
-        const spName = u.spaceKey || '—';
-        // 空间不匹配提示（第25轮）：单元所在空间 ≠ 当前 fn 生效空间时，在单元行上标注
-        const effSp = effectiveSpaceAt(fnOfUnit(u) || '').key;
-        const spaceMismatch = effSp && u.spaceKey && u.spaceKey !== effSp;
+        const spaceMismatch = false; // 第38轮：计划锁定空间，不再有跨空间错配
         return `
         <div class="plan-unit-row p-2 bg-slate-50 rounded-md ${checked ? '' : 'opacity-60'}" data-fn="${fnOfUnit(u) || ''}" data-space="${u.spaceKey || ''}">
           <div class="flex flex-wrap items-center gap-2">
@@ -2518,61 +2429,13 @@
           </div>
           <div class="mt-1.5 pt-1.5 border-t border-slate-200/70 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
             <span><span class="text-slate-400">Function：</span><span class="text-slate-600">${fnText}</span></span>
-            <span><span class="text-slate-400">售卖空间：</span><span class="text-slate-600">${spName}</span>${spaceMismatch ? '<span class="text-amber-600 text-[10px] ml-1">⚠ 非生效空间</span>' : ''}</span>
+            <span><span class="text-slate-400">售卖空间：</span><span class="text-slate-600">${u.spaceKey || '—'}</span></span>
             <span class="flex flex-wrap items-center gap-x-3 gap-y-0.5">
               <span class="text-slate-400">维度组合：</span>${formatDimMeasure(u)}
             </span>
           </div>
         </div>`;
       }).join('');
-      // 恢复上一次的 fn 复选状态（进入新页面时 keepFnFilter=false → 全量）
-      if (keepFnFilter) {
-        box.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)').forEach(c => {
-          if (prevFnChecks[c.value]) c.checked = true;
-        });
-        const fboxes = Array.from(box.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)'));
-        const allB = box.querySelector('.plan-filter-fn-all');
-        if (allB && fboxes.length > 0) allB.checked = fboxes.every(c => c.checked);
-      }
-      applyPlanUnitFilter();
-    }
-    // fn「全选」复选联动（第24轮）：勾=全部选中；取消=全部清空（单勾改变时同步全选框状态）
-    function onPlanFnFilterToggleAll(allBox) {
-      document.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)').forEach(c => { c.checked = allBox.checked; });
-      applyPlanUnitFilter();
-    }
-    // 筛选值读取（第24轮）：fn=复选组（全不勾=全部）；空间=''全部 / '__ACTIVE__'=仅生效中
-    function planFilterFns() {
-      const sel = Array.from(document.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)')).filter(c => c.checked).map(c => c.value);
-      return { fns: sel, isAll: sel.length === 0 };
-    }
-    function planUnitRowMatch(row) {
-      const { fns, isAll } = planFilterFns();
-      const fnOk = isAll || fns.includes(row.dataset.fn || '');
-      const spSel = document.getElementById('plan-filter-space') ? document.getElementById('plan-filter-space').value : '';
-      let spOk = true;
-      if (spSel === '__ACTIVE__') {
-        const fn = row.dataset.fn || '';
-        spOk = effectiveSpaceAt(fn).key === (row.dataset.space || ''); // 第25轮：计划定时切换优先
-      }
-      return fnOk && spOk;
-    }
-    // 筛选（第24轮重设计）：所有行按筛选显隐（含已勾选行）；超出筛选范围的已勾选项自动取消（筛选条件改变时，之前选中的就不算了）
-    // 若发生勾选取消 → 整体重渲统一视觉状态（renderPlanCreatePage 保留勾选/筛选状态，幂等不递归）
-    function applyPlanUnitFilter() {
-      let pruned = false;
-      document.querySelectorAll('.plan-unit-row').forEach(row => {
-        const check = row.querySelector('.plan-unit-check');
-        if (!check) return;
-        const match = planUnitRowMatch(row);
-        if (check.checked && !match) { check.checked = false; pruned = true; }
-        row.classList.toggle('hidden', !match);
-      });
-      // 同步 fn「全选」框状态
-      const fnChecks = Array.from(document.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)'));
-      const allBox = document.querySelector('.plan-filter-fn-all');
-      if (allBox && fnChecks.length > 0) allBox.checked = fnChecks.every(c => c.checked);
-      if (pruned) renderPlanCreatePage();
     }
     // 切换售卖单元上架/下架（写 DOM data-state 后整体重渲）
     function setPlanUnitState(uid, st) {
@@ -2773,8 +2636,21 @@
       if (!guardEdit()) { closePlanCreatePage(); return; }
       const name = (document.getElementById('plan-name').value || '').trim();
       if (!name) { alert('请填写售卖计划名称'); return; }
+      // 第38轮：必须选择空间；单元只能取该空间内；时间须在空间生效范围内
+      const spaceKey = planSpaceKey();
+      if (!spaceKey || !spaces[spaceKey]) { alert('请选择售卖空间'); return; }
+      const sp = spaces[spaceKey];
       const allUnits = selectedPlanUnits();
       if (allUnits.length === 0) { alert('请至少选择一个售卖单元'); return; }
+      const outOfSpace = allUnits.filter(uid => { const u = saleUnits.find(x => x.id === uid); return !u || (u.spaceKey || '') !== spaceKey; });
+      if (outOfSpace.length > 0) { alert('以下售卖单元不属于所选空间：' + outOfSpace.join('、')); return; }
+      const effStart = pcpVal(document.getElementById('plan-eff-start').value, '2026-11-01T00:00:00');
+      const effEnd = pcpVal(document.getElementById('plan-eff-end').value, '2027-11-01T00:00:00');
+      if (effStart > effEnd) { alert('开始生效时间不能晚于结束生效时间'); return; }
+      if (effStart < sp.effStart || effEnd > sp.effEnd) {
+        alert('售卖计划生效时间（' + effStart + ' ~ ' + effEnd + '）必须在售卖空间 ' + spaceKey + ' 的生效范围（' + sp.effStart + ' ~ ' + sp.effEnd + '）内');
+        return;
+      }
       collectDraftFromDOM();
       const onUnits = onSalePlanUnits();
       // unitStates：勾选且上架=on；勾选但下架=off
@@ -2823,13 +2699,13 @@
       }
       const qunified = (planDraft.qty.unified && typeof planDraft.qty.unified === 'object') ? planDraft.qty.unified : { min: '100', max: '10000', step: '100' };
       const row = {
-        name, units: allUnits, unitStates, chargeCodes, quotaCodes, inventoryCodes,
+        name, spaceKey, units: allUnits, unitStates, chargeCodes, quotaCodes, inventoryCodes,
         modes, factor, slo, factors, slos, payloadId, payloads,
         minQty: qunified.min || '100', maxQty: qunified.max || '10000', stepQty: qunified.step || '100',
         qtys,
         priority: parseInt(document.getElementById('plan-priority').value) || 0,
-        effStart: pcpVal(document.getElementById('plan-eff-start').value, '2026-11-01T00:00:00'),
-        effEnd: pcpVal(document.getElementById('plan-eff-end').value, '2027-11-01T00:00:00')
+        effStart,
+        effEnd
       };
       if (editingPlanIdx >= 0 && planRows[editingPlanIdx]) {
         planRows[editingPlanIdx] = row;
@@ -2852,12 +2728,21 @@
       editingPlanIdx = idx;
       const r = planRows[idx];
       closePlanDetail();
-      planUnitsFilterReset(); // 第24轮：进入修改页重置筛选（回填勾选不受影响——重置只筛选不取消勾选的逻辑由 renderPlanUnitsCharge 的默认全过完成）
       document.getElementById('plan-create-page-title').textContent = '修改售卖计划：' + (r.name || '—');
       document.getElementById('plan-name').value = r.name || '';
       document.getElementById('plan-priority').value = r.priority;
       document.getElementById('plan-eff-start').value = (r.effStart || '').replace(' ', 'T');
       document.getElementById('plan-eff-end').value = (r.effEnd || '').replace(' ', 'T');
+      // 第38轮：空间下拉回填（计划锁定的空间；若空间已不存在则提示）
+      const sel = document.getElementById('plan-space-sel');
+      const keys = Object.keys(spaces);
+      sel.innerHTML = '<option value="">请选择售卖空间</option>' + keys.map(k => {
+        const sp = spaces[k];
+        const meta = planStatusMeta(sp.status);
+        return `<option value="${k}">${k} · ${sp.name || '—'}（${meta.text}，${sp.effStart} ~ ${sp.effEnd}）</option>`;
+      }).join('');
+      sel.value = r.spaceKey || '';
+      onPlanSpaceChange();
       // 初始化 draft = r 的字段值
       resetPlanDraft();
       const onU = Object.entries(r.unitStates || {}).filter(([, st]) => st !== 'off').map(([uid]) => uid);
