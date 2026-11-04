@@ -1315,13 +1315,14 @@
         document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元</td></tr>`;
         return;
       }
-      // 第40轮：设定查询时刻 → 过滤到唯一生效空间内的单元；未设时刻 → 展示全部
+      // 第40/42轮：任何时刻（未选时间=当前时刻）都只展示唯一生效空间内的单元
+      const at = (timeFilter && timeFilter.point) ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' ');
       let listUnits = saleUnits;
-      if (timeFilter && timeFilter.point) {
-        const actKey = effectiveSpaceAtAll(timeFilter.point);
+      {
+        const actKey = effectiveSpaceAtAll(at);
         listUnits = actKey ? saleUnits.filter(u => (u.spaceKey || '') === actKey) : [];
         if (listUnits.length === 0) {
-          document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">该时刻无生效中的售卖空间</td></tr>`;
+          document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">当前时刻无生效中的售卖空间</td></tr>`;
           return;
         }
       }
