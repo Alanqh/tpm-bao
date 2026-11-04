@@ -72,7 +72,7 @@ let tabTxt = w.document.getElementById('space-tbody').textContent;
 ok(tabTxt.includes('sp1') && tabTxt.includes('sp2'), '列表同时展示 sp1 与 sp2（含未到档期空间）');
 ok(tabTxt.includes('双11大促·输入售卖空间'), '列表展示空间名称');
 const ths = w.document.querySelectorAll('#inner-tab-space thead th');
-ok(ths.length === 9, '售卖空间表头 9 列，实得 ' + ths.length);
+ok(ths.length === 8, '售卖空间表头 8 列（第40轮删空间单元列），实得 ' + ths.length);
 // 时间旅行 11-15：档期徽标变化（sp2 生效期内）
 T.timeFilter = { point: '2026-11-15 12:00:00' };
 T.renderSpaceTab();

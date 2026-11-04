@@ -39,21 +39,21 @@ ok(!document.getElementById('space-new-btn'), '批量创建售卖空间按钮已
 ok(!document.getElementById('fn-space-cards'), 'fn 配置卡已删（第23轮合并进列表）');
 ok(!!document.getElementById('space-tbody'), '含售卖空间列表表');
 
-// ===== 2. 空间列表渲染（第38轮：全空间展示 9 列；空间级列 rowspan 合并） =====
+// ===== 2. 空间列表渲染（第40轮：全空间展示 8 列，删空间单元列；空间级列 rowspan 合并） =====
 section('2. 空间列表');
 const spRows = Array.from(document.querySelectorAll('#space-tbody tr'));
 ok(spRows.length === 4, '空间列表 4 行（sp1 三 fn 行 + sp2 一行），实得 ' + spRows.length);
 const spHead = Array.from(document.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(spHead.length === 9 && spHead[0] === '空间单元' && spHead[2] === '售卖空间' && spHead[4] === 'Function' && spHead[5] === '空间维度', '空间列表 9 列（空间单元/状态/售卖空间/空间名称/Function/空间维度/售卖单元数/优先级/生效起止）');
+ok(spHead.length === 8 && spHead[0] === '售卖空间' && spHead[1] === '状态' && spHead[2] === '空间名称' && spHead[3] === 'Function' && spHead[4] === '空间维度', '空间列表 8 列（售卖空间/状态/空间名称/Function/空间维度/售卖单元数/优先级/生效起止）');
+ok(!spHead.includes('空间单元'), '第40轮已删「空间单元」列');
 // 排序（第39轮）：状态→优先级降序→创建时间逆序；sp2（500）> sp1（100）→ sp2 在前
 const firstCells = spRows[0].cells;
-ok(firstCells[2] && firstCells[2].textContent.trim() === 'sp2', '首行空间=sp2（published 按优先级降序在前）');
-ok(firstCells[0].textContent.trim().startsWith('pu-sp-2-'), '空间单元编号 pu-sp-2-1: ' + firstCells[0].textContent.trim());
-// sp1 三行 fn 序（第39轮）：fnDims 键序=创建时勾选序 input/output/cache，pu-sp-1-1/2/3 与创建时一致；首行 rowspan=3
+ok(firstCells[0] && firstCells[0].textContent.trim() === 'sp2', '首行空间=sp2（published 按优先级降序在前）');
+ok(!spRows[0].textContent.includes('pu-sp-'), '无空间单元编号（pu-sp 已删）');
+// sp1 三行 fn 序（第39轮）：fnDims 键序=创建时勾选序 input/output/cache；首行空间列 rowspan=3
 const sp1First = spRows[1].cells;
-ok(sp1First[2] && sp1First[2].textContent.trim() === 'sp1' && sp1First[2].rowSpan === 3, 'sp1 空间列 rowspan=3（三 fn 行合并）');
-ok(sp1First[4].textContent.trim() === 'input', 'sp1 首 fn 行=input（创建时勾选序）');
-ok(spRows[1].cells[0].textContent.trim() === 'pu-sp-1-1', 'sp1 首行空间单元编号 pu-sp-1-1（input=创建序第1）');
+ok(sp1First[0] && sp1First[0].textContent.trim() === 'sp1' && sp1First[0].rowSpan === 3, 'sp1 空间列 rowspan=3（三 fn 行合并）');
+ok(sp1First[3].textContent.trim() === 'input', 'sp1 首 fn 行=input（创建时勾选序）');
 ok(spRows[2].cells[0].textContent.trim() === 'output' && spRows[2].cells[2].textContent.trim() === '1', 'sp1 output 行单元数=1');
 ok(spRows[3].cells[0].textContent.trim() === 'cache' && spRows[3].cells[2].textContent.trim() === '1', 'sp1 cache 行单元数=1');
 
@@ -175,8 +175,9 @@ window.openDetailByCode('maas-product-vtpm-std');
 window.eval('switchInnerTab("space")');
 const vRows = Array.from(document.querySelectorAll('#space-tbody tr'));
 ok(vRows.length === 1, '无 fn 商品空间列表单行（sp1 常驻空间）');
-ok(vRows[0].cells[4].textContent.trim() === '—', 'Function 列显示 —（无 function）');
+ok(vRows[0].cells[3].textContent.trim() === '—', 'Function 列显示 —（无 function）');
 ok(vRows[0].cells[1].textContent.includes('已发布'), 'sp1 状态徽标=已发布');
+ok(vRows[0].cells[0].textContent.trim() === 'sp1', '空间列=sp1');
 ok(evalInPage('currentSpaceOfFn("")') === 'sp1', 'currentSpaceOfFn("")=sp1（fn=""→sp1）');
 window.eval('backToList()');
 

@@ -52,7 +52,7 @@ ok(rows.every(r => !r.textContent.includes('起切换')), '无切换预告文案
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
 rows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows.length === 4, '11-15 时仍 4 行（全空间展示）');
-const sp2r = rows.find(r => r.cells[2] && r.cells[2].textContent.trim() === 'sp2');
+const sp2r = rows.find(r => r.cells[0] && r.cells[0].textContent.trim() === 'sp2');
 ok(sp2r && sp2r.textContent.includes('生效期内'), '11-15 sp2 行=生效期内（接管中）');
 w.eval('timeFilter = null; renderSpaceTab()');
 

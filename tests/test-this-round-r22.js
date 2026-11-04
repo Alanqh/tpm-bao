@@ -30,7 +30,7 @@ ok(w.eval('currentSpaceOfFn("cache")') === 'sp1', 'cache 当前 sp1');
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
 ok(w.eval('currentSpaceOfFn("input")') === 'sp2', '11-15 双11空间接管 input→sp2（priority 500>100）');
 const midRows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(midRows.length === 4 && midRows.some(r => r.cells[2] && r.cells[2].textContent.trim() === 'sp2' && r.textContent.includes('生效期内')), '11-15 列表 sp2 行显示生效期内');
+ok(midRows.length === 4 && midRows.some(r => r.cells[0] && r.cells[0].textContent.trim() === 'sp2' && r.textContent.includes('生效期内')), '11-15 列表 sp2 行显示生效期内');
 w.eval('timeFilter = null; renderSpaceTab()');
 // 5. SU 创建链路已删（第37轮）
 ok(!d.getElementById('modal-su-confirm'), 'SU 弹窗已删除');
@@ -96,7 +96,7 @@ w.eval('exitEdit(); backToList()');
 w.eval('openDetailByCode("maas-product-vtpm-std")');
 const vRows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(vRows.length === 1, 'vtpm 单行（sp1 常驻空间）');
-ok(vRows[0].cells[4].textContent.includes('—'), 'Function 列显示 —');
+ok(vRows[0].cells[3].textContent.includes('—'), 'Function 列显示 —');
 ok(w.eval('currentSpaceOfFn("")') === 'sp1', 'vtpm 当前 sp1');
 // 12. snapshot 链路（第38轮）：glm4 新建空间后返回列表再进入，spaces/spaceSeq 恢复
 w.eval('openDetailByCode("maas-online-text-glm4")');

@@ -110,14 +110,16 @@ window.eval(`
 `);
 ok(statusOf('su-2') === '在售', '恢复上架后 su-2 重新在售');
 
-// 时间点查询：mock 生效期 2026-10-01 起 → 查 2026-09-01 时无一生效 → 全部禁售
+// 时间点查询：mock 生效期 2026-10-01 起 → 查 2026-09-01 时无生效中空间 → SU Tab 空态（第40轮：时刻过滤只显唯一生效空间）
 window.eval(`
   (function(){
     document.getElementById('tf-point').value = '2026-09-01T12:00';
     querySaleParams();
   })()
 `);
-ok(statusOf('su-1') === '禁售' && statusOf('su-2') === '禁售' && statusOf('su-3') === '禁售', '查询 2026-09-01（生效期之前）全部禁售');
+const rows0901 = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
+ok(rows0901.length === 1 && rows0901[0].textContent.includes('该时刻无生效中的售卖空间'), '查询 2026-09-01（生效期之前）无生效空间 → 空态提示（第40轮）');
+ok(evalInPage('effectiveSpaceAtAll("2026-09-01 12:00:00")') === '', 'effectiveSpaceAtAll(2026-09-01)=空');
 // 复位时间点 → su-2/su-3 回到在售，su-1 因只剩停用计划仍禁售
 window.eval(`
   (function(){

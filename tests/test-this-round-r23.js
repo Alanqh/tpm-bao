@@ -14,15 +14,16 @@ function ok(cond, msg) { step++; if (!cond) { fail++; console.log('FAIL[' + step
 
 // 1. 打开 glm4（浏览态）
 w.eval('openDetailByCode("maas-online-text-glm4")');
-// 2. 列表结构：9 列表头（第38轮）
+// 2. 列表结构：8 列表头（第40轮：删空间单元列，售卖空间居首）
 const spHead = Array.from(d.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(JSON.stringify(spHead) === JSON.stringify(['空间单元','状态','售卖空间','空间名称','Function','空间维度','售卖单元数','优先级','生效起止']), '表头 9 列: ' + spHead.join('/'));
-// 3. 行序（第39轮：排序=状态→优先级降序→创建时间逆序；sp1 内 fn 按创建序 input/output/cache，pu-sp-1-1/2/3 与创建勾选一致）
+ok(JSON.stringify(spHead) === JSON.stringify(['售卖空间','状态','空间名称','Function','空间维度','售卖单元数','优先级','生效起止']), '表头 8 列: ' + spHead.join('/'));
+// 3. 行序（第39轮：排序=状态→优先级降序→创建时间逆序；sp1 内 fn 按创建序 input/output/cache）
 const rows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows.length === 4, '4 个空间行（sp1×3fn + sp2×1）');
-ok(rows[0].cells[2].textContent.trim() === 'sp2', '首行 sp2（同 published，优先级 500 > 100）');
-ok(rows[1].cells[2].textContent.trim() === 'sp1' && rows[1].cells[2].rowSpan === 3, 'sp1 空间列 rowspan=3');
-ok(rows[1].cells[4].textContent.trim() === 'input' && rows[2].cells[0].textContent.trim() === 'output' && rows[3].cells[0].textContent.trim() === 'cache', 'sp1 三行按创建序 input/output/cache');
+ok(rows[0].cells[0].textContent.trim() === 'sp2', '首行 sp2（同 published，优先级 500 > 100）');
+ok(rows[1].cells[0].textContent.trim() === 'sp1' && rows[1].cells[0].rowSpan === 3, 'sp1 空间列 rowspan=3');
+ok(rows[1].cells[3].textContent.trim() === 'input' && rows[2].cells[0].textContent.trim() === 'output' && rows[3].cells[0].textContent.trim() === 'cache', 'sp1 三行按创建序 input/output/cache');
+ok(!rows[0].textContent.includes('pu-sp-'), '第40轮已删空间单元列（无 pu-sp 编号）');
 // 4. 状态列（第38轮：三态徽标 + 档期内/外标注）
 ok(rows[0].textContent.includes('已发布') && rows[1].textContent.includes('已发布'), '两空间首行均已发布徽标（sp1 续行被 rowspan 合并无徽标）');
 ok(rows[0].textContent.includes('生效期外') || rows[0].textContent.includes('生效期内'), '档期标注展示（当前时刻 sp2 未到档期=生效期外）');
@@ -40,9 +41,9 @@ w.eval('backToList()');
 w.eval('openDetailByCode("maas-product-vtpm-std")');
 const vRows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(vRows.length === 1, 'vtpm 单行（sp1 常驻空间）');
-ok(vRows[0].cells[4].textContent.includes('—'), '无 fn 显示 —');
+ok(vRows[0].cells[3].textContent.includes('—'), '无 fn 显示 —');
 ok(vRows[0].textContent.includes('已发布'), 'sp1 已发布');
-ok(vRows[0].cells[6].textContent.trim() === '3', 'sp1 售卖单元数=3（std mock su-1~3）');
+ok(vRows[0].cells[5].textContent.trim() === '3', 'sp1 售卖单元数=3（std mock su-1~3）');
 // 8. 创建新空间：未发布 → 不参与仲裁；发布且高优先级 → 生效
 w.eval('startEdit()');
 w.eval('openSpacePlanModal()');
@@ -66,7 +67,7 @@ ok(w.eval('currentSpaceOfFn("")') === 'sp1', 'sp2 待发布 → 不接管，仍 
 w.eval('publishSpacePlan("sp2")');
 ok(w.eval('currentSpaceOfFn("")') === 'sp2', '发布后 priority 200>100 → sp2 接管');
 let rows3 = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows3.length === 2 && rows3[0].cells[2].textContent.trim() === 'sp2', '列表显示 sp2（排序在前：effStart 相同但 priority 无关排序，seq 大不前置——按 seq 升序在后）');
+ok(rows3.length === 2 && rows3[0].cells[0].textContent.trim() === 'sp2', '列表显示 sp2（排序在前：同 published，priority 200 > 100）');
 // 9. 重复维度集合不再拦截（总是新建 sp3）
 w.eval('openSpacePlanModal()');
 const box9 = d.querySelector('.sp-fn-check[data-fn=""]');

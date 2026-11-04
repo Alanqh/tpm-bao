@@ -22,18 +22,18 @@ ok(w.eval('typeof querySpaceAt') === 'undefined' && w.eval('typeof resetSpaceAt'
 
 // ===== 2. 初始列表：4 行（sp2×input + sp1×input/output/cache），9 列表头 =====
 const ths = d.querySelectorAll('#inner-tab-space thead th');
-ok(ths.length === 9, '售卖空间表头 9 列，实得 ' + ths.length);
+ok(ths.length === 8 && ths[0].textContent.trim() === '售卖空间', '售卖空间表头 8 列（第40轮删空间单元列；售卖空间居首），实得 ' + ths.length);
 let rows = dataRows();
 ok(rows.length === 4, 'glm4 初始 4 行（sp1 三 fn + sp2 一 fn），实得 ' + rows.length);
 // 排序（第39轮）：同为 published → 优先级降序（sp2 500 > sp1 100）→ sp2 首行
-ok(rows[0].cells[2] && rows[0].cells[2].textContent.trim() === 'sp2', 'sp2（优先级 500）排首行');
-ok(rows[0].cells[4].textContent.trim() === 'input' && rows[0].cells[2].rowSpan === 1, 'sp2 行 fn=input 单行 rowspan=1');
-// sp1 组内按创建序（fnDims 键序 input→output→cache），pu-sp 编号与创建勾选一致
-const fnOfRow = r => r.cells.length === 3 ? r.cells[0].textContent.trim() : r.cells[4].textContent.trim();
+ok(rows[0].cells[0] && rows[0].cells[0].textContent.trim() === 'sp2', 'sp2（优先级 500）排首行');
+ok(rows[0].cells[3].textContent.trim() === 'input' && rows[0].cells[0].rowSpan === 1, 'sp2 行 fn=input 单行 rowspan=1');
+// sp1 组内按创建序（fnDims 键序 input→output→cache）
+const fnOfRow = r => r.cells.length === 3 ? r.cells[0].textContent.trim() : r.cells[3].textContent.trim();
 const fnsSp1 = [fnOfRow(rows[1]), fnOfRow(rows[2]), fnOfRow(rows[3])];
-ok(fnsSp1.join(',') === 'input,output,cache', 'sp1 三行按创建序 input→output→cache（pu-sp-1-1/2/3 与创建时一致），实得 ' + fnsSp1.join(','));
-ok(rows[1].cells[0].textContent.trim() === 'pu-sp-1-1', 'sp1 首行编号 pu-sp-1-1（input=创建时第 1 个勾选）');
-ok(rows[1].cells.length === 9 && rows[2].cells.length === 3 && rows[3].cells.length === 3, 'sp1 首行 9 列带空间级列、两续行仅 3 列');
+ok(fnsSp1.join(',') === 'input,output,cache', 'sp1 三行按创建序 input→output→cache，实得 ' + fnsSp1.join(','));
+ok(!d.getElementById('space-tbody').textContent.includes('pu-sp-'), '第40轮：列表无 pu-sp 编号');
+ok(rows[1].cells.length === 8 && rows[2].cells.length === 3 && rows[3].cells.length === 3, 'sp1 首行 8 列带空间级列、两续行仅 3 列');
 // 当前 11-04：sp2 生效期外（11-11 起）、sp1 生效期内
 ok(rows[0].textContent.includes('生效期外'), 'sp2 生效期外（11-11 起档）');
 ok(rows[1].textContent.includes('生效期内'), 'sp1 生效期内');
@@ -73,8 +73,8 @@ w.eval('confirmSpacePlan()');
 rows = dataRows();
 ok(rows.length === 5, '新增空间后 5 行，实得 ' + rows.length);
 // 状态组：published（sp2/sp1）在前，pending（sp3 新建）在后
-ok(rows[0].cells[2].textContent.trim() === 'sp2' && rows[1].cells[2].textContent.trim() === 'sp1', 'published 组在前（sp2 优先级高）');
-ok(rows[4].cells[2].textContent.trim() === 'sp3' && rows[4].cells[1].textContent.trim() === '待发布', '新建空间 sp3 排末尾（pending 组）');
+ok(rows[0].cells[0].textContent.trim() === 'sp2' && rows[1].cells[0].textContent.trim() === 'sp1', 'published 组在前（sp2 优先级高）');
+ok(rows[4].cells[0].textContent.trim() === 'sp3' && rows[4].cells[1].textContent.trim() === '待发布', '新建空间 sp3 排末尾（pending 组）');
 // 再建一个 pending 且优先级 800 的空间 → 仍排在 pending 组内最前（优先级降序）
 w.eval('openSpacePlanModal()');
 d.getElementById('sp-name').value = 'r39次优空间';
@@ -89,16 +89,16 @@ d.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入token区间"
 w.eval('confirmSpacePlan()');
 rows = dataRows();
 ok(rows.length === 6, '再增 1 行共 6 行');
-ok(rows[4].cells[2].textContent.trim() === 'sp3' && rows[5].cells[2].textContent.trim() === 'sp4', 'pending 组内优先级降序（sp3 900 > sp4 800）');
+ok(rows[4].cells[0].textContent.trim() === 'sp3' && rows[5].cells[0].textContent.trim() === 'sp4', 'pending 组内优先级降序（sp3 900 > sp4 800）');
 // 停用 sp3 → stopped 组排最后
 w.eval('stopSpacePlan("sp3")');
 rows = dataRows();
-ok(rows[5].cells[2].textContent.trim() === 'sp3' && rows[5].cells[1].textContent.trim() === '已停用', '停用后 sp3 落到 stopped 组末尾');
+ok(rows[5].cells[0].textContent.trim() === 'sp3' && rows[5].cells[1].textContent.trim() === '已停用', '停用后 sp3 落到 stopped 组末尾');
 // 发布 sp4 → 优先级 800 > sp1 100，但 < sp2 500 → published 组内第二
 w.eval('publishSpacePlan("sp4")');
 rows = dataRows();
-ok(rows[0].cells[2].textContent.trim() === 'sp4' && rows[1].cells[2].textContent.trim() === 'sp2' && rows[2].cells[2].textContent.trim() === 'sp1',
-  '发布 sp4 后 published 组=sp4(800)→sp2(500)→sp1(100)（优先级降序），实得 ' + rows.map(r => (r.cells[2] || { textContent: '' }).textContent.trim()).join(','));
+ok(rows[0].cells[0].textContent.trim() === 'sp4' && rows[1].cells[0].textContent.trim() === 'sp2' && rows[2].cells[0].textContent.trim() === 'sp1',
+  '发布 sp4 后 published 组=sp4(800)→sp2(500)→sp1(100)（优先级降序），实得 ' + rows.map(r => (r.cells[0] || { textContent: '' }).textContent.trim()).join(','));
 // 清理：删除测试造的空间恢复现场
 w.eval('delete spaces["sp3"]; delete spaces["sp4"]; saleUnits = saleUnits.filter(u => u.spaceKey !== "sp3" && u.spaceKey !== "sp4"); spaceSeq = 2; renderSpaceTab(); renderSaleUnits();');
 w.eval('exitEdit()');
@@ -107,8 +107,8 @@ ok(dataRows().length === 4, '清理后回到 4 行');
 // ===== 7. vtpm：常驻空间单行 =====
 w.eval('backToList(); openDetailByCode("maas-product-vtpm-std")');
 rows = dataRows();
-ok(rows.length === 1 && rows[0].cells[2].textContent.trim() === 'sp1', 'vtpm 常驻空间单行');
-ok(rows[0].cells[4].textContent.trim() === '—', 'fn 空串单元 Function 列=—（不区分 function）');
+ok(rows.length === 1 && rows[0].cells[0].textContent.trim() === 'sp1', 'vtpm 常驻空间单行');
+ok(rows[0].cells[3].textContent.trim() === '—', 'fn 空串单元 Function 列=—（不区分 function）');
 ok((d.getElementById('space-tbody').textContent.match(/未指定/g) || []).length === 0, '无「未指定」行');
 
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
