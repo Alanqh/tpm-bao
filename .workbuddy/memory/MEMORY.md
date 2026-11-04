@@ -1,7 +1,10 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第40轮（main 31f66cb / gh-pages f173da0，24 套全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第41轮（main 804a9e3 / gh-pages 2b41729，24 套全绿）。
+
+## 第41轮（现行口径）：售卖单元 Tab 时间选择即时刷新
+- 删「查询」「重置」按钮及 querySaleParams/resetSaleParams 函数；#tf-point 加 onchange=onSaleTimeChange(this.value)——有值→timeFilter={point}，清空→null（默认当前时刻），随后 renderSaleUnits()。timeFilter 消费方零改动。
 
 ## 第40轮（现行口径）：列表删空间单元列 + 详情页售卖单元清单 + SU Tab 唯一生效空间过滤
 - **售卖空间列表 8 列**：删「空间单元」列（pu-sp-N-M 前缀界面清零），列序=售卖空间/状态/空间名称/Function/空间维度/售卖单元数/优先级/生效起止；空表 colspan=8。
