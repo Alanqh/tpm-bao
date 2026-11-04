@@ -90,7 +90,7 @@ const fnBox = modal.querySelector('.sp-fn-check[data-fn="output"]');
 fnBox.checked = true;
 fnBox.dispatchEvent(new w.Event('change', { bubbles: true }));
 modal.querySelectorAll('.sp-dim-check[data-fn="output"]').forEach(c => { c.checked = c.value === '输入token区间'; c.dispatchEvent(new w.Event('change', { bubbles: true })); });
-const measBox = modal.querySelector('.sp-measure-check[data-fn="output"][data-dim="输入token区间"][value="1M+"]');
+const measBox = modal.querySelector('.sp-measure-check[data-dim="输入token区间"][value="1M+"]');
 if (measBox) measBox.checked = true;
 w.document.getElementById('sp-name').value = '测试空间A';
 w.document.getElementById('sp-priority').value = '150';

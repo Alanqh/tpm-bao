@@ -47,9 +47,9 @@ const dtThs = Array.from(d.querySelector('#spaceplan-detail-tbody').closest('tab
 ok(dtThs.join('/') === '售卖单元/Function/维度:度量', '详情单元表 3 列（售卖单元/Function/维度:度量）: ' + dtThs.join('/'));
 const dtRows = Array.from(d.querySelectorAll('#spaceplan-detail-tbody tr'));
 ok(dtRows.length === 12, '详情单元表 12 行（sp1 全部售卖单元，r43 缺省扩展）');
-ok(dtRows[0].textContent.includes('su-11') && dtRows[0].textContent.trim().endsWith('--'), '首行=su-11 全缺省 组合序（--）排最前');
+ok(dtRows[0].textContent.includes('su-4') && dtRows[0].textContent.trim().endsWith('--'), '首行=su-4 全缺省 组合序（--）排最前（r44 fn 序 input 在前）');
 ok(dtRows.some(r => r.textContent.includes('su-1') && r.textContent.includes('input')), 'su-1/input 在清单中');
-ok(dtRows[11].textContent.includes('su-10') && dtRows[11].textContent.includes('16K+'), '末行=su-10（输出16K+ 组合序最后）');
+ok(dtRows[11].textContent.includes('su-14') && dtRows[11].textContent.includes('0～4K'), '末行=su-14（cache/输出0～4K 组合序最后，r44）');
 w.eval('closeSpacePlanDetail()');
 
 // ===== 5. 纯空间仲裁（第38轮）=====
@@ -70,11 +70,11 @@ w.eval('startEdit(); openSpacePlanModal()');
 d.getElementById('sp-name').value = 'r38双fn空间';
 d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-05T00:00:00';
-// 第43轮两步：三个 fn 全勾 + 每 fn 各勾一个度量（组合=勾选度量∪全缺省 → 每 fn 2 单元）
+// 第44轮：三个 fn 全勾 + 共享勾选两维度度量（输入0～128K + 输出0～4K → 每 fn (1+1)×(1+1)=4 组合）
 Array.from(d.querySelectorAll('#modal-spaceplan .sp-fn-check')).forEach(b => { b.checked = true; b.dispatchEvent(new w.Event('change', { bubbles: true })); });
-d.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入token区间"][value="0～128K"]').checked = true;
-d.querySelector('.sp-measure-check[data-fn="output"][data-dim="输出token区间"][value="0～4K"]').checked = true;
-d.querySelector('.sp-measure-check[data-fn="cache"][data-dim="输入token区间"][value="0～128K"]').checked = true;
+d.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]').checked = true;
+d.querySelector('.sp-measure-check[data-dim="输出token区间"][value="0～4K"]').checked = true;
+d.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]').checked = true;
 w.eval('confirmSpacePlan()');
 rows = Array.from(d.querySelectorAll('#space-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
 ok(rows.length === 7, '新空间加入后 7 行（sp1×3 + sp2×1 + sp3×3），实得 ' + rows.length);
@@ -83,7 +83,7 @@ const sp3Idx = rows.indexOf(sp3First);
 ok(!!sp3First && rows[sp3Idx+1] && rows[sp3Idx+2] && rows[sp3Idx+1].cells.length === 3 && rows[sp3Idx+2].cells.length === 3,
   'sp3 三 fn 行（首行 8 列带空间级列，两续行仅 fn/维度/单元数 3 列）');
 ok(sp3First.cells[0].rowSpan === 3 && sp3First.cells[3].textContent.trim() === 'input', 'sp3 空间列 rowspan=3（首行 fn=input，创建时勾选序 input→output→cache）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 6, 'sp3 每 fn (1+1)=2 组合（勾选+全缺省）×3 fn 共 6 单元');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 12, 'sp3 每 fn 4 组合（含缺省交叉与全缺省）×3 fn 共 12 单元（r44 共享度量）');
 
 // ===== 8. vtpm 商品：常驻空间单行=====
 w.eval('exitEdit(); backToList(); openDetailByCode("maas-product-vtpm-std")');

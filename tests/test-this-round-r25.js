@@ -91,10 +91,11 @@ ok(alerts.some(m => m.includes('至少勾选一个 function')), '未勾任何 fn
 const inBox = modal.querySelector('.sp-fn-check[data-fn="input"]');
 inBox.checked = true;
 inBox.dispatchEvent(new w.Event('change', { bubbles: true }));
-const inDimWrap = modal.querySelector('[data-fndims="input"]');
-ok(inDimWrap && !inDimWrap.classList.contains('opacity-50'), '勾选后度量区启用');
 ok(!modal.querySelector('.sp-dim-check'), '第43轮：维度复选已删');
-modal.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入token区间"][value="0～128K"]').checked = true;
+// 第44轮：fn 与度量分离不嵌套——度量区块独立于 fn
+ok(!modal.querySelector('#sp-fnspaces .sp-measure-check'), 'fn 区块内无度量（不嵌套）');
+ok(modal.querySelector('.sp-measure-check[data-dim="输入token区间"]') && !modal.querySelector('.sp-measure-check[data-dim="输入token区间"]').disabled, '度量始终可用');
+modal.querySelector('.sp-measure-check[data-dim="输入token区间"][value="0～128K"]').checked = true;
 d.getElementById('sp-priority').value = '300';
  alerts.length = 0;
 w.eval('confirmSpacePlan()');

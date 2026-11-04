@@ -54,8 +54,8 @@ ok(!spRows[0].textContent.includes('pu-sp-'), '无空间单元编号（pu-sp 已
 const sp1First = spRows[1].cells;
 ok(sp1First[0] && sp1First[0].textContent.trim() === 'sp1' && sp1First[0].rowSpan === 3, 'sp1 空间列 rowspan=3（三 fn 行合并）');
 ok(sp1First[3].textContent.trim() === 'input', 'sp1 首 fn 行=input（创建时勾选序）');
-ok(spRows[2].cells[0].textContent.trim() === 'output' && spRows[2].cells[2].textContent.trim() === '4', 'sp1 output 行单元数=4（r43 缺省扩展）');
-ok(spRows[3].cells[0].textContent.trim() === 'cache' && spRows[3].cells[2].textContent.trim() === '2', 'sp1 cache 行单元数=2（勾选+全缺省）');
+ok(spRows[2].cells[0].textContent.trim() === 'output' && spRows[2].cells[2].textContent.trim() === '4', 'sp1 output 行单元数=4');
+ok(spRows[3].cells[0].textContent.trim() === 'cache' && spRows[3].cells[2].textContent.trim() === '4', 'sp1 cache 行单元数=4（r44：三 fn 共享度量勾选，各 4 组合）');
 
 // ===== 3. effectiveSpaceAt（第38轮：纯空间本体仲裁） =====
 section('3. 生效空间推导');
@@ -77,8 +77,8 @@ const r0 = suRows[0].cells;
 ok(r0[0].textContent.includes('sp1') && r0[0].rowSpan === 12 && r0[1].textContent.trim() === '--' && r0[2].textContent.trim() === 'cache' && r0[3].textContent.trim() === 'su-15', 'sp1 空间列 rowspan=12（全部 12 单元跨组合/跨 fn 合并；首行=全缺省组合/—/su-15）');
 // 全缺省组合段：三 fn 各一行，组合 td rowspan=3
 ok(r0[1].rowSpan === 3, '全缺省组合 rowspan=3（跨三 fn 合并）');
-ok(suRows[1].cells[0].textContent.trim() === 'input' && suRows[1].cells[1].textContent.trim() === 'su-11', '组内第二行 fn=input/su-11');
-ok(suRows[2].cells[0].textContent.trim() === 'output' && suRows[2].cells[1].textContent.trim() === 'su-14', '组内第三行 fn=output/su-14');
+ok(suRows[1].cells[0].textContent.trim() === 'input' && suRows[1].cells[1].textContent.trim() === 'su-4', '组内第二行 fn=input/su-4（r44 重排）');
+ok(suRows[2].cells[0].textContent.trim() === 'output' && suRows[2].cells[1].textContent.trim() === 'su-11', '组内第三行 fn=output/su-11（r44 重排）');
 ok(!suRows.some(r => r.textContent.includes('sp2')), '默认视图不含 sp2（未到档期空间不展示；第42轮）');
 // 时间旅行 11-15：sp2（优先级 500）胜出 → 切显 sp2 四单元（含 su-16 全缺省）
 window.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSaleUnits();');
@@ -101,7 +101,7 @@ ok(document.querySelectorAll('.sp-dim-check').length === 0, '第43轮：维度�
 const box6 = document.querySelector('.sp-fn-check[data-fn="output"]');
 box6.checked = true;
 box6.dispatchEvent(new window.Event('change', { bubbles: true }));
-document.querySelectorAll('.sp-measure-check[data-fn="output"][data-dim="购买量区间"]').forEach(c => { c.checked = ['1～100', '500+'].includes(c.value); });
+document.querySelectorAll('.sp-measure-check[data-dim="购买量区间"]').forEach(c => { c.checked = ['1～100', '500+'].includes(c.value); });
 document.getElementById('sp-name').value = 'r43 创建空间X';
 document.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 document.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';

@@ -798,8 +798,12 @@
           </div>
         </div>
         <div>
-          <label class="form-label">空间内各 function 售卖配置（维度 × 度量确认后叉乘生成售卖单元）</label>
-          <div id="sp-fnspaces" class="space-y-2"></div>
+          <label class="form-label">售卖 function</label>
+          <div id="sp-fnspaces" class="flex flex-wrap gap-3"></div>
+        </div>
+        <div>
+          <label class="form-label">维度度量值（维度 × 度量确认后与各 function 叉乘生成售卖单元）</label>
+          <div id="sp-dimmeas" class="space-y-1.5"></div>
         </div>
       </div>
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
@@ -975,22 +979,22 @@
         { id: 'su-7', fn: '', spaceKey: 'sp1', dim: '购买周期', measure: '90天' },
         { id: 'su-8', fn: '', spaceKey: 'sp1', dim: '', measure: '' }
       ],
-      // glm4：sp1（input 6 + output 4 + cache 2 = 12）+ sp2（3 度量 + 全缺省 = 4）
+      // glm4（第44轮）：sp1 三 fn 共享同一份勾选（输入[128K～1M]+输出[0～4K]），每 fn 4 组合×3=12；sp2（input 单维 3 度量 + 全缺省 = 4）
       'maas-online-text-glm4': [
         { id: 'su-1', fn: 'input', spaceKey: 'sp1', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
-        { id: 'su-2', fn: 'input', spaceKey: 'sp1', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 16K+' },
-        { id: 'su-3', fn: 'output', spaceKey: 'sp1', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
-        { id: 'su-4', fn: 'cache', spaceKey: 'sp1', dim: '输入token区间', measure: '0～128K' },
+        { id: 'su-2', fn: 'input', spaceKey: 'sp1', dim: '输入token区间', measure: '128K～1M' },
+        { id: 'su-3', fn: 'input', spaceKey: 'sp1', dim: '输出token区间', measure: '0～4K' },
+        { id: 'su-4', fn: 'input', spaceKey: 'sp1', dim: '', measure: '' },
         { id: 'su-5', fn: 'input', spaceKey: 'sp2', dim: '输入token区间', measure: '0～128K' },
         { id: 'su-6', fn: 'input', spaceKey: 'sp2', dim: '输入token区间', measure: '128K～1M' },
         { id: 'su-7', fn: 'input', spaceKey: 'sp2', dim: '输入token区间', measure: '1M+' },
-        { id: 'su-8', fn: 'input', spaceKey: 'sp1', dim: '输入token区间', measure: '128K～1M' },
-        { id: 'su-9', fn: 'input', spaceKey: 'sp1', dim: '输出token区间', measure: '0～4K' },
-        { id: 'su-10', fn: 'input', spaceKey: 'sp1', dim: '输出token区间', measure: '16K+' },
-        { id: 'su-11', fn: 'input', spaceKey: 'sp1', dim: '', measure: '' },
-        { id: 'su-12', fn: 'output', spaceKey: 'sp1', dim: '输入token区间', measure: '128K～1M' },
-        { id: 'su-13', fn: 'output', spaceKey: 'sp1', dim: '输出token区间', measure: '0～4K' },
-        { id: 'su-14', fn: 'output', spaceKey: 'sp1', dim: '', measure: '' },
+        { id: 'su-8', fn: 'output', spaceKey: 'sp1', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
+        { id: 'su-9', fn: 'output', spaceKey: 'sp1', dim: '输入token区间', measure: '128K～1M' },
+        { id: 'su-10', fn: 'output', spaceKey: 'sp1', dim: '输出token区间', measure: '0～4K' },
+        { id: 'su-11', fn: 'output', spaceKey: 'sp1', dim: '', measure: '' },
+        { id: 'su-12', fn: 'cache', spaceKey: 'sp1', dim: '输入token区间 + 输出token区间', measure: '128K～1M + 0～4K' },
+        { id: 'su-13', fn: 'cache', spaceKey: 'sp1', dim: '输入token区间', measure: '128K～1M' },
+        { id: 'su-14', fn: 'cache', spaceKey: 'sp1', dim: '输出token区间', measure: '0～4K' },
         { id: 'su-15', fn: 'cache', spaceKey: 'sp1', dim: '', measure: '' },
         { id: 'su-16', fn: 'input', spaceKey: 'sp2', dim: '', measure: '' }
       ]
@@ -1013,9 +1017,9 @@
       'maas-product-vtpm-pre': {
         'sp1': { seq: 1, name: '预发布·常驻售卖空间', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'pending_publish', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100'], '购买周期': ['30天', '60天', '90天'] } } }
       },
-      // glm4：常规空间（一个空间同时含 input/output/cache 三 fn 配置）+ 双11高优先级后档空间（仅 input，接管期生效）
+      // glm4：常规空间（第44轮：三 fn 共享同一份维度度量勾选——输入[128K～1M]+输出[0～4K]，每 fn 4 组合×3=12 单元）+ 双11高优先级后档空间（仅 input，接管期生效）
       'maas-online-text-glm4': {
-        'sp1': { seq: 1, name: 'GLM4·常规售卖空间', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { input: ['输入token区间', '输出token区间'], output: ['输入token区间', '输出token区间'], cache: ['输入token区间'] }, fnMeasures: { input: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K', '16K+'] }, output: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K'] }, cache: { '输入token区间': ['0～128K'] } } },
+        'sp1': { seq: 1, name: 'GLM4·常规售卖空间', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { input: ['输入token区间', '输出token区间'], output: ['输入token区间', '输出token区间'], cache: ['输入token区间', '输出token区间'] }, fnMeasures: { input: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K'] }, output: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K'] }, cache: { '输入token区间': ['128K～1M'], '输出token区间': ['0～4K'] } } },
         'sp2': { seq: 2, name: '双11大促·输入售卖空间', priority: 500, effStart: '2026-11-11 00:00:00', effEnd: '2026-11-20 00:00:00', status: 'published', fnDims: { input: ['输入token区间'] }, fnMeasures: { input: { '输入token区间': ['0～128K', '128K～1M', '1M+'] } } }
       }
     };
@@ -1958,41 +1962,24 @@
       document.getElementById('sp-priority').value = '';
       document.getElementById('sp-eff-start').value = '2026-11-11T00:00:00';
       document.getElementById('sp-eff-end').value = '2026-11-20T00:00:00';
-      // 第43轮两步：①勾 function ②直接勾各维度的度量（无维度 checkbox）——
+      // 第44轮：function 与维度度量值分离（不嵌套）——
+      // 区块1 勾 function（独立复选）；区块2 勾各维度度量（全局一份，与 fn 无关，共享给全部勾选 fn）
       // 组合 = 每个维度 {勾选度量 ∪ 缺省} 完整叉乘（含全缺省），每组合 × 每勾选 fn 生成一个售卖单元
-      document.getElementById('sp-fnspaces').innerHTML = fns.map(f => {
-        const dimBlocks = dimensionOptions.map(d => {
-          const measures = measureOptions[d] || [];
-          return `<div class="border border-slate-200 rounded-md px-2 py-1.5 bg-white" data-dimblock="${f}|${d}">
-            <p class="text-xs font-medium text-slate-700">${d}<span class="ml-1 text-slate-400 font-normal">（缺省=该维度不参与组合）</span></p>
-            <div class="ml-1 mt-1 flex flex-wrap gap-x-3 gap-y-1" data-dimmeas="${f}|${d}">
-              ${measures.map(m => `<label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
-                <input type="checkbox" class="sp-measure-check" data-fn="${f}" data-dim="${d}" value="${m}" disabled style="accent-color:#7C3AED">
-                <span>${m}</span></label>`).join('')}
-            </div>
-          </div>`;
-        }).join('');
-        return `<div class="border border-slate-200 rounded-md px-2.5 py-2 bg-slate-50" data-fnrow="${f}">
-          <label class="flex flex-wrap items-center gap-2 text-xs">
-            <input type="checkbox" class="sp-fn-check" data-fn="${f}" style="accent-color:#7C3AED" onchange="onSpFnCheck(this)">
-            <span class="font-mono font-medium text-slate-700">${f || '—（无 function）'}</span>
-          </label>
-          <div class="ml-6 mt-1.5 space-y-1.5 opacity-50" data-fndims="${f}">
-            ${dimBlocks}
+      document.getElementById('sp-fnspaces').innerHTML = fns.map(f => `<label class="flex items-center gap-1.5 text-xs cursor-pointer text-slate-700 border border-slate-200 rounded-md px-2.5 py-1.5 bg-white">
+          <input type="checkbox" class="sp-fn-check" data-fn="${f}" style="accent-color:#7C3AED">
+          <span class="font-mono font-medium">${f || '—（无 function）'}</span></label>`).join('');
+      document.getElementById('sp-dimmeas').innerHTML = dimensionOptions.map(d => {
+        const measures = measureOptions[d] || [];
+        return `<div class="border border-slate-200 rounded-md px-2 py-1.5 bg-white" data-dimblock="${d}">
+          <p class="text-xs font-medium text-slate-700">${d}<span class="ml-1 text-slate-400 font-normal">（缺省=该维度不参与组合）</span></p>
+          <div class="ml-1 mt-1 flex flex-wrap gap-x-3 gap-y-1" data-dimmeas-group="${d}">
+            ${measures.map(m => `<label class="flex items-center gap-1 text-xs cursor-pointer text-slate-700">
+              <input type="checkbox" class="sp-measure-check" data-dim="${d}" value="${m}" style="accent-color:#7C3AED">
+              <span>${m}</span></label>`).join('')}
           </div>
         </div>`;
       }).join('');
       openModal('spaceplan');
-    }
-    function onSpFnCheck(box) {
-      const wrap = document.querySelector('[data-fndims="' + box.dataset.fn + '"]');
-      if (!wrap) return;
-      wrap.classList.toggle('opacity-50', !box.checked);
-      if (box.checked) {
-        wrap.querySelectorAll('.sp-measure-check').forEach(c => { c.disabled = false; });
-      } else {
-        wrap.querySelectorAll('.sp-measure-check').forEach(c => { c.checked = false; c.disabled = true; });
-      }
     }
         // 保存：收集 fn→维度→度量 → 新建一个空间（多 fn 共一个空间）→ 叉乘生成全部售卖单元 → 待发布
     function confirmSpacePlan() {
@@ -2003,21 +1990,16 @@
       const effStart = pcpVal(document.getElementById('sp-eff-start').value, '2026-11-11T00:00:00');
       const effEnd = pcpVal(document.getElementById('sp-eff-end').value, '2026-11-20T00:00:00');
       if (effStart > effEnd) { alert('生效开始不能晚于生效结束'); return; }
-      // 第43轮：直接收集勾选 fn 及其每维度勾选的度量（fnDims[f]=有勾选度量的维度列表）
-      const fnDims = {};
-      const fnMeasures = {};
-      document.querySelectorAll('.sp-fn-check').forEach(c => {
-        if (c.checked) {
-          const f = c.dataset.fn;
-          const meas = {};
-          document.querySelectorAll('.sp-measure-check[data-fn="' + f + '"]:checked').forEach(x => {
-            (meas[x.dataset.dim] = meas[x.dataset.dim] || []).push(x.value);
-          });
-          fnMeasures[f] = meas;
-          fnDims[f] = Object.keys(meas); // 有勾选度量的维度才进列表（未勾度量的维度不参与）
-        }
+      // 第44轮：区块1 勾选的 fn 共享区块2 的同一份维度度量配置
+      const checkedFns = Array.from(document.querySelectorAll('.sp-fn-check')).filter(c => c.checked).map(c => c.dataset.fn);
+      if (checkedFns.length === 0) { alert('至少勾选一个 function'); return; }
+      const meas = {};
+      document.querySelectorAll('.sp-measure-check:checked').forEach(x => {
+        (meas[x.dataset.dim] = meas[x.dataset.dim] || []).push(x.value);
       });
-      if (Object.keys(fnDims).length === 0) { alert('至少勾选一个 function'); return; }
+      const dimList = Object.keys(meas); // 有勾选度量的维度才参与组合（未勾度量的维度不参与）
+      const fnDims = {}; const fnMeasures = {};
+      checkedFns.forEach(f => { fnDims[f] = dimList.slice(); fnMeasures[f] = JSON.parse(JSON.stringify(meas)); });
       // 新建空间（第38轮：一个空间可含多 fn）
       spaceSeq += 1;
       const key = 'sp' + spaceSeq;
