@@ -571,18 +571,18 @@
 
     // 商品（SKU）→ 售卖单元（与 admin-products defaultSaleUnits/defaultPlans 对齐）
     // 状态口径（第8轮起）：在售 = 生效中（published 且 effStart≤now≤effEnd）的最高优先级计划将该单元上架；禁售 = 无生效中计划或最高优先级计划为下架/待发布
-    // 对齐 admin-products 实际数据：std 三单元全在售；pro 仅 su-1 在售（su-2 的 90 天计划 pending_publish、su-3/su-4 无计划 → 禁售）；pre 计划待发布 → 全部禁售（商品未上架）
+    // 对齐 admin-products 实际数据（第48轮）：std su-1/su-2 在售、su-3 计划下架 → 禁售；pro su-1/su-3 在售（30天计划）、su-2/su-4 禁售（90天计划待发布）；pre 计划待发布 → 全部禁售（商品未上架）
     // qty min/max/step 单位：万 vTPM；price = 关联计费项刊例价（元/万 vTPM，随周期变化的单价）；cycleDays = 该单元的购买周期天数
     const products = [
       { code: 'maas-product-vtpm-std', id: '001', name: 'vTPM 预留资源包（标准）', sellUnits: [
         { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-std.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' },
         { id: 'su-2', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '60天' }], chargeCode: 'maas-product-vtpm-std.60d', cycleDays: 60, minQty: 100, maxQty: 10000, stepQty: 500, payloadId: 'payload-vtpm-002', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' },
-        { id: 'su-3', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-std.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-vtpm-003', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' }
+        { id: 'su-3', status: 'off', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-std.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-vtpm-003', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' }
       ] },
       { code: 'maas-product-vtpm-pro', id: '002', name: 'vTPM 预留资源包（专业）', sellUnits: [
         { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pro.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
         { id: 'su-2', status: 'off', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-pro.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
-        { id: 'su-3', status: 'off', dims: [{ dim: '购买量区间', measure: '500+' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pro.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-3', status: 'on', dims: [{ dim: '购买量区间', measure: '500+' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pro.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
         { id: 'su-4', status: 'off', dims: [{ dim: '购买量区间', measure: '500+' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-pro.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' }
       ] },
       { code: 'maas-product-vtpm-pre', id: '003', name: 'vTPM 预留资源包（预）', sellUnits: [
