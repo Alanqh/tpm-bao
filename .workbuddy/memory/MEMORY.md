@@ -1,7 +1,16 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第44轮（main be80204 / gh-pages 82e6a7c，24 套全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第45轮（main ee1a60f / gh-pages e2a5c7e，25 套全绿）。
+
+## 第45轮（现行）：空fn必选+待发布空间可编辑+计划选已发布空间+创建项即时入下拉+单元信息精简
+- **①空fn必选**：无 fn 商品（vtpm 类）弹窗渲染「—（无 function）」复选（fnPool 空→[''] 渲染），勾选校验至少一个 fn（既有拦截保留）。此为既有正确行为，测试固化。
+- **②待发布空间可编辑（editSpacePlan 恢复）**：仅 pending_publish 可编辑；详情页操作区 pending=修改+发布+复制 / published=停用+复制 / stopped=仅复制。openSpacePlanModal(k) 编辑模式（editingSpaceKey；标题「修改售卖空间：名称」；回填名称/优先级/档期/fn 勾选（fnDims 键）/度量勾选（fnMeasures 首个 fn 的共享配置））。confirmSpacePlan：editingSpaceKey 命中→Object.assign 原地更新（key/seq/status 不变）；否则新建。差异叉乘走 genSaleUnitsForSpace 幂等（原单元永不删除，仅补新组合）。closeModal('spaceplan') 清 editingSpaceKey；已发布/停用调用拦截「仅待发布状态的空间可编辑」。
+- **③计划只选已发布空间**：openPlanCreatePage/editPlanRow 空间下拉候选=spaces.filter(status==='published')，选项不再显示状态括注；editPlanRow 若计划原空间不在候选（如已停用）保底附加并标注状态。pre 演示空间 sp1 改 status:'published'（演示「商品待上架但空间已就绪」）。
+- **④创建项即时入下拉（既有行为，测试固化）**：confirmCreateBilling/confirmItemCreate/confirmConfigEdit 末尾都 collectDraftFromDOM→写 draft→renderPlanCreateSections(true)——新计费项/配额项/库存项/折算配置新版本即时出现在 unified 与 perUnit 下拉并选中。
+- **⑤计划创建页单元行信息**：Function+维度组合，删「售卖空间」行。
+- 踩坑：r38 测试第 6 段重启 sp3 发布后须在 6d 结尾 stopSpacePlan("sp3") 清理，否则同优先级后建胜出把第 7 段 SU Tab 断言打红；jsdom DOMException{}（querySelector 合法选择器匹配失败导致节点闭包抛错）与 window.eval 顶层异常会被 runScripts 吞掉只显示 evaluator 崩溃——隔离 try/catch + VirtualConsole('jsdomError') 定位。
+- 测试：新增 test-this-round-r45.js（40 项：五点断言+四商品 mock 自洽复检）；r11/r13 段6 重写（pre 空间已发布的新语义）；r20 段7/8（editSpacePlan 恢复断言+下拉候选 3）；r38 段3/5b/5c/6c/6d/7（sp3 不可选→计划挂 sp1）；data-consistency pre 段重写；r19 区块2 不含 sp-x。25 套 948 项全绿。
 
 ## 第44轮（现行）：fn 与维度度量值分离不嵌套 + mock 符合创建选项
 - **弹窗分离式**：区块1「售卖 function」独立复选（#sp-fnspaces，.sp-fn-check 无 onchange）；区块2「维度度量值」全局一份（#sp-dimmeas，.sp-measure-check 只有 data-dim/value、无 data-fn、始终可用）；onSpFnCheck 已删。confirmSpacePlan：checkedFns 空→拦截「至少勾选一个 function」；全部勾选 fn 共享同一份 meas 收集（fnDims[f]=dimList.slice()、fnMeasures[f]=深拷贝）。
@@ -79,12 +88,12 @@ renderSpacePlans 每行完整渲染（用户嫌合并难看）；排序：状态
 - 第12轮：商品与模型/Playground 解耦。第16/18轮：计划三态均可复制（深拷贝→-副本→待发布）不受锁。
 
 ## 已废弃链路（防止复建）
-第37轮前编辑锁在基本信息上方/手动 SU 创建弹窗/.sp-dim-check 维度复选/data-fn 度量勾选；第38轮前独立空间计划实体/计划跨空间勾选单元；第39轮前售卖空间 Tab 时间点查询；第40轮前 pu-sp-N-M 界面前缀；第33轮前「已上架」文案。
+第37轮前编辑锁在基本信息上方/手动 SU 创建弹窗/.sp-dim-check 维度复选/data-fn 度量勾选；第38轮前独立空间计划实体/计划跨空间勾选单元；**第45轮前「空间完全不可改」口径（现=待发布可编辑原地更新，编辑弹窗=创建弹窗复用）**/计划下拉含待发布停用空间/计划页单元信息含售卖空间；第39轮前售卖空间 Tab 时间点查询；第40轮前 pu-sp-N-M 界面前缀；第33轮前「已上架」文案。
 
 ## 技术约定与部署
 - 每页顶部深色「原型导航」栏；后台紫色主色 #7C3AED；管理员「吕」。数据全为页面内 JS mock。
 - **部署（Pages legacy 从分支部署）**：gh-pages 分支=HTML 根直出+.nojekyll。流程：推 main → git worktree add gh-pages → rm+cp prototype/*.html → 推送 → sleep~105s → curl 验证线上 md5 → worktree remove。URL：https://alanqh.github.io/tpm-bao/admin-products.html
-- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：24 套全绿（第44轮口径，848 项）——this-round(31)/r38(39)/smoke-r26(46)/plan-page(78)/data-consistency(29)/su-dim-validate(13)/r9(26)/r10(51)/r11(19)/r12(38)/r13(32)/r14(50)/r15(38)/r16(29)/r18(27)/r19(38)/r20(69)/r22(33)/r23(34)/r24(18)/r25(49)/r27(33)/r28(33)/r29(45)。第44轮适配要点：.sp-measure-check 选择器一律无 data-fn；弹窗断言「fn 区块内无度量/度量始终可用」；多 fn 共享度量组合数=每 fn ∏(nᵢ+1)。
+- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：25 套全绿（第45轮口径，948 项）——this-round(31)/r9(26)/r10(51)/r11(19)/r12(38)/r13(33)/r14(50)/r15(38)/r16(29)/r18(27)/r19(38)/r20(73)/r22(33)/r23(34)/r24(18)/r25(49)/r27(33)/r28(33)/r29(45)/r38(43)/r45(40) + smoke-r26(46)/plan-page(78)/data-consistency(30)/su-dim-validate(13)。第45轮适配要点：editSpacePlan 恢复（断言 typeof==='function'）；计划下拉候选=已发布空间数+1；pre 空间默认已发布（三态联动断言重写）。第44轮适配要点：.sp-measure-check 选择器一律无 data-fn；多 fn 共享度量组合数=每 fn ∏(nᵢ+1)。
 - **jsdom 踩坑汇总**：runScripts:'dangerously'；confirm/alert 打桩；页面顶层 const 用 window.eval 取；rowspan 合并行 cells 索引偏移（空间级列只首行有）；勾选联动须 dispatchEvent(change,{bubbles:true})；跨商品切换先 backToList()；筛选元素重渲后重查；跑批 >150s 被 SIGKILL(137) 分批跑；保存成功路径无 alert（断言数据变化）。
 - 语法校验：node -e 提取 `<script>` 用 new Function()。修页面后先跑全套找红再逐套改断言。
 - 网络偶发 502：push 失败等 1-2 分钟重试；恢复检测=curl https://github.com
