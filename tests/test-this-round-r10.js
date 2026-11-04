@@ -15,18 +15,21 @@ const section = (t) => console.log('\n== ' + t + ' ==');
 // ===== 1. std：进入详情页默认浏览态，变更按钮置灰 =====
 section('1. 默认浏览态（无锁）');
 window.openDetailFromListed('maas-product-vtpm-std');
-const suBtn = document.getElementById('su-create-btn');
-const planBtn = document.getElementById('plan-create-btn');
-ok(suBtn.disabled === true, '创建售卖单元按钮置灰');
-ok(planBtn.disabled === true, '创建售卖计划按钮置灰');
+const suBtn = document.getElementById('plan-create-btn');
+const planBtn = document.getElementById('spaceplan-new-btn');
+ok(suBtn.disabled === true, '创建售卖计划按钮置灰');
+ok(planBtn.disabled === true, '创建空间计划按钮置灰');
 ok(suBtn.classList.contains('opacity-40'), '置灰样式 opacity-40');
 const bar = document.getElementById('edit-lock-bar');
 ok(bar.textContent.includes('发起变更'), '锁栏显示「发起变更」按钮');
-// 第36轮：编辑锁位于基本信息卡片之前、居左
-ok(bar.previousElementSibling === null || !bar.previousElementSibling.classList.contains('admin-card'), '锁栏之前无基本信息卡片（位于卡片前）');
-ok(bar.parentElement && bar.parentElement.querySelector('.admin-card') && (bar.compareDocumentPosition(bar.parentElement.querySelector('.admin-card')) & window.Node.DOCUMENT_POSITION_FOLLOWING), '基本信息卡片在锁栏之后');
+// 第37轮：编辑锁位于基本信息卡片之后、Tab 卡片之前，居左
+const firstCard = bar.parentElement.querySelector('.admin-card');
+ok(!!firstCard && (firstCard.compareDocumentPosition(bar) & window.Node.DOCUMENT_POSITION_FOLLOWING), '锁栏在基本信息卡片之后');
+ok(bar.nextElementSibling && bar.nextElementSibling.classList.contains('admin-card'), '锁栏之后是 Tab 卡片');
+ok(bar.previousElementSibling && bar.previousElementSibling.classList.contains('admin-card'), '锁栏之前是基本信息卡片');
 ok(bar.className.includes('justify-start'), '锁栏居左（justify-start）');
-// 删除按钮置灰（std 无可删单元；用 pre 商品验证可删单元）
+// 第37轮：售卖单元不可删除（由空间计划叉乘生成）；操作入口统一为计划/空间计划
+ok(typeof window.removeSaleUnit === 'undefined', 'removeSaleUnit 函数已删除（售卖单元一律不可删）');
 // 护栏：直接调用操作被拦截
 alertMsg = '';
 window.publishPlanRow(0);
@@ -35,9 +38,6 @@ ok(window.eval('planRowStatuses[0]') === 'published', '实际状态未变（publ
 alertMsg = '';
 window.stopPlanRow(0);
 ok(alertMsg.includes('发起变更') && window.eval('planRowStatuses[0]') === 'published', '无锁时 stopPlanRow 被拦截');
-alertMsg = '';
-window.removeSaleUnit('su-1');
-ok(alertMsg.length > 0, '无锁时 removeSaleUnit 被拦截');
 
 // ===== 2. 发起变更：进入编辑态 =====
 section('2. 发起变更');
@@ -54,6 +54,11 @@ section('3. 编辑态操作');
 window.openPlanCreatePage();
 ok(!document.getElementById('plan-create-view').classList.contains('hidden'), '可打开创建售卖计划页面');
 window.closePlanCreatePage();
+// 空间计划弹窗可开（第37轮：售卖单元由此叉乘生成）
+window.startEdit();
+window.openSpacePlanModal();
+ok(!document.getElementById('modal-spaceplan').classList.contains('hidden'), '可打开创建空间计划弹窗');
+window.eval('closeModal("spaceplan")');
 // 发布已有待发布计划：先把计划0改待发布再发布
 window.eval('planRowStatuses[0] = "pending_publish"; renderPlan();');
 window.openPlanDetail(0);
@@ -94,19 +99,15 @@ alertMsg = '';
 window.publishPlanRow(0);
 ok(alertMsg.includes('张三') && alertMsg.includes('zhangsan01'), '发布被拦截并提示持锁人: ' + alertMsg);
 
-// ===== 6. pre：可删除售卖单元的置灰/恢复 =====
-section('6. 删除售卖单元随锁切换');
+// ===== 6. 第37轮：售卖单元不可删除（SU Tab 无删除按钮，函数已删） =====
+section('6. 售卖单元不可删除（第37轮）');
 window.backToList();
 window.openPendingDetail(0);
-// su-3 无计划关联可删除，但无锁 → 置灰
+ok(!document.getElementById('su-create-btn'), 'SU Tab「创建售卖单元」按钮已删除');
+const suHead = Array.from(document.querySelectorAll('#inner-tab-saleunit thead th')).map(th => th.textContent.trim());
+ok(suHead.length === 14 && !suHead.includes('操作'), 'SU 表头 14 列（操作列已删），实得 ' + suHead.length);
 const delCell = Array.from(document.querySelectorAll('#saleunit-tbody tr')).find(r => r.cells[0].textContent.trim() === 'su-3');
-ok(delCell.textContent.includes('🔒'), '无锁时删除按钮置灰（🔒）');
-window.startEdit();
-const delCell2 = Array.from(document.querySelectorAll('#saleunit-tbody tr')).find(r => r.cells[0].textContent.trim() === 'su-3');
-ok(delCell2.textContent.includes('删除') && !delCell2.textContent.includes('🔒'), '持锁后删除按钮恢复');
-window.removeSaleUnit('su-3');
-ok(window.eval('saleUnits.length') === 2, '持锁后删除 su-3 成功（剩余 2 个: ' + window.eval('saleUnits.map(u=>u.id).join(",")') + '）');
-window.exitEdit();
+ok(delCell && !delCell.textContent.includes('删除') && !delCell.textContent.includes('🔒'), '售卖单元行无删除入口');
 
 // ===== 7. 第36轮：商品名称快速编辑（标题旁铅笔 → 行内输入+保存/取消，无需编辑锁） =====
 section('7. 商品名称快速编辑（第36轮）');
@@ -129,6 +130,19 @@ ok(window.eval('currentProduct.name') === '预发布商品改名版', 'currentPr
 window.openDetailNameEdit();
 window.closeDetailNameEdit();
 ok(nameWrap.classList.contains('hidden') && !editBtn.classList.contains('hidden'), '取消恢复铅笔按钮');
+// 第37轮：基本信息卡片也有名称快捷编辑（共享输入条）
+const infoEditBtn = document.getElementById('detail-info-name-edit-btn');
+const infoNameSpan = document.getElementById('detail-info-name');
+ok(!!infoEditBtn && !!infoNameSpan && infoNameSpan.textContent === '预发布商品改名版', '基本信息卡片名称旁有铅笔且展示新名称');
+window.openDetailNameEdit('info');
+ok(!nameWrap.classList.contains('hidden') && infoEditBtn.classList.contains('hidden') && editBtn.classList.contains('hidden'), '从基本信息卡片进入编辑（两处铅笔均隐藏、共用输入条）');
+window.closeDetailNameEdit();
+ok(nameWrap.classList.contains('hidden') && !infoEditBtn.classList.contains('hidden'), '取消恢复两处铅笔');
+nameInput.value = '预发布商品二次改名';
+window.openDetailNameEdit('info');
+nameInput.value = '预发布商品二次改名'; // open 回填当前名后重新设值
+window.confirmDetailNameEdit();
+ok(document.getElementById('detail-info-name').textContent === '预发布商品二次改名', '保存后基本信息卡片名称同步');
 window.backToList();
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');

@@ -67,6 +67,9 @@ Array.from(d.querySelectorAll('#modal-spaceplan .sp-fn-check')).forEach(b => { b
 d.querySelector('.sp-dim-check[data-fn="input"][value="输入token区间"]').checked = true;
 d.querySelector('.sp-dim-check[data-fn="output"][value="输出token区间"]').checked = true;
 d.querySelector('.sp-dim-check[data-fn="cache"][value="输入token区间"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入token区间"][value="0～128K"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn="output"][data-dim="输出token区间"][value="0～4K"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn="cache"][data-dim="输入token区间"][value="0～128K"]').checked = true;
 w.eval('confirmSpacePlan()');
 w.eval('renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));

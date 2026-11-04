@@ -19,13 +19,13 @@ const infoGrid = document.getElementById('detail-info');
 ok(infoGrid.className.includes('md:grid-cols-4'), '基本信息 4 列紧凑排列');
 ok(infoGrid.querySelectorAll('div.bg-slate-50').length === 3, '基本信息 3 个字段（第30轮：删除售卖空间卡片；此前第15轮新增售卖维度，第21轮移除售卖维度）');
 
-// 2. 售卖单元 Tab 文案
-section('2. 创建售卖单元文案');
+// 2. 售卖单元 Tab（第37轮：纯只读——创建按钮已删，售卖单元由空间计划叉乘生成）
+section('2. 售卖单元 Tab 只读');
 window.switchInnerTab('saleunit');
 const suTab = document.getElementById('inner-tab-saleunit');
-const suBtn = suTab.querySelector('button');
-ok(suBtn.textContent.includes('创建售卖单元'), '按钮文案=创建售卖单元: ' + suBtn.textContent.trim());
-ok(suBtn.className.includes('admin-btn-primary'), '按钮为紫色 primary');
+ok(!suTab.querySelector('button') || !suTab.textContent.includes('创建售卖单元'), 'SU Tab 无「创建售卖单元」按钮; ' + (suTab.querySelector('button') || {}).textContent);
+ok(suTab.textContent.includes('选择时间'), '时间筛选保留');
+ok(!document.getElementById('su-create-btn'), 'su-create-btn 已删除');
 
 // 3. 计划状态三态
 section('3. 计划状态三态');

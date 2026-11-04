@@ -1,3 +1,4 @@
+// 第37轮：空间计划创建弹窗的维度/度量校验 + 叉乘生成售卖单元（原 SU 弹窗校验的转译版）
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
 const html = fs.readFileSync('/Users/lqh/Documents/ChatGPT/TPM保障包/prototype/admin-products.html', 'utf8');
@@ -9,43 +10,53 @@ let pass = 0, fail = 0, alertMsg = '';
 window.alert = (m) => { alertMsg = m; };
 const ok = (c, msg) => { c ? (pass++, console.log('  ✓ ' + msg)) : (fail++, console.log('  ✗ ' + msg)); };
 
-// std 打开详情拿锁，构造"新商品式"场景：清空售卖单元后测试创建
+// std 持锁后测试空间计划创建的校验与叉乘
 window.openDetailByCode('maas-product-vtpm-std');
 window.startEdit();
 
-// 场景1：全新（无已确认维度），只勾购买周期 30天 → 拦截（购买量区间漏选）
-window.eval('saleUnits = [];');
-window.openSuConfirmModal();
-document.querySelector('.su-leaf[data-dim="购买周期"][data-measure="30天"]').checked = true;
+// 场景1：勾 fn('')+两维度、只勾购买周期 30天 → 拦截（购买量区间漏选度量）
+window.openSpacePlanModal();
+const fnBox = document.querySelector('.sp-fn-check[data-fn=""]');
+fnBox.checked = true;
+fnBox.dispatchEvent(new window.Event('change', { bubbles: true }));
+['购买量区间', '购买周期'].forEach(dim => {
+  const dc = document.querySelector('.sp-dim-check[data-fn=""][value="' + dim + '"]');
+  dc.checked = true;
+  dc.dispatchEvent(new window.Event('change', { bubbles: true }));
+});
+document.querySelector('.sp-measure-check[data-fn=""][data-dim="购买周期"][value="30天"]').checked = true;
+document.getElementById('sp-name').value = '校验计划甲';
+const suCount0 = window.eval('saleUnits.length');
 alertMsg = '';
-window.confirmSaleUnits();
-ok(alertMsg.includes('购买量区间') && alertMsg.includes('至少需要选择一个度量'), '只勾购买周期 → 拦截并提示漏选维度: ' + alertMsg);
-ok(window.eval('saleUnits.length') === 0, '售卖单元未生成');
+window.confirmSpacePlan();
+ok(alertMsg.includes('购买量区间') && alertMsg.includes('至少勾选一个度量'), '勾维度漏选度量 → 拦截并提示: ' + alertMsg);
+ok(window.eval('saleUnits.length') === suCount0, '售卖单元未生成');
 
-// 场景2：两维各勾一个 → 成功（1×1=1 个单元）
+// 场景2：补勾购买量区间 1～100 → 成功（1×1=1 个单元叉乘生成）
+document.querySelector('.sp-measure-check[data-fn=""][data-dim="购买量区间"][value="1～100"]').checked = true;
 alertMsg = '';
-document.querySelector('.su-leaf[data-dim="购买量区间"][data-measure="1～100"]').checked = true;
-window.confirmSaleUnits();
-ok(alertMsg.includes('已创建售卖单元：1 个'), '两维各一 → 创建成功 1 个');
-ok(window.eval('saleUnits.length') === 1 && window.eval('saleUnits[0].dim') === '购买量区间 + 购买周期', '生成二元售卖单元');
+window.confirmSpacePlan();
+ok(alertMsg.includes('已保存') && alertMsg.includes('已自动生成售卖单元 1 个'), '两维各一 → 叉乘 1 个: ' + alertMsg.slice(-30));
+const newKey = window.eval('spacePlans[spacePlans.length-1].fnSpaces[""]');
+ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length') === 1, '新空间下 1 个单元');
+ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '")[0].dim') === '购买量区间 + 购买周期', '生成二元售卖单元（dim 顺序=勾选维度序）');
 
-// 场景3：一个维度全空 → 拦截
-window.eval('saleUnits = [];');
-window.openSuConfirmModal();
+// 场景3：fn 不勾 → 拦截（至少勾选一个 function）
+window.openSpacePlanModal();
+document.getElementById('sp-name').value = '校验计划乙';
 alertMsg = '';
-window.confirmSaleUnits();
-ok(alertMsg.includes('请至少勾选一个度量'), '全部不勾 → 原提示拦截');
+window.confirmSpacePlan();
+ok(alertMsg.includes('至少勾选一个 function'), '不勾任何 fn → 拦截: ' + alertMsg);
 
-// 场景4：已有已确认维度（disabled checked 天然计入）——std 默认数据下，加勾另一维度单度量
-window.eval('saleUnits = JSON.parse(JSON.stringify(defaultSaleUnits["maas-product-vtpm-std"]));');
-window.openSuConfirmModal();
-// su-1/su-2 涉及勾选都是 disabled；手动取消一个可选项再试：购买周期 90天 已确认，购买量区间 1～100 已确认
-// 构造：取消勾选（jsdom 可改 DOM）购买量区间的 500+（未确认态才能操作——500+ 本来就没勾）
-// 直接勾 购买量区间 500+ + 购买周期 90天（90天 disabled checked 已计入）→ 应成功 9 个（3+1 × 3）
-document.querySelector('.su-leaf[data-dim="购买量区间"][data-measure="500+"]').checked = true;
+// 场景4：0 维度（fn 勾选+维度不选）→ 生成唯一单元（第35/37轮）
+window.openSpacePlanModal();
+const fnBox4 = document.querySelector('.sp-fn-check[data-fn=""]');
+fnBox4.checked = true;
+fnBox4.dispatchEvent(new window.Event('change', { bubbles: true }));
+document.getElementById('sp-name').value = '校验计划丙';
 alertMsg = '';
-window.confirmSaleUnits();
-ok(alertMsg.includes('已创建售卖单元'), '已确认维度 + 新增勾选 → 校验通过并创建（' + window.eval('saleUnits.length') + ' 个）');
+window.confirmSpacePlan();
+ok(alertMsg.includes('0 维度') && alertMsg.includes('已自动生成售卖单元 1 个'), '0 维度空间 → 唯一单元自动生成: ' + alertMsg.slice(-40));
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

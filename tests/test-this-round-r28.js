@@ -61,6 +61,7 @@ function mkplan(name, start, fn) {
   const b = d.querySelector('.sp-fn-check[data-fn="' + fn + '"]');
   b.checked = true; b.dispatchEvent(new w.Event('change', { bubbles: true }));
   d.querySelector('.sp-dim-check[data-fn="' + fn + '"][value="输入token区间"]').checked = true;
+  d.querySelector('.sp-measure-check[data-fn="' + fn + '"][data-dim="输入token区间"][value="0～128K"]').checked = true;
   w.eval('confirmSpacePlan()');
 }
 mkplan('P1晚生效', '2026-12-10', 'input');   // idx2（常规0/双11 1 之后）→ publish
@@ -81,6 +82,7 @@ w.eval('editSpacePlan(6)');
 const b2 = d.querySelector('.sp-fn-check[data-fn="output"]');
 b2.checked = true; b2.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-dim-check[data-fn="output"][value="输入token区间"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn="output"][data-dim="输入token区间"][value="0～128K"]').checked = true;
 w.eval('confirmSpacePlan(); renderSpacePlans()');
 rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
 ok(rows.length === 10, 'P5 双 fn 后 10 行（常规3+双11+P1~P4 各1 + P5 双行），实得 ' + rows.length);

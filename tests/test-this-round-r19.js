@@ -94,11 +94,10 @@ ok(rows[0].cells[0].textContent.trim() === '—', 'vtpm 第一列 Function=—�
 ok(rows[0].cells[1].textContent.trim() === 'sp1', 'vtpm 第二列 售卖空间=sp1（第35轮：code 即标识）');
 ok(rows[0].cells[2].textContent.trim() === 'su-1', 'vtpm 第三列 售卖单元=su-1');
 ok(rows[0].cells[4].textContent.includes('购买量区间') && rows[0].cells[4].textContent.includes('购买周期'), 'vtpm 维度:度量正常展示');
-// vtpm 无 function → 创建售卖单元弹窗无 function 下拉
-window.startEdit();
-window.openSuConfirmModal();
-ok(document.getElementById('su-fn-block').classList.contains('hidden'), 'vtpm 创建售卖单元弹窗隐藏 function 下拉');
-window.eval('closeModal("su-confirm"); exitEdit();');
+// vtpm 无 function（第37轮：SU 弹窗已删——售卖单元由空间计划叉乘生成）
+ok(!document.getElementById('modal-su-confirm'), 'SU 弹窗已删除（第37轮）');
+ok(typeof window.openSuConfirmModal === 'undefined', 'openSuConfirmModal 函数已删');
+window.eval('exitEdit();');
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

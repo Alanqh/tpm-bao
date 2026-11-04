@@ -20,6 +20,7 @@ window.__T = {
   get timeFilter(){return timeFilter}, set timeFilter(v){timeFilter=v},
   openDetailByCode, backToList, startEdit, exitEdit,
   renderSpaceTab, renderSpacePlans, openSpacePlanModal, confirmSpacePlan, publishSpacePlan, stopSpacePlan, editSpacePlan, copySpacePlan,
+  get saleUnits(){return saleUnits},
   closeModal, guardEdit
 };
 `);
@@ -106,7 +107,10 @@ let modal = w.document.getElementById('modal-spaceplan');
 const box = modal.querySelector('.sp-fn-check[data-fn="output"]');
 box.checked = true;
 box.dispatchEvent(new w.Event('change', { bubbles: true }));
-modal.querySelectorAll('.sp-dim-check[data-fn="output"]').forEach(c => { c.checked = c.value === '输入token区间'; });
+modal.querySelectorAll('.sp-dim-check[data-fn="output"]').forEach(c => { c.checked = c.value === '输入token区间'; c.dispatchEvent(new w.Event('change', { bubbles: true })); });
+// 第37轮：勾选维度后须勾度量（保存校验：每维度至少一个度量；勾1M+ 生成 1 个售卖单元）
+const measBox = modal.querySelector('.sp-measure-check[data-fn="output"][data-dim="输入token区间"][value="1M+"]');
+if (measBox) measBox.checked = true;
 w.document.getElementById('sp-name').value = '测试计划A';
 w.document.getElementById('sp-priority').value = '100';
 w.document.getElementById('sp-eff-start').value = '2026-12-01 00:00:00';
@@ -116,6 +120,8 @@ T.confirmSpacePlan();
 const newKey = T.spacePlans[2].fnSpaces.output;
 ok(newKey === 'sp' + (seqBefore + 1), '保存为 output 新建空间 ' + newKey);
 ok(T.spacePlanStatuses[2] === 'pending_publish', '新计划待发布');
+// 第37轮：保存时叉乘自动生成售卖单元（勾选维度「输入token区间」×度量「1M+」= su-5）
+ok(T.saleUnits && T.saleUnits.some(u => u.spaceKey === newKey && u.dim === '输入token区间' && u.measure === '1M+'), '新空间自动生成售卖单元（输入token区间×1M+）');
 ok(T.effectiveSpaceAt('output', '2026-12-05 00:00:00').key === 'sp4', '待发布不参与仲裁（12-05 仍 sp4）');
 T.publishSpacePlan(2);
 ok(T.effectiveSpaceAt('output', '2026-12-05 00:00:00').key === newKey, '发布后 12-05 output=' + newKey + '（同优先级 100，后创建胜出）');

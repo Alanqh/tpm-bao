@@ -33,17 +33,10 @@ ok(w.eval('currentSpaceOfFn("input")') === 'sp3', '11-15 双11计划接管 input
 const midRows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(midRows.length === 3 && midRows.some(r => r.cells[1].textContent.includes('sp3')), '11-15 列表 input 行=sp3');
 w.eval('timeFilter = null; renderSpaceTab()');
-// 5. SU 弹窗：input 默认 sp2（生效空间）、度量=全量（3+3=6）
-w.eval('openSuConfirmModal()');
-d.getElementById('su-fn-select').value = 'input';
-w.eval('onSuFnChange()');
-ok(d.getElementById('su-space-select').value === 'sp2', 'SU 默认空间=生效空间 sp2');
-ok(d.querySelectorAll('#su-confirm-body input.su-leaf').length === 6, 'SU 候选度量=全量 6');
-// 6. 切 sp3：单维度仍全量 3
-w.eval('document.getElementById("su-space-select").value = "sp3"; onSuSpaceChange()');
-ok(d.querySelectorAll('#su-confirm-body input.su-leaf').length === 3, 'sp3 候选=全量单维度 3');
-w.eval('closeModal("su-confirm")');
-// 7. 空间计划创建（第31轮）：与已有 fn 空间维度集合相同 → 不再拦截（总是新建）
+// 5. SU 弹窗已删（第37轮：售卖单元由空间计划叉乘生成；保留 effectiveSpaceAt 链路断言）
+ok(!d.getElementById('modal-su-confirm'), 'SU 弹窗已删除（第37轮）');
+ok(w.eval('typeof openSuConfirmModal') === 'undefined', 'openSuConfirmModal 函数已删');
+// 7. 空间计划创建（第31轮+第37轮）：与已有 fn 空间维度集合相同 → 不拦截（总是新建）；维度勾选后须勾度量
 w.eval('openSpacePlanModal()');
 let box7 = d.querySelector('.sp-fn-check[data-fn="input"]');
 box7.checked = true;
@@ -53,8 +46,12 @@ box7.dispatchEvent(new w.Event('change', { bubbles: true }));
 });
 d.getElementById('sp-name').value = 'r31 计划甲';
 w.eval('confirmSpacePlan()');
+ok(alerts[alerts.length - 1].includes('至少勾选一个度量'), '勾维度不勾度量拦截（第37轮）: ' + (alerts[alerts.length - 1] || '').slice(0, 30));
+d.querySelectorAll('.sp-measure-check[data-fn="input"]').forEach(c => { c.checked = true; });
+w.eval('confirmSpacePlan()');
 ok(alerts[alerts.length - 1].includes('已新建售卖空间'), '重复维度集合不拦截（总是新建口径）: ' + (alerts[alerts.length - 1] || '').slice(0, 24));
 ok(w.eval('spaceSeq') === 6, '新建 sp6（input 两 token 维度）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp6").length') === 9, 'sp6 叉乘 9 单元（度量全勾 3×3）');
 // 8. 一份计划多 fn：cache+两 token 维度（跨 fn 可同维度集合）→ sp7
 w.eval('openSpacePlanModal()');
 const box8 = d.querySelector('.sp-fn-check[data-fn="cache"]');
@@ -63,20 +60,25 @@ box8.dispatchEvent(new w.Event('change', { bubbles: true }));
 ['输入token区间', '输出token区间'].forEach(dm => {
   d.querySelector('.sp-dim-check[data-fn="cache"][value="' + dm + '"]').checked = true;
 });
+d.querySelectorAll('.sp-measure-check[data-fn="cache"][data-dim="输入token区间"]').forEach(c => { c.checked = c.value === '0～128K'; });
+d.querySelectorAll('.sp-measure-check[data-fn="cache"][data-dim="输出token区间"]').forEach(c => { c.checked = c.value === '0～4K'; });
 d.getElementById('sp-name').value = 'r31 计划乙';
 w.eval('confirmSpacePlan()');
 ok(w.eval('spaces["sp7"].fn') === 'cache' && w.eval('spaces["sp7"].dims.length') === 2, 'sp7 fn=cache 两维度（跨 fn 同集合允许）');
 ok(w.eval('spaces["sp7"].measures') === undefined, '新空间无 measures（只管维度）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp7").length') === 1, 'sp7 叉乘 1 单元（输入0～128K×输出0～4K）');
 // 8b. 多 fn 单计划：output+购买量区间、input+购买周期 → sp8/sp9 一次创建
 w.eval('openSpacePlanModal()');
 const boxOut9 = d.querySelector('.sp-fn-check[data-fn="output"]');
 boxOut9.checked = true;
 boxOut9.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-dim-check[data-fn="output"][value="购买量区间"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn="output"][data-dim="购买量区间"][value="1～100"]').checked = true;
 const boxIn9 = d.querySelector('.sp-fn-check[data-fn="input"]');
 boxIn9.checked = true;
 boxIn9.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-dim-check[data-fn="input"][value="购买周期"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn="input"][data-dim="购买周期"][value="30天"]').checked = true;
 d.getElementById('sp-name').value = 'r31 计划丙';
 w.eval('confirmSpacePlan()');
 ok(alerts[alerts.length - 1].includes('已新建售卖空间：sp8') && alerts[alerts.length - 1].includes('sp9'), '一份计划两 fn 各建一空间（第35轮 alert 用 code）: ' + (alerts[alerts.length - 1] || '').slice(0, 40));

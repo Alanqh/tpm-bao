@@ -55,6 +55,7 @@ const box8 = d.querySelector('.sp-fn-check[data-fn=""]');
 box8.checked = true;
 box8.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-dim-check[data-fn=""][value="购买量区间"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn=""][data-dim="购买量区间"][value="1～100"]').checked = true; // 第37轮：维度勾选后须勾度量
 d.getElementById('sp-name').value = 'r31 vtpm 计划A';
 d.getElementById('sp-priority').value = '200';
 d.getElementById('sp-eff-start').value = '2026-11-01T00:00:00';
@@ -63,6 +64,7 @@ w.eval('confirmSpacePlan()');
 ok(w.eval('spaceSeq') === 6, 'sp6 创建成功（计划保存即落地空间）');
 ok(w.eval('spaces["sp6"].dims.length') === 1, 'sp6 单维度');
 ok(w.eval('spaces["sp6"].measures') === undefined, '空间无 measures 字段（只管维度）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp6" && u.measure === "1～100").length') === 1, 'sp6 叉乘 1 单元（购买量区间×1～100）');
 let rows3 = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows3.length === 1 && rows3[0].cells[1].textContent.trim() === 'sp1', '计划A 待发布 → 不接管，列表仍仅 sp1（第32轮：纯计划仲裁）');
 // 发布后接管：priority 200 > 常驻 100 → sp6 生效
@@ -70,21 +72,22 @@ w.eval('publishSpacePlan(1)');
 ok(w.eval('currentSpaceOfFn("")') === 'sp6', '发布后 priority 200>100 → sp6 接管');
 rows3 = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows3.length === 1 && rows3[0].cells[1].textContent.trim() === 'sp6', '列表显示 sp6（按时刻过滤）');
-// 9. 重复维度集合不再拦截（第31轮口径：总是新建 sp7）
+// 9. 重复维度集合不再拦截（第31轮口径：总是新建 sp7；第37轮：度量须勾）
 w.eval('openSpacePlanModal()');
 const box9 = d.querySelector('.sp-fn-check[data-fn=""]');
 box9.checked = true;
 box9.dispatchEvent(new w.Event('change', { bubbles: true }));
 ['购买量区间', '购买周期'].forEach(dim => { d.querySelector('.sp-dim-check[data-fn=""][value="' + dim + '"]').checked = true; });
 d.getElementById('sp-name').value = 'r31 vtpm 计划B';
+d.querySelector('.sp-measure-check[data-fn=""][data-dim="购买量区间"][value="1～100"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn=""][data-dim="购买周期"][value="30天"]').checked = true;
 w.eval('confirmSpacePlan()');
 ok(w.eval('spaceSeq') === 7 && w.eval('spaces["sp7"].dims.length') === 2, '维度集合与 sp1 相同 → 不拦截，新建 sp7（总是新建）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp7").length') === 1, 'sp7 叉乘 1 单元（1～100×30天）');
 w.eval('closeModal("spaceplan")');
-// 10. SU 弹窗：度量候选=全量（默认=生效空间 sp6）
-w.eval('openSuConfirmModal()');
-ok(d.getElementById('su-space-select').value === 'sp6', 'SU 默认=生效空间 sp6（计划A 已发布接管）');
-ok(d.querySelectorAll('#su-confirm-body .su-leaf').length === 3, '度量候选=全量 3（非空间配置）');
-w.eval('closeModal("su-confirm")');
+// 10. SU 弹窗已删（第37轮）；售卖计划引用的单元仍在 SU Tab 展示
+ok(!d.getElementById('modal-su-confirm'), 'SU 弹窗已删（第37轮——单元由空间计划叉乘生成）');
+ok(w.eval('typeof openSuConfirmModal') === 'undefined', 'openSuConfirmModal 已删');
 // 11. 编辑度量功能已删
 ok(!d.getElementById('modal-space-measure-edit'), '编辑度量弹窗已删');
 ok(w.eval('typeof editSpaceMeasures') === 'undefined', 'editSpaceMeasures 函数已删');

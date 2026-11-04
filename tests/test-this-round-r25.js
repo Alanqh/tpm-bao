@@ -99,6 +99,7 @@ inBox.dispatchEvent(new w.Event('change', { bubbles: true }));
 const inDimWrap = modal.querySelector('[data-fndims="input"]');
 ok(inDimWrap && !inDimWrap.classList.contains('opacity-50'), '勾选后维度区启用');
 modal.querySelector('.sp-dim-check[data-fn="input"][value="输入token区间"]').checked = true;
+modal.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入token区间"][value="0～128K"]').checked = true;
 d.getElementById('sp-priority').value = '300';
 d.getElementById('sp-eff-start').value = '2026-12-01 00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-10 00:00:00';
@@ -137,13 +138,10 @@ w.eval('backToList(); openDetailByCode("maas-online-text-glm4")');
 ok(w.eval('spacePlans.length') === 3 && w.eval('spacePlans[2].name') === 'r26测试计划', '快照恢复空间切换计划（常规+双11+r26）');
 ok(w.eval('spacePlanStatuses[2]') === 'stopped', '快照恢复状态=stopped');
 
-// ===== 11. SU 弹窗默认空间挂 effectiveSpaceAt（11-15 input→sp3）=====
-w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
-w.eval('openSuConfirmModal()');
-d.getElementById('su-fn-select').value = 'input';
-w.eval('onSuFnChange()');
-ok(d.getElementById('su-space-select').value === 'sp3', 'SU 弹窗默认空间=effectiveSpaceAt（11-15 → sp3）');
-w.eval('closeModal("su-confirm"); timeFilter = null');
+// ===== 11. SU 弹窗已删（第37轮）；effectiveSpaceAt 链路由第11段前置的时间旅行断言覆盖 =====
+ok(!d.getElementById('modal-su-confirm'), 'SU 弹窗已删除（第37轮——单元由空间计划叉乘生成）');
+ok(w.eval('typeof openSuConfirmModal') === 'undefined', 'openSuConfirmModal 函数已删');
+w.eval('timeFilter = null; renderSpaceTab()');
 
 // ===== 12. 快照透传（第32轮：glm4 mock 含常规+双11，r26 计划停用后仍在快照） =====
 w.eval('backToList()');
