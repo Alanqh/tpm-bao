@@ -17,12 +17,12 @@ w.eval('openDetailByCode("maas-online-text-glm4")');
 // 2. 列表结构：9 列表头（第38轮）
 const spHead = Array.from(d.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
 ok(JSON.stringify(spHead) === JSON.stringify(['空间单元','状态','售卖空间','空间名称','Function','空间维度','售卖单元数','优先级','生效起止']), '表头 9 列: ' + spHead.join('/'));
-// 3. 行序（第38轮：全空间展示；排序=状态→effStart 降序→seq→fn 字典序；sp1 三行 fn 字典序 cache/input/output）
+// 3. 行序（第39轮：排序=状态→优先级降序→创建时间逆序；sp1 内 fn 按创建序 input/output/cache，pu-sp-1-1/2/3 与创建勾选一致）
 const rows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows.length === 4, '4 个空间行（sp1×3fn + sp2×1）');
-ok(rows[0].cells[2].textContent.trim() === 'sp2', '首行 sp2（同 published，effStart 11-11 更晚降序在前）');
+ok(rows[0].cells[2].textContent.trim() === 'sp2', '首行 sp2（同 published，优先级 500 > 100）');
 ok(rows[1].cells[2].textContent.trim() === 'sp1' && rows[1].cells[2].rowSpan === 3, 'sp1 空间列 rowspan=3');
-ok(rows[1].cells[4].textContent.trim() === 'cache' && rows[2].cells[0].textContent.trim() === 'input' && rows[3].cells[0].textContent.trim() === 'output', 'sp1 三行 fn 字典序 cache/input/output');
+ok(rows[1].cells[4].textContent.trim() === 'input' && rows[2].cells[0].textContent.trim() === 'output' && rows[3].cells[0].textContent.trim() === 'cache', 'sp1 三行按创建序 input/output/cache');
 // 4. 状态列（第38轮：三态徽标 + 档期内/外标注）
 ok(rows[0].textContent.includes('已发布') && rows[1].textContent.includes('已发布'), '两空间首行均已发布徽标（sp1 续行被 rowspan 合并无徽标）');
 ok(rows[0].textContent.includes('生效期外') || rows[0].textContent.includes('生效期内'), '档期标注展示（当前时刻 sp2 未到档期=生效期外）');

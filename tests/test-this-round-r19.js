@@ -39,17 +39,17 @@ ok(fmtTxt.includes('输入token区间:0～128K') && fmtTxt.includes('输出token
 const fmtHtml = evalInPage('formatDimMeasure(saleUnits[0])');
 ok(!String(fmtHtml).includes('function'), 'formatDimMeasure 不含 function');
 
-// ===== 2. 售卖单元 Tab（第20轮：前三列=function（合并）/售卖空间（合并）/售卖单元） =====
+// ===== 2. 售卖单元 Tab（第39轮：前三列=售卖空间（最外合并）/function（空间组内合并）/售卖单元） =====
 section('2. 售卖单元 Tab');
 let rows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(rows.length === 2, '售卖单元 2 行');
 const suRow = rows[0];
-ok(suRow.cells[0].textContent.trim() === 'input' && suRow.cells[0].rowSpan === 1, 'su-1 第一列 Function=input（合并单元格）');
-ok(suRow.cells[1].textContent.trim().startsWith('sp-x') && suRow.cells[1].textContent.includes('已发布'), '第二列 售卖空间=sp-x+三态徽标（第38轮）: ' + suRow.cells[1].textContent.trim());
+ok(suRow.cells[0].textContent.trim().startsWith('sp-x') && suRow.cells[0].textContent.includes('已发布'), '第一列 售卖空间=sp-x+三态徽标（第39轮空间列居首）: ' + suRow.cells[0].textContent.trim());
+ok(suRow.cells[1].textContent.trim() === 'input' && suRow.cells[1].rowSpan === 1, '第二列 Function=input');
 ok(suRow.cells[2].textContent.trim() === 'su-1', '第三列 售卖单元=su-1');
-// su-2 fn 变化但空间相同 → 保留 fn td（rs1）、空间被合并
+// su-2 fn 变化但空间相同 → 空间被合并，fn td 新起（rs1）
 ok(rows[1].cells[0].textContent.trim() === 'output' && rows[1].cells[0].rowSpan >= 1, 'su-2 行 fn td=output');
-ok(rows[1].cells[1].textContent.trim() === 'su-2', 'su-2 行空间列被合并：第二 td=su-2');
+ok(rows[1].cells[1].textContent.trim() === 'su-2', 'su-2 行空间列被合并：第一 td=output 后为 su-2');
 ok(!suRow.textContent.includes('function'), '维度:度量列不含 function');
 ok(suRow.cells[4].textContent.includes('输入token区间') && suRow.cells[4].textContent.includes('输出token区间'), '第5列 维度:度量展示 token 区间');
 
@@ -98,8 +98,8 @@ section('6. vtpm 回归');
 window.eval('closePlanCreatePage(); exitEdit(); backToList()');
 window.openDetailByCode('maas-product-vtpm-std');
 rows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
-ok(rows[0].cells[0].textContent.trim() === '—', 'vtpm 第一列 Function=—（无 function，合并单元格）');
-ok(rows[0].cells[1].textContent.trim().startsWith('sp1'), 'vtpm 第二列 售卖空间=sp1（+三态徽标，第38轮）');
+ok(rows[0].cells[0].textContent.trim().startsWith('sp1'), 'vtpm 第一列 售卖空间=sp1（+三态徽标，第39轮空间列居首）');
+ok(rows[0].cells[1].textContent.trim() === '—', 'vtpm 第二列 Function=—（无 function）');
 ok(rows[0].cells[2].textContent.trim() === 'su-1', 'vtpm 第三列 售卖单元=su-1');
 ok(rows[0].cells[4].textContent.includes('购买量区间') && rows[0].cells[4].textContent.includes('购买周期'), 'vtpm 维度:度量正常展示');
 // vtpm 无 function（第37轮：SU 弹窗已删——售卖单元由空间计划叉乘生成）

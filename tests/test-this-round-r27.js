@@ -32,10 +32,10 @@ const firstHead = rows[0];
 ok(firstHead.cells.length === 9, '空间行 9 列（空间单元/状态/售卖空间/空间名称/Function/维度/单元数/优先级/起止）');
 ok(firstHead.cells[4].textContent.trim() === 'input', 'Function 列=input');
 
-// ===== 3. 排序与 rowspan（第38轮：状态→effStart 降序→seq→fn；空间级列合并）=====
-ok(rows[0].cells[2].textContent.trim() === 'sp2', '首行 sp2（published，effStart 11-11 > 11-01 降序在前）');
+// ===== 3. 排序与 rowspan（第39轮：状态→优先级降序→创建时间逆序；空间内 fn 行按创建序，pu-sp 编号与创建时一致）=====
+ok(rows[0].cells[2].textContent.trim() === 'sp2', '首行 sp2（同 published，priority 500 > 100）');
 ok(rows[1].cells[2].textContent.trim() === 'sp1' && rows[1].cells[2].rowSpan === 3, 'sp1 空间列 rowspan=3');
-ok(rows[1].cells[4].textContent.trim() === 'cache', 'sp1 首行 fn=cache（字典序）');
+ok(rows[1].cells[4].textContent.trim() === 'input', 'sp1 首行 fn=input（创建时勾选序，pu-sp-1-1）');
 
 // ===== 4. 空间详情页（第38轮：标题+三态+字段+单元表；无修改）=====
 w.eval('openSpacePlanDetail("sp1")');
@@ -81,7 +81,7 @@ const sp3First = rows.find(r => r.cells.length >= 9 && r.cells[2] && r.cells[2].
 const sp3Idx = rows.indexOf(sp3First);
 ok(!!sp3First && rows[sp3Idx+1] && rows[sp3Idx+2] && rows[sp3Idx+1].cells.length === 3 && rows[sp3Idx+2].cells.length === 3,
   'sp3 三 fn 行（首行 9 列带空间级列，两续行仅 fn/维度/单元数 3 列）');
-ok(sp3First.cells[2].rowSpan === 3 && sp3First.cells[4].textContent.trim() === 'cache', 'sp3 空间列 rowspan=3（fn 字典序 cache 首）');
+ok(sp3First.cells[2].rowSpan === 3 && sp3First.cells[4].textContent.trim() === 'input', 'sp3 空间列 rowspan=3（首行 fn=input，创建时勾选序 input→output→cache）');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 3, 'sp3 逐 fn 叉乘共 3 单元');
 
 // ===== 8. vtpm 商品：常驻空间单行=====

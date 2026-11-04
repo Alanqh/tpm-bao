@@ -134,8 +134,8 @@ ok(!document.getElementById('modal-su-confirm'), 'SU 弹窗已删');
 ok(typeof window.removeSaleUnit === 'undefined' && typeof window.confirmSaleUnits === 'undefined' && typeof window.openSuConfirmModal === 'undefined', 'removeSaleUnit/confirmSaleUnits/openSuConfirmModal 函数全删');
 const suHead = Array.from(document.querySelectorAll('#inner-tab-saleunit thead th')).map(th => th.textContent.trim());
 ok(suHead.length === 14, 'SU 表头 14 列（无操作列）');
-// SU Tab 空间列（第2列）带三态徽标 + code
-const suSpaceCell = Array.from(document.querySelectorAll('#saleunit-tbody tr')).map(r => r.cells[1].textContent);
+// SU Tab 空间列（第39轮起第 1 列，空间层级在 Function 之上）带三态徽标 + code
+const suSpaceCell = Array.from(document.querySelectorAll('#saleunit-tbody tr')).map(r => r.cells[0].textContent);
 ok(suSpaceCell.some(t => t.includes('sp1') && t.includes('已发布')), 'SU 空间列展示空间 code + 三态徽标: ' + suSpaceCell[0]);
 
 // ===== 8. 第38轮：售卖计划 Tab 与详情页带空间信息 =====

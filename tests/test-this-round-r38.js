@@ -105,8 +105,8 @@ ok(suRows.length === 11, 'SU Tab 11 行（sp1×4 + sp2×3 + sp3×4），实得 '
 const suOfRow = r => { const m = Array.from(r.cells).map(c => c.textContent).join(' ').match(/su-\d+/g); return m ? m[0] : ''; };
 const sp3Ids = ['su-8', 'su-9', 'su-10', 'su-11'];
 ok(suRows.filter(r => sp3Ids.includes(suOfRow(r))).length === 4, 'sp3 组 4 个单元（su-8~11）');
-// 空间列 rowspan 按 fn 分段：sp3 三段首行的空间徽标（6c/6d 后 sp3 最终=已发布）
-ok(suRows.filter(r => r.textContent.includes('sp3') && r.textContent.includes('已发布')).length === 3, 'sp3 三段首行（cache/input/output 各一）带空间状态徽标（已发布）');
+// 空间列第39轮起最外层合并（空间列在 Function 之上）：sp3 整组一个段首行带徽标
+ok(suRows.filter(r => r.textContent.includes('sp3') && r.textContent.includes('已发布')).length === 1, 'sp3 组单一段首行带空间状态徽标（已发布；第39轮空间列最外层合并）');
 ok(suRows.some(r => r.textContent.includes('sp1') && r.textContent.includes('已发布')) && suRows.some(r => r.textContent.includes('sp2')), 'sp1/sp2 组首行带空间徽标');
 
 // ===== 8. 名称快编写回 allProducts（bug 1 修复回归）=====

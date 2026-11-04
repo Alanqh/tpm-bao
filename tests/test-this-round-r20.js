@@ -45,17 +45,17 @@ const spRows = Array.from(document.querySelectorAll('#space-tbody tr'));
 ok(spRows.length === 4, '空间列表 4 行（sp1 三 fn 行 + sp2 一行），实得 ' + spRows.length);
 const spHead = Array.from(document.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
 ok(spHead.length === 9 && spHead[0] === '空间单元' && spHead[2] === '售卖空间' && spHead[4] === 'Function' && spHead[5] === '空间维度', '空间列表 9 列（空间单元/状态/售卖空间/空间名称/Function/空间维度/售卖单元数/优先级/生效起止）');
-// 排序：先 sp2（同 published 但 effStart 2026-11-11 更晚 → 降序在前）还是 sp1？——effStart 降序：sp2(11-11) > sp1(11-01) → sp2 行在前
+// 排序（第39轮）：状态→优先级降序→创建时间逆序；sp2（500）> sp1（100）→ sp2 在前
 const firstCells = spRows[0].cells;
-ok(firstCells[2] && firstCells[2].textContent.trim() === 'sp2', '首行空间=sp2（published 按 effStart 降序在前）');
+ok(firstCells[2] && firstCells[2].textContent.trim() === 'sp2', '首行空间=sp2（published 按优先级降序在前）');
 ok(firstCells[0].textContent.trim().startsWith('pu-sp-2-'), '空间单元编号 pu-sp-2-1: ' + firstCells[0].textContent.trim());
-// sp1 三行 fn 序：fnDims 键序 input/output/cache；首行 rowspan=3
+// sp1 三行 fn 序（第39轮）：fnDims 键序=创建时勾选序 input/output/cache，pu-sp-1-1/2/3 与创建时一致；首行 rowspan=3
 const sp1First = spRows[1].cells;
 ok(sp1First[2] && sp1First[2].textContent.trim() === 'sp1' && sp1First[2].rowSpan === 3, 'sp1 空间列 rowspan=3（三 fn 行合并）');
-ok(sp1First[4].textContent.trim() === 'cache', 'sp1 首 fn 行=cache（fn 字典序）；pu-sp 编号=fn 在 fnDims 内的序号（cache 第3）');
-ok(spRows[1].cells[0].textContent.trim() === 'pu-sp-1-3', 'sp1 首行空间单元编号 pu-sp-1-3（cache=fn 键序第3）');
-ok(spRows[2].cells[0].textContent.trim() === 'input' && spRows[2].cells[2].textContent.trim() === '2', 'sp1 input 行单元数=2');
-ok(spRows[3].cells[0].textContent.trim() === 'output' && spRows[3].cells[2].textContent.trim() === '1', 'sp1 output 行单元数=1');
+ok(sp1First[4].textContent.trim() === 'input', 'sp1 首 fn 行=input（创建时勾选序）');
+ok(spRows[1].cells[0].textContent.trim() === 'pu-sp-1-1', 'sp1 首行空间单元编号 pu-sp-1-1（input=创建序第1）');
+ok(spRows[2].cells[0].textContent.trim() === 'output' && spRows[2].cells[2].textContent.trim() === '1', 'sp1 output 行单元数=1');
+ok(spRows[3].cells[0].textContent.trim() === 'cache' && spRows[3].cells[2].textContent.trim() === '1', 'sp1 cache 行单元数=1');
 
 // ===== 3. effectiveSpaceAt（第38轮：纯空间本体仲裁） =====
 section('3. 生效空间推导');
@@ -65,19 +65,20 @@ ok(evalInPage('effectiveSpaceAt("input","2026-11-15 00:00:00").key') === 'sp2' &
 ok(evalInPage('effectiveSpaceAt("input","2026-11-25 00:00:00").key') === 'sp1', '11-25 双11空间过档期 → sp1 恢复');
 ok(evalInPage('effectiveSpaceAt("input","2026-11-15 00:00:00").plan.name') === '双11大促·输入售卖空间', '胜出空间=双11（priority 500）');
 
-// ===== 4. 售卖单元 Tab 前三列合并（fn/空间/单元） =====
+// ===== 4. 售卖单元 Tab 前三列合并（第39轮：售卖空间/Function/售卖单元——空间层级在 fn 之上） =====
 section('4. 售卖单元前三列');
 window.eval('switchInnerTab("saleunit"); renderSaleUnits();');
 const suRows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(suRows.length === 7, 'glm4 售卖单元 7 行，实得 ' + suRows.length);
 const suHead = Array.from(document.querySelector('#saleunit-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(suHead.length === 14 && suHead[0] === 'Function' && suHead[1] === '售卖空间' && suHead[2] === '售卖单元', '售卖单元表头 14 列，前三列=Function/售卖空间/售卖单元');
+ok(suHead.length === 14 && suHead[0] === '售卖空间' && suHead[1] === 'Function' && suHead[2] === '售卖单元', '售卖单元表头 14 列，前三列=售卖空间/Function/售卖单元（第39轮空间居首）');
 const r0 = suRows[0].cells;
-ok(r0[0].textContent.trim() === 'cache' && r0[1].textContent.includes('sp1') && r0[2].textContent.trim() === 'su-4', '首行=cache/sp1/su-4（fn→space→unit 排序）');
-const inputRow = suRows[1].cells;
-ok(inputRow[0].textContent.trim() === 'input' && inputRow[0].rowSpan === 5, 'input fn td rowspan=5（sp1 两单元 + sp2 三单元跨空间分组合并）');
-ok(suRows[3].cells[0].textContent.includes('sp2') && suRows[3].cells[0].rowSpan === 3, 'sp2 空间列 rowspan=3（同 fn 跨空间时空间列独立合并，含三态徽标）');
-ok(suRows[6].cells[0].textContent.trim() === 'output', 'output 独立 fn td（新合并组）');
+ok(r0[0].textContent.includes('sp1') && r0[0].rowSpan === 4 && r0[1].textContent.trim() === 'cache' && r0[2].textContent.trim() === 'su-4', 'sp1 空间列 rowspan=4（sp1 全部 4 单元跨 fn 合并；首行=sp1/cache/su-4）');
+ok(suRows[1].cells[0].textContent.trim() === 'input' && suRows[1].cells[0].rowSpan === 2, 'sp1 组内 input fn td rowspan=2');
+ok(suRows[3].cells[0].trim === undefined && suRows[3].cells[0].textContent.trim() === 'output', 'sp1 组内 output 独立 fn td');
+const sp2Idx = suRows.findIndex(r => r.textContent.includes('sp2'));
+ok(sp2Idx === 4 && suRows[4].cells[0].textContent.includes('sp2') && suRows[4].cells[0].rowSpan === 3, 'sp2 空间列 rowspan=3（整组独立，含三态徽标）');
+ok(suRows[4].cells[1].textContent.trim() === 'input' && suRows[4].cells[1].rowSpan === 3, 'sp2 组内 input fn td rowspan=3');
 
 // ===== 5. SU 创建链路已删（第37轮） =====
 section('5. SU 创建链路已删');

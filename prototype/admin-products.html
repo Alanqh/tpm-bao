@@ -278,18 +278,11 @@
             <button type="button" class="admin-tab" data-tab="slo-config" onclick="switchInnerTab('slo-config')">SLO赔付规则配置</button>
           </div>
 
-          <!-- 售卖空间 Tab（第38轮：吸收空间计划——空间本体携带优先级/生效期/三态，创建确认时按维度×度量叉乘生成售卖单元；每行=空间×fn） -->
+          <!-- 售卖空间 Tab（第39轮：纯列表——无时间点查询；排序=状态→优先级降序→创建时间逆序） -->
           <div id="inner-tab-space" class="p-4">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
               <button type="button" id="spaceplan-new-btn" onclick="if(!guardEdit())return; openSpacePlanModal()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-layer-group mr-1"></i>创建售卖空间</button>
-              <div class="flex flex-wrap items-center gap-2 text-xs">
-                <span class="text-slate-500"><i class="fa-regular fa-clock mr-1"></i>选择时间</span>
-                <input id="space-tf-point" type="datetime-local" step="1" class="form-input text-xs px-2 py-1 w-56">
-                <button type="button" onclick="querySpaceAt()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-magnifying-glass mr-1"></i>查询</button>
-                <button type="button" onclick="resetSpaceAt()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">重置</button>
-              </div>
             </div>
-            <p id="space-tf-tip" class="hidden text-[11px] text-violet-600 mb-2"><i class="fa-regular fa-clock mr-1"></i>正在查看 <span class="font-mono font-medium"></span> 时点的空间情况</p>
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[1000px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
@@ -325,8 +318,8 @@
             <table class="w-full text-sm min-w-[1600px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">售卖空间</th>
+                  <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元</th>
                   <th class="text-left px-3 py-2 font-medium">状态</th>
                   <th class="text-left px-3 py-2 font-medium">维度:度量</th>
@@ -1321,30 +1314,31 @@
         document.getElementById('saleunit-tbody').innerHTML = `<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖单元</td></tr>`;
         return;
       }
-      // 第20轮：前三列 = function（合并）/售卖空间（合并）/售卖单元；排序 fn → spaceKey → id（保证同 fn 同空间连续，可 rowspan 合并）
+      // 第39轮：层级=售卖空间在 Function 之上——前三列 = 售卖空间（最外层合并）/function（空间组内合并）/售卖单元；
+      // 排序 spaceKey → fn → id（保证同空间连续，空间内同 fn 连续，两层可 rowspan 合并）
       const sorted = saleUnits.slice().sort((a, b) => {
-        const fa = fnOfUnit(a) || '', fb = fnOfUnit(b) || '';
-        if (fa !== fb) return fa.localeCompare(fb);
         const sa = a.spaceKey || '', sb = b.spaceKey || '';
         if (sa !== sb) return sa.localeCompare(sb);
+        const fa = fnOfUnit(a) || '', fb = fnOfUnit(b) || '';
+        if (fa !== fb) return fa.localeCompare(fb);
         return (a.id || '').localeCompare(b.id || '');
       });
       let prevFn = null, prevSpace = null, fnSpan = 0, spSpan = 0;
       document.getElementById('saleunit-tbody').innerHTML = sorted.map((u, i) => {
         const fn = fnOfUnit(u) || '';
         const spaceKey = u.spaceKey || '';
-        const showFn = fn !== prevFn || prevFn === null;
         const showSpace = spaceKey !== prevSpace || prevSpace === null;
-        if (showFn) { fnSpan = 0; }
-        if (showFn || showSpace) { spSpan = 0; }
-        // 统计连续相同段长度（向后看）
-        if (showFn) {
-          let j = i; while (j < sorted.length && (fnOfUnit(sorted[j]) || '') === fn) j++;
-          fnSpan = j - i;
-        }
+        const showFn = showSpace || fn !== prevFn || prevFn === null;
+        if (showSpace) { fnSpan = 0; }
+        if (showSpace || showFn) { spSpan = 0; }
+        // 统计连续相同段长度（向后看）：空间段=同空间全部行（跨 fn）；fn 段=空间内同 fn 行
         if (showSpace) {
-          let j = i; while (j < sorted.length && (fnOfUnit(sorted[j]) || '') === fn && (sorted[j].spaceKey || '') === spaceKey) j++;
+          let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey) j++;
           spSpan = j - i;
+        }
+        if (showFn) {
+          let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey && (fnOfUnit(sorted[j]) || '') === fn) j++;
+          fnSpan = j - i;
         }
         prevFn = fn; prevSpace = spaceKey;
         const st = unitStatusOf(u.id);
@@ -1354,12 +1348,12 @@
         const charge = plan ? (chargeItems.find(c => c.code === (plan.chargeCodes && plan.chargeCodes[u.id]) || c.code === plan.chargeCode) || null) : null;
         // 所选时间执行价（示意）：有 charge 时 = 刊例价 × 0.95 折扣示意
         const execPrice = charge ? (charge.price * 0.95).toFixed(4) : '—';
-        // 第38轮：空间列带三态徽标（空间=带档期实体）
+        // 空间列带三态徽标（空间=带档期实体）
         const spSt = spaces[spaceKey] ? planStatusMeta(spaces[spaceKey].status) : null;
         return `
         <tr class="hover:bg-slate-50">
-          ${showFn ? `<td rowspan="${fnSpan}" class="px-3 py-2 text-xs font-medium align-top border-r border-slate-100">${fn || '—'}</td>` : ''}
           ${showSpace ? `<td rowspan="${spSpan}" class="px-3 py-2 align-top border-r border-slate-100"><div class="font-mono text-xs">${spaceKey || '—'}</div>${spSt ? `<span class="badge ${spSt.cls} mt-1 inline-block">${spSt.text}</span>` : ''}</td>` : ''}
+          ${showFn ? `<td rowspan="${fnSpan}" class="px-3 py-2 text-xs font-medium align-top border-r border-slate-100">${fn || '—'}</td>` : ''}
           <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
           <td class="px-3 py-2"><span class="badge ${st.cls}">${st.text}</span></td>
           <td class="px-3 py-2">${formatDimMeasure(u)}</td>
@@ -1611,31 +1605,8 @@
       document.getElementById('tf-point').value = '';
       renderSaleUnits();
     }
-    // 售卖空间 Tab 时间点查询（第28轮）：查询指定时刻每个 function 的空间情况（接管按该时刻判定；与售卖单元 Tab 共享 timeFilter）
-    function syncSpaceTfPoint() {
-      const tip = document.getElementById('space-tf-tip');
-      const inp = document.getElementById('space-tf-point');
-      if (timeFilter) {
-        if (inp && inp.value === '') inp.value = timeFilter.point.replace(' ', 'T');
-        if (tip) { tip.classList.remove('hidden'); tip.querySelector('span').textContent = timeFilter.point; }
-      } else {
-        if (inp && inp.value !== '') inp.value = '';
-        if (tip) { tip.classList.add('hidden'); }
-      }
-    }
-    function querySpaceAt() {
-      const p = (document.getElementById('space-tf-point').value || '').replace('T', ' ');
-      if (!p) { alert('请先选择一个时间节点'); return; }
-      timeFilter = { point: p };
-      renderSpaceTab();
-      syncSpaceTfPoint();
-    }
-    function resetSpaceAt() {
-      timeFilter = null;
-      document.getElementById('space-tf-point').value = '';
-      renderSpaceTab();
-      syncSpaceTfPoint();
-    }
+    // 第39轮：售卖空间 Tab 改纯列表——时间点查询（querySpaceAt/resetSpaceAt/syncSpaceTfPoint）已删；
+    // timeFilter 仍由售卖单元 Tab（#tf-point / querySaleParams / resetSaleParams）维护，空间层判定共用。
     // 售卖单元关联的售卖计划：生效期内的已发布计划优先；有 timeFilter 时取该时刻生效期内的计划，否则取生效期内优先
     function planOfUnit(unitId) {
       const published = planRows.filter((r, i) => (r.units || []).includes(unitId) && planRowStatuses[i] === 'published');
@@ -1838,11 +1809,11 @@
       alert('已复制售卖计划「' + (src.name || '—') + '」→「' + copyName + '」（待发布），可进入修改后发布。');
     }
 
-    // ===== 售卖空间 Tab（第38轮）：空间=带档期的单元集合——列表展示全部空间（按 状态→effStart 降序→seq），每行=空间×fn =====
+    // ===== 售卖空间 Tab（第39轮）：纯列表（无时间点查询）；排序=状态→优先级降序→创建时间逆序(seq 降序)；空间内 fn 行按创建序（与创建弹窗填写一致）=====
     function renderSpaceTab() {
       const tbody = document.getElementById('space-tbody');
       if (!tbody) return;
-      // 展开行：每个空间按其 fnDims 的 fn 展开（一空间多 fn 多行）
+      // 展开行：每个空间按其 fnDims 的 fn 展开（一空间多 fn 多行；键序=创建时勾选 fn 的顺序）
       const rows = [];
       Object.keys(spaces).forEach(k => {
         const sp = spaces[k];
@@ -1853,17 +1824,24 @@
       });
       if (rows.length === 0) {
         tbody.innerHTML = `<tr><td colspan="9" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖空间</td></tr>`;
-        syncSpaceTfPoint();
         return;
       }
-      // 排序：状态（已发布→待发布→已停用）→ effStart 降序 → 空间 seq → fn 字典序
+      // 空间间排序：状态（已发布→待发布→已停用）→ 优先级降序 → 创建时间逆序（seq 降序，后创建在前）
       const stRank = { published: 0, pending_publish: 1, stopped: 2 };
-      rows.sort((a, b) => {
-        const sa = stRank[a.sp.status] ?? 1, sb = stRank[b.sp.status] ?? 1;
+      const spaceOrder = Object.keys(spaces).sort((a, b) => {
+        const A = spaces[a], B = spaces[b];
+        const sa = stRank[A.status] ?? 1, sb = stRank[B.status] ?? 1;
         if (sa !== sb) return sa - sb;
-        if (a.sp.effStart !== b.sp.effStart) return a.sp.effStart < b.sp.effStart ? 1 : -1;
-        if ((a.sp.seq || 0) !== (b.sp.seq || 0)) return (a.sp.seq || 0) - (b.sp.seq || 0);
-        return (a.f || '').localeCompare(b.f || '');
+        const pa = A.priority || 0, pb = B.priority || 0;
+        if (pa !== pb) return pb - pa;
+        return (B.seq || 0) - (A.seq || 0);
+      });
+      rows.sort((a, b) => {
+        const ia = spaceOrder.indexOf(a.k), ib = spaceOrder.indexOf(b.k);
+        if (ia !== ib) return ia - ib;
+        // 同空间内按创建时的 fn 顺序（fnDims 键序），pu-sp 编号与创建时一一对应
+        const fa = Object.keys(a.sp.fnDims || {}).indexOf(a.f), fb = Object.keys(b.sp.fnDims || {}).indexOf(b.f);
+        return fa - fb;
       });
       const nowStr = timeFilter ? timeFilter.point : new Date().toISOString().slice(0, 19).replace('T', ' ');
       let prevKey = null;
@@ -1892,7 +1870,6 @@
           ${showSpace ? `<td rowspan="${spanCnt}" class="px-3 py-2"><span class="font-mono text-xs whitespace-nowrap">${sp.effStart} ~ ${sp.effEnd}</span><div class="text-[10px] mt-0.5">${isEff ? '<span class="text-green-600">生效期内</span>' : '<span class="text-slate-400">生效期外</span>'}</div></td>` : ''}
         </tr>`;
       }).join('');
-      syncSpaceTfPoint();
     }
     // ===== 售卖空间（第38轮）：创建弹窗/发布/停用/复制/详情 =====
     // 空间完全不可改（第38轮口径）：无「修改」操作；任何变更=复制出待发布新空间（旧空间原样归档，单元永不删除）
