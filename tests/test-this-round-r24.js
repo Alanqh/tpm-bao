@@ -1,7 +1,8 @@
-// 第24轮：售卖计划区块2筛选重设计——fn 复选组（多选/全选）+ 空间筛（全部/仅生效中）+ 筛选变更取消超出范围的勾选
+// 第24轮历史验证——第38轮口径重写：售卖计划锁定单空间（fn 复选筛选/空间筛已删）；
+// 区块2 只展示所选空间内单元；时间范围 ⊆ 空间档期；保存强校验；修改页回填
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
-const html = fs.readFileSync('prototype/admin-products.html', 'utf8');
+const html = fs.readFileSync('/Users/lqh/Documents/ChatGPT/TPM保障包/prototype/admin-products.html', 'utf8');
 const dom = new JSDOM(html, { runScripts: 'dangerously', url: 'http://localhost/' });
 const { window } = dom;
 const alerts = [];
@@ -13,57 +14,76 @@ let step = 0, fail = 0;
 function ok(cond, msg) { step++; if (!cond) { fail++; console.log('FAIL[' + step + '] ' + msg); } }
 const vis = () => Array.from(d.querySelectorAll('.plan-unit-row')).filter(r => !r.classList.contains('hidden')).map(r => r.querySelector('.plan-unit-check').value);
 const chk = () => Array.from(d.querySelectorAll('.plan-unit-check:checked')).map(c => c.value);
-const fnBoxes = () => Array.from(d.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)'));
 
-// 1. 进入创建页：筛选重置（fn 全不勾=全部、空间=全部空间）
+// 1. 进入创建页：无旧筛选；须先选空间
 w.eval('openDetailByCode("maas-online-text-glm4")');
 w.eval('startEdit()');
 w.eval('openPlanCreatePage()');
-ok(vis().length === 4, '进入创建页全部可见（4）');
-ok(d.getElementById('plan-filter-space').value === '', '空间筛默认=全部空间');
-ok(fnBoxes().length === 3, 'fn 复选组 3 个（input/output/cache）');
-ok(!!d.querySelector('.plan-filter-fn-all'), '存在全选框');
-// 2. 直接改数据：su-1 挪到 sp3（input 的未生效空间）→ 重进创建页后筛「仅生效中」应滤掉 su-1
-w.eval('closePlanCreatePage()');
-w.eval('saleUnits.find(u => u.id === "su-1").spaceKey = "sp3"');
-ok(w.eval('currentSpaceOfFn("input")') === 'sp2', 'input 生效空间仍 sp2（su-1 现在在未生效空间 sp3）');
-w.eval('openPlanCreatePage()');
-d.getElementById('plan-filter-space').value = '__ACTIVE__';
-w.eval('applyPlanUnitFilter()');
-ok(!vis().includes('su-1') && vis().length === 3, '仅生效中滤掉 sp3 的 su-1: ' + vis().join(','));
-ok(!chk().includes('su-1'), 'su-1 的勾选被自动取消');
-// 3. 恢复全部空间 → su-1 可见但仍不勾（取消不自动恢复）
-d.getElementById('plan-filter-space').value = '';
-w.eval('applyPlanUnitFilter()');
-ok(vis().length === 4, '全部空间恢复 4 行可见');
-ok(!chk().includes('su-1'), 'su-1 不自动恢复勾选（需手动重勾）');
-// 4. fn 多选：cache+input → 可见 su-1/su-4（+su-2 若在 sp2）
-fnBoxes().forEach(c => { c.checked = ['cache', 'input'].includes(c.value); });
-w.eval('applyPlanUnitFilter()');
-ok(vis().sort().join(',') === 'su-1,su-2,su-4', 'fn 勾 cache+input 多选可见 3 行: ' + vis().join(','));
-// 5. 全选框联动：勾上→子框全选全可见；取消→子框全清（空选=不过滤）
-d.querySelector('.plan-filter-fn-all').checked = true;
-w.eval('onPlanFnFilterToggleAll(document.querySelector(".plan-filter-fn-all"))');
-ok(fnBoxes().every(c => c.checked) && vis().length === 4, '全选框联动全 fn 全可见');
-d.querySelector('.plan-filter-fn-all').checked = false;
-w.eval('onPlanFnFilterToggleAll(document.querySelector(".plan-filter-fn-all"))');
-ok(fnBoxes().every(c => !c.checked) && vis().length === 4, '取消全选=全部（空选=不过滤）');
-// 6. 保存链路：筛选 output 后保存 → 计划 units 只含范围内单元（glm4 无既有计费项，先 mock 一个）
-fnBoxes().forEach(c => { c.checked = c.value === 'output'; });
-w.eval('applyPlanUnitFilter()');
-ok(vis().length === 1 && vis()[0] === 'su-3', 'fn=output 可见仅 su-3');
-w.eval('chargeItems.push({code:"maas-online-text-glm4.out30d", name:"GLM4输出包30天", price:0.0500, unit:"万vTPM·天", currency:"CNY"})');
-w.eval('renderPlanCreateSections(true)');
-d.querySelector('#plan-charge-unified select').value = 'maas-online-text-glm4.out30d';
-d.querySelector('.plan-unit-check[value="su-3"]').checked = true; // 前步筛选已把 su-3 勾选清掉，重新勾上
-d.getElementById('plan-name').value = '筛后计划';
+ok(d.querySelectorAll('.plan-filter-fn-check').length === 0 && !d.getElementById('plan-filter-space'), 'fn 复选组/空间筛选已删（第38轮锁空间）');
+ok(d.getElementById('plan-units-charge-container').textContent.includes('请先在区块1选择售卖空间'), '未选空间区块2 提示');
+const sel = d.getElementById('plan-space-sel');
+ok(sel && sel.options.length === 3, '空间下拉 3 项（请选择+sp1+sp2）: ' + sel.options.length);
+// 2. 选 sp1 → 只展示 sp1 内单元
+sel.value = 'sp1';
+sel.dispatchEvent(new w.Event('change', { bubbles: true }));
+ok(vis().sort().join(',') === 'su-1,su-2,su-3,su-4', '选 sp1 → 可见 su-1~su-4: ' + vis().join(','));
+ok(chk().length === 4, '首次渲染默认全选');
+// 3. 切 sp2 → 可见切换为双11三单元，勾选不保留
+sel.value = 'sp2';
+sel.dispatchEvent(new w.Event('change', { bubbles: true }));
+ok(vis().sort().join(',') === 'su-5,su-6,su-7', '切 sp2 → 可见 su-5~su-7');
+ok(chk().length === 3, 'sp2 首次渲染默认全选');
+// 4. 时间范围软提示：计划时间超出 sp2 档期 → info 标红 + planTimeWithinSpace=false
+d.getElementById('plan-name').value = 'r38 锁空间计划';
+d.getElementById('plan-eff-start').value = '2026-11-12T00:00:00';
+d.getElementById('plan-eff-end').value = '2026-12-15T00:00:00';
+sel.dispatchEvent(new w.Event('change', { bubbles: true }));
+ok(w.eval('planTimeWithinSpace()') === false, '时间超 sp2 档期 → false');
+ok(d.getElementById('plan-space-info').className.includes('text-red-500'), '超范围提示标红');
+// 5. 保存强校验：超范围拦截
+alerts.length = 0;
+w.eval('confirmPlanCreate()');
+ok(alerts.some(m => m.includes('生效范围')), '保存被拦截（时间超空间档期）: ' + (alerts[alerts.length-1] || '').slice(0, 30));
+ok(w.eval('planRows.length') === 2, '计划未保存（仍 2 个）');
+// 6. 时间收回档期内 → 保存成功
+d.getElementById('plan-eff-end').value = '2026-11-19T00:00:00';
 w.eval('confirmPlanCreate()');
 const saved = w.eval('planRows[planRows.length-1]');
-ok(saved && saved.name === '筛后计划' && JSON.stringify(saved.units) === JSON.stringify(['su-3']), '保存的计划 units=筛选后勾选的 su-3');
-// 7. 修改入口：筛选重置 + 原计划勾选回填且不被取消（su-3 output 在全部筛选下可见）
+ok(saved && saved.name === 'r38 锁空间计划' && saved.spaceKey === 'sp2', '保存成功且锁定 sp2');
+ok(JSON.stringify(saved.units) === JSON.stringify(['su-5','su-6','su-7']), 'units=sp2 内三单元: ' + saved.units.join(','));
+// 7. 跨空间单元拦截（直接改数据模拟）：把 su-1 勾上（属于 sp1）→ 保存拦截
+w.eval('openPlanCreatePage()');
+sel.value = 'sp2';
+sel.dispatchEvent(new w.Event('change', { bubbles: true }));
+d.getElementById('plan-name').value = 'r38 跨空间计划';
+d.getElementById('plan-eff-start').value = '2026-11-12T00:00:00';
+d.getElementById('plan-eff-end').value = '2026-11-19T00:00:00';
+// mock：直接往区块2塞一个 sp1 单元的勾选（绕过 UI 验证后端校验）
+w.eval('saleUnits.find(u => u.id === "su-1").spaceKey = "sp1"'); // 保险：明确归属
+// 通过直接操作 planDraft 模拟勾选了非本空间单元（构造 units 数组直接调用校验路径 → 用 DOM 注入）
+const box = d.createElement('input');
+box.type = 'checkbox';
+box.className = 'plan-unit-check';
+box.value = 'su-1';
+box.checked = true;
+box.dataset.state = 'on';
+d.getElementById('plan-units-charge-container').appendChild(box);
+alerts.length = 0;
+w.eval('confirmPlanCreate()');
+ok(alerts.some(m => m.includes('不属于所选空间')), '跨空间单元保存被拦截: ' + (alerts[alerts.length-1] || '').slice(0, 30));
+box.remove();
+// 8. 修改入口：回填空间+勾选
 const editIdx = w.eval('planRows.length-1');
 w.eval('editPlanRow(' + editIdx + ')');
-ok(chk().length === 1 && chk()[0] === 'su-3', '修改页回填原计划勾选（su-3）: ' + chk().join(','));
-ok(vis().length === 4, '修改页筛选已重置（默认全部可见，已勾选不被取消）');
+ok(d.getElementById('plan-space-sel').value === 'sp2', '修改页回填空间 sp2');
+ok(chk().sort().join(',') === 'su-5,su-6,su-7', '修改页回填原计划勾选: ' + chk().join(','));
+// 9. 未选空间拦截（清空下拉）
+w.eval('openPlanCreatePage()');
+d.getElementById('plan-name').value = 'r38 无空间计划';
+d.getElementById('plan-eff-start').value = '2026-11-12T00:00:00';
+d.getElementById('plan-eff-end').value = '2026-11-19T00:00:00';
+alerts.length = 0;
+w.eval('confirmPlanCreate()');
+ok(alerts.some(m => m.includes('请选择售卖空间')), '未选空间保存被拦截');
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

@@ -31,6 +31,9 @@ const uSel = document.querySelector('#plan-charge-unified select.plan-charge-sel
 uSel.value = 'maas-product-vtpm-std.60d';
 ok(uSel.value === 'maas-product-vtpm-std.60d', 'unified 下拉可切换计费项');
 // perUnit 模式：两行布局（第一行售卖单元信息，第二行下拉+去创建），无详情容器
+// 第38轮：计划创建先在区块1选择售卖空间，区块2 才渲染该空间单元
+document.getElementById('plan-space-sel').value = 'sp1';
+window.onPlanSpaceChange();
 document.getElementById('plan-mode-charge').checked = true;
 window.renderPlanCreateSections();
 const pBox = document.getElementById('plan-charge-perunit');

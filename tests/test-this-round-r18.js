@@ -35,9 +35,9 @@ ok(evalInPage('currentProduct.dims') === undefined, '商品无 dims 字段（第
 ok(evalInPage('currentProduct.type') === 'maas-online-text', '商品类型= maas-online-text');
 const activeTab2 = document.querySelector('#plan-tabs-card .admin-tab.active');
 ok(activeTab2 && activeTab2.textContent.trim() === '售卖空间', '创建后默认打开「售卖空间」Tab');
-// 新商品：通过空间计划创建空间（第31轮：每份计划为每个勾选 fn 新建一个空间；input 需两个空间 → 两份计划）
+// 新商品：通过「创建售卖空间」建空间（第38轮：一个空间可含多个 fn）
 window.eval('startEdit()');
-// 计划一：input（输出token区间）+ output（输入token区间）
+// 空间一：input（输出token区间×0～4K）+ output（输入token区间×0～128K）——多 fn 共一空间
 window.eval('openSpacePlanModal()');
 let boxIn = document.querySelector('.sp-fn-check[data-fn="input"]');
 boxIn.checked = true;
@@ -49,34 +49,35 @@ boxOut.checked = true;
 boxOut.dispatchEvent(new window.Event('change', { bubbles: true }));
 document.querySelectorAll('.sp-dim-check[data-fn="output"]').forEach(c => { if (c.value === '输入token区间') { c.checked = true; c.dispatchEvent(new window.Event('change', { bubbles: true })); } });
 document.querySelectorAll('.sp-measure-check[data-fn="output"][data-dim="输入token区间"]').forEach(c => { c.checked = c.value === '0～128K'; });
-document.getElementById('sp-name').value = 'r31 计划一';
+document.getElementById('sp-name').value = 'r38 空间一';
 alertMsg = '';
 window.confirmSpacePlan();
-ok(alertMsg.includes('已保存'), '计划一保存成功: ' + alertMsg.slice(0, 20));
-// 计划二：input（购买量区间）
+ok(alertMsg.includes('已保存'), '空间一保存成功: ' + alertMsg.slice(0, 20));
+// 空间二：input（购买量区间×1～100）
 window.eval('openSpacePlanModal()');
 boxIn = document.querySelector('.sp-fn-check[data-fn="input"]');
 boxIn.checked = true;
 boxIn.dispatchEvent(new window.Event('change', { bubbles: true }));
 document.querySelectorAll('.sp-dim-check[data-fn="input"]').forEach(c => { if (c.value === '购买量区间') { c.checked = true; c.dispatchEvent(new window.Event('change', { bubbles: true })); } });
 document.querySelectorAll('.sp-measure-check[data-fn="input"][data-dim="购买量区间"]').forEach(c => { c.checked = c.value === '1～100'; });
-document.getElementById('sp-name').value = 'r31 计划二';
+document.getElementById('sp-name').value = 'r38 空间二';
 window.confirmSpacePlan();
-ok(evalInPage('spaceSeq') === 8, 'spaceSeq=8（售卖空间6/7/8，跨 function 连续编号）');
-ok(evalInPage('spaces["sp6"].measures') === undefined, '空间无 measures（第23轮只管维度）');
-// 不同 fn 的空间维度集合可相同（总是新建互不影响）
-ok(evalInPage('spaces["sp2"].fn === "input" && spaces["sp4"].fn === "output" && spaces["sp2"].dims.join(",") === spaces["sp4"].dims.join(",")'), '不同 function 的空间维度可相同（mock sp2/sp4 同维度集合各自独立）');
+ok(evalInPage('spaceSeq') === 2, 'spaceSeq=2（空间一/二，跨 function 连续编号）');
+ok(evalInPage('Object.keys(spaces["sp1"].fnDims).join(",")') === 'input,output', '空间一含 input+output 两个 fn（第38轮多 fn 共一空间）');
+ok(evalInPage('spaces["sp2"].fnDims["input"].join(",")') === '购买量区间', '空间二 input 单维度');
 
-// ===== 3. online-text：SU 弹窗已删（第37轮）——售卖单元改由空间计划叉乘生成 =====
-section('3. 叉乘生成售卖单元（第37轮）');
+// ===== 3. online-text：SU 弹窗已删（第37轮）——售卖单元改由空间叉乘生成 =====
+section('3. 叉乘生成售卖单元（第38轮）');
 window.eval('startEdit()');
 ok(!document.getElementById('modal-su-confirm'), 'SU 弹窗已删除');
 ok(!document.getElementById('su-create-btn'), 'SU Tab 创建按钮已删除');
-// 前面计划一（sp6：input+输出token区间×0～4K；sp7：output+输入token区间×0～128K）保存时已自动各生成 1 个单元
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp6").length') === 1, '计划一 sp6（input+输出token区间×0～4K）生成 1 个单元');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp6")[0].fn') === 'input', '售卖单元 fn=input');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp6")[0].dim') === '输出token区间', '售卖单元 dim 不含 function');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp7").length') === 1, '计划一 sp7（output）生成 1 个单元');
+// 空间一保存时逐 fn 叉乘：input 1 个 + output 1 个，同属 sp1
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 2, '空间一（input+output）生成 2 个单元');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="input").length') === 1, 'sp1 input 单元 1 个');
+const suIn = evalInPage('saleUnits.find(u=>u.spaceKey==="sp1" && u.fn==="input")');
+ok(suIn && suIn.dim === '输出token区间', '售卖单元 dim 不含 function（input 单元 dim=输出token区间）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="output").length') === 1, 'sp1 output 单元 1 个');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp2").length') === 1, '空间二（input+购买量区间×1～100）生成 1 个单元');
 
 // ===== 4. 复制不受状态影响 =====
 section('4. 复制不受状态影响');

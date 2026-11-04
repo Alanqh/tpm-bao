@@ -40,13 +40,22 @@ ok(evalInPage('typeof refreshProductBadge') === 'function', 'refreshProductBadge
 window.eval('refreshProductBadge()'); // 不应报错
 
 // ===== 3. 编辑驱动单元状态变化 → 列表 Tab 联动（第13轮快照回写仍生效）=====
+// 第38轮新语义：单元在售=空间 published 且在档期内 + 生效中最高优先级计划 on；只发计划不发空间仍禁售
 section('3. 状态变化联动');
 window.openDetailByCode('maas-product-vtpm-pre');
 window.startEdit();
 window.eval('planRowStatuses[0] = "published"; renderPlan(); renderSaleUnits();');
+window.eval('exitEdit()');
+window.backToList();
+ok(!document.getElementById('listed-tbody').textContent.includes('maas-product-vtpm-pre'), '第38轮：只发计划不发空间 → pre 仍在禁售 Tab（空间待发布）');
+// 空间也发布 → 转在售
+window.openDetailByCode('maas-product-vtpm-pre');
+window.startEdit();
+window.eval('publishSpacePlan("sp1"); planRowStatuses[0] = "published"; renderPlan(); renderSaleUnits();');
+window.eval('exitEdit()');
 window.backToList();
 const listedTxt2 = document.getElementById('listed-tbody').textContent;
-ok(listedTxt2.includes('maas-product-vtpm-pre'), 'pre 计划发布后 su-1 转在售 → 出现在在售 Tab');
+ok(listedTxt2.includes('maas-product-vtpm-pre'), '空间+计划均发布后 su-1 转在售 → 出现在在售 Tab');
 ok(!Array.from(document.querySelectorAll('#pending-tbody tr')).some(r => r.cells[2] && r.cells[2].textContent.trim() === 'maas-product-vtpm-pre' && r.cells[0].textContent.trim() === 'su-1'), 'pre 的 su-1 不再出现在禁售 Tab（转在售）');
 
 // ===== 4. productIsListed 推导函数仍可用（兼容入口） =====

@@ -1,4 +1,4 @@
-// 第28轮：售卖空间 Tab 时间点查询 + 空间计划 Tab 纯计划单元列表（排序：已发布→待发布→已停用，effStart 降序，fn/seq）
+// 第28轮（第38轮口径重写）：售卖空间 Tab 时间点查询 + 空间列表排序（状态→effStart 降序→seq→fn 字典序）+ 仲裁与切换预告
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
 const html = fs.readFileSync('prototype/admin-products.html', 'utf8');
@@ -11,32 +11,59 @@ const w = window, d = w.document;
 let step = 0, fail = 0;
 function ok(cond, msg) { step++; if (!cond) { fail++; console.log('FAIL[' + step + '] ' + msg); } }
 
-// ===== 1. 售卖空间 Tab 时间点查询控件 =====
+function dataRows() {
+  return Array.from(d.querySelectorAll('#space-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
+}
+
+// ===== 1. 时间点查询控件存在 + 初始提示隐藏 =====
 w.eval('openDetailByCode("maas-online-text-glm4")');
 ok(!!d.getElementById('space-tf-point') && !!d.getElementById('space-tf-tip'), '时间点查询控件存在');
 ok(d.getElementById('space-tf-tip').classList.contains('hidden'), '初始提示隐藏（当前时点）');
 
-// ===== 2. 查询 11-15：接管生效 + 提示 =====
+// ===== 2. 初始列表：4 行（sp2×input + sp1×cache/input/output），9 列表头 =====
+const ths = d.querySelectorAll('#inner-tab-space thead th');
+ok(ths.length === 9, '售卖空间表头 9 列，实得 ' + ths.length);
+let rows = dataRows();
+ok(rows.length === 4, 'glm4 初始 4 行（sp1 三 fn + sp2 一 fn），实得 ' + rows.length);
+// 排序：同为 published → effStart 降序（sp2 11-11 > sp1 11-01）→ sp2 首行；sp1 组内 fn 字典序 cache/input/output
+ok(rows[0].cells[2] && rows[0].cells[2].textContent.trim() === 'sp2', 'sp2（effStart 11-11 更晚）排首行');
+ok(rows[0].cells[4].textContent.trim() === 'input' && rows[0].cells[2].rowSpan === 1, 'sp2 行 fn=input 单行 rowspan=1');
+const fnOfRow = r => r.cells.length === 3 ? r.cells[0].textContent.trim() : r.cells[4].textContent.trim();
+const fnsSp1 = [fnOfRow(rows[1]), fnOfRow(rows[2]), fnOfRow(rows[3])];
+ok(fnsSp1.join(',') === 'cache,input,output', 'sp1 三行 fn 字典序 cache→input→output，实得 ' + fnsSp1.join(','));
+ok(rows[1].cells.length === 9 && rows[2].cells.length === 3 && rows[3].cells.length === 3, 'sp1 首行 9 列带空间级列、两续行仅 3 列');
+// 当前 11-04：sp2 生效期外（11-11 起）、sp1 生效期内
+ok(rows[0].textContent.includes('生效期外'), '当前时点 sp2 生效期外');
+ok(rows[1].textContent.includes('生效期内'), 'sp1 生效期内（2026-11-01~2027-11-01）');
+
+// ===== 3. 查询 11-15：sp2 生效期内 + 提示 + timeFilter 置位 =====
 d.getElementById('space-tf-point').value = '2026-11-15T12:00:00';
 w.eval('querySpaceAt()');
 ok(w.eval('timeFilter && timeFilter.point.indexOf("2026-11-15 12:00") === 0'), 'timeFilter 置位: ' + w.eval('JSON.stringify(timeFilter)'));
 ok(!d.getElementById('space-tf-tip').classList.contains('hidden'), '提示显示');
 ok(d.getElementById('space-tf-tip').textContent.includes('2026-11-15 12:00'), '提示含时间点文本');
-const t2Rows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(t2Rows.some(r => r.cells[1].textContent.trim() === 'sp3') && t2Rows.every(r => r.cells[1].textContent.trim() !== 'sp2'), '11-15 input 行=sp3（双11接管；第35轮删胜出计划标注，按行断言）');
-ok(w.eval('effectiveSpaceAt("input").key') === 'sp3', 'effectiveSpaceAt 走 timeFilter → sp3');
+rows = dataRows();
+ok(rows[0].textContent.includes('生效期内'), '11-15 时点 sp2 生效期内（双11档期 11-11~11-20）');
 
-// ===== 3. 空值查询拦截 / 重置 =====
+// ===== 4. 仲裁（第38轮：priority 降序→seq 降序）与切换预告 =====
+ok(w.eval('effectiveSpaceAt("input").key') === 'sp2', '11-15 input 生效空间=sp2（priority 500 > sp1 100）');
+ok(w.eval('effectiveSpaceAt("output").key') === 'sp1' && w.eval('effectiveSpaceAt("cache").key') === 'sp1', '11-15 output/cache 仍=sp1（sp2 仅含 input）');
+
+// ===== 5. 切换预告：当前时点下一个改变 input 空间的已发布空间 =====
 w.eval('resetSpaceAt()');
 ok(w.eval('timeFilter') === null, '重置后 timeFilter=null');
 ok(d.getElementById('space-tf-tip').classList.contains('hidden'), '重置后提示隐藏');
-ok(Array.from(d.querySelectorAll('#space-tbody tr')).every(r => !r.cells[2].textContent.includes('计划「')), '当前时点状态列只留徽标（第35轮：切换预告标注已删）');
+ok(w.eval('nextSpaceSwitchOfFn("input")') === 'sp2', '当前时点 input 下一切换预告=sp2（11-11 起接管）');
+ok(w.eval('nextSpaceSwitchOfFn("output")') === null, 'output 无切换预告（sp2 不含 output）');
+
+// ===== 6. 空值查询拦截 =====
 d.getElementById('space-tf-point').value = '';
 alerts.length = 0;
 w.eval('querySpaceAt()');
 ok(alerts.some(m => m.includes('请先选择一个时间节点')), '空值查询拦截');
+ok(w.eval('timeFilter') === null, '空值查询不置位');
 
-// ===== 4. 与售卖单元 Tab 共享 timeFilter（反向同步）=====
+// ===== 7. 与售卖单元 Tab 共享 timeFilter（反向同步）=====
 d.getElementById('tf-point').value = '2026-11-15T08:00:00';
 w.eval('querySaleParams()');
 w.eval('renderSpaceTab()');
@@ -45,61 +72,25 @@ w.eval('resetSaleParams(); renderSpaceTab()');
 ok(d.getElementById('space-tf-tip').classList.contains('hidden'), '重置后同步隐藏');
 ok(d.getElementById('space-tf-point').value === '', '输入框跟随清空');
 
-// ===== 5. 空间计划 Tab：纯计划单元（第32轮：glm4 mock 含常规计划 3 单元 + 双11 1 单元）=====
-w.eval('renderSpacePlans()');
-let rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
-ok(rows.length === 4, 'glm4 初始 4 行（常规 pu-sp-1-1~3 + 双11 pu-sp-2-1），实得 ' + rows.length);
-ok(rows.some(r => r.textContent.includes('双11大促') && r.textContent.includes('pu-sp-2-1')), '双11计划单元（按 fnSpaces 键序 pu 号=计划 index+1）');
-
-// ===== 6. 排序：已发布(effStart 降序)→待发布→已停用（第31轮：维度勾选创建，空间总是新建）=====
+// ===== 8. 停用空间后排序落到已停用组（状态→effStart 的状态优先级验证）=====
 w.eval('startEdit()');
-function mkplan(name, start, fn) {
-  w.eval('openSpacePlanModal()');
-  d.getElementById('sp-name').value = name;
-  d.getElementById('sp-eff-start').value = start + 'T00:00:00';
-  d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
-  const b = d.querySelector('.sp-fn-check[data-fn="' + fn + '"]');
-  b.checked = true; b.dispatchEvent(new w.Event('change', { bubbles: true }));
-  d.querySelector('.sp-dim-check[data-fn="' + fn + '"][value="输入token区间"]').checked = true;
-  d.querySelector('.sp-measure-check[data-fn="' + fn + '"][data-dim="输入token区间"][value="0～128K"]').checked = true;
-  w.eval('confirmSpacePlan()');
-}
-mkplan('P1晚生效', '2026-12-10', 'input');   // idx2（常规0/双11 1 之后）→ publish
-mkplan('P2待发布', '2026-12-20', 'input');   // idx3 → pending
-mkplan('P3已停用', '2026-12-05', 'output');  // idx4 → stop
-mkplan('P4早生效', '2026-12-01', 'cache');   // idx5 → publish（早于 P1）
-w.eval('publishSpacePlan(2); stopSpacePlan(4); publishSpacePlan(5); renderSpacePlans()');
-rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
-ok(rows.length === 8, '8 行（常规3+双11+P1+P2+P3+P4），实得 ' + rows.length);
-const order = rows.map(r => (r.textContent.match(/GLM4·常规|双11大促|P\d/) || ['?'])[0]);
-ok(order.join(',').startsWith('P1,P4,双11大促,GLM4·常规') && order.join(',').endsWith('P2,P3'), '排序=published effStart降序(12-10→12-01→11-11→11-01)→pending(P2)→stopped(P3)：' + order.join(','));
+w.eval('stopSpacePlan("sp2")'); // sp2 档期 11-11~11-20，当前 11-04 无生效计划 → 可停用
+rows = dataRows();
+ok(rows.length === 4, '停用不删行，仍 4 行');
+ok(rows[3].cells[2] && rows[3].cells[2].textContent.trim() === 'sp2', '已停用 sp2 排到末尾（状态优先于 effStart）');
+ok(rows[3].cells[1].textContent.trim() === '已停用', 'sp2 状态徽标=已停用');
+ok(rows[0].cells[2].textContent.trim() === 'sp1' && rows[0].cells[1].textContent.trim() === '已发布', '已发布的 sp1 组升为首位');
+w.eval('publishSpacePlan("sp2")'); // 恢复现场
+rows = dataRows();
+ok(rows[0].cells[2].textContent.trim() === 'sp2' && rows[0].cells[1].textContent.trim() === '已发布', '重新发布后 sp2 回到首行（published+effStart 降序）');
+w.eval('exitEdit()');
 
-// ===== 7. 同计划多 fn 行相邻且均 9 列（第34轮取消 rowspan 合并）=====
-// P1 只有单 fn；再建一条双 fn 计划验证
-mkplan('P5双fn', '2026-12-15', 'input');
-w.eval('openSpacePlanModal ? 0 : 0');
-w.eval('editSpacePlan(6)');
-const b2 = d.querySelector('.sp-fn-check[data-fn="output"]');
-b2.checked = true; b2.dispatchEvent(new w.Event('change', { bubbles: true }));
-d.querySelector('.sp-dim-check[data-fn="output"][value="输入token区间"]').checked = true;
-d.querySelector('.sp-measure-check[data-fn="output"][data-dim="输入token区间"][value="0～128K"]').checked = true;
-w.eval('confirmSpacePlan(); renderSpacePlans()');
-rows = Array.from(d.querySelectorAll('#spaceplan-tbody tr'));
-ok(rows.length === 10, 'P5 双 fn 后 10 行（常规3+双11+P1~P4 各1 + P5 双行），实得 ' + rows.length);
-const p5First = rows.find(r => r.textContent.includes('pu-sp-7-1')); // P5 为第7条计划（planIdx=6）
-ok(p5First && p5First.cells.length === 9 && !p5First.innerHTML.includes('rowspan'), 'P5 首行 9 列且无 rowspan（第34轮取消合并）');
-const p5Second = rows.find(r => r.textContent.includes('pu-sp-7-2'));
-ok(p5Second && p5Second.cells.length === 9 && !p5Second.innerHTML.includes('rowspan'), 'P5 次行也 9 列（每行完整渲染）');
-// P5=pending 12-15，排在 pending 组（P2 12-20 之后）：
-const order2 = rows.map(r => (r.textContent.match(/GLM4·常规|双11大促|P\d/) || ['?'])[0]);
-ok(order2.join(',').indexOf('P2,P5') >= 0, '同状态组内 effStart 降序（P2 12-20 → P5 12-15）：' + order2.join(','));
-
-// ===== 8. vtpm：常驻计划单行（第32轮 mock），无「未指定」行 =====
+// ===== 9. vtpm：常驻空间单行 + 时间查询无副作用 =====
 w.eval('backToList(); openDetailByCode("maas-product-vtpm-std")');
-w.eval('renderSpacePlans()');
-const vt = d.getElementById('spaceplan-tbody').textContent;
-ok(vt.includes('标准·常驻售卖空间1'), 'vtpm 常驻计划单元（fn=""→sp1，第32轮 mock）');
-ok((vt.match(/未指定/g) || []).length === 0, '不再有「未指定」行');
+rows = dataRows();
+ok(rows.length === 1 && rows[0].cells[2].textContent.trim() === 'sp1', 'vtpm 常驻空间单行');
+ok(rows[0].cells[4].textContent.trim() === '—', 'fn 空串单元 Function 列=—（不区分 function）');
+ok((d.getElementById('space-tbody').textContent.match(/未指定/g) || []).length === 0, '无「未指定」行');
 
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

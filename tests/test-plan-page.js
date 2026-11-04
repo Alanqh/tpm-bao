@@ -41,6 +41,10 @@ window.switchInnerTab('plan');
 window.openPlanCreatePage();
 ok(!document.getElementById('plan-create-view').classList.contains('hidden'), '页面显示');
 ok(document.getElementById('detail-view').classList.contains('hidden'), '商品详情页隐藏');
+// 第38轮：先在区块1选择售卖空间，区块2 渲染空间内单元
+ok(document.getElementById('plan-units-charge-container').textContent.includes('请先在区块1选择售卖空间'), '未选空间时区块2 提示先选空间');
+document.getElementById('plan-space-sel').value = 'sp1';
+window.onPlanSpaceChange();
 const checks = Array.from(document.querySelectorAll('.plan-unit-check'));
 ok(checks.length === 3 && checks.every(c => c.checked), '区块2 默认全选 3 个售卖单元');
 ok(checks.every(c => c.dataset.state === 'on'), '默认全部「上架」');

@@ -1,8 +1,7 @@
-// 第23轮（第32轮口径适配）：售卖空间只管维度 + 列表按时刻过滤（每 fn 一行生效空间，5 列无操作列）
-// 原第23轮的「设为默认/操作列/setSpaceActive」链路已在第32轮废除——生效空间完全由已发布空间计划仲裁
+// 第23轮历史验证——第38轮口径重写：空间=聚合根（无 spacePlans）；列表全空间展示 9 列（不按时刻过滤）；发布/优先级仲裁
 const fs = require('fs');
 const { JSDOM } = require('jsdom');
-const html = fs.readFileSync('prototype/admin-products.html', 'utf8');
+const html = fs.readFileSync('/Users/lqh/Documents/ChatGPT/TPM保障包/prototype/admin-products.html', 'utf8');
 const dom = new JSDOM(html, { runScripts: 'dangerously', url: 'http://localhost/' });
 const { window } = dom;
 const alerts = [];
@@ -15,88 +14,87 @@ function ok(cond, msg) { step++; if (!cond) { fail++; console.log('FAIL[' + step
 
 // 1. 打开 glm4（浏览态）
 w.eval('openDetailByCode("maas-online-text-glm4")');
-// 2. 列表结构：5 列表头（第32轮删操作列）
+// 2. 列表结构：9 列表头（第38轮）
 const spHead = Array.from(d.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(JSON.stringify(spHead.slice(0,4)) === JSON.stringify(['Function','售卖空间','状态','空间维度']), '表头前4列=Function/售卖空间/状态/空间维度: ' + spHead.join('/'));
-ok(spHead.length === 5 && spHead[4] === '售卖单元数', '共 5 列（第32轮删操作列）');
-// 3. 行序（第32轮：每 fn 一行生效空间；fn 字典序 cache<input<output）
+ok(JSON.stringify(spHead) === JSON.stringify(['空间单元','状态','售卖空间','空间名称','Function','空间维度','售卖单元数','优先级','生效起止']), '表头 9 列: ' + spHead.join('/'));
+// 3. 行序（第38轮：全空间展示；排序=状态→effStart 降序→seq→fn 字典序；sp1 三行 fn 字典序 cache/input/output）
 const rows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows.length === 3, '3 个空间行（每 fn 一行：sp5/sp2/sp4）');
-ok(rows[0].cells[0].textContent.trim() === 'cache' && rows[0].cells[0].rowSpan === 1, '首行 cache（字典序）');
-ok(rows[1].cells[0].textContent.trim() === 'input', '第二行 input（无 rowspan 合并，每 fn 一行）');
-ok(rows[1].cells.length === 5, 'input 行 5 cells（无合并）');
-ok(rows[2].cells[0].textContent.trim() === 'output', 'output 第三行');
-ok(rows[0].cells[1].textContent.trim() === 'sp5' && rows[1].cells[1].textContent.trim() === 'sp2' && rows[2].cells[1].textContent.trim() === 'sp4', '当前时刻 cache=sp5/input=sp2/output=sp4（第35轮：空间列只显 code）');
-// 4. 状态列（第35轮：只留「生效中」徽标，胜出计划/切换预告标注已删）
-ok(rows[0].textContent.includes('生效中') && rows[1].textContent.includes('生效中') && rows[2].textContent.includes('生效中'), 'sp5/sp2/sp4 均生效中');
-ok(rows.every(r => !r.cells[2].textContent.includes('计划「') && !r.cells[2].textContent.includes('起切换')), '状态列无胜出计划/切换预告文案（第35轮精简）');
-// 5. 无操作列/无默认机制（第32轮）
-ok(!rows[0].innerHTML.includes('设为默认') && !rows[0].innerHTML.includes('设为生效'), '无设为默认/设为生效（默认机制已废）');
+ok(rows.length === 4, '4 个空间行（sp1×3fn + sp2×1）');
+ok(rows[0].cells[2].textContent.trim() === 'sp2', '首行 sp2（同 published，effStart 11-11 更晚降序在前）');
+ok(rows[1].cells[2].textContent.trim() === 'sp1' && rows[1].cells[2].rowSpan === 3, 'sp1 空间列 rowspan=3');
+ok(rows[1].cells[4].textContent.trim() === 'cache' && rows[2].cells[0].textContent.trim() === 'input' && rows[3].cells[0].textContent.trim() === 'output', 'sp1 三行 fn 字典序 cache/input/output');
+// 4. 状态列（第38轮：三态徽标 + 档期内/外标注）
+ok(rows[0].textContent.includes('已发布') && rows[1].textContent.includes('已发布'), '两空间首行均已发布徽标（sp1 续行被 rowspan 合并无徽标）');
+ok(rows[0].textContent.includes('生效期外') || rows[0].textContent.includes('生效期内'), '档期标注展示（当前时刻 sp2 未到档期=生效期外）');
+// 5. 无操作列/无默认机制
+ok(!rows[0].innerHTML.includes('设为默认') && !rows[0].innerHTML.includes('设为生效'), '无设为默认/设为生效');
 ok(w.eval('typeof setSpaceActive') === 'undefined', 'setSpaceActive 函数已删');
-// 6. 时间切换后状态即时变化（11-15：双11接管 input→sp3）
+// 6. 时间切换后档期标注变化（11-15：sp2 进入档期）
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
 const rows2 = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows2.length === 3, '11-15 仍 3 行（每 fn 一行）');
-ok(rows2.some(r => r.cells[1].textContent.trim() === 'sp3'), '11-15 input 行空间=sp3（双11接管）');
-ok(rows2.some(r => r.cells[1].textContent.trim() === 'sp2') === false, '11-15 sp2 不在列表（按时刻过滤）');
+ok(rows2.length === 4, '11-15 仍 4 行（全空间展示不按时刻过滤）');
+ok(rows2[0].textContent.includes('生效期内'), '11-15 sp2 行=生效期内（双11空间接管 input）');
 w.eval('timeFilter = null; renderSpaceTab()');
-// 7. 浏览态：vtpm std（常驻计划 sp1 单行）
+// 7. 浏览态：vtpm std（常驻空间 sp1 单行）
 w.eval('backToList()');
 w.eval('openDetailByCode("maas-product-vtpm-std")');
 const vRows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(vRows.length === 1, 'vtpm 单行（sp1 常驻计划）');
-ok(vRows[0].cells[0].textContent.trim() === '—' || vRows[0].cells[0].textContent.includes('—'), '无 fn 显示 —');
-ok(vRows[0].textContent.includes('生效中'), 'sp1 生效中');
-ok(vRows[0].cells[4].textContent.trim() === '3', 'sp1 售卖单元数=3（std mock su-1~3）');
-// 8. 空间计划创建新空间后：未发布 → 不在售卖空间 Tab；发布且时段命中 → 生效
+ok(vRows.length === 1, 'vtpm 单行（sp1 常驻空间）');
+ok(vRows[0].cells[4].textContent.includes('—'), '无 fn 显示 —');
+ok(vRows[0].textContent.includes('已发布'), 'sp1 已发布');
+ok(vRows[0].cells[6].textContent.trim() === '3', 'sp1 售卖单元数=3（std mock su-1~3）');
+// 8. 创建新空间：未发布 → 不参与仲裁；发布且高优先级 → 生效
 w.eval('startEdit()');
 w.eval('openSpacePlanModal()');
 const box8 = d.querySelector('.sp-fn-check[data-fn=""]');
 box8.checked = true;
 box8.dispatchEvent(new w.Event('change', { bubbles: true }));
-d.querySelector('.sp-dim-check[data-fn=""][value="购买量区间"]').checked = true;
-d.querySelector('.sp-measure-check[data-fn=""][data-dim="购买量区间"][value="1～100"]').checked = true; // 第37轮：维度勾选后须勾度量
-d.getElementById('sp-name').value = 'r31 vtpm 计划A';
+const dimBox8 = d.querySelector('.sp-dim-check[data-fn=""][value="购买量区间"]');
+dimBox8.checked = true;
+dimBox8.dispatchEvent(new w.Event('change', { bubbles: true }));
+d.querySelector('.sp-measure-check[data-fn=""][data-dim="购买量区间"][value="1～100"]').checked = true;
+d.getElementById('sp-name').value = 'r38 vtpm 空间A';
 d.getElementById('sp-priority').value = '200';
 d.getElementById('sp-eff-start').value = '2026-11-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2027-11-01T00:00:00';
 w.eval('confirmSpacePlan()');
-ok(w.eval('spaceSeq') === 6, 'sp6 创建成功（计划保存即落地空间）');
-ok(w.eval('spaces["sp6"].dims.length') === 1, 'sp6 单维度');
-ok(w.eval('spaces["sp6"].measures') === undefined, '空间无 measures 字段（只管维度）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp6" && u.measure === "1～100").length') === 1, 'sp6 叉乘 1 单元（购买量区间×1～100）');
+ok(w.eval('spaceSeq') === 2, 'sp2 创建成功（保存即落地空间）');
+ok(w.eval('spaces["sp2"].fnDims[""].length') === 1, 'sp2 单维度');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2" && u.measure === "1～100").length') === 1, 'sp2 叉乘 1 单元（购买量区间×1～100）');
+ok(w.eval('currentSpaceOfFn("")') === 'sp1', 'sp2 待发布 → 不接管，仍 sp1');
+// 发布后接管：priority 200 > 常驻 100 → sp2 生效
+w.eval('publishSpacePlan("sp2")');
+ok(w.eval('currentSpaceOfFn("")') === 'sp2', '发布后 priority 200>100 → sp2 接管');
 let rows3 = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows3.length === 1 && rows3[0].cells[1].textContent.trim() === 'sp1', '计划A 待发布 → 不接管，列表仍仅 sp1（第32轮：纯计划仲裁）');
-// 发布后接管：priority 200 > 常驻 100 → sp6 生效
-w.eval('publishSpacePlan(1)');
-ok(w.eval('currentSpaceOfFn("")') === 'sp6', '发布后 priority 200>100 → sp6 接管');
-rows3 = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows3.length === 1 && rows3[0].cells[1].textContent.trim() === 'sp6', '列表显示 sp6（按时刻过滤）');
-// 9. 重复维度集合不再拦截（第31轮口径：总是新建 sp7；第37轮：度量须勾）
+ok(rows3.length === 2 && rows3[0].cells[2].textContent.trim() === 'sp2', '列表显示 sp2（排序在前：effStart 相同但 priority 无关排序，seq 大不前置——按 seq 升序在后）');
+// 9. 重复维度集合不再拦截（总是新建 sp3）
 w.eval('openSpacePlanModal()');
 const box9 = d.querySelector('.sp-fn-check[data-fn=""]');
 box9.checked = true;
 box9.dispatchEvent(new w.Event('change', { bubbles: true }));
-['购买量区间', '购买周期'].forEach(dim => { d.querySelector('.sp-dim-check[data-fn=""][value="' + dim + '"]').checked = true; });
-d.getElementById('sp-name').value = 'r31 vtpm 计划B';
+['购买量区间', '购买周期'].forEach(dim => { const c = d.querySelector('.sp-dim-check[data-fn=""][value="' + dim + '"]'); c.checked = true; c.dispatchEvent(new w.Event('change', { bubbles: true })); });
+d.getElementById('sp-name').value = 'r38 vtpm 空间B';
+d.getElementById('sp-eff-start').value = '2026-11-01T00:00:00';
+d.getElementById('sp-eff-end').value = '2027-11-01T00:00:00';
 d.querySelector('.sp-measure-check[data-fn=""][data-dim="购买量区间"][value="1～100"]').checked = true;
 d.querySelector('.sp-measure-check[data-fn=""][data-dim="购买周期"][value="30天"]').checked = true;
 w.eval('confirmSpacePlan()');
-ok(w.eval('spaceSeq') === 7 && w.eval('spaces["sp7"].dims.length') === 2, '维度集合与 sp1 相同 → 不拦截，新建 sp7（总是新建）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp7").length') === 1, 'sp7 叉乘 1 单元（1～100×30天）');
+ok(w.eval('spaceSeq') === 3 && w.eval('spaces["sp3"].fnDims[""].length') === 2, '维度集合与 sp1 相同 → 不拦截，新建 sp3（总是新建）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 1, 'sp3 叉乘 1 单元（1～100×30天）');
 w.eval('closeModal("spaceplan")');
-// 10. SU 弹窗已删（第37轮）；售卖计划引用的单元仍在 SU Tab 展示
-ok(!d.getElementById('modal-su-confirm'), 'SU 弹窗已删（第37轮——单元由空间计划叉乘生成）');
+// 10. SU 弹窗已删（第37轮）
+ok(!d.getElementById('modal-su-confirm'), 'SU 弹窗已删');
 ok(w.eval('typeof openSuConfirmModal') === 'undefined', 'openSuConfirmModal 已删');
-// 11. 编辑度量功能已删
+// 11. 编辑度量/空间修改功能已删
 ok(!d.getElementById('modal-space-measure-edit'), '编辑度量弹窗已删');
 ok(w.eval('typeof editSpaceMeasures') === 'undefined', 'editSpaceMeasures 函数已删');
-ok(w.eval('typeof setFnSpace') === 'undefined', 'setFnSpace 已删（默认机制已废）');
-ok(!d.getElementById('fn-space-cards'), 'fn 配置卡已删（合并进列表）');
-// 12. snapshot 恢复（第32轮）：glm4 重进后常规/双11计划仍在，input 当前 sp2
-w.eval('backToList()');
+ok(w.eval('typeof setFnSpace') === 'undefined', 'setFnSpace 已删');
+ok(w.eval('typeof editSpacePlan') === 'undefined', 'editSpacePlan 已删（第38轮：空间不可改）');
+ok(!d.getElementById('fn-space-cards'), 'fn 配置卡已删');
+// 12. snapshot 恢复（第38轮）：glm4 重进后空间/状态保持
+w.eval('exitEdit(); backToList()');
 w.eval('openDetailByCode("maas-online-text-glm4")');
-ok(w.eval('spacePlans.length') === 2 && w.eval('spacePlanStatuses[0]') === 'published', '重进 glm4 恢复 2 份计划（常规+双11）');
-ok(w.eval('currentSpaceOfFn("input")') === 'sp2', '快照恢复 input=sp2（常规计划仲裁）');
+ok(w.eval('Object.keys(spaces).length') === 2 && w.eval('spaces["sp1"].status') === 'published', '重进 glm4 恢复 2 空间 mock 默认（vtpm 编辑不影响 glm4）');
+ok(w.eval('currentSpaceOfFn("input")') === 'sp1', '当前 input=sp1（当前时刻 sp2 未到档期）');
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

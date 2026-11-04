@@ -17,8 +17,8 @@ const evalInPage = (expr) => window.eval(expr);
 section('1. 列表结构');
 const lrows = Array.from(document.querySelectorAll('#listed-tbody tr'));
 const prows = Array.from(document.querySelectorAll('#pending-tbody tr'));
-ok(lrows.length === 6, '已上架 Tab 平铺 6 行（std 3 在售 + pro su-1 在售 + glm4 su-3/su-4 在售·第25轮常规售卖计划）: ' + lrows.length);
-ok(prows.length === 8, '未上架 Tab 平铺 8 行（pre 3 + pro su-2/3/4 禁售 + glm4 su-1/su-2 禁售·双11计划未到期）: ' + prows.length);
+ok(lrows.length === 8, '已上架 Tab 平铺 8 行（std 3 在售 + pro su-1 在售 + glm4 su-1~su-4 在售·第38轮常规计划锁 sp1 全四单元）: ' + lrows.length);
+ok(prows.length === 9, '未上架 Tab 平铺 9 行（pre 3 + pro su-2/3/4 禁售 + glm4 su-5/6/7 禁售·双11空间未到档期）: ' + prows.length);
 const lhead = Array.from(document.querySelectorAll('#top-tab-listed thead th')).map(th => th.textContent.trim());
 ok(lhead.length === 14, '已上架 Tab 表头 14 列: ' + lhead.length);
 ok(lhead[0] === '售卖单元' && lhead[1] === '状态' && lhead[2] === 'SKU', '前3列=售卖单元/状态/SKU（SKU 第三列）');
@@ -35,6 +35,8 @@ ok(prows.every(r => r.cells[1].textContent.trim() === '禁售'), '未上架 Tab 
 // pro su-3/su-4（无计划→禁售）出现在未上架 Tab
 const proSu3 = prows.find(r => r.cells[2].textContent.trim() === 'maas-product-vtpm-pro' && r.cells[0].textContent.trim() === 'su-3');
 ok(!!proSu3, 'pro 的禁售单元 su-3 出现在未上架 Tab');
+const glm4Su5 = prows.find(r => r.cells[2].textContent.trim() === 'maas-online-text-glm4' && r.cells[0].textContent.trim() === 'su-5');
+ok(!!glm4Su5, 'glm4 的双11单元 su-5（空间未到档期）出现在未上架 Tab');
 ok(!lrows.some(r => r.cells[2].textContent.trim() === 'maas-product-vtpm-pro' && ['su-3', 'su-4'].includes(r.cells[0].textContent.trim())), 'pro 的禁售单元不出现在已上架 Tab');
 
 // ===== 3. 排序：按 SKU + 售卖单元 ID =====
@@ -74,12 +76,20 @@ window.backToList();
 section('6. 状态变化联动');
 window.openDetailByCode('maas-product-vtpm-pre');
 window.startEdit();
+// 第38轮：只发计划不发空间 → su-1 仍禁售
 window.eval('planRowStatuses[0] = "published"; renderSaleUnits(); refreshProductBadge();');
 window.backToList();
-const lrows2 = Array.from(document.querySelectorAll('#listed-tbody tr'));
+let lrows2 = Array.from(document.querySelectorAll('#listed-tbody tr'));
+ok(lrows2.length === 8, '第38轮：只发计划不发空间 → su-1 仍禁售 → 已上架 Tab 仍 8 行: ' + lrows2.length);
+// 空间也发布 → su-1 转在售
+window.openDetailByCode('maas-product-vtpm-pre');
+window.startEdit();
+window.eval('publishSpacePlan("sp1"); renderSaleUnits(); refreshProductBadge();');
+window.backToList();
+lrows2 = Array.from(document.querySelectorAll('#listed-tbody tr'));
 const prows2 = Array.from(document.querySelectorAll('#pending-tbody tr'));
-ok(lrows2.length === 7, 'pre 计划发布后 su-1 转在售 → 已上架 Tab 7 行: ' + lrows2.length);
-ok(prows2.length === 7, '未上架 Tab 剩 7 行（pre su-2/su-3 仍禁售 + glm4 su-1/su-2 禁售）：' + prows2.length);
+ok(lrows2.length === 9, '空间+计划均发布后 su-1 转在售 → 已上架 Tab 9 行: ' + lrows2.length);
+ok(prows2.length === 8, '未上架 Tab 剩 8 行（pre su-2/su-3 仍禁售 + glm4 su-5/6/7 禁售）：' + prows2.length);
 
 // ===== 7. 无售卖单元的商品 → 占位行（未上架 Tab） =====
 section('7. 空态占位');

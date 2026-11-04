@@ -14,16 +14,16 @@ const evalInPage = (expr) => window.eval(expr);
 
 // 构建 online-text 演示数据（第20轮 schema：fn=独立字段，spaceKey=归属空间）
 window.eval(`
-  currentProduct = { code: 'maas-online-text-demo', name: '在线文本演示', type: 'maas-online-text', dims: ['输入token区间', '输出token区间'] };
-  currentConfigs = {}; planRowStatuses = [];
-  spaces = { 'sp-x': { name: '演示空间X', dimsObj: { '输入token区间': ['0～128K'], '输出token区间': ['0～4K'] } } };
-  defaultSpaceByFn = { input: { fn: 'input', spaceKey: 'sp-x' }, output: { fn: 'output', spaceKey: 'sp-x' } };
-  spacePlans = []; spacePlanStatuses = [];
+  currentProduct = { code: 'maas-online-text-demo', name: '在线文本演示', type: 'maas-online-text' };
+  currentConfigs = {};
+  // 第38轮 schema：空间本体携带 档期/优先级/三态/fnDims/fnMeasures（fn→维度→度量）
+  spaces = { 'sp-x': { seq: 1, name: '演示空间X', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { input: ['输入token区间', '输出token区间'], output: ['输入token区间', '输出token区间'] }, fnMeasures: { input: { '输入token区间': ['0～128K'], '输出token区间': ['0～4K'] }, output: { '输入token区间': ['0～128K'], '输出token区间': ['0～4K'] } } } };
+  spaceSeq = 1;
   saleUnits = [
     { id: 'su-1', fn: 'input', spaceKey: 'sp-x', dim: '输入token区间 + 输出token区间', measure: '0～128K + 0～4K' },
     { id: 'su-2', fn: 'output', spaceKey: 'sp-x', dim: '输入token区间 + 输出token区间', measure: '0～128K + 0～4K' }
   ];
-  planRows = [{ name: '在线文本计划', units: ['su-1','su-2'], unitStates: {'su-1':'on','su-2':'on'}, chargeCodes: {}, quotaCodes: {}, inventoryCodes: {}, modes: {}, factor: 'x', slo: 'y', minQty: 1, maxQty: 2, stepQty: 3, payloadId: 'p1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }];
+  planRows = [{ name: '在线文本计划', spaceKey: 'sp-x', units: ['su-1','su-2'], unitStates: {'su-1':'on','su-2':'on'}, chargeCodes: {}, quotaCodes: {}, inventoryCodes: {}, modes: {}, factor: 'x', slo: 'y', minQty: 1, maxQty: 2, stepQty: 3, payloadId: 'p1', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }];
   planRowStatuses = ['published'];
   showDetailView();
 `);
@@ -45,7 +45,7 @@ let rows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(rows.length === 2, '售卖单元 2 行');
 const suRow = rows[0];
 ok(suRow.cells[0].textContent.trim() === 'input' && suRow.cells[0].rowSpan === 1, 'su-1 第一列 Function=input（合并单元格）');
-ok(suRow.cells[1].textContent.trim() === 'sp-x', '第二列 售卖空间=sp-x（第35轮：code 即标识）');
+ok(suRow.cells[1].textContent.trim().startsWith('sp-x') && suRow.cells[1].textContent.includes('已发布'), '第二列 售卖空间=sp-x+三态徽标（第38轮）: ' + suRow.cells[1].textContent.trim());
 ok(suRow.cells[2].textContent.trim() === 'su-1', '第三列 售卖单元=su-1');
 // su-2 fn 变化但空间相同 → 保留 fn td（rs1）、空间被合并
 ok(rows[1].cells[0].textContent.trim() === 'output' && rows[1].cells[0].rowSpan >= 1, 'su-2 行 fn td=output');
@@ -73,17 +73,25 @@ ok(pdRow.cells.length === 17, '详情行 17 列（第20轮加售卖空间列）'
 ok(pdRow.cells[2].textContent.trim() === 'input', '详情 Function 列=input');
 ok(pdRow.cells[3].textContent.trim() === 'sp-x', '详情 售卖空间列=sp-x（第35轮=code）');
 
-// ===== 5. 计划创建页区块2（第20轮：function筛选下拉 + 空间筛选 + fn/空间信息行） =====
+// ===== 5. 计划创建页区块1/2（第38轮：计划锁定单空间——区块1 空间下拉，区块2 只展示所选空间内单元；旧筛选已删） =====
 section('5. 计划创建页');
 window.eval('closePlanDetail(); startEdit(); openPlanCreatePage()');
+ok(!document.getElementById('plan-filter-space') && document.querySelectorAll('.plan-filter-fn-check').length === 0, '第38轮：fn 复选筛选/空间筛选下拉已删（改为区块1 锁定空间）');
+const spaceSel = document.getElementById('plan-space-sel');
+ok(!!spaceSel, '区块1 有售卖空间下拉（第38轮）');
+ok(spaceSel.options.length === 2 && spaceSel.options[1].value === 'sp-x', '空间下拉候选含 sp-x（1 个空间）');
+// 未选空间 → 区块2 提示
+ok(document.getElementById('plan-units-charge-container').textContent.includes('请先在区块1选择售卖空间'), '未选空间时区块2 提示先选空间');
+// 选中空间 → 区块2 只展示该空间内单元
+spaceSel.value = 'sp-x';
+spaceSel.dispatchEvent(new window.Event('change', { bubbles: true }));
 const unitCards = Array.from(document.querySelectorAll('.plan-unit-check')).map(c => c.closest('div.plan-unit-row'));
-ok(unitCards.length === 2, '区块2 渲染 2 个售卖单元');
+ok(unitCards.length === 2, '选中 sp-x 后区块2 渲染 2 个售卖单元');
 const card1 = unitCards[0].textContent;
 ok(card1.includes('input'), '区块2 su-1 Function=input');
 ok(card1.includes('sp-x'), '区块2 su-1 展示售卖空间（第35轮=code）');
 ok(!card1.includes('维度组合：function'), '区块2 维度组合不含 function');
-ok(document.querySelectorAll('.plan-filter-fn-check:not(.plan-filter-fn-all)').length === 2, '区块2 有 function 筛选复选组（第24轮多选，input/output）');
-ok(!!document.getElementById('plan-filter-space'), '区块2 有售卖空间筛选下拉（第20轮）');
+ok(document.getElementById('plan-space-info').textContent.includes('空间生效范围'), '区块1 空间档期提示展示');
 
 // ===== 6. vtpm 商品（无 function）不回归 =====
 section('6. vtpm 回归');
@@ -91,7 +99,7 @@ window.eval('closePlanCreatePage(); exitEdit(); backToList()');
 window.openDetailByCode('maas-product-vtpm-std');
 rows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(rows[0].cells[0].textContent.trim() === '—', 'vtpm 第一列 Function=—（无 function，合并单元格）');
-ok(rows[0].cells[1].textContent.trim() === 'sp1', 'vtpm 第二列 售卖空间=sp1（第35轮：code 即标识）');
+ok(rows[0].cells[1].textContent.trim().startsWith('sp1'), 'vtpm 第二列 售卖空间=sp1（+三态徽标，第38轮）');
 ok(rows[0].cells[2].textContent.trim() === 'su-1', 'vtpm 第三列 售卖单元=su-1');
 ok(rows[0].cells[4].textContent.includes('购买量区间') && rows[0].cells[4].textContent.includes('购买周期'), 'vtpm 维度:度量正常展示');
 // vtpm 无 function（第37轮：SU 弹窗已删——售卖单元由空间计划叉乘生成）

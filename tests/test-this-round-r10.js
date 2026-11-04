@@ -109,40 +109,44 @@ ok(suHead.length === 14 && !suHead.includes('操作'), 'SU 表头 14 列（操�
 const delCell = Array.from(document.querySelectorAll('#saleunit-tbody tr')).find(r => r.cells[0].textContent.trim() === 'su-3');
 ok(delCell && !delCell.textContent.includes('删除') && !delCell.textContent.includes('🔒'), '售卖单元行无删除入口');
 
-// ===== 7. 第36轮：商品名称快速编辑（标题旁铅笔 → 行内输入+保存/取消，无需编辑锁） =====
-section('7. 商品名称快速编辑（第36轮）');
+// ===== 7. 第38轮：商品名称快速编辑（contenteditable 就地编辑，无独立输入框，无需编辑锁） =====
+section('7. 商品名称快速编辑（第38轮 contenteditable）');
 window.backToList();
 window.openDetailByCode('maas-product-vtpm-pre');
 const editBtn = document.getElementById('detail-name-edit-btn');
-const nameWrap = document.getElementById('detail-name-edit-wrap');
-const nameInput = document.getElementById('detail-name-input');
-ok(!!editBtn && !nameWrap.classList.contains('flex') && nameWrap.classList.contains('hidden'), '初始只显示铅笔按钮');
-window.openDetailNameEdit();
-ok(!nameWrap.classList.contains('hidden') && editBtn.classList.contains('hidden'), '点击后行内输入+保存/取消出现');
-ok(nameInput.value === window.eval('currentProduct.name'), '输入框回填当前名称');
-nameInput.value = '';
+const titleSpan = document.getElementById('detail-title-name');
+const infoSpan = document.getElementById('detail-info-name');
+const infoEditBtn = document.getElementById('detail-info-name-edit-btn');
+ok(!!editBtn && !!titleSpan && !!infoSpan && !!infoEditBtn, '标题旁+基本信息卡片铅笔均存在');
+ok(!document.getElementById('detail-name-edit-wrap') && !document.getElementById('detail-name-input'), '旧输入条/输入框已删除（contenteditable 方案）');
+ok(titleSpan.getAttribute('contenteditable') !== 'true', '初始非编辑态（无 contenteditable）');
+// 打开编辑：就地 contenteditable + 描边
+window.openDetailNameEdit('title');
+ok(titleSpan.getAttribute('contenteditable') === 'true', '点击铅笔 → 标题 span contenteditable=true');
+ok(titleSpan.classList.contains('outline'), '编辑态描边样式');
+// 空名拦截
+titleSpan.textContent = '';
 window.confirmDetailNameEdit();
 ok(alertMsg.includes('不能为空'), '空名称拦截');
-nameInput.value = '预发布商品改名版';
+titleSpan.textContent = '预发布商品改名版';
 window.confirmDetailNameEdit();
-ok(document.getElementById('detail-title').textContent.includes('预发布商品改名版'), '保存后标题同步新名称');
-ok(window.eval('currentProduct.name') === '预发布商品改名版', 'currentProduct.name 已更新（无需编辑锁）');
-window.openDetailNameEdit();
-window.closeDetailNameEdit();
-ok(nameWrap.classList.contains('hidden') && !editBtn.classList.contains('hidden'), '取消恢复铅笔按钮');
-// 第37轮：基本信息卡片也有名称快捷编辑（共享输入条）
-const infoEditBtn = document.getElementById('detail-info-name-edit-btn');
-const infoNameSpan = document.getElementById('detail-info-name');
-ok(!!infoEditBtn && !!infoNameSpan && infoNameSpan.textContent === '预发布商品改名版', '基本信息卡片名称旁有铅笔且展示新名称');
+ok(titleSpan.getAttribute('contenteditable') !== 'true', '确认后关闭编辑态');
+ok(titleSpan.textContent === '预发布商品改名版' && window.eval('currentProduct.name') === '预发布商品改名版', '保存后 currentProduct.name 已更新（无需编辑锁）');
+ok(infoSpan.textContent === '预发布商品改名版', '基本信息卡片名称同步（两处共享）');
+ok(window.eval('allProducts.find(p=>p.code==="maas-product-vtpm-pre").name') === '预发布商品改名版', '改名写回 allProducts（重新进入详情不回退）');
+// 基本信息卡片入口
 window.openDetailNameEdit('info');
-ok(!nameWrap.classList.contains('hidden') && infoEditBtn.classList.contains('hidden') && editBtn.classList.contains('hidden'), '从基本信息卡片进入编辑（两处铅笔均隐藏、共用输入条）');
+ok(infoSpan.getAttribute('contenteditable') === 'true' && titleSpan.getAttribute('contenteditable') !== 'true', '从基本信息卡片进入编辑（仅 info span 可编辑）');
 window.closeDetailNameEdit();
-ok(nameWrap.classList.contains('hidden') && !infoEditBtn.classList.contains('hidden'), '取消恢复两处铅笔');
-nameInput.value = '预发布商品二次改名';
+ok(infoSpan.getAttribute('contenteditable') !== 'true', '取消恢复非编辑态');
 window.openDetailNameEdit('info');
-nameInput.value = '预发布商品二次改名'; // open 回填当前名后重新设值
+infoSpan.textContent = '预发布商品二次改名';
 window.confirmDetailNameEdit();
-ok(document.getElementById('detail-info-name').textContent === '预发布商品二次改名', '保存后基本信息卡片名称同步');
+ok(document.getElementById('detail-info-name').textContent === '预发布商品二次改名' && titleSpan.textContent === '预发布商品二次改名', '保存后两处名称同步');
+// 改名不回退（backToList → 重新进入）
+window.backToList();
+window.openDetailByCode('maas-product-vtpm-pre');
+ok(window.eval('currentProduct.name') === '预发布商品二次改名', '重新进入详情名称保持（写回 allProducts）');
 window.backToList();
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');
