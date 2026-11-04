@@ -53,14 +53,14 @@ ok(ds.length === 2, 'std 两维度下拉');
 const qtyMeasures = Array.from(ds[0].options).map(o => o.value).filter(Boolean);
 ok(qtyMeasures.join(',') === '1～100', 'std 购买量区间只有 1～100（与 admin-products 的 std 单元一致）: ' + qtyMeasures.join(','));
 const cycMeasures = Array.from(ds[1].options).map(o => o.value).filter(Boolean);
-ok(cycMeasures.join(',') === '30天,60天,90天', 'std 周期 30/60/90 天: ' + cycMeasures.join(','));
-// pro：仅 su-1 在售（su-2 计划待发布、su-3/su-4 无计划 → 禁售，不出现）
+ok(cycMeasures.join(',') === '30天,60天', 'std 周期 30/60 天（第48轮：90天 su-3 禁售不出现）: ' + cycMeasures.join(','));
+// pro：su-1/su-3 在售（30天计划 on）；su-2/su-4 禁售（90天计划待发布）
 skuSel.value = '002'; window.onSkuChange();
 ds = Array.from(document.querySelectorAll('#grant-dims select'));
 const proQty = Array.from(ds[0].options).map(o => o.value).filter(Boolean);
 const proCyc = Array.from(ds[1].options).map(o => o.value).filter(Boolean);
-ok(proQty.join(',') === '1～100', 'pro 购买量区间仅 1～100（500+ 的 su-3/su-4 禁售不出现）: ' + proQty.join(','));
-ok(proCyc.join(',') === '30天', 'pro 周期仅 30天（su-2 的 90 天计划待发布 → 禁售不出现）: ' + proCyc.join(','));
+ok(proQty.join(',') === '1～100,500+', 'pro 购买量区间 1～100/500+（su-3 第48轮在售）: ' + proQty.join(','));
+ok(proCyc.join(',') === '30天', 'pro 周期仅 30天（su-2/su-4 的 90 天计划待发布 → 禁售不出现）: ' + proCyc.join(','));
 
 // ===== 3. 售卖参数详情（单价=选中周期刊例价；无售卖单元行） =====
 section('3. 参数详情');
@@ -102,23 +102,21 @@ const now = new Date();
 const exp = new Date(now); exp.setHours(0, 0, 0, 0); exp.setDate(exp.getDate() + 61);
 const expStr = exp.getFullYear() + '-' + String(exp.getMonth() + 1).padStart(2, '0') + '-' + String(exp.getDate()).padStart(2, '0') + ' 00:00';
 ok(document.getElementById('grant-end').value === expStr, '结束时间=开始+60天+1天: ' + document.getElementById('grant-end').value);
-// su-3（90 天）购买量 1000~50000 step1000
-ds[1].value = '90天'; window.onDimChange();
-const qty90 = Array.from(qtySel.options).map(o => parseInt(o.value, 10));
-ok(qty90[0] === 1000 && qty90[qty90.length - 1] === 50000 && qty90[1] === 2000, 'std.90d 购买量 1000~50000 step1000');
-ok(detail.textContent.includes('0.0075'), '90 天单价 0.0075');
+// su-3（90 天）第48轮起禁售（计划 off）→ 90天不出现在 std 周期下拉
+ok(!Array.from(ds[1].options).some(o => o.value === '90天'), 'std 90天（su-3 禁售）不出现在周期下拉 → 无法选中交付');
 
-// ===== 5. 确认交付摘要 =====
+// ===== 5. 确认交付摘要（60 天周期） =====
 section('5. 确认交付');
-qtySel.value = '1000';
+ds[1].value = '60天'; window.onDimChange();
+qtySel.value = '1100';
 document.getElementById('grant-note').value = '一致性修正备注';
 // 勾选 pool
 document.querySelectorAll('#grant-pool-list input[name="grant-pool"]').forEach(cb => { cb.checked = true; });
 alertMsg = '';
 window.confirmGrant();
-ok(alertMsg.includes('0.0075') && alertMsg.includes('90 天'), '摘要含单价与周期');
-ok(alertMsg.includes('1,000 万 vTPM'), '摘要含购买量 1000 万 vTPM');
-ok(alertMsg.includes('7.5'), '摘要费用=0.0075×1000=¥7.5');
+ok(alertMsg.includes('0.0077') && alertMsg.includes('60 天'), '摘要含单价与周期');
+ok(alertMsg.includes('1,100 万 vTPM'), '摘要含购买量 1100 万 vTPM');
+ok(alertMsg.includes('8.47'), '摘要费用=0.0077×1100=¥8.47');
 ok(alertMsg.includes('proj-delta') && alertMsg.includes('Serverless'), '摘要含各 Pool 超量路由');
 
 // ===== 6. 详情页（列表联动） =====
@@ -146,8 +144,8 @@ ok(alertMsg.includes('请先完整选择'), '维度未选完整时拦截');
 // ===== 8. 在售单元口径（第14轮补充修正） =====
 section('8. 在售单元口径');
 // mock 状态与 admin-products 推导一致
-ok(evalInPage("products.find(p=>p.code==='maas-product-vtpm-std').sellUnits.every(u=>u.status==='on')"), 'std 三单元全在售');
-ok(evalInPage("products.find(p=>p.code==='maas-product-vtpm-pro').sellUnits.filter(u=>u.status==='on').map(u=>u.id).join()==='su-1'"), 'pro 仅 su-1 在售');
+ok(evalInPage("products.find(p=>p.code==='maas-product-vtpm-std').sellUnits.filter(u=>u.status==='on').map(u=>u.id).join()==='su-1,su-2'"), 'std su-1/su-2 在售（su-3 第48轮起禁售）');
+ok(evalInPage("products.find(p=>p.code==='maas-product-vtpm-pro').sellUnits.filter(u=>u.status==='on').map(u=>u.id).join()==='su-1,su-3'"), 'pro su-1/su-3 在售');
 ok(evalInPage("products.find(p=>p.code==='maas-product-vtpm-pre').sellUnits.every(u=>u.status==='off')"), 'pre 全部禁售（计划待发布）');
 ok(evalInPage("products.find(p=>p.code==='maas-product-vtpm-pre').sellUnits.length === 1") || true, 'pre mock 单元数（列表推导口径以 admin-products 为准）');
 // 已上架商品过滤：pre 不在下拉

@@ -23,49 +23,43 @@ ok(d.querySelectorAll('.plan-filter-fn-check').length === 0, 'fn 复选组已删
 ok(d.getElementById('plan-filter-space') && d.getElementById('plan-filter-space').closest('#inner-tab-plan') !== null, '空间筛选下拉在售卖计划 Tab 工具条（第43轮），非创建页');
 ok(d.getElementById('plan-units-charge-container').textContent.includes('请先在区块1选择售卖空间'), '未选空间区块2 提示');
 const sel = d.getElementById('plan-space-sel');
-ok(sel && sel.options.length === 3, '创建页空间下拉 3 项（请选择+sp1+sp2）: ' + sel.options.length);
+ok(sel && sel.options.length === 2, '创建页空间下拉 2 项（请选择+sp1，第48轮单空间）: ' + sel.options.length);
 // 2. 选 sp1 → 只展示 sp1 内单元
 sel.value = 'sp1';
 sel.dispatchEvent(new w.Event('change', { bubbles: true }));
-ok(vis().sort().join(',') === 'su-1,su-10,su-11,su-2,su-3,su-4,su-5,su-6,su-7,su-8,su-9', '选 sp1 → 可见 11 单元（第47轮 per-fn）: ' + vis().join(','));
-ok(chk().length === 11, '首次渲染默认全选（11）');
-// 3. 切 sp2 → 可见切换为双11三单元，勾选不保留
-sel.value = 'sp2';
-sel.dispatchEvent(new w.Event('change', { bubbles: true }));
-ok(vis().sort().join(',') === 'su-12,su-13,su-14,su-15', '切 sp2 → 可见 4 单元（含 su-12 全缺省）');
-ok(chk().length === 4, 'sp2 首次渲染默认全选（4）');
-// 4. 时间范围软提示：计划时间超出 sp2 档期 → info 标红 + planTimeWithinSpace=false
+ok(vis().sort().join(',') === 'su-1,su-2,su-3,su-4', '选 sp1 → 可见 4 单元（第48轮 per-fn）: ' + vis().join(','));
+ok(chk().length === 4, '首次渲染默认全选（4）');
+// 3. 时间范围软提示：计划时间超出 sp1 档期 → info 标红 + planTimeWithinSpace=false
 d.getElementById('plan-name').value = 'r38 锁空间计划';
 d.getElementById('plan-eff-start').value = '2026-11-12T00:00:00';
-d.getElementById('plan-eff-end').value = '2026-12-15T00:00:00';
+d.getElementById('plan-eff-end').value = '2028-12-15T00:00:00';
 sel.dispatchEvent(new w.Event('change', { bubbles: true }));
-ok(w.eval('planTimeWithinSpace()') === false, '时间超 sp2 档期 → false');
+ok(w.eval('planTimeWithinSpace()') === false, '时间超 sp1 档期 → false');
 ok(d.getElementById('plan-space-info').className.includes('text-red-500'), '超范围提示标红');
-// 5. 保存强校验：超范围拦截
+// 4. 保存强校验：超范围拦截
 alerts.length = 0;
 w.eval('confirmPlanCreate()');
 ok(alerts.some(m => m.includes('生效范围')), '保存被拦截（时间超空间档期）: ' + (alerts[alerts.length-1] || '').slice(0, 30));
-ok(w.eval('planRows.length') === 2, '计划未保存（仍 2 个）');
-// 6. 时间收回档期内 → 保存成功
-d.getElementById('plan-eff-end').value = '2026-11-19T00:00:00';
+ok(w.eval('planRows.length') === 1, '计划未保存（仍 1 个）');
+// 5. 时间收回档期内 → 保存成功
+d.getElementById('plan-eff-end').value = '2027-10-31T00:00:00';
 w.eval('confirmPlanCreate()');
 const saved = w.eval('planRows[planRows.length-1]');
-ok(saved && saved.name === 'r38 锁空间计划' && saved.spaceKey === 'sp2', '保存成功且锁定 sp2');
-ok(JSON.stringify(saved.units) === JSON.stringify(['su-12','su-13','su-14','su-15']), 'units=sp2 内四单元: ' + saved.units.join(','));
-// 7. 跨空间单元拦截（直接改数据模拟）：把 su-1 勾上（属于 sp1）→ 保存拦截
+ok(saved && saved.name === 'r38 锁空间计划' && saved.spaceKey === 'sp1', '保存成功且锁定 sp1');
+ok(JSON.stringify(saved.units) === JSON.stringify(['su-1','su-2','su-3','su-4']), 'units=sp1 内四单元: ' + saved.units.join(','));
+// 6. 跨空间单元拦截（直接改数据模拟）：把 su-1 勾上（构造外部空间假单元）→ 保存拦截
+w.eval('saleUnits.push({ id: "su-90", fn: "input", spaceKey: "sp-x", dim: "输入区间", measure: "0～128K" })');
 w.eval('openPlanCreatePage()');
-sel.value = 'sp2';
+sel.value = 'sp1';
 sel.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.getElementById('plan-name').value = 'r38 跨空间计划';
 d.getElementById('plan-eff-start').value = '2026-11-12T00:00:00';
-d.getElementById('plan-eff-end').value = '2026-11-19T00:00:00';
-// mock：直接往区块2塞一个 sp1 单元的勾选（绕过 UI 验证后端校验）
-w.eval('saleUnits.find(u => u.id === "su-1").spaceKey = "sp1"'); // 保险：明确归属
-// 通过直接操作 planDraft 模拟勾选了非本空间单元（构造 units 数组直接调用校验路径 → 用 DOM 注入）
+d.getElementById('plan-eff-end').value = '2027-10-31T00:00:00';
+// 通过 DOM 注入一个非本空间单元勾选（绕过 UI 验证后端校验）
 const box = d.createElement('input');
 box.type = 'checkbox';
 box.className = 'plan-unit-check';
-box.value = 'su-1';
+box.value = 'su-90';
 box.checked = true;
 box.dataset.state = 'on';
 d.getElementById('plan-units-charge-container').appendChild(box);
@@ -73,16 +67,17 @@ alerts.length = 0;
 w.eval('confirmPlanCreate()');
 ok(alerts.some(m => m.includes('不属于所选空间')), '跨空间单元保存被拦截: ' + (alerts[alerts.length-1] || '').slice(0, 30));
 box.remove();
-// 8. 修改入口：回填空间+勾选
+w.eval('saleUnits = saleUnits.filter(u => u.id !== "su-90")');
+// 7. 修改入口：回填空间+勾选
 const editIdx = w.eval('planRows.length-1');
 w.eval('editPlanRow(' + editIdx + ')');
-ok(d.getElementById('plan-space-sel').value === 'sp2', '修改页回填空间 sp2');
-ok(chk().sort().join(',') === 'su-12,su-13,su-14,su-15', '修改页回填原计划勾选: ' + chk().join(','));
-// 9. 未选空间拦截（清空下拉）
+ok(d.getElementById('plan-space-sel').value === 'sp1', '修改页回填空间 sp1');
+ok(chk().sort().join(',') === 'su-1,su-2,su-3,su-4', '修改页回填原计划勾选: ' + chk().join(','));
+// 8. 未选空间拦截（清空下拉）
 w.eval('openPlanCreatePage()');
 d.getElementById('plan-name').value = 'r38 无空间计划';
 d.getElementById('plan-eff-start').value = '2026-11-12T00:00:00';
-d.getElementById('plan-eff-end').value = '2026-11-19T00:00:00';
+d.getElementById('plan-eff-end').value = '2027-10-31T00:00:00';
 alerts.length = 0;
 w.eval('confirmPlanCreate()');
 ok(alerts.some(m => m.includes('请选择售卖空间')), '未选空间保存被拦截');

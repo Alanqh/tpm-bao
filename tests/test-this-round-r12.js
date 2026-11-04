@@ -79,7 +79,7 @@ document.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 window.confirmSpacePlan();
 ok(alertMsg.includes('已保存'), '未勾度量 → 保存成功（生成全缺省组合单元）: ' + alertMsg.slice(0, 30));
 
-// ===== 5. 叉乘生成：输入1度量 × 费用发生日2度量 = (1+1)×(2+1) = 6 组合 =====
+// ===== 5. 叉乘生成（第48轮纯叉乘）：输入1度量 × 费用发生日2度量 = 1×2 = 2 组合（无空度量组合） =====
 section('5. 叉乘生成');
 window.openSpacePlanModal();
 const inBox2 = document.querySelector('.sp-fn-check[data-fn="input"]');
@@ -95,11 +95,11 @@ document.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 document.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
 window.confirmSpacePlan();
 const newKey = 'sp' + (keyBefore + 1);
-ok(alertMsg.includes('已自动生成售卖单元 6 个'), '保存提示叉乘 6 个（(1+1)×(2+1) 含缺省）: ' + alertMsg.slice(-40));
+ok(alertMsg.includes('已自动生成售卖单元 2 个'), '保存提示叉乘 2 个（1×2，无空组合）: ' + alertMsg.slice(-40));
 ok(window.eval('spaces["' + newKey + '"] && spaces["' + newKey + '"].status') === 'pending_publish', '新空间待发布');
-ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length') === 6, '新空间 6 组合单元（输入1×费用发生日2）');
+ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length') === 2, '新空间 2 组合单元（输入1×费用发生日2）');
 const dims = window.eval('JSON.stringify(saleUnits.filter(u => u.spaceKey === "' + newKey + '").map(u => u.dim + "=" + u.measure).sort())');
-ok(dims.includes('输入区间 + 费用发生日=0～128K + 周一至周五') && dims.includes('输入区间=0～128K') && dims.includes('费用发生日=周一至周五') && dims.includes('"="'), '缺省组合齐备（含全缺省=""）: ' + dims.slice(0, 90));
+ok(dims.includes('输入区间 + 费用发生日=0～128K + 周一至周五') && dims.includes('输入区间 + 费用发生日=0～128K + 周末') && !dims.includes('"="'), '第48轮：仅完整组合（无缺省/空组合）: ' + dims.slice(0, 90));
 
 // ===== 6. 空间不可改：无修改入口；复制=唯一变更路径（新空间+同构单元，旧空间保留） =====
 section('6. 空间不可改/复制');

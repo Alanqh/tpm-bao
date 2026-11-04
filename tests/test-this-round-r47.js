@@ -88,10 +88,10 @@ function boot() {
     output: saleUnits.filter(u => u.spaceKey === '${k}' && u.fn === 'output').length,
     cache: saleUnits.filter(u => u.spaceKey === '${k}' && u.fn === 'cache').length
   })`);
-  check('③ input 8 组合（(1+1)³ 含全缺省）', cnts.input === 8);
-  check('③ output 2 组合', cnts.output === 2);
-  check('③ cache 0维=1 全缺省', cnts.cache === 1);
-  check('③ 空间总单元 11（8+2+1，无跨 fn 重复叉乘）', window.eval(`saleUnits.filter(u => u.spaceKey === '${k}').length`) === 11);
+  check('③ input 1 组合（1×1×1 纯叉乘，无缺省空对）', cnts.input === 1);
+  check('③ output 1 组合', cnts.output === 1);
+  check('③ cache 0维=1 空单元', cnts.cache === 1);
+  check('③ 空间总单元 3（1+1+1，无跨 fn 重复叉乘）', window.eval(`saleUnits.filter(u => u.spaceKey === '${k}').length`) === 3);
   window.eval(`backToList()`);
 }
 
@@ -127,14 +127,13 @@ function boot() {
   window.eval(`openSpacePlanModal('sp1')`);
   check('④ 三 fn 勾选回填', ['input', 'output', 'cache'].every(f => doc.querySelector('.sp-fn-check[data-fn="' + f + '"]').checked === true));
   check('④ 三张 fn 卡片渲染', doc.querySelectorAll('[data-fncard]').length === 3);
-  // input 卡片回填三维各 1 度量
-  check('④ input 回填 128K～1M', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="128K～1M"]').checked === true);
-  check('④ input 回填 周一至周五', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="费用发生日"][value="周一至周五"]').checked === true);
-  check('④ input 回填 2点～8点', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="费用发生时间"][value="2点～8点"]').checked === true);
-  check('④ input 未勾档位不回填', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]').checked === false);
+  // input 卡片回填输入区间两档（第48轮口径：sp1 input 仅输入区间维度）
+  check('④ input 回填 0～128K', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]').checked === true);
+  check('④ input 回填 1M+', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="1M+"]').checked === true);
+  check('④ input 未勾档位不回填', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="128K～1M"]').checked === false);
   // output 卡片只回填输入区间一档；cache 卡片全空（0维）
-  check('④ output 回填 128K～1M', doc.querySelector('.sp-measure-check[data-fn="output"][data-dim="输入区间"][value="128K～1M"]').checked === true);
-  check('④ output 无费用发生时间勾选（per-fn 独立）', doc.querySelector('.sp-measure-check[data-fn="output"][data-dim="费用发生时间"][value="2点～8点"]').checked === false);
+  check('④ output 回填 1M+（不随 input 双档，per-fn 独立）', doc.querySelector('.sp-measure-check[data-fn="output"][data-dim="输入区间"][value="1M+"]').checked === true);
+  check('④ output 未勾 input 档位（per-fn 独立）', doc.querySelector('.sp-measure-check[data-fn="output"][data-dim="输入区间"][value="0～128K"]').checked === false);
   check('④ cache 卡片全未勾（0维 fn）', doc.querySelectorAll('.sp-measure-check[data-fn="cache"]:checked').length === 0);
   window.eval(`backToList()`);
 }
@@ -154,7 +153,7 @@ function boot() {
           let combos = [[]];
           dims.forEach(d => {
             const next = [];
-            const vals = (mea[d] || []).map(m => ({ dim: d, measure: m })).concat([{ dim: '', measure: '' }]);
+            const vals = (mea[d] || []).map(m => ({ dim: d, measure: m }));
             combos.forEach(c => vals.forEach(v => next.push([...c, v])));
             combos = next;
           });
@@ -176,17 +175,17 @@ function boot() {
   });
 }
 
-// ===== ⑥ glm4 mock 数量与售卖单元视图（第47轮：sp1 11 + sp2 4） =====
+// ===== ⑥ glm4 mock 数量与售卖单元视图（第48轮：单空间 sp1 = input 2/output 1/cache 1 共 4） =====
 {
   const dom = boot(); const { window } = dom; const doc = window.document;
   window.eval(`openDetailByCode('maas-online-text-glm4')`);
-  check('⑥ sp1 11 单元', window.eval(`saleUnits.filter(u => u.spaceKey === 'sp1').length`) === 11);
-  check('⑥ sp2 4 单元', window.eval(`saleUnits.filter(u => u.spaceKey === 'sp2').length`) === 4);
-  check('⑥ sp1 input 8 / output 2 / cache 1', window.eval(`['input','output','cache'].map(f => saleUnits.filter(u => u.spaceKey === 'sp1' && u.fn === f).length).join()`) === '8,2,1');
-  check('⑥ glm4 售卖单元数据共 15', window.eval(`saleUnits.length`) === 15);
+  check('⑥ sp1 4 单元', window.eval(`saleUnits.filter(u => u.spaceKey === 'sp1').length`) === 4);
+  check('⑥ 无 sp2（第48轮删双11空间）', window.eval(`saleUnits.filter(u => u.spaceKey === 'sp2').length`) === 0);
+  check('⑥ sp1 input 2 / output 1 / cache 1', window.eval(`['input','output','cache'].map(f => saleUnits.filter(u => u.spaceKey === 'sp1' && u.fn === f).length).join()`) === '2,1,1');
+  check('⑥ glm4 售卖单元数据共 4', window.eval(`saleUnits.length`) === 4);
   window.eval(`switchInnerTab('saleunit'); renderSaleUnits()`);
   const rows = Array.from(doc.querySelectorAll('#saleunit-tbody tr'));
-  check('⑥ SU Tab 默认 11 行（当前时刻唯一生效空间 sp1）', rows.length === 11);
+  check('⑥ SU Tab 默认 4 行（当前时刻唯一生效空间 sp1）', rows.length === 4);
   window.eval(`backToList()`);
 }
 

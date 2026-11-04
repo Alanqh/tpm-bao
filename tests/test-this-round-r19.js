@@ -100,7 +100,7 @@ window.eval('closePlanCreatePage(); exitEdit(); backToList()');
 window.openDetailByCode('maas-product-vtpm-std');
 rows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(rows[0].cells[0].textContent.trim().startsWith('sp1'), 'vtpm 第一列 售卖空间=sp1（+三态徽标，第39轮空间列居首）');
-ok(rows[0].cells[1].textContent.trim() === '--' && rows[0].cells[3].textContent.trim() === 'su-8', 'vtpm 首行=全缺省组合（--）排最前，r43 组合序（su-8）');
+ok(rows[0].cells[3].textContent.trim() === 'su-1' && rows[0].cells[1].textContent.trim() !== '--', 'vtpm 首行=su-1（第48轮：无空组合，首行即勾选组合）');
 const su1Row = rows.find(r => Array.from(r.cells).some(c => c.textContent.trim() === 'su-1'));
 ok(su1Row && su1Row.textContent.includes('购买量区间') && su1Row.textContent.includes('购买周期'), 'vtpm 维度:度量组合正常展示（第43轮组合列居次）');
 ok(rows[0].cells[2].textContent.trim() === '—', 'vtpm 第三列 Function=—（无 function）');

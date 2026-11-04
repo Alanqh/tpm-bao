@@ -69,13 +69,13 @@ section('3. 叉乘生成售卖单元（第38轮）');
 window.eval('startEdit()');
 ok(!document.getElementById('modal-su-confirm'), 'SU 弹窗已删除');
 ok(!document.getElementById('su-create-btn'), 'SU Tab 创建按钮已删除');
-// 空间一保存时逐 fn 叉乘（第47轮 per-fn：input 费用发生日{周末} 2组合 + output 输入区间{0～128K} 2组合 = 4），同属 sp1
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 4, '空间一（input+output per-fn）生成 4 单元（每 fn 2 组合）');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="input").length') === 2, 'sp1 input 单元 2 个');
+// 空间一保存时逐 fn 纯叉乘（第48轮：input 费用发生日{周末} 1组合 + output 输入区间{0～128K} 1组合 = 2，无空组合），同属 sp1
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 2, '空间一（input+output per-fn）生成 2 单元（每 fn 1 组合，第48轮无空组合）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="input").length') === 1, 'sp1 input 单元 1 个');
 const suIn = evalInPage('saleUnits.find(u=>u.spaceKey==="sp1" && u.fn==="input" && u.dim === "费用发生日")');
 ok(!!suIn, '售卖单元 dim 不含 function（input 有 dim=费用发生日 单元）');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="output").length') === 2, 'sp1 output 单元 2 个');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp2").length') === 2, '空间二（input+输入区间×1M+）生成 2 单元（含全缺省）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="output").length') === 1, 'sp1 output 单元 1 个');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp2").length') === 1, '空间二（input+输入区间×1M+）生成 1 单元（无全缺省）');
 
 // ===== 4. 复制不受状态影响 =====
 section('4. 复制不受状态影响');

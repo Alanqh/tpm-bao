@@ -46,7 +46,7 @@ ok(document.getElementById('plan-units-charge-container').textContent.includes('
 document.getElementById('plan-space-sel').value = 'sp1';
 window.onPlanSpaceChange();
 const checks = Array.from(document.querySelectorAll('.plan-unit-check'));
-ok(checks.length === 8 && checks.every(c => c.checked), '区块2 默认全选 8 个售卖单元（r43 缺省扩展）');
+ok(checks.length === 3 && checks.every(c => c.checked), '区块2 默认全选 3 个售卖单元（第48轮纯叉乘）');
 ok(checks.every(c => c.dataset.state === 'on'), '默认全部「上架」');
 // 上架/下架按钮存在 + 每行展示 function 与维度组合
 ok(pcView.querySelectorAll('button').length > 0 && pcView.textContent.includes('下架'), '上架/下架切换按钮渲染');
@@ -65,28 +65,28 @@ ok(document.getElementById('plan-eff-start') && pcView.textContent.includes('开
 // ================= 在售/禁售 =================
 section('上架/下架切换');
 window.setPlanUnitState('su-3', 'off');
-ok(evalInPage('onSalePlanUnits().join(",")') === 'su-1,su-2,su-4,su-5,su-6,su-7,su-8', 'su-3 设下架后 onSalePlanUnits 不含 su-3');
-ok(evalInPage('selectedPlanUnits().length') === 8, 'su-3 仍勾选（selectedPlanUnits=8）');
+ok(evalInPage('onSalePlanUnits().join(",")') === 'su-1,su-2', 'su-3 设下架后 onSalePlanUnits 不含 su-3');
+ok(evalInPage('selectedPlanUnits().length') === 3, 'su-3 仍勾选（selectedPlanUnits=3）');
 window.setPlanUnitState('su-3', 'on');
-ok(evalInPage('onSalePlanUnits().length') === 8, 'su-3 恢复上架');
+ok(evalInPage('onSalePlanUnits().length') === 3, 'su-3 恢复上架');
 
 // ================= 开关 perUnit =================
 section('字段开关（perUnit）');
 document.getElementById('plan-mode-charge').checked = true;
 window.renderPlanCreateSections();
-ok(document.querySelectorAll('#plan-charge-perunit select.plan-charge-select').length === 8, '计费项 perUnit：8 行（已上架售卖单元，r43 扩展）');
+ok(document.querySelectorAll('#plan-charge-perunit select.plan-charge-select').length === 3, '计费项 perUnit：3 行（第48轮 3 单元）');
 ok(document.getElementById('plan-charge-unified').classList.contains('hidden'), '计费项 unified 隐藏');
 document.getElementById('plan-mode-charge').checked = false;
 // 禁售一个再看 perUnit 行数
 window.setPlanUnitState('su-2', 'off');
 document.getElementById('plan-mode-charge').checked = true;
 window.renderPlanCreateSections();
-ok(document.querySelectorAll('#plan-charge-perunit select.plan-charge-select').length === 7, 'su-2 下架后 perUnit 渲染其余 7 行');
+ok(document.querySelectorAll('#plan-charge-perunit select.plan-charge-select').length === 2, 'su-2 下架后 perUnit 渲染其余 2 行');
 window.setPlanUnitState('su-2', 'on');
 // qty perUnit
 document.getElementById('plan-mode-qty').checked = true;
 window.renderPlanCreateSections();
-ok(document.querySelectorAll('#plan-qty-perunit input[data-unit]').length === 24, '购买量 perUnit：8 单元 × 3 输入框');
+ok(document.querySelectorAll('#plan-qty-perunit input[data-unit]').length === 9, '购买量 perUnit：3 单元 × 3 输入框');
 
 // ================= 配额项/库存项去创建 =================
 section('配额项/库存项去创建（可创建，数量值）');
@@ -161,8 +161,8 @@ section('修改回填（下架 + perUnit draft）');
 evalInPage(`planRows[3].unitStates['su-3'] = 'off'; planRows[3].modes.factor = 'perUnit'; planRows[3].factors = { 'su-1': 'vtpm-factor-deepseek v3.3', 'su-2': 'vtpm-factor-deepseek v3.4' };`);
 window.editPlanRow(3);
 ok(!document.getElementById('plan-create-view').classList.contains('hidden'), '修改打开创建页面');
-ok(evalInPage('selectedPlanUnits().length') === 8, '回填勾选 8 个');
-ok(evalInPage('onSalePlanUnits().join(",")') === 'su-1,su-2,su-4,su-5,su-6,su-7,su-8', '回填 su-3 下架');
+ok(evalInPage('selectedPlanUnits().length') === 3, '回填勾选 3 个');
+ok(evalInPage('onSalePlanUnits().join(",")') === 'su-1,su-2', '回填 su-3 下架');
 ok(document.getElementById('plan-mode-factor').checked === true, '回填 factor 开关 = perUnit');
 const fSel2 = document.querySelector('#plan-factor-perunit select[data-unit="su-2"]');
 ok(!!fSel2, '回填渲染 su-2 下拉');

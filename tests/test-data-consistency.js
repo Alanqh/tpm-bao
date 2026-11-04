@@ -22,7 +22,7 @@ section('std 商品（3 计划全部生效中）');
 window.openDetailFromListed('maas-product-vtpm-std');
 ok(evalInPage('planRows.length') === 3, 'std 挂载 3 个售卖计划');
 ok(evalInPage('planRows.every(r => Object.values(r.chargeCodes).every(c => c.startsWith("maas-product-vtpm-std.")))'), 'std 的计费项前缀全部为 std');
-ok(statusOf('su-1') === '在售' && statusOf('su-2') === '在售' && statusOf('su-3') === '在售', 'std su-1/2/3 全部在售');
+ok(statusOf('su-1') === '在售' && statusOf('su-2') === '在售' && statusOf('su-3') === '禁售', 'std su-1/2 在售、su-3 禁售（第48轮：90天计划 off）');
 ok(rowOf('su-1').textContent.includes('maas-product-vtpm-std.30d'), 'su-1 关联计费项 std.30d');
 ok(rowOf('su-1').textContent.includes('0.0084'), 'su-1 刊例价 0.0084');
 
@@ -33,7 +33,7 @@ window.openDetailFromListed('maas-product-vtpm-pro');
 ok(evalInPage('planRows.length') === 2, 'pro 挂载 2 个售卖计划');
 ok(statusOf('su-1') === '在售', 'pro su-1 在售（生效中计划且上架）');
 ok(statusOf('su-2') === '未配置', 'pro su-2 未配置（第43轮：仅待发布计划=无生效中计划覆盖 → 灰而非红）: ' + statusOf('su-2'));
-ok(statusOf('su-3') === '未配置' && statusOf('su-4') === '未配置', 'pro su-3/su-4 未配置（无任何计划覆盖）');
+ok(statusOf('su-3') === '在售' && statusOf('su-4') === '未配置', 'pro su-3 在售（30天计划 on）/su-4 未配置（90天待发布）: ' + statusOf('su-3') + '/' + statusOf('su-4'));
 // 未配置行查不出额外信息：关联计费项/刊例价显示 —
 const su2Row = rowOf('su-2');
 ok(su2Row.textContent.includes('—') && !su2Row.textContent.includes('maas-product-vtpm-pro.90d'), '未配置 su-2 不展示关联计费项（—）');
@@ -57,9 +57,9 @@ window.closePlanDetail();
 window.backToList();
 window.openPendingDetail(0);
 ok(evalInPage('planRows.length') === 1, 'pre 挂载 1 个售卖计划');
-// 第45轮：pre 空间默认已发布 → SU Tab 有生效空间（8 单元）；停用空间后回空态（第42轮过滤仍生效）
+// 第45轮：pre 空间默认已发布 → SU Tab 有生效空间（第48轮 3 单元）；停用空间后回空态（第42轮过滤仍生效）
 const preRows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
-ok(preRows.length === 8, 'pre SU Tab 8 行（第45轮空间默认已发布）');
+ok(preRows.length === 3, 'pre SU Tab 3 行（第45轮空间默认已发布；第48轮 3 单元）');
 window.eval('spaces["sp1"].status = "stopped"; renderSaleUnits()');
 const preRows2 = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(preRows2.length === 1 && preRows2[0].textContent.includes('当前时刻无生效中的售卖空间'), '停用空间后 SU Tab 空态（无生效空间；第42轮过滤）');
@@ -94,7 +94,7 @@ window.stopPlanRow(0);
 const allStopped = evalInPage('planRowStatuses.join(",")');
 // std 三个计划：0 被停用，1/2 仍生效中 → su-1 无生效中计划 → 禁售
 ok(statusOf('su-1') === '未配置', '停用后 su-1 未配置（第43轮：无生效中计划覆盖 → 灰；红仅=生效中计划下架或空间未生效）: ' + statusOf('su-1') + ' | ' + allStopped);
-ok(statusOf('su-2') === '在售' && statusOf('su-3') === '在售', 'su-2/su-3 仍在售（其他计划仍生效中）');
+ok(statusOf('su-2') === '在售' && statusOf('su-3') === '禁售', 'su-2 仍在售；su-3 仍禁售（第48轮 mock：90天计划 off，不受计划0停用影响）');
 
 // ================= 两态判定：最高优先级下架 → 禁售（时间点查询） =================
 section('两态判定（最高优先级下架）');
@@ -106,8 +106,7 @@ window.eval(`
   })()
 `);
 ok(statusOf('su-2') === '禁售', '生效中最高优先级计划单元下架 → su-2 禁售: ' + statusOf('su-2'));
-ok(statusOf('su-1') === '未配置' && statusOf('su-3') === '在售', 'su-1 仍未配置（前面停用）、su-3 仍在售');
-// 恢复上架 → su-2 回到在售
+ok(statusOf('su-1') === '未配置' && statusOf('su-3') === '禁售', 'su-1 仍未配置（前面停用）、su-3 仍禁售（90天计划 off）');
 window.eval(`
   (function(){
     planRows[1].unitStates['su-2'] = 'on';
@@ -136,7 +135,7 @@ window.eval(`
     inp.dispatchEvent(new window.Event('change', { bubbles: true }));
   })()
 `);
-ok(statusOf('su-2') === '在售' && statusOf('su-3') === '在售', '复位时间点后 su-2/su-3 在售');
+ok(statusOf('su-2') === '在售' && statusOf('su-3') === '禁售', '复位时间点后 su-2 在售、su-3 禁售');
 ok(statusOf('su-1') === '未配置', 'su-1 仍未配置（计划已停用，无生效中覆盖）');
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');

@@ -18,15 +18,15 @@ const p1 = JSON.parse(sp1);
 ok(p1.seq === 1 && p1.priority === 100 && p1.effStart === '2026-11-01 00:00:00' && p1.effEnd === '2027-11-01 00:00:00' && p1.status === 'published', 'sp1 空间本体携带 seq/priority/档期/状态');
 ok(p1.name === 'GLM4·常规售卖空间', '空间带名称（第38轮恢复 name 展示）');
 ok(Object.keys(p1.fnDims).join(',') === 'input,output,cache', 'sp1 一个空间含三个 fn（fnDims 多 fn）');
-ok(p1.fnMeasures.input['输入区间'].join(',') === '128K～1M', 'fnMeasures 携带维度→度量配置');
+ok(p1.fnMeasures.input['输入区间'].join(',') === '0～128K,1M+', 'fnMeasures 携带维度→度量配置（第48轮 input 两档）');
 ok(!w.eval('typeof spacePlans') !== 'undefined' || true, 'spacePlans 实体已删（合并进空间）');
 ok(w.eval('typeof spacePlans') === 'undefined', '全局不再有独立 spacePlans 实体');
 
-// ===== 2. 仲裁（第38轮：priority 降序→seq 降序，纯粹空间本体仲裁）=====
-ok(w.eval('effectiveSpaceAt("input").key') === 'sp1', '当前（11-04，sp2 未起档）input=sp1');
+// ===== 2. 仲裁（第38轮：priority 降序→seq 降序；第48轮：glm4 单空间，任意时刻均 sp1）=====
+ok(w.eval('effectiveSpaceAt("input").key') === 'sp1', '当前（11-04）input=sp1');
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }');
-ok(w.eval('effectiveSpaceAt("input").key') === 'sp2', '11-15 input=sp2（priority 500 接管）');
-ok(w.eval('effectiveSpaceAt("input").plan.priority') === 500, 'effectiveSpaceAt 返回空间本体（.plan=空间对象）');
+ok(w.eval('effectiveSpaceAt("input").key') === 'sp1', '11-15 单空间口径 input 仍=sp1（第48轮删双11接管空间）');
+ok(w.eval('effectiveSpaceAt("input").plan.priority') === 100, 'effectiveSpaceAt 返回空间本体（.plan=空间对象，priority=100）');
 w.eval('timeFilter = null');
 
 // ===== 3. 第38轮空间不可改 → 第45轮：待发布可编辑，已发布/停用仍不可 =====
@@ -44,15 +44,15 @@ w.eval('exitEdit()');
 alerts.length = 0;
 w.eval("copySpacePlan('sp1')");
 ok(alerts.some(m => m.includes('已复制售卖空间')), '退锁状态复制成功（复制豁免编辑锁）');
-ok(w.eval('spaceSeq') === 3, '副本 key=sp3');
-ok(w.eval('spaces["sp3"].name') === 'GLM4·常规售卖空间-副本', '副本命名=原名-副本');
-ok(w.eval('spaces["sp3"].status') === 'pending_publish', '副本=待发布');
-ok(w.eval('JSON.stringify(spaces["sp3"].fnDims)') === JSON.stringify(p1.fnDims), '副本继承三 fn 配置（含维度）');
-ok(w.eval('JSON.stringify(spaces["sp3"].fnMeasures)') === JSON.stringify(p1.fnMeasures), '副本继承度量配置（含 fnMeasures）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 11, '副本叉乘生成 11 个单元（sp1 同构，第47轮 per-fn）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp1").length') === 11, '原空间 sp1 单元永不删除（11 个）');
-// 第45轮：待发布空间 sp3 详情操作=修改+发布+复制
-w.eval('startEdit(); openSpacePlanDetail("sp3")');
+ok(w.eval('spaceSeq') === 2, '副本 key=sp2（第48轮：glm4 仅 sp1，副本顺延）');
+ok(w.eval('spaces["sp2"].name') === 'GLM4·常规售卖空间-副本', '副本命名=原名-副本');
+ok(w.eval('spaces["sp2"].status') === 'pending_publish', '副本=待发布');
+ok(w.eval('JSON.stringify(spaces["sp2"].fnDims)') === JSON.stringify(p1.fnDims), '副本继承三 fn 配置（含维度）');
+ok(w.eval('JSON.stringify(spaces["sp2"].fnMeasures)') === JSON.stringify(p1.fnMeasures), '副本继承度量配置（含 fnMeasures）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2").length') === 4, '副本叉乘生成 4 个单元（sp1 同构，第48轮 per-fn）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp1").length') === 4, '原空间 sp1 单元永不删除（4 个）');
+// 第45轮：待发布空间 sp2 详情操作=修改+发布+复制
+w.eval('startEdit(); openSpacePlanDetail("sp2")');
 ok(d.getElementById('spaceplan-detail-actions').textContent.includes('修改'), '待发布空间详情操作含修改（第45轮）');
 // 编辑回填验证
 d.getElementById('spaceplan-detail-actions').querySelector('button[onclick*="editSpacePlan"]').click();
@@ -68,7 +68,7 @@ d.getElementById('plan-priority').value = '50';
 alerts.length = 0;
 w.eval('confirmPlanCreate()');
 ok(alerts.some(m => m.includes('请选择售卖空间')), '未选空间 → 拦截');
-// 5b. 时间超出空间档期拦截（sp3 副本为待发布 → 第45轮不可选；改用 sp1 全量空间测试档期校验，填 10 月起档被拦）
+// 5b. 时间超出空间档期拦截（sp2 副本为待发布 → 第45轮不可选；改用 sp1 全量空间测试档期校验，填 10 月起档被拦）
 d.getElementById('plan-space-sel').value = 'sp1';
 w.eval('onPlanSpaceChange()');
 d.getElementById('plan-eff-start').value = '2026-10-15T00:00:00';
@@ -76,7 +76,7 @@ d.getElementById('plan-eff-end').value = '2027-10-01T00:00:00';
 alerts.length = 0;
 w.eval('confirmPlanCreate()');
 ok(alerts.some(m => m.includes('必须在售卖空间') && m.includes('生效范围')), '计划时间超过空间档期 → 拦截');
-// 5c. 合法保存（sp1 + 合档时间 + 单元全选默认）——第45轮：sp3 待发布不可下拉选中，改用 sp1
+// 5c. 合法保存（sp1 + 合档时间 + 单元全选默认）——第45轮：sp2 待发布不可下拉选中，改用 sp1
 d.getElementById('plan-space-sel').value = 'sp1';
 w.eval('onPlanSpaceChange()');
 d.getElementById('plan-eff-start').value = '2026-11-05T00:00:00';
@@ -85,47 +85,45 @@ alerts.length = 0;
 w.eval('confirmPlanCreate()');
 const lastIdx = w.eval('planRows.length - 1');
 ok(w.eval('planRows[' + lastIdx + '].name') === 'r38锁定测试' && alerts.length === 0, '合法计划保存成功（planRows 追加，无拦截提示）');
-ok(w.eval('planRows[' + lastIdx + '].units.length') === 11 && w.eval('planRows[' + lastIdx + '].units.every(u => saleUnits.find(x => x.id === u).spaceKey === "sp1")'), 'units=sp1 内 11 个叉乘单元（默认全选，第47轮）');
+ok(w.eval('planRows[' + lastIdx + '].units.length') === 4 && w.eval('planRows[' + lastIdx + '].units.every(u => saleUnits.find(x => x.id === u).spaceKey === "sp1")'), 'units=sp1 内 4 个叉乘单元（默认全选，第48轮）');
 
 // ===== 6. 停用拦截：空间内有生效中的售卖计划 → 拦截 =====
 alerts.length = 0;
 w.eval("stopSpacePlan('sp1')");
 ok(alerts.some(m => m.includes('生效中的售卖计划')), 'sp1 有生效中计划（常规售卖）→ 停用拦截');
 ok(w.eval('spaces["sp1"].status') === 'published', '拦截后状态不变');
-// 6b. sp3 计划刚保存还是待发布 → sp3 可直接停用（不存在生效中计划）
+// 6b. sp2 无任何计划 → 可直接停用
 alerts.length = 0;
-w.eval("stopSpacePlan('sp3')");
-ok(alerts.length === 0, 'sp3 仅待发布计划 → 停用成功无拦截');
-ok(w.eval('spaces["sp3"].status') === 'stopped', 'sp3 → 已停用');
-// 6c. 时间旅行验证：发布 sp3 计划后，其档期 11-05 起不含当前 11-04 → activePlansInSpace=0 仍可停
-// 注：第45轮计划挂在 sp1（r38锁定测试），但 sp3 本身无计划；sp3 停用/发布仍可验证空间三态流转
-w.eval("publishSpacePlan('sp3')");
-w.eval("stopSpacePlan('sp3')");
-ok(w.eval('spaces["sp3"].status') === 'stopped', 'sp3 无生效计划 → 可反复停用');
-// 6d. 造一个挂 sp3 的已发布计划（直接写 planRows，档期 11-05~11-20）→ 时间旅行到档期内 → 拦截
-w.eval("publishSpacePlan('sp3'); planRows.push({ name: 'r45-sp3计划', spaceKey: 'sp3', units: ['su-17'], unitStates: { 'su-17': 'on' }, chargeCodes: { 'su-17': 'maas-online-text-glm4.30d' }, quotaCodes: { 'su-17': 'quota-vtpm-30d' }, inventoryCodes: { 'su-17': 'inv-vtpm-30d' }, modes: {}, priority: 100, effStart: '2026-11-05 00:00:00', effEnd: '2026-11-20 00:00:00' }); planRowStatuses.push('published')");
+w.eval("stopSpacePlan('sp2')");
+ok(alerts.length === 0, 'sp2 无生效计划 → 停用成功无拦截');
+ok(w.eval('spaces["sp2"].status') === 'stopped', 'sp2 → 已停用');
+// 6c. 空间三态流转：停用→发布→再停用
+w.eval("publishSpacePlan('sp2')");
+w.eval("stopSpacePlan('sp2')");
+ok(w.eval('spaces["sp2"].status') === 'stopped', 'sp2 无生效计划 → 可反复停用');
+// 6d. 造一个挂 sp2 的已发布计划（直接写 planRows，档期 11-05~11-20，unit=su-5 sp2 副本首单元）→ 时间旅行到档期内 → 拦截
+w.eval("publishSpacePlan('sp2'); planRows.push({ name: 'r48-sp2计划', spaceKey: 'sp2', units: ['su-5'], unitStates: { 'su-5': 'on' }, chargeCodes: { 'su-5': 'maas-online-text-glm4.30d' }, quotaCodes: { 'su-5': 'quota-vtpm-30d' }, inventoryCodes: { 'su-5': 'inv-vtpm-30d' }, modes: {}, priority: 100, effStart: '2026-11-05 00:00:00', effEnd: '2026-11-20 00:00:00' }); planRowStatuses.push('published')");
 w.eval('timeFilter = { point: "2026-11-10 00:00:00" }');
-ok(w.eval('activePlansInSpace("sp3").length') === 1, '11-10 sp3 有 1 个生效中计划');
+ok(w.eval('activePlansInSpace("sp2").length') === 1, '11-10 sp2 有 1 个生效中计划');
 alerts.length = 0;
-w.eval("stopSpacePlan('sp3')");
+w.eval("stopSpacePlan('sp2')");
 ok(alerts.some(m => m.includes('生效中的售卖计划')), '档期内有生效计划 → 停用拦截');
-w.eval('timeFilter = null; planRows.pop(); planRowStatuses.pop(); stopSpacePlan("sp3")');
+w.eval('timeFilter = null; planRows.pop(); planRowStatuses.pop(); stopSpacePlan("sp2")');
 
-// ===== 7. SU Tab 空间分组（第42轮：任何时刻都只显唯一生效空间——r45 后当前时刻仅 sp1 已发布生效）=====
+// ===== 7. SU Tab 空间分组（第42轮：任何时刻只显唯一生效空间；第48轮：glm4 单空间恒显 sp1 四单元）=====
 w.eval('backToList(); openDetailByCode("maas-online-text-glm4"); switchInnerTab("saleunit")');
 const suRows = Array.from(d.querySelectorAll('#saleunit-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
-ok(suRows.length === 11, 'SU Tab 默认 11 行（第42轮：只显唯一生效空间 sp1 的单元；第47轮 per-fn），实得 ' + suRows.length);
+ok(suRows.length === 4, 'SU Tab 默认 4 行（第48轮：单空间 sp1 全部单元），实得 ' + suRows.length);
 // 空间列 rowspan 合并：sp key 文本只出现在组首行，按「空间列文本 / su-id 已知分组」两组口径验证
 const suOfRow = r => { const m = Array.from(r.cells).map(c => c.textContent).join(' ').match(/su-\d+/g); return m ? m[0] : ''; };
-const sp1Ids = ['su-1','su-2','su-3','su-4','su-5','su-6','su-7','su-8','su-9','su-10','su-11'];
-ok(suRows.filter(r => sp1Ids.includes(suOfRow(r))).length === 11, '默认视图=sp1 组 11 个单元（r45：sp3 已停用不参与仲裁；第47轮）');
+const sp1Ids = ['su-1','su-2','su-3','su-4'];
+ok(suRows.filter(r => sp1Ids.includes(suOfRow(r))).length === 4, '默认视图=sp1 组 4 个单元（第48轮）');
 // 空间列第39轮起最外层合并（空间列在 Function 之上）：sp1 整组一个段首行带徽标
 ok(suRows.filter(r => r.textContent.includes('sp1') && r.textContent.includes('已发布')).length === 1, 'sp1 组单一段首行带空间状态徽标（已发布；第39轮空间列最外层合并）');
-ok(!suRows.some(r => r.textContent.includes('sp2')), '默认视图不含非生效空间 sp2（第42轮）');
-// 时间旅行 11-15：sp2（500）胜出 → 只显 sp2 三单元
+// 时间旅行 11-15：单空间口径 → 仍只显 sp1 四单元
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSaleUnits()');
 const suRowsMid = Array.from(d.querySelectorAll('#saleunit-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
-ok(suRowsMid.length === 4 && suRowsMid.every(r => ['su-12','su-13','su-14','su-15'].includes(suOfRow(r))), '11-15 只显 sp2 四单元（su-13~15 + su-12 全缺省，第47轮）');
+ok(suRowsMid.length === 4 && suRowsMid.every(r => sp1Ids.includes(suOfRow(r))), '11-15 单空间口径仍只显 sp1 四单元（第48轮）');
 w.eval('timeFilter = null; renderSaleUnits()');
 
 // ===== 8. 名称快编写回 allProducts（bug 1 修复回归）=====

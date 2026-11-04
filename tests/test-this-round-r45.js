@@ -57,9 +57,9 @@ function boot() {
   window.eval(`confirmSpacePlan()`);
   const newKey = window.eval(`Object.keys(spaces).find(k => spaces[k].name === 'r45-edit-me')`);
   check('② 新建空间为待发布状态', newKey && window.eval(`spaces['${newKey}'].status`) === 'pending_publish');
-  // cache 0维（未勾任何度量）→ 1 全缺省；input 输入区间1度量 → 2 组合
+  // cache 0维（未勾任何度量）→ 1 空单元；input 输入区间1度量 → 1 组合（第48轮纯叉乘）
   const cnt1 = window.eval(`saleUnits.filter(u => u.spaceKey === '${newKey}').length`);
-  check('② 新空间叉乘生成单元（input 2组合 + cache 0维1 = 3）', cnt1 === 3);
+  check('② 新空间叉乘生成单元（input 1组合 + cache 0维1 = 2）', cnt1 === 2);
   const ids1 = window.eval(`JSON.stringify(saleUnits.filter(u => u.spaceKey === '${newKey}').map(u => u.id).sort())`);
   window.eval(`openSpacePlanDetail('${newKey}')`);
   const editBtn = doc.querySelector('#spaceplan-detail-actions button[onclick*="editSpacePlan"]');
@@ -80,9 +80,9 @@ function boot() {
   check('② 仍为待发布', window.eval(`spaces['${newKey}'].status`) === 'pending_publish');
   check('② 编辑后 fnDims 补充 output（0维）', window.eval(`Object.keys(spaces['${newKey}'].fnDims).sort().join()`) === 'cache,input,output');
   const cnt2 = window.eval(`saleUnits.filter(u => u.spaceKey === '${newKey}').length`);
-  check('② 差量叉乘不删原单元（6=原3保留+input 扩4组合新增2+output 0维1）', cnt2 === 6);
+  check('② 差量叉乘不删原单元（4=原2保留+input 新增双维组合1+output 0维新增1）', cnt2 === 4);
   const ids2 = window.eval(`JSON.stringify(saleUnits.filter(u => u.spaceKey === '${newKey}').map(u => u.id).sort())`);
-  check('② 原 3 个单元 id 保留未删', JSON.parse(ids2).filter(id => JSON.parse(ids1).includes(id)).length === 3);
+  check('② 原 2 个单元 id 保留未删', JSON.parse(ids2).filter(id => JSON.parse(ids1).includes(id)).length === 2);
   // 已发布空间编辑拦截
   const alerted = [];
   window.alert = m => alerted.push(m);
@@ -111,9 +111,12 @@ function boot() {
   const pendKey = mkSpace('r45-pending');
   const stoppedKey = mkSpace('r45-stopped');
   window.eval(`spaces['${stoppedKey}'].status = 'stopped'`);
+  // 第48轮：glm4 默认仅 sp1 一个已发布空间；再造一个并发布，验证多个已发布候选项
+  const pubKey = mkSpace('r45-pub2');
+  window.eval(`publishSpacePlan('${pubKey}')`);
   window.eval(`openPlanCreatePage()`);
   const opts = Array.from(doc.getElementById('plan-space-sel').options).map(o => o.value);
-  check('③ 下拉含已发布 sp1/sp2', opts.includes('sp1') && opts.includes('sp2'));
+  check('③ 下拉含已发布 sp1/' + pubKey, opts.includes('sp1') && opts.includes(pubKey));
   check('③ 下拉不含待发布空间', !opts.includes(pendKey));
   check('③ 下拉不含已停用空间', !opts.includes(stoppedKey));
   check('③ 下拉选项不再显示空间状态括注', Array.from(doc.getElementById('plan-space-sel').options).every(o => !o.textContent.includes('已发布') && !o.textContent.includes('待发布')));
@@ -183,7 +186,7 @@ function boot() {
   check('⑤ 行信息含 Function', rows.some(r => r.textContent.includes('Function')));
   check('⑤ 行信息含维度组合', rows.some(r => r.textContent.includes('维度组合')));
   check('⑤ 行信息不含售卖空间', rows.every(r => !r.textContent.includes('售卖空间')));
-  check('⑤ 行信息含维度度量值（128K～1M）', rows.some(r => r.textContent.includes('128K～1M')));
+  check('⑤ 行信息含维度度量值（0～128K）', rows.some(r => r.textContent.includes('0～128K')));
   window.eval(`backToList()`);
 }
 
@@ -202,7 +205,7 @@ function boot() {
           let combos = [[]];
           dims.forEach(d => {
             const next = [];
-            const vals = (mea[d] || []).map(m => ({ dim: d, measure: m })).concat([{ dim: '', measure: '' }]);
+            const vals = (mea[d] || []).map(m => ({ dim: d, measure: m }));
             combos.forEach(c => vals.forEach(v => next.push([...c, v])));
             combos = next;
           });

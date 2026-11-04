@@ -37,29 +37,41 @@ ok(!d.getElementById('space-tbody').innerHTML.includes('stopSpacePlan('), '列�
 ok(!d.getElementById('space-tbody').innerHTML.includes('editSpacePlan('), '第38轮：列表行内无修改入口（空间不可改）');
 
 // ===== 4. 详情入口：售卖空间 code = 进详情链接 =====
-const btn = Array.from(d.querySelectorAll('#space-tbody button')).find(b => b.textContent.trim() === 'sp2');
-ok(btn && btn.getAttribute('onclick').includes("openSpacePlanDetail('sp2')"), '空间 code 徽标=详情链接 openSpacePlanDetail(sp2)');
+const btn = Array.from(d.querySelectorAll('#space-tbody button')).find(b => b.textContent.trim() === 'sp1');
+ok(btn && btn.getAttribute('onclick').includes("openSpacePlanDetail('sp1')"), '空间 code 徽标=详情链接 openSpacePlanDetail(sp1)');
 
-// ===== 5. 详情页：已发布（sp2 双11）→ 停用+复制（无修改——空间不可改）=====
-w.eval("openSpacePlanDetail('sp2')");
+// ===== 5. 详情页：已发布（sp1，第48轮单空间）→ 停用+复制 =====
+w.eval("openSpacePlanDetail('sp1')");
 ok(!d.getElementById('spaceplan-detail-view').classList.contains('hidden'), '详情页打开');
-ok(d.getElementById('spaceplan-detail-title').textContent.includes('双11大促·输入售卖空间'), '标题含空间名');
+ok(d.getElementById('spaceplan-detail-title').textContent.includes('GLM4·常规售卖空间'), '标题含空间名');
 ok(d.getElementById('spaceplan-detail-status').textContent === '已发布', '状态=已发布');
 let act = d.getElementById('spaceplan-detail-actions');
 ok(act.textContent.includes('停用') && act.textContent.includes('复制'), '已发布操作=停用+复制');
 ok(!act.innerHTML.includes('editSpacePlan'), '第38轮：无修改操作（空间完全不可改，变更=复制新建）');
 const fields = d.getElementById('spaceplan-detail-fields').textContent;
-ok(fields.includes('sp2') && fields.includes('双11大促·输入售卖空间') && fields.includes('500') && fields.includes('2026-11-11 00:00:00 ~ 2026-11-20 00:00:00'), '字段区：code/名称/优先级/生效起止');
+ok(fields.includes('sp1') && fields.includes('GLM4·常规售卖空间') && fields.includes('100') && fields.includes('2026-11-01 00:00:00 ~ 2027-11-01 00:00:00'), '字段区：code/名称/优先级/生效起止');
 const dtRows = d.querySelectorAll('#spaceplan-detail-tbody tr');
-ok(dtRows.length === 4 && Array.from(dtRows).every(r => r.textContent.includes('input')) && dtRows[0].textContent.includes('su-12') && !dtRows[0].textContent.includes('pu-sp-'), '详情售卖单元清单（r46：sp2 四单元=3 输入组合+全缺省 su-12，组合序全缺省居首，无 pu-sp 编号）');
+ok(dtRows.length === 4 && dtRows[0].textContent.includes('su-4') && dtRows[0].textContent.trim().endsWith('--') && dtRows[3].textContent.includes('su-3') && !dtRows[0].textContent.includes('pu-sp-'), '详情售卖单元清单（第48轮：4 单元=cache 0维 su-4 居首 + input×2 + output；组合序空串最前，无 pu-sp 编号）');
 
 // ===== 6. 停用拦截：空间内有生效中的售卖计划时不允许停用 =====
 alerts.length = 0;
 w.eval("stopSpacePlan('sp1')");
 ok(alerts.some(m => m.includes('生效中的售卖计划')), 'sp1 有生效计划 → 停用被拦截：' + (alerts[0] || '(无提示)'));
+// 造一个无计划的新空间 sp2（第48轮：原双11空间已删，用新建空间演练停用/复制链路）
+w.eval('openSpacePlanModal()');
+const nb = d.querySelector('.sp-fn-check[data-fn="input"]');
+nb.checked = true; nb.dispatchEvent(new w.Event('change', { bubbles: true }));
+d.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]').checked = true;
+d.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="1M+"]').checked = true;
+d.getElementById('sp-name').value = 'r48演练空间';
+d.getElementById('sp-priority').value = '500';
+d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
+d.getElementById('sp-eff-end').value = '2026-12-31T00:00:00';
+w.eval('confirmSpacePlan()');
 ok(w.eval('spaces["sp1"].status') === 'published', 'sp1 状态未变');
 
-// ===== 7. 停用成功路径：sp2 档期 11-11 起（当前 11-04 无生效计划）→ 可停用 =====
+// ===== 7. 停用成功路径：新建 sp2 无生效计划 → 可停用 =====
+w.eval("closeSpacePlanDetail(); openSpacePlanDetail('sp2')");
 alerts.length = 0;
 w.eval("stopSpacePlan('sp2')");
 ok(w.eval('spaces["sp2"].status') === 'stopped', 'sp2 无生效计划 → 停用成功');
@@ -76,19 +88,19 @@ ok(d.getElementById('spaceplan-detail-status').textContent === '已发布', '重
 alerts.length = 0;
 w.eval("copySpacePlan('sp2')");
 ok(alerts.some(m => m.includes('已复制售卖空间')), '复制提示');
-ok(w.eval('spaceSeq') === 3 && w.eval('spaces["sp3"] && spaces["sp3"].name') === '双11大促·输入售卖空间-副本', '副本空间 sp3 入列（-副本命名）');
+ok(w.eval('spaceSeq') === 3 && w.eval('spaces["sp3"] && spaces["sp3"].name') === 'r48演练空间-副本', '副本空间 sp3 入列（-副本命名）');
 ok(w.eval('spaces["sp3"].status') === 'pending_publish', '副本=待发布');
-ok(w.eval('spaces["sp3"].priority') === 500 && w.eval('spaces["sp3"].effStart') === '2026-11-11 00:00:00', '副本继承优先级/档期');
+ok(w.eval('spaces["sp3"].priority') === 500 && w.eval('spaces["sp3"].effStart').startsWith('2026-12-01'), '副本继承优先级/档期');
 ok(w.eval('spaces["sp3"].fnDims["input"].join(",")') === '输入区间', '副本继承 fn 配置');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 4, '副本叉乘生成 4 售卖单元（3 勾选组合 + 全缺省，r43 含缺省）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2").length') === 4, '原空间 sp2 单元保留（4 个，永不删除）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 2, '副本叉乘生成 2 售卖单元（2 勾选组合，第48轮无空组合）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2").length') === 2, '原空间 sp2 单元保留（2 个，永不删除）');
 
 // 8b. 退锁后复制不受限（复制豁免编辑锁）
 w.eval('exitEdit()');
 alerts.length = 0;
 w.eval("copySpacePlan('sp3')");
 ok(alerts.some(m => m.includes('已复制')), '退锁后复制不受限');
-ok(w.eval('spaces["sp4"].name') === '双11大促·输入售卖空间-副本-副本', '连续复制=源名+副本命名');
+ok(w.eval('spaces["sp4"].name') === 'r48演练空间-副本-副本', '连续复制=源名+副本命名');
 // 清理测试造的空间 4（sp3 保留验证待发布详情页）
 w.eval('delete spaces["sp4"]; saleUnits = saleUnits.filter(u => u.spaceKey !== "sp4"); spaceSeq = 3; renderSpaceTab(); renderSaleUnits();');
 
@@ -114,8 +126,8 @@ ok(d.getElementById('spaceplan-detail-view').classList.contains('hidden'), '返�
 w.eval('openDetailByCode("maas-online-text-glm4")');
 ok(d.getElementById('spaceplan-detail-view').classList.contains('hidden') && !d.getElementById('detail-view').classList.contains('hidden'), '重进详情页正常');
 // 清理 sp3 恢复 mock 现场
-w.eval('delete spaces["sp3"]; saleUnits = saleUnits.filter(u => u.spaceKey !== "sp3"); spaceSeq = 2; renderSpaceTab(); renderSaleUnits();');
-ok(dataRows().length === 4, '清理后回到 4 行（sp1×3+sp2×1）');
+w.eval('delete spaces["sp2"]; delete spaces["sp3"]; saleUnits = saleUnits.filter(u => u.spaceKey !== "sp2" && u.spaceKey !== "sp3"); spaceSeq = 1; renderSpaceTab(); renderSaleUnits();');
+ok(dataRows().length === 3, '清理后回到 3 行（第48轮单空间 sp1×3）');
 
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

@@ -21,7 +21,7 @@ const listedTxt = document.getElementById('listed-tbody').textContent;
 const pendingTxt = document.getElementById('pending-tbody').textContent;
 ok(listedTxt.includes('maas-product-vtpm-std') && listedTxt.includes('maas-product-vtpm-pro'), '在售 Tab 含 std/pro');
 ok(!listedTxt.includes('maas-product-vtpm-pre'), '在售 Tab 不含 pre（计划待发布→单元禁售）');
-ok(pendingTxt.includes('maas-product-vtpm-pre'), '禁售 Tab 含 pre');
+ok(!pendingTxt.includes('maas-product-vtpm-pre'), '第48轮：pre 全部未配置 → 不在禁售 Tab（禁售 Tab 只显禁售单元）');
 ok(pendingTxt.includes('禁售') && !pendingTxt.includes('在售'), '禁售 Tab 单元状态=禁售');
 ok(listedTxt.includes('在售'), '在售 Tab 含在售售卖单元');
 const tabBtns = Array.from(document.querySelectorAll('.admin-tab[data-tab="listed"], .admin-tab[data-tab="pending"]')).map(b => b.textContent.trim());
@@ -40,14 +40,15 @@ ok(evalInPage('typeof refreshProductBadge') === 'function', 'refreshProductBadge
 window.eval('refreshProductBadge()'); // 不应报错
 
 // ===== 3. 编辑驱动单元状态变化 → 列表 Tab 联动（第13轮快照回写仍生效）=====
-// 第45轮：pre 空间默认已发布——停用空间+发布计划 → su-1 未配置（计入禁售 Tab，不出现在售 Tab）
+// 第45轮：pre 空间默认已发布——停用空间+发布计划 → su-1 未配置（第48轮：不出现在禁售 Tab，也不出现在售 Tab）
 section('3. 状态变化联动');
 window.openDetailByCode('maas-product-vtpm-pre');
 window.startEdit();
 window.eval('planRowStatuses[0] = "published"; spaces["sp1"].status = "stopped"; renderPlan(); renderSaleUnits();');
 window.eval('exitEdit()');
 window.backToList();
-ok(!document.getElementById('listed-tbody').textContent.includes('maas-product-vtpm-pre'), '第45轮：空间停用 → pre 仍在禁售 Tab（未配置）');
+ok(!document.getElementById('listed-tbody').textContent.includes('maas-product-vtpm-pre'), '第45轮：空间停用 → pre 未配置 → 不在在售 Tab');
+ok(document.getElementById('pending-tbody').textContent.includes('maas-product-vtpm-pre'), '第48轮：空间停用 → 未配置升级为禁售（红）→ 计入禁售 Tab');
 // 空间重新发布（计划已发布）→ 转在售
 window.openDetailByCode('maas-product-vtpm-pre');
 window.startEdit();
@@ -71,7 +72,7 @@ document.getElementById('inp-name').value = '徽标删除后新商品';
 window.submitProduct();
 ok(evalInPage('saleUnits.length') === 0 && evalInPage('planRows.length') === 0, '新建商品无单元无计划（前端草稿态）');
 window.backToList();
-ok(document.getElementById('pending-tbody').textContent.includes('maas-product-vtpm-new1'), '新建商品出现在禁售 Tab');
+ok(!document.getElementById('pending-tbody').textContent.includes('maas-product-vtpm-new1'), '第48轮：无售卖单元的商品不再显示禁售占位行');
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

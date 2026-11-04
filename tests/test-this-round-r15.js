@@ -61,7 +61,7 @@ document.getElementById('sp-eff-end').value = '2027-11-01T00:00:00';
 alertMsg = '';
 window.confirmSpacePlan();
 ok(alertMsg.includes('已保存') && alertMsg.includes('待发布'), '空间保存成功（待发布）: ' + alertMsg.slice(0, 24));
-ok(alertMsg.includes('已自动生成售卖单元 2 个'), '提示叉乘 2 个单元（1～100 + 全缺省）: ' + alertMsg.slice(-30));
+ok(alertMsg.includes('已自动生成售卖单元 1 个'), '提示叉乘 1 个单元（1～100，第48轮无空组合）: ' + alertMsg.slice(-30));
 ok(evalInPage('spaces["sp1"] && spaces["sp1"].fnDims[""].join(",")') === '购买量区间', '新空间 sp1 fn="" 维度=购买量区间');
 ok(evalInPage('spaces["sp1"].priority') === 100, '空间优先级 100 落地');
 ok(evalInPage('spaces["sp1"].fnMeasures') !== undefined, '空间带 fnMeasures（fn→维度→度量定义）');
@@ -97,8 +97,8 @@ ok(evalInPage('currentSpaceOfFn("")') === 'sp1', '发布空间A后 sp1 生效');
 section('4. 叉乘生成售卖单元');
 ok(!document.getElementById('modal-su-confirm'), 'SU 弹窗已删除（第37轮）');
 ok(!document.getElementById('su-create-btn'), 'SU Tab 创建按钮已删除');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 2, '空间A 叉乘 2 单元（1～100 + 全缺省，r43）');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").some(u => u.dim === "购买量区间")', '含 dim=购买量区间 单元（组合序全缺省在前）') === true || evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").map(u=>u.dim).join("|")') === ',购买量区间', '单元 dims=全缺省+购买量区间: ' + evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").map(u=>u.dim).join("|")'));
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 1, '空间A 叉乘 1 单元（1～100，第48轮无空组合）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").map(u=>u.dim).join("|")') === '购买量区间', '单元 dims=购买量区间（无全缺省）: ' + evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").map(u=>u.dim).join("|")'));
 
 // ===== 5. 复制=唯一变更路径（第38轮：空间不可改） =====
 section('5. 复制空间');
@@ -116,7 +116,7 @@ section('6. 既有商品');
 window.eval('backToList()');
 window.openDetailByCode('maas-product-vtpm-std');
 ok(evalInPage('currentProduct.dims') === undefined, 'std 商品无 dims（第21轮统一）');
-ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 8, 'std mock 单元 8 个（sp1，r43 缺省扩展）');
+ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 3, 'std mock 单元 3 个（sp1，第48轮纯叉乘）');
 ok(evalInPage('spaces["sp1"].status') === 'published', 'std 常驻空间 published');
 
 // ===== 7. 新建商品入列（无 dims） =====
