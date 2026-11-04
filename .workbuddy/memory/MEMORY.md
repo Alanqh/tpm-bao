@@ -1,11 +1,20 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第36轮（main 981dea1 / gh-pages 9f9144f，21 套 + smoke 全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第37轮（main bcd20e5 / gh-pages de568d6，22 套 + smoke 全绿）。
+
+## 第37轮（现行口径）：编辑锁移至基本信息下方 + 售卖单元改为空间计划叉乘生成 + 基本信息 name 快编
+- **编辑锁移位**：#edit-lock-bar 位于基本信息卡片**之后**、Tab 卡片之前独立行（justify-start 居左）；id 不变，renderEditLockBar 零改动。
+- **售卖单元由空间计划叉乘生成（重大语义变更）**：确认空间计划时按「勾选 fn→维度→每维度勾选度量」完整叉乘自动生成该空间全部售卖单元（genSaleUnitsForSpace：0 维=唯一单元 dim/measure 空串渲 --；幂等 saleUnitKey 去重；dim/measure 多值用 ' + ' 拼接）。勾了维度必须至少勾一个度量（拦截）；不勾维度=合法 0 维度空间。
+- **修改/覆盖语义**：修改空间计划身份判定=sameDims && sameMeas（mapSort 键值排序 JSON 比较）→ 不一致则**新建空间+完整叉乘**；已存在售卖单元**永不删除**（旧空间旧单元保留，售卖计划引用安全）；copySpacePlan 每 fn 新建空间并叉乘。spacePlan row 新增 fnMeasures 字段。
+- **SU 链路删除**：#modal-su-confirm、#su-create-btn、openSuConfirmModal 等全套创建/删除函数删除；SU Tab 纯只读 14 列（原 15 含操作列）；refreshEditControls 只管 plan-create-btn/spaceplan-new-btn。saleUnitKey 保留。
+- **基本信息名称快编**：detail-info 商品名称块加 #detail-info-name+铅笔 openDetailNameEdit('info')；三函数支持 source('title'/'info')，两处铅笔共享标题旁输入条；不依赖编辑锁。
+- 空间计划弹窗三层勾选（fn→维度卡 [data-dimblock]→度量 [data-dimmeas]），禁用级联：未勾 fn 全禁/未勾维度度量禁/取消维度清空度量。
+- 踩坑：jsdom 下 .sp-fn-check/.sp-dim-check 有 onchange 须 dispatch(change)；.sp-measure-check 无 onchange 直接设 checked。r20 新建计划叉乘出新单元致固定行数断言失效→动态基准。mock 补 defaultSpacePlans.fnMeasures 与 defaultSaleUnits 对应（glm4 su-4 修正 sp5 单维）。
 
 ## 第36轮（现行口径）：删解释性文案 + 编辑锁移位 + 商品名快编
 - **解释性文案清理（约 30 处）**：各详情/创建页副标题 p、区块标题括注、弹窗 p 提示、title 悬停说明、下拉选项括注全删；空表提示精简。保留：mock 业务名括号、编辑锁徽标人名、—（不区分 function）、--（0 维度）等信息性内容。
-- **编辑锁移位**：#edit-lock-bar 移至基本信息卡片之前独立行（justify-start 居左）；id 不变，renderEditLockBar 零改动。
+- **编辑锁移位**：#edit-lock-bar 移至基本信息卡片之前独立行（第37轮修正为之后）；id 不变，renderEditLockBar 零改动。
 - **商品名称快编**：标题旁铅笔按钮 → 行内输入+保存/取消（openDetailNameEdit/closeDetailNameEdit/confirmDetailNameEdit）；更新 currentProduct.name+标题+基本信息卡片；showDetailView 进入复位；不依赖编辑锁。
 
 ## 第35轮（现行口径）：0 维度空间 + code 唯一标识 + 状态列精简
@@ -51,14 +60,14 @@
 
 ## 核心业务概念
 - 预留 vTPM 资源包：按「购买量（万 vTPM step）× 购买周期（天）」售卖；超量路由=超量限流（429）或超量路由 Serverless 二选一；折算系数三维度配 YAML 版本；SLO A类违约按累计违约分钟/月分档赔付。
-- 关键实体链：商品 → 售卖空间（属 function，只管维度）→ fn 生效空间（纯空间计划仲裁）→ 售卖单元（纯前端草稿，有售卖计划才算真正创建）→ 售卖计划（七字段组）→ 空间计划 → 手动交付 → 资源包 → 监控。
+- 关键实体链：商品 → 售卖空间（属 function，只管维度+度量）→ fn 生效空间（纯空间计划仲裁）→ 售卖单元（第37轮起=空间计划确认时按维度×度量叉乘自动生成，永不删除）→ 售卖计划（七字段组）→ 空间计划 → 手动交付 → 资源包 → 监控。
 - 后台菜单：预留vTPM管理挂「活动运营」；商品管理挂「商品定价中心」。
 
 ## 历史轮要点（仍有效）
 - 第12轮：商品与模型/Playground 解耦。第13轮：列表页按单元状态平铺两 Tab（第33轮起=在售/禁售）。第11轮 productIsListed 推导（第33轮起不驱动 UI）。
 - 第16/18轮计划复制：三态均可复制（深拷贝→-副本→待发布）不受锁，copySpacePlan 继承。
-- 第19/20轮：售卖单元 Tab 15 列（fn/空间 rowspan）；售卖计划 Tab 19 列/详情表 17 列。
-- 已废弃：第15~18轮维度勾选；第20轮默认空间/自定义名称；第21轮旧空间计划实体；第22轮空间 measures/fn 配置卡；第25轮 path B；第27轮行内操作列（第29轮删）；第28轮前「未指定空间补尾行」；第30轮前售卖空间卡片；第31轮前批量创建空间；第32轮前手动默认空间；第33轮前上架徽标+已上架/未上架 Tab；第34轮前空间计划列表 rowspan 合并；第35轮前空间名称/至少一维拦截/状态列计划标注；第36轮前编辑锁在头部右侧/详情页副标题与括注解释文案。
+- 第19/20轮：售卖单元 Tab ~~15 列~~（第37轮起 14 列纯只读；fn/空间 rowspan 保留）；售卖计划 Tab 19 列/详情表 17 列。
+- 已废弃：第15~18轮维度勾选；第20轮默认空间/自定义名称；第21轮旧空间计划实体；第22轮空间 measures/fn 配置卡；第25轮 path B；第27轮行内操作列（第29轮删）；第28轮前「未指定空间补尾行」；第30轮前售卖空间卡片；第31轮前批量创建空间；第32轮前手动默认空间；第33轮前上架徽标+已上架/未上架 Tab；第34轮前空间计划列表 rowspan 合并；第35轮前空间名称/至少一维拦截/状态列计划标注；第36轮前编辑锁在头部右侧/详情页副标题与括注解释文案；第37轮前编辑锁在基本信息上方/手动 SU 创建弹窗与创建按钮/售卖单元删除链路/SU Tab 操作列/单元在 SU 弹窗中手动勾选创建。
 
 ## 页面地图（prototype/）
 - index.html 官网首页 / terms.html 购买须知 / wallet.html 前台充值（packages.html 跳转壳）/ monitor.html+monitor-component.html 前台+共用监控组件 / admin-monitor.html 后台监控。
@@ -72,13 +81,13 @@
 - 计划三态：pending_publish/published/stopped（两类计划共用）。
 - planRow schema：{name,priority,effStart,effEnd,units,unitStates,chargeCodes/quotaCodes/inventoryCodes,modes{7键},factor|factors,slo|slos,payloadId|payloads,minQty/maxQty/stepQty|qtys}；planFieldVal+PLAN_FIELDS 映射。
 - draft 双存 planDraft{key:{unified,units{}}}；renderPlanCreateSections(skipCollect)——外部写完 draft 重渲必须传 true。**含 ${} 模板字符串用 Edit 工具改**。
-- **编辑锁（第10轮）**：editLocks{code}（pro 由张三持锁）；canEdit/guardEdit/startEdit/exitEdit；护栏在 publish/stop/editPlanRow/confirmSaleUnits/removeSaleUnit/confirmPlanCreate/confirmSpacePlan（复制豁免）。
+- **编辑锁（第10轮）**：editLocks{code}（pro 由张三持锁）；canEdit/guardEdit/startEdit/exitEdit；护栏在 publish/stop/editPlanRow/confirmPlanCreate/confirmSpacePlan（复制豁免；第37轮删 confirmSaleUnits/removeSaleUnit）。
 - backToList snapshotCurrentProduct 回写；openDetailByCode 统一入口。示例数据自洽：计划/状态按商品隔离；计费项前缀=商品code。
 
 ## 技术约定与部署
 - 每页顶部深色「原型导航」栏；后台紫色主色 #7C3AED；管理员「吕」。数据全为页面内 JS mock。
 - **部署（Pages legacy 从分支部署）**：gh-pages 分支=HTML 根直出+.nojekyll。流程：推 main → git worktree add gh-pages → rm+cp prototype/*.html → 推送 → sleep~105s → curl 验证线上 → worktree remove。URL：https://alanqh.github.io/tpm-bao/admin-products.html
-- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：21 套 + smoke 全绿（第35轮口径；项数以各套最新输出为准）——plan-page(77)/this-round(31)/data-consistency(28)/r9..r13(25/32/18/30)/r14(50)/r15(38)/r16(29)/r18(28)/r19(33)/r20(74)/r22(28)/r23(34)/r24(16)/r25(51)/r27(31)/r28(24)/r29(39)/su-dim-validate(6)。
+- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：22 套 + smoke 全绿（第37轮口径；项数以各套最新输出为准）——plan-page(77)/this-round-r12(31·新建)/data-consistency(28)/r9..r13(26/48/18/30)/r14(50)/r15(35)/r16(29)/r18(26)/r19(34)/r20(76)/r22(30)/r23(36)/r24(16)/r25(52)/r27(31)/r28(24)/r29(39)/su-dim-validate(7·重写)。
 - **jsdom 踩坑汇总**：runScripts:'dangerously'；confirm/alert 打桩；页面顶层 const 用 window.eval 取；rowspan 合并行按"任意 cell 匹配"取行、cells 索引偏移；勾选联动须 dispatchEvent(change,{bubbles:true})；跨商品切换先 backToList()；筛选测试元素引用重渲后重查；**jsdom 跑批 >150s 被 SIGKILL(137) 分批跑**；断言 beware 计划名含空间名子串（用空间 key/pu-sp-N-N 定位）；行数断言先想清 productSpaces() 按 fnPool 过滤（glm4 无 sp1）。
 - 语法校验：node -e 提取 `<script>` 用 new Function()。修页面后先跑全套找红再逐套改断言。
 - 网络偶发 502：push 失败等 1-2 分钟重试；恢复检测=curl https://github.com
