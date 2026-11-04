@@ -1,7 +1,13 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第43轮（main 762f193 / gh-pages f703f52，24 套全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第44轮（main f452fd1 / gh-pages 82e6a7c，24 套全绿）。
+
+## 第44轮（现行口径）：fn 与维度度量值分离不嵌套 + mock 符合创建选项
+- **弹窗分离式（修正第43轮嵌套）**：区块1「售卖 function」独立复选（#sp-fnspaces，.sp-fn-check 无 onchange）；区块2「维度度量值」全局一份（#sp-dimmeas，.sp-measure-check 只有 data-dim/value 无 data-fn、始终可用不禁用）；onSpFnCheck 联动函数已删（勾/取消 fn 不影响度量）。confirmSpacePlan：勾选 fn 共享同一份 meas 收集（checkedFns 循环赋同值 fnDims/fnMeasures）。
+- **mock 全量自检通过**：四商品每个空间按「fnDims/fnMeasures 共享勾选+缺省叉乘」重算与 defaultSaleUnits 完全一致（std 8/pro 9/pre 8/glm4 16）。
+- **glm4 sp1 重排**：三 fn 共享输入[128K～1M]+输出[0～4K] → 每 fn 4 组合×3=12（su-1~4 input / su-8~11 output / su-12~15 cache；sp2 su-5/6/7/16 不变）；SU Tab 全缺省段序=cache su-15/input su-4/output su-11；详情清单序 su-4/su-11/su-15 全缺省居首，末行 su-14（cache/输出0～4K）。
+- 测试适配：批量删 `.sp-measure-check[data-fn="X"]` 选择器（用 python re 全套替换）；r12/r25 重写「不嵌套/度量始终可用/取消 fn 不清空」断言；r18/r20/r22/r27 共享度量组合数重算（input+output 两度量→每 fn 4）。
 
 ## 第43轮（现行口径）：两步创建+缺省完整叉乘+售卖单元三态+计划空间筛选
 - **创建售卖空间两步**：①勾 function（.sp-fn-check）②每维度直接勾度量（.sp-measure-check，**.sp-dim-check 维度复选已删**）；勾 fn 启用度量，取消 fn 清空度量；不勾任何 fn 拦截；**未勾度量也可保存**（生成全缺省组合）。
@@ -121,7 +127,7 @@
 ## 技术约定与部署
 - 每页顶部深色「原型导航」栏；后台紫色主色 #7C3AED；管理员「吕」。数据全为页面内 JS mock。
 - **部署（Pages legacy 从分支部署）**：gh-pages 分支=HTML 根直出+.nojekyll。流程：推 main → git worktree add gh-pages → rm+cp prototype/*.html → 推送 → sleep~105s → curl 验证线上 → worktree remove。URL：https://alanqh.github.io/tpm-bao/admin-products.html
-- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：24 套全绿（第43轮口径）——this-round(31)/r38(39)/smoke-r26(46)/plan-page(78)/data-consistency(29)/su-dim-validate(13)/r9(26)/r10(51)/r11(19)/r12(37)/r13(32)/r14(50)/r15(38)/r16(29)/r18(27)/r19(38)/r20(69)/r22(33)/r23(34)/r24(18)/r25(48)/r27(33)/r28(33)/r29(45)。第43轮测试适配要点：删所有 .sp-dim-check 交互（jsdom 下 null 崩溃）；glm4 SU Tab 默认 12 行/11-15 sp2 4 行；std sp1 单元数 3→8；rowspan 断言三层（spSpan/cbSpan）；三态断言（pro su-2/3/4 未配置、std 停用计划→未配置灰非红）。
+- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules）**：24 套全绿（第44轮口径）——this-round(31)/r38(39)/smoke-r26(46)/plan-page(78)/data-consistency(29)/su-dim-validate(13)/r9(26)/r10(51)/r11(19)/r12(38)/r13(32)/r14(50)/r15(38)/r16(29)/r18(27)/r19(38)/r20(69)/r22(33)/r23(34)/r24(18)/r25(49)/r27(33)/r28(33)/r29(45)。第44轮适配要点：.sp-measure-check 选择器一律无 data-fn；弹窗断言「fn 区块内无度量/度量区块内无 fn/度量始终可用」；多 fn 共享度量组合数=每 fn (n₁+1)×(n₂+1)…；glm4 SU 全缺省段=su-15/su-4/su-11（fn 序=fnDims 键序）。
 - **jsdom 踩坑汇总**：runScripts:'dangerously'；confirm/alert 打桩；页面顶层 const 用 window.eval 取；rowspan 合并行按"任意 cell 匹配"取行、cells 索引偏移（第38轮：空间级列只首行有，续行 cells 少）；勾选联动须 dispatchEvent(change,{bubbles:true})；跨商品切换先 backToList()；筛选测试元素引用重渲后重查；**jsdom 跑批 >150s 被 SIGKILL(137) 分批跑**；断言 beware 计划名含空间名子串；测试造的空间/计划结尾清理（delete+游标复位）；保存成功路径无 alert（断言数据变化）。
 - 语法校验：node -e 提取 `<script>` 用 new Function()。修页面后先跑全套找红再逐套改断言。
 - 网络偶发 502：push 失败等 1-2 分钟重试；恢复检测=curl https://github.com
