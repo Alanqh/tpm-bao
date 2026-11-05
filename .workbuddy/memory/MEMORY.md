@@ -1,7 +1,14 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第49轮（main 9c50e8f / gh-pages 81745e3，28 套 1119 项全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第50轮（main e7681b5 / gh-pages e914d8a，28 套 1134 项全绿）。
+
+## 第50轮（现行）：online-text 商品各列表隐藏折算系数及之后的 vTPM 专属列
+- **列表页 maas 两 Tab**：表头删折算系数/SLO/payload/最小购买量/最大购买量/购买量step 7 列（14→8 列，末列=所选时间执行价）；renderUnitRow 按行商品组（productTabGroup!=='vtpm' 则不输出尾部 `${isVtpm?...:''}`）跳过输出；renderTopTab 空态 colspan 按组 14/8。
+- **详情页三处 col-vtpm 显隐**：SU Tab（th/td 6 列）、售卖计划 Tab（7 列=库存项+折算及之后 6）、计划详情页（7 列）——`syncUnitListColumnsByType()`（showDetailView 进详情时调 + renderSaleUnits/renderPlan/renderPlanDetail 末尾各调一次，因重渲 innerHTML 新 td 无 hidden 类须重同步）；vTPM 商品全显示（对照组）。
+- **用户确认口径**：售卖计划 Tab/计划详情页一并隐藏；计划表「库存项」列也隐藏（第49轮起 online-text 保存已不收集库存项）。
+- 测试：r49 套件补⑦段（47→62 项：maas 8 列/行、vTPM 14 列、详情三处 hidden 计数、std 对照）；r13 适配（maas 表头 8 列断言+行 cells 数，39 项）。28 套 1134 项全绿。
+- 部署：main e7681b5 / gh-pages e914d8a；线上 md5 0136ab5edcd1005b9c91fc8092e7dd40 一致，col-vtpm 42 处、syncUnitListColumnsByType 5 处命中。
 
 ## 第49轮（现行）：列表四 Tab + 生效起止拆列 + SU 列序调换 + 类型适配
 - **①列表四 Tab**（商品类型 × 上架状态）：maas已上架/maas未上架/vTPM已上架/vTPM未上架（#maas-listed-tbody 等四 tbody + renderTopTab(group,listed,tbodyId)）；只统计各商品**当前时刻生效售卖空间**（activeUnitsOfData：published∧档期内 priority→seq 仲裁）内单元——在售→已上架，未配置/禁售→未上架；**无生效空间→商品从四 Tab 完全消失**（pre 停空间后不再计入未上架）；productTabGroup：type=maas-product-vtpm→vtpm 组，其余→maas 组。mock 基准：maas已上架 4（glm4）/maas未上架 0/vTPM已上架 4（std2+pro2）/vTPM未上架 6（pre3未配置+pro2未配置+std su-3禁售）。
