@@ -36,6 +36,11 @@
       border: 1px solid #E5E7EB;
       border-radius: 0.5rem;
     }
+    /* 第51轮：maas（online-text）售卖单元列表紧凑化——列内边距收紧 */
+    table.compact-cells th, table.compact-cells td { padding-top: 0.3rem; padding-bottom: 0.3rem; }
+    /* 第51轮：详情页 SU Tab 表格（vTPM 全列 1600；online-text 紧凑态切 1000，由 JS 切 compact-cells） */
+    table.su-table { min-width: 1600px; }
+    table.su-table.compact-cells { min-width: 1000px; }
     .admin-tab {
       padding: 0.5rem 1rem;
       border-bottom: 2px solid transparent;
@@ -197,7 +202,7 @@
           <!-- 第49轮：四 Tab 按商品类型 × 上架状态划分；只看各商品当前生效售卖空间内的售卖单元（在售→已上架；未配置/禁售→未上架） -->
           <div id="top-tab-maas-listed" class="p-4">
             <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[1500px]">
+            <table class="w-full text-sm min-w-[1000px] compact-cells">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                <tr>
                  <th class="text-left px-3 py-2 font-medium">售卖单元</th>
@@ -217,7 +222,7 @@
 
           <div id="top-tab-maas-unlisted" class="p-4 hidden">
             <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[1500px]">
+            <table class="w-full text-sm min-w-[1000px] compact-cells">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                <tr>
                  <th class="text-left px-3 py-2 font-medium">售卖单元</th>
@@ -293,9 +298,8 @@
       <div id="detail-view" class="hidden">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div class="flex items-center gap-2">
-            <!-- 第38轮：名称快编改为 contenteditable 就地编辑（铅笔点击后在原文本位置编辑，回车/失焦保存、Esc 取消） -->
+            <!-- 第38轮：名称快编改为 contenteditable 就地编辑；第51轮：标题旁铅笔已删，仅保留基本信息卡内快编 -->
             <h2 id="detail-title" class="text-lg font-semibold text-slate-900"><span id="detail-title-name">商品详情</span><span id="detail-title-code" class="ml-1 font-normal text-slate-500"></span></h2>
-            <button type="button" id="detail-name-edit-btn" onclick="openDetailNameEdit('title')" class="text-slate-400 hover:text-violet-600" title="编辑商品名称"><i class="fa-solid fa-pen text-xs"></i></button>
           </div>
           <button onclick="backToList()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回列表</button>
         </div>
@@ -356,7 +360,7 @@
               </div>
             </div>
             <div class="overflow-x-auto">
-            <table class="w-full text-sm min-w-[1600px]">
+            <table id="saleunit-table" class="w-full text-sm su-table">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th class="text-left px-3 py-2 font-medium">售卖空间</th>
@@ -396,10 +400,12 @@
                   <th class="text-left px-3 py-2 font-medium">售卖计划单元</th>
                   <th class="text-left px-3 py-2 font-medium">状态</th>
                   <th class="text-left px-3 py-2 font-medium">类型</th>
+                  <th class="text-left px-3 py-2 font-medium">售卖空间</th>
                   <th class="text-left px-3 py-2 font-medium">所属售卖计划</th>
+                  <th class="text-left px-3 py-2 font-medium">生效开始</th>
+                  <th class="text-left px-3 py-2 font-medium">生效结束</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
-                  <th class="text-left px-3 py-2 font-medium">售卖空间</th>
                   <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">计费项</th>
                   <th class="text-left px-3 py-2 font-medium">配额项</th>
@@ -411,8 +417,6 @@
                   <th class="text-right px-3 py-2 font-medium col-vtpm">最大购买量</th>
                   <th class="text-right px-3 py-2 font-medium col-vtpm">购买量step</th>
                   <th class="text-left px-3 py-2 font-medium">优先级</th>
-                  <th class="text-left px-3 py-2 font-medium">生效开始</th>
-                  <th class="text-left px-3 py-2 font-medium">生效结束</th>
                 </tr>
               </thead>
               <tbody id="plan-tbody" class="divide-y divide-slate-100"></tbody>
@@ -463,9 +467,9 @@
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th class="text-left px-3 py-2 font-medium">售卖计划单元</th>
+                  <th class="text-left px-3 py-2 font-medium">售卖空间</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
-                  <th class="text-left px-3 py-2 font-medium">售卖空间</th>
                   <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">类型</th>
                   <th class="text-left px-3 py-2 font-medium">生效开始</th>
@@ -533,9 +537,9 @@
           </div>
         </div>
 
-        <!-- 区块1：基础信息（售卖空间锁定 + 名称 + 优先级 + 生效时间，时间须在空间生效范围内） -->
+        <!-- 区块1：基础信息（售卖空间锁定 + 名称 + 生效时间 + 优先级，时间须在空间生效范围内；第51轮：优先级后置、去区块序号） -->
         <div class="admin-card p-4 mb-4">
-          <p class="text-sm font-medium text-slate-900 mb-3">1. 基础信息</p>
+          <p class="text-sm font-medium text-slate-900 mb-3">基础信息</p>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="form-label">售卖空间</label>
@@ -549,10 +553,6 @@
               <input id="plan-name" class="form-input" placeholder="如 vTPM 预留·标准·30天">
             </div>
             <div>
-              <label class="form-label">优先级</label>
-              <input id="plan-priority" type="number" class="form-input" placeholder="如 100">
-            </div>
-            <div>
               <label class="form-label">开始生效时间</label>
               <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" value="2026-11-01T00:00:00" onchange="onPlanSpaceChange()">
             </div>
@@ -560,13 +560,17 @@
               <label class="form-label">结束生效时间</label>
               <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" value="2027-11-01T00:00:00" onchange="onPlanSpaceChange()">
             </div>
+            <div>
+              <label class="form-label">优先级</label>
+              <input id="plan-priority" type="number" class="form-input" placeholder="如 100">
+            </div>
           </div>
         </div>
 
         <!-- 区块2：售卖空间内的售卖单元（第38轮：计划锁定单空间——只展示所选空间内叉乘生成的单元） -->
         <div class="admin-card p-4 mb-4">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <p class="text-sm font-medium text-slate-900">2. 本售卖计划对哪些售卖单元生效</p>
+            <p class="text-sm font-medium text-slate-900">本售卖计划对哪些售卖单元生效</p>
             <div class="flex items-center gap-1.5">
               <button type="button" onclick="toggleAllPlanUnits()" class="admin-btn-default text-xs px-2.5 py-1 rounded-md whitespace-nowrap"><i class="fa-regular fa-square-check mr-1"></i>全选/全不选</button>
             </div>
@@ -576,13 +580,13 @@
 
         <!-- 区块3：各字段组（每个都带「全部一致 / 按售卖单元配置」开关） -->
         <div class="admin-card p-4">
-          <p class="text-sm font-medium text-slate-900 mb-1">3. 计划字段配置</p>
+          <p class="text-sm font-medium text-slate-900 mb-1">计划字段配置</p>
           <div class="grid grid-cols-1 gap-5">
 
             <!-- 3.1 计费项 -->
             <div class="border border-slate-200 rounded-md p-3">
               <div class="flex flex-wrap items-center gap-3 mb-2">
-                <p class="text-xs font-semibold text-slate-700">3.1 关联计费项</p>
+                <p class="text-xs font-semibold text-slate-700">关联计费项</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="plan-mode-charge" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                   按售卖单元配置
@@ -595,7 +599,7 @@
             <!-- 3.2 配额项 -->
             <div class="border border-slate-200 rounded-md p-3">
               <div class="flex flex-wrap items-center gap-3 mb-2">
-                <p class="text-xs font-semibold text-slate-700">3.2 关联配额项</p>
+                <p class="text-xs font-semibold text-slate-700">关联配额项</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="plan-mode-quota" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                   按售卖单元配置
@@ -608,7 +612,7 @@
             <!-- 3.3 库存项（第49轮：仅 vTPM 商品显示） -->
             <div class="border border-slate-200 rounded-md p-3" id="plan-section-inventory">
               <div class="flex flex-wrap items-center gap-3 mb-2">
-                <p class="text-xs font-semibold text-slate-700">3.3 关联库存项</p>
+                <p class="text-xs font-semibold text-slate-700">关联库存项</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="plan-mode-inventory" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                   按售卖单元配置
@@ -622,7 +626,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="plan-section-factor-slo">
               <div class="border border-slate-200 rounded-md p-3">
                 <div class="flex flex-wrap items-center gap-3 mb-2">
-                  <p class="text-xs font-semibold text-slate-700">3.4 关联vTPM折算系数配置</p>
+                  <p class="text-xs font-semibold text-slate-700">关联vTPM折算系数配置</p>
                   <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                     <input type="checkbox" id="plan-mode-factor" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                     按售卖单元配置
@@ -633,7 +637,7 @@
               </div>
               <div class="border border-slate-200 rounded-md p-3">
                 <div class="flex flex-wrap items-center gap-3 mb-2">
-                  <p class="text-xs font-semibold text-slate-700">3.5 关联SLO赔付规则配置</p>
+                  <p class="text-xs font-semibold text-slate-700">关联SLO赔付规则配置</p>
                   <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                     <input type="checkbox" id="plan-mode-slo" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                     按售卖单元配置
@@ -647,7 +651,7 @@
             <!-- 3.6 payload（第49轮：仅 vTPM 商品显示） -->
             <div class="border border-slate-200 rounded-md p-3" id="plan-section-payload">
               <div class="flex flex-wrap items-center gap-3 mb-2">
-                <p class="text-xs font-semibold text-slate-700">3.6 关联payload</p>
+                <p class="text-xs font-semibold text-slate-700">关联payload</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="plan-mode-payload" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                   按售卖单元配置
@@ -660,7 +664,7 @@
             <!-- 3.7 购买量（第49轮：仅 vTPM 商品显示） -->
             <div class="border border-slate-200 rounded-md p-3" id="plan-section-qty">
               <div class="flex flex-wrap items-center gap-3 mb-2">
-                <p class="text-xs font-semibold text-slate-700">3.7 购买量</p>
+                <p class="text-xs font-semibold text-slate-700">购买量</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
                   <input type="checkbox" id="plan-mode-qty" class="mt-0" style="accent-color:#7C3AED" onchange="renderPlanCreateSections()">
                   按售卖单元配置
@@ -1529,10 +1533,12 @@
             <td class="px-3 py-2 font-mono text-xs">${puId}</td>
             <td class="px-3 py-2"><span class="badge ${meta.cls}">${meta.text}</span></td>
             <td class="px-3 py-2">${typeBadge}</td>
+            <td class="px-3 py-2 text-xs">${spaceNameOf(u)}</td>
             <td class="px-3 py-2 text-xs"><button type="button" onclick="openPlanDetail(${planIdx})" class="text-violet-600 hover:underline font-medium">${r.name || '—'}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap font-mono">${r.effStart}</td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap font-mono">${r.effEnd}</td>
             <td class="px-3 py-2 font-mono text-xs">${uid}</td>
             <td class="px-3 py-2 text-xs">${fnOfUnit(u) || '—'}</td>
-            <td class="px-3 py-2 text-xs">${spaceNameOf(u)}</td>
             <td class="px-3 py-2">${formatDimMeasure(u)}</td>
             <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code : '—'}</td>
             <td class="px-3 py-2 font-mono text-xs">${quota ? quota.id : '—'}</td>
@@ -1544,8 +1550,6 @@
             <td class="px-3 py-2 text-right text-xs col-vtpm">${planFieldVal(r, uid, 'maxQty')}</td>
             <td class="px-3 py-2 text-right text-xs col-vtpm">${planFieldVal(r, uid, 'stepQty')}</td>
             <td class="px-3 py-2 text-xs">${r.priority}</td>
-            <td class="px-3 py-2 text-xs whitespace-nowrap font-mono">${r.effStart}</td>
-            <td class="px-3 py-2 text-xs whitespace-nowrap font-mono">${r.effEnd}</td>
           </tr>`;
       }).join('');
       syncUnitListColumnsByType(); // 第50轮：重渲后同步 vTPM 专属列显隐
@@ -2390,9 +2394,9 @@
           return `
           <tr class="hover:bg-slate-50">
             <td class="px-3 py-2 font-mono text-xs">${planUnitId(idx, uid)}</td>
+            <td class="px-3 py-2 text-xs">${spaceNameOf(u)}</td>
             <td class="px-3 py-2 font-mono text-xs">${uid}</td>
             <td class="px-3 py-2 text-xs">${fnOfUnit(u) || '—'}</td>
-            <td class="px-3 py-2 text-xs">${spaceNameOf(u)}</td>
             <td class="px-3 py-2">${formatDimMeasure(u)}</td>
             <td class="px-3 py-2">${stateBadge}</td>
             <td class="px-3 py-2">${effStartCell}</td>
@@ -2446,6 +2450,9 @@
     function syncUnitListColumnsByType() {
       const show = isVtpmProduct();
       document.querySelectorAll('.col-vtpm').forEach(el => el.classList.toggle('hidden', !show));
+      // 第51轮：online-text（maas）商品 SU Tab 表格紧凑化——切 compact-cells（min-width 1600→1000 + 行距收紧）
+      const suTable = document.getElementById('saleunit-table');
+      if (suTable) suTable.classList.toggle('compact-cells', !show);
     }
     function syncPlanCreateSectionsByType() {
       const isVtpm = isVtpmProduct();
@@ -2476,13 +2483,13 @@
       }).join('');
       sel.value = '';
       if (document.getElementById('plan-space-info')) document.getElementById('plan-space-info').textContent = '';
-      // 全部开关复位为「全部一致」
+      // 全部开关复位：第51轮——计费项/配额项默认「按售卖单元配置」（perUnit），其余复位为「全部一致」
       ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty'].forEach(k => {
         const m = document.getElementById('plan-mode-' + k);
-        if (m) m.checked = false;
+        if (m) m.checked = (k === 'charge' || k === 'quota');
       });
       // 复位区块2（未选空间时提示）
-      document.getElementById('plan-units-charge-container').innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>请先在区块1选择售卖空间</p>';
+      document.getElementById('plan-units-charge-container').innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>请先选择售卖空间</p>';
       // 复位区块3字段组（创建模式：draft 清空后渲染 unified 默认选中项）
       resetPlanDraft();
       renderPlanCreateSections(true);
@@ -2503,7 +2510,8 @@
       const sel = document.getElementById('plan-space-sel');
       return sel ? (sel.value || '') : '';
     }
-    // 空间选择变化：重渲单元清单 + 时间范围校验提示
+    // 空间选择变化：重渲单元清单 + 字段组（perUnit 行随单元集合变化）+ 时间范围校验提示
+    // 第51轮：改为整页重渲——计费项/配额项默认 perUnit 后，选空间时 perUnit 行须同步渲染
     function onPlanSpaceChange() {
       const k = planSpaceKey();
       const sp = k ? spaces[k] : null;
@@ -2516,7 +2524,7 @@
           info.textContent = '';
         }
       }
-      renderPlanUnitsCharge();
+      renderPlanCreatePage();
     }
     // 校验：计划生效时间 ⊆ 所选空间生效范围
     function planTimeWithinSpace() {
@@ -2533,7 +2541,7 @@
       if (!box) return;
       const k = planSpaceKey();
       if (!k) {
-        box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>请先在区块1选择售卖空间</p>';
+        box.innerHTML = '<p class="text-xs text-amber-600 py-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i>请先选择售卖空间</p>';
         return;
       }
       // 该空间内的单元（第38轮：计划只能在该空间单元集合内勾选）
