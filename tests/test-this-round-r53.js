@@ -60,11 +60,18 @@ const localMin2 = (ms) => { const d = new Date(Date.now() + ms); const p = n => 
   const spN = window.eval('spaces["sp' + window.eval('spaceSeq') + '"]');
   check('① 保存落库新空间', window.eval('Object.values(spaces).some(s => s.name === "r53-新空间" && s.status === "pending_publish")'));
   check('① 保存后回详情页（页面关闭）', doc.getElementById('spaceplan-create-view').classList.contains('hidden') && !doc.getElementById('detail-view').classList.contains('hidden'));
-  // 复制 → 预填页面
+  // 复制 → 预填页面（第54轮：复制须持锁——本段当前在编辑态。另测未持锁拦截）
   window.eval(`copySpacePlan('sp1')`);
   check('① 复制打开创建页（预填）', !doc.getElementById('spaceplan-create-view').classList.contains('hidden'));
   check('① 复制标题含「复制自」', doc.getElementById('spaceplan-form-title').textContent.includes('复制自'));
-  window.eval(`closeSpacePlanPage(); exitEdit(); backToList()`);
+  window.eval(`closeSpacePlanPage()`);
+  // 第54轮：退锁后复制被拦截（复制=创建操作）
+  window.eval(`exitEdit()`);
+  let lockAlert = '';
+  dom.window.alert = (m) => { lockAlert = String(m); };
+  window.eval(`copySpacePlan('sp1')`);
+  check('① 未持锁复制被拦截（第54轮）', lockAlert.includes('发起变更') && doc.getElementById('spaceplan-create-view').classList.contains('hidden'));
+  window.eval(`backToList()`);
 }
 
 // ===== ② 默认时间本地时区口径 =====

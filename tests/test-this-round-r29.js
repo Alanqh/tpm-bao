@@ -101,17 +101,13 @@ ok(w.eval('spaces["sp3"].fnDims["input"].join(",")') === '输入区间', '副本
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 2, '副本叉乘生成 2 售卖单元（2 勾选组合，第48轮无空组合）');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2").length') === 2, '原空间 sp2 单元保留（2 个，永不删除）');
 
-// 8b. 退锁后复制被拦截（第52轮：复制打开编辑弹窗需确认保存，须持锁）
+// 8b. 退锁后复制被拦截（第54轮：复制=创建操作，须持锁）
 w.eval('exitEdit()');
 alerts.length = 0;
 w.eval("copySpacePlan('sp3')");
-ok(alerts.length === 0 && (w.eval('spaces["sp4"]') === undefined), '退锁后不产生新空间（弹窗预填不落库）');
-ok(!d.getElementById('spaceplan-create-view').classList.contains('hidden'), '弹窗仍打开（预填）');
-ok(d.getElementById('sp-name').value === 'r48演练空间-副本-副本', '连续复制=源名+副本命名（预填）');
-// 未持锁保存被 guardEdit 拦截
-alerts.length = 0;
-w.eval('confirmSpacePlan()');
-ok(alerts.some(m => m.includes('发起变更')), '退锁后保存被拦截（须持锁）');
+ok(alerts.some(m => m.includes('发起变更')), '退锁后复制被拦截（第54轮：复制须持锁）');
+ok(w.eval('spaces["sp4"]') === undefined, '未持锁复制不产生新空间');
+ok(d.getElementById('spaceplan-create-view').classList.contains('hidden'), '未持锁复制不打开创建页');
 w.eval('closeSpacePlanPage()');
 
 // ===== 9. 待发布详情页：发布+复制（未持锁置灰）=====

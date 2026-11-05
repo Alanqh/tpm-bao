@@ -39,15 +39,12 @@ alerts.length = 0;
 w.eval("editSpacePlan('sp1')");
 ok(alerts.some(m => m.includes('仅待发布')), '已发布空间调用编辑 → 拦截');
 
-// ===== 4. 复制=预填弹窗（第52轮：不直接保存，保存才落库、须持锁）=====
+// ===== 4. 复制须持锁（第54轮：复制=创建操作；第52轮：不直接保存，保存才落库）=====
 w.eval('exitEdit()');
 alerts.length = 0;
 w.eval("copySpacePlan('sp1')");
-ok(alerts.length === 0 && !d.getElementById('spaceplan-create-view').classList.contains('hidden'), '退锁状态复制打开预填弹窗（不落库）');
-alerts.length = 0;
-w.eval('confirmSpacePlan()');
-ok(alerts.some(m => m.includes('发起变更')), '退锁保存被拦截（复制保存须持锁）');
-w.eval('closeSpacePlanPage()');
+ok(alerts.some(m => m.includes('发起变更')), '退锁状态复制被拦截（第54轮：复制须持锁）');
+ok(d.getElementById('spaceplan-create-view').classList.contains('hidden'), '未持锁复制不打开创建页');
 // 持锁复制 + 保存 → 落库
 w.eval('startEdit()');
 w.eval("copySpacePlan('sp1')");
