@@ -187,13 +187,15 @@
         </div>
 
         <div class="admin-card">
-          <div class="flex border-b border-slate-200 px-2">
-            <button type="button" class="admin-tab active" data-tab="listed" onclick="switchTopTab('listed')">在售</button>
-            <button type="button" class="admin-tab" data-tab="pending" onclick="switchTopTab('pending')">禁售</button>
+          <div class="flex border-b border-slate-200 px-2 overflow-x-auto">
+            <button type="button" class="admin-tab active" data-tab="maas-listed" onclick="switchTopTab('maas-listed')">maas已上架</button>
+            <button type="button" class="admin-tab" data-tab="maas-unlisted" onclick="switchTopTab('maas-unlisted')">maas未上架</button>
+            <button type="button" class="admin-tab" data-tab="vtpm-listed" onclick="switchTopTab('vtpm-listed')">vTPM已上架</button>
+            <button type="button" class="admin-tab" data-tab="vtpm-unlisted" onclick="switchTopTab('vtpm-unlisted')">vTPM未上架</button>
           </div>
 
-          <!-- 在售 Tab：该组商品下的售卖单元平铺（有生效中已发布售卖计划且单元上架的单元） -->
-          <div id="top-tab-listed" class="p-4">
+          <!-- 第49轮：四 Tab 按商品类型 × 上架状态划分；只看各商品当前生效售卖空间内的售卖单元（在售→已上架；未配置/禁售→未上架） -->
+          <div id="top-tab-maas-listed" class="p-4">
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[1500px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
@@ -214,13 +216,12 @@
                  <th class="text-right px-3 py-2 font-medium">购买量step</th>
                </tr>
              </thead>
-             <tbody id="listed-tbody" class="divide-y divide-slate-100"></tbody>
+             <tbody id="maas-listed-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
             </div>
           </div>
 
-          <!-- 禁售 Tab：全部售卖单元平铺（无生效计划的草稿单元/计划未生效/单元下架） -->
-          <div id="top-tab-pending" class="p-4 hidden">
+          <div id="top-tab-maas-unlisted" class="p-4 hidden">
             <div class="overflow-x-auto">
             <table class="w-full text-sm min-w-[1500px]">
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
@@ -241,7 +242,59 @@
                  <th class="text-right px-3 py-2 font-medium">购买量step</th>
                </tr>
              </thead>
-             <tbody id="pending-tbody" class="divide-y divide-slate-100"></tbody>
+             <tbody id="maas-unlisted-tbody" class="divide-y divide-slate-100"></tbody>
+            </table>
+            </div>
+          </div>
+
+          <div id="top-tab-vtpm-listed" class="p-4 hidden">
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[1500px]">
+              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
+               <tr>
+                 <th class="text-left px-3 py-2 font-medium">售卖单元</th>
+                 <th class="text-left px-3 py-2 font-medium">状态</th>
+                 <th class="text-left px-3 py-2 font-medium">SKU</th>
+                 <th class="text-left px-3 py-2 font-medium">Function</th>
+                 <th class="text-left px-3 py-2 font-medium">维度:度量</th>
+                 <th class="text-left px-3 py-2 font-medium">关联计费项</th>
+                 <th class="text-right px-3 py-2 font-medium">刊例价</th>
+                 <th class="text-right px-3 py-2 font-medium">所选时间执行价</th>
+                 <th class="text-left px-3 py-2 font-medium">折算系数</th>
+                 <th class="text-left px-3 py-2 font-medium">SLO</th>
+                 <th class="text-left px-3 py-2 font-medium">payload</th>
+                 <th class="text-right px-3 py-2 font-medium">最小购买量</th>
+                 <th class="text-right px-3 py-2 font-medium">最大购买量</th>
+                 <th class="text-right px-3 py-2 font-medium">购买量step</th>
+               </tr>
+             </thead>
+             <tbody id="vtpm-listed-tbody" class="divide-y divide-slate-100"></tbody>
+            </table>
+            </div>
+          </div>
+
+          <div id="top-tab-vtpm-unlisted" class="p-4 hidden">
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[1500px]">
+              <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
+               <tr>
+                 <th class="text-left px-3 py-2 font-medium">售卖单元</th>
+                 <th class="text-left px-3 py-2 font-medium">状态</th>
+                 <th class="text-left px-3 py-2 font-medium">SKU</th>
+                 <th class="text-left px-3 py-2 font-medium">Function</th>
+                 <th class="text-left px-3 py-2 font-medium">维度:度量</th>
+                 <th class="text-left px-3 py-2 font-medium">关联计费项</th>
+                 <th class="text-right px-3 py-2 font-medium">刊例价</th>
+                 <th class="text-right px-3 py-2 font-medium">所选时间执行价</th>
+                 <th class="text-left px-3 py-2 font-medium">折算系数</th>
+                 <th class="text-left px-3 py-2 font-medium">SLO</th>
+                 <th class="text-left px-3 py-2 font-medium">payload</th>
+                 <th class="text-right px-3 py-2 font-medium">最小购买量</th>
+                 <th class="text-right px-3 py-2 font-medium">最大购买量</th>
+                 <th class="text-right px-3 py-2 font-medium">购买量step</th>
+               </tr>
+             </thead>
+             <tbody id="vtpm-unlisted-tbody" class="divide-y divide-slate-100"></tbody>
             </table>
             </div>
           </div>
@@ -273,9 +326,9 @@
             <button type="button" class="admin-tab" data-tab="space" onclick="switchInnerTab('space')">售卖空间</button>
             <button type="button" class="admin-tab active" data-tab="saleunit" onclick="switchInnerTab('saleunit')">售卖单元</button>
             <button type="button" class="admin-tab" data-tab="plan" onclick="switchInnerTab('plan')">售卖计划</button>
-            <button type="button" class="admin-tab" data-tab="pricing" onclick="switchInnerTab('pricing')">定价计划</button>
-            <button type="button" class="admin-tab" data-tab="factor-config" onclick="switchInnerTab('factor-config')">vTPM折算系数配置</button>
-            <button type="button" class="admin-tab" data-tab="slo-config" onclick="switchInnerTab('slo-config')">SLO赔付规则配置</button>
+            <button type="button" class="admin-tab" data-tab="pricing" onclick="switchInnerTab('pricing')" id="inner-tab-btn-pricing">定价计划</button>
+            <button type="button" class="admin-tab" data-tab="factor-config" onclick="switchInnerTab('factor-config')" id="inner-tab-btn-factor-config">vTPM折算系数配置</button>
+            <button type="button" class="admin-tab" data-tab="slo-config" onclick="switchInnerTab('slo-config')" id="inner-tab-btn-slo-config">SLO赔付规则配置</button>
           </div>
 
           <!-- 售卖空间 Tab（第39轮：纯列表——无时间点查询；排序=状态→优先级降序→创建时间逆序） -->
@@ -291,10 +344,11 @@
                   <th class="text-left px-3 py-2 font-medium">状态</th>
                   <th class="text-left px-3 py-2 font-medium">空间名称</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
-                  <th class="text-left px-3 py-2 font-medium">空间维度</th>
+                  <th class="text-left px-3 py-2 font-medium">维度组合</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元数</th>
                   <th class="text-right px-3 py-2 font-medium">优先级</th>
-                  <th class="text-left px-3 py-2 font-medium">生效起止</th>
+                  <th class="text-left px-3 py-2 font-medium">生效开始</th>
+                  <th class="text-left px-3 py-2 font-medium">生效结束</th>
                 </tr>
               </thead>
               <tbody id="space-tbody" class="divide-y divide-slate-100"></tbody>
@@ -304,6 +358,8 @@
 
           <!-- 售卖单元 Tab（第37轮：纯只读展示——售卖单元由空间计划创建时叉乘自动生成）+ 配置查询（时间筛选 + 状态） -->
           <div id="inner-tab-saleunit" class="p-4 hidden">
+            <!-- 第49轮：声明查询口径——只查指定时间点生效售卖空间内单元的最终生效状态 -->
+            <p class="text-xs text-slate-500 mb-2"><i class="fa-regular fa-circle-question mr-1"></i>此处仅查询指定时间点生效的售卖空间内的售卖单元的最终生效状态</p>
             <!-- 顶部：时间筛选查状态（第41轮：删查询/重置按钮——选时间即刷新，清空=当前时刻） -->
             <div class="flex flex-wrap items-center justify-end gap-2 mb-3">
               <div class="flex flex-wrap items-center gap-2 text-xs">
@@ -316,8 +372,8 @@
               <thead class="text-xs text-slate-500 bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th class="text-left px-3 py-2 font-medium">售卖空间</th>
-                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
+                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元</th>
                   <th class="text-left px-3 py-2 font-medium">状态</th>
                   <th class="text-left px-3 py-2 font-medium">关联计费项</th>
@@ -367,7 +423,8 @@
                   <th class="text-right px-3 py-2 font-medium">最大购买量</th>
                   <th class="text-right px-3 py-2 font-medium">购买量step</th>
                   <th class="text-left px-3 py-2 font-medium">优先级</th>
-                  <th class="text-left px-3 py-2 font-medium">生效起止</th>
+                  <th class="text-left px-3 py-2 font-medium">生效开始</th>
+                  <th class="text-left px-3 py-2 font-medium">生效结束</th>
                 </tr>
               </thead>
               <tbody id="plan-tbody" class="divide-y divide-slate-100"></tbody>
@@ -423,7 +480,8 @@
                   <th class="text-left px-3 py-2 font-medium">售卖空间</th>
                   <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">类型</th>
-                  <th class="text-left px-3 py-2 font-medium">生效起止</th>
+                  <th class="text-left px-3 py-2 font-medium">生效开始</th>
+                  <th class="text-left px-3 py-2 font-medium">生效结束</th>
                   <th class="text-left px-3 py-2 font-medium">计费项</th>
                   <th class="text-left px-3 py-2 font-medium">配额项</th>
                   <th class="text-left px-3 py-2 font-medium">库存项</th>
@@ -559,8 +617,8 @@
               <div id="plan-quota-perunit" class="hidden"></div>
             </div>
 
-            <!-- 3.3 库存项 -->
-            <div class="border border-slate-200 rounded-md p-3">
+            <!-- 3.3 库存项（第49轮：仅 vTPM 商品显示） -->
+            <div class="border border-slate-200 rounded-md p-3" id="plan-section-inventory">
               <div class="flex flex-wrap items-center gap-3 mb-2">
                 <p class="text-xs font-semibold text-slate-700">3.3 关联库存项</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
@@ -572,8 +630,8 @@
               <div id="plan-inventory-perunit" class="hidden"></div>
             </div>
 
-            <!-- 3.4 折算系数 / SLO -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- 3.4 折算系数 / SLO（第49轮：仅 vTPM 商品显示） -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="plan-section-factor-slo">
               <div class="border border-slate-200 rounded-md p-3">
                 <div class="flex flex-wrap items-center gap-3 mb-2">
                   <p class="text-xs font-semibold text-slate-700">3.4 关联vTPM折算系数配置</p>
@@ -598,8 +656,8 @@
               </div>
             </div>
 
-            <!-- 3.6 payload -->
-            <div class="border border-slate-200 rounded-md p-3">
+            <!-- 3.6 payload（第49轮：仅 vTPM 商品显示） -->
+            <div class="border border-slate-200 rounded-md p-3" id="plan-section-payload">
               <div class="flex flex-wrap items-center gap-3 mb-2">
                 <p class="text-xs font-semibold text-slate-700">3.6 关联payload</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
@@ -611,8 +669,8 @@
               <div id="plan-payload-perunit" class="hidden"></div>
             </div>
 
-            <!-- 3.7 购买量 -->
-            <div class="border border-slate-200 rounded-md p-3">
+            <!-- 3.7 购买量（第49轮：仅 vTPM 商品显示） -->
+            <div class="border border-slate-200 rounded-md p-3" id="plan-section-qty">
               <div class="flex flex-wrap items-center gap-3 mb-2">
                 <p class="text-xs font-semibold text-slate-700">3.7 购买量</p>
                 <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
@@ -880,16 +938,21 @@
       }
     }
 
-    // ===== 顶部 Tab：在售 / 禁售（第33轮：按售卖单元状态两 Tab；默认在售） =====
+    // ===== 顶部 Tab（第49轮：按商品类型 × 上架状态四分）——maas已上架/maas未上架/vTPM已上架/vTPM未上架；默认 maas已上架 =====
+    const TOP_TABS = ['maas-listed', 'maas-unlisted', 'vtpm-listed', 'vtpm-unlisted'];
     function switchTopTab(tab) {
-      document.querySelectorAll('.admin-tab[data-tab="listed"], .admin-tab[data-tab="pending"]').forEach(t => t.classList.remove('active'));
-      document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
-      document.getElementById('top-tab-listed').classList.toggle('hidden', tab !== 'listed');
-      document.getElementById('top-tab-pending').classList.toggle('hidden', tab !== 'pending');
+      document.querySelectorAll('#list-view .admin-tab[data-tab]').forEach(t => t.classList.remove('active'));
+      document.querySelector(`#list-view .admin-tab[data-tab="${tab}"]`).classList.add('active');
+      TOP_TABS.forEach(id => {
+        document.getElementById('top-tab-' + id).classList.toggle('hidden', tab !== id);
+      });
     }
 
     // ===== 详情页内 Tab：售卖单元（含配置查询）/ 售卖计划 / 折算系数 / SLO =====
     function switchInnerTab(tab) {
+      // 第49轮：折算系数/SLO 配置 Tab 仅 vTPM 商品（maas-product-vtpm）提供；online-text 无此配置 → 自动回落到售卖空间 Tab
+      const isVtpm = currentProduct && currentProduct.type === 'maas-product-vtpm';
+      if (!isVtpm && (tab === 'factor-config' || tab === 'slo-config')) tab = 'space';
       document.querySelectorAll('#detail-view .admin-tab[data-tab]').forEach(t => t.classList.remove('active'));
       document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
       ['saleunit', 'plan', 'space', 'pricing', 'factor-config', 'slo-config'].forEach(id => {
@@ -1240,22 +1303,45 @@
          <td class="px-3 py-2 text-right text-xs">${plan ? plan.stepQty : '—'}</td>
        </tr>`;
     }
+    // ===== 列表页（第49轮四 Tab：商品类型 × 上架状态）=====
+    // 只统计各商品「当前时刻生效售卖空间」（published ∧ 档期内，priority→seq 仲裁）内的售卖单元：
+    // 在售 → 已上架；未配置/禁售 → 未上架；商品类型 maas-product-vtpm → vTPM 组，其余（maas-online-text 等）→ maas 组
+    function activeUnitsOfData(d) {
+      const nowStr = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      const actKey = Object.keys(d.spaces || {})
+        .filter(k => { const s = d.spaces[k]; return s && s.status === 'published' && s.effStart <= nowStr && nowStr <= s.effEnd; })
+        .sort((a, b) => ((d.spaces[b].priority || 0) - (d.spaces[a].priority || 0)) || ((d.spaces[b].seq || 0) - (d.spaces[a].seq || 0)))[0] || '';
+      return actKey ? (d.units || []).filter(u => (u.spaceKey || '') === actKey) : [];
+    }
+    // 按类型归属 Tab 组：vTPM 商品 → 'vtpm'；其余（maas-online-text）→ 'maas'
+    function productTabGroup(code) {
+      const p = allProducts.find(x => x.code === code);
+      return (p && p.type === 'maas-product-vtpm') ? 'vtpm' : 'maas';
+    }
+    // 渲染一个 Tab：group=maas|vtpm；listed=true→在售（已上架）；false→未配置/禁售（未上架）
+    function renderTopTab(group, listed, tbodyId, emptyText) {
+      const codes = allProducts.filter(p => productTabGroup(p.code) === group).map(p => p.code).sort();
+      const rows = codes.flatMap(code => {
+        const d = productDataOf(code);
+        const actUnits = activeUnitsOfData(d);
+        if (actUnits.length === 0) return [];
+        // 复用 computeUnitRowsOf 的状态推导，但只保留当前生效空间内的单元
+        return computeUnitRowsOf(code).filter(row => actUnits.some(u => u.id === row.u.id));
+      }).filter(row => listed ? !row.st.offline : (row.st.offline || row.st.unconf));
+      document.getElementById(tbodyId).innerHTML = rows.length === 0
+        ? '<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">' + emptyText + '</td></tr>'
+        : rows.map(renderUnitRow).join('');
+    }
     function renderListed() {
-      // 在售 Tab：只展示「在售」状态的售卖单元（按 SKU + 售卖单元 ID 排序）
-      const codes = allProducts.map(p => p.code).sort();
-      const rows = codes.flatMap(code => computeUnitRowsOf(code)).filter(row => !row.st.offline);
-      document.getElementById('listed-tbody').innerHTML = rows.length === 0
-        ? '<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无在售售卖单元</td></tr>'
-        : rows.map(renderUnitRow).join('');
-   }
+      // 已上架 = 当前生效售卖空间内「在售」状态的售卖单元
+      renderTopTab('maas', true, 'maas-listed-tbody', '暂无已上架售卖单元');
+      renderTopTab('vtpm', true, 'vtpm-listed-tbody', '暂无已上架售卖单元');
+    }
     function renderPending() {
-      // 禁售 Tab（第48轮）：只展示「禁售」状态的售卖单元（空间未生效或最高优先级计划下架）；未配置（灰）与在售单元不在此显示
-      const codes = allProducts.map(p => p.code).sort();
-      const rows = codes.flatMap(code => computeUnitRowsOf(code)).filter(row => row.st.offline && !row.st.unconf);
-      document.getElementById('pending-tbody').innerHTML = rows.length === 0
-        ? '<tr><td colspan="14" class="px-3 py-8 text-center text-xs text-slate-400">暂无禁售售卖单元</td></tr>'
-        : rows.map(renderUnitRow).join('');
-   }
+      // 未上架 = 当前生效售卖空间内「未配置（灰）」或「禁售（红）」状态的售卖单元
+      renderTopTab('maas', false, 'maas-unlisted-tbody', '暂无未上架售卖单元');
+      renderTopTab('vtpm', false, 'vtpm-unlisted-tbody', '暂无未上架售卖单元');
+    }
     // 第19轮：function 有专门展示列——从售卖单元 dim/measure 拆出 function 维度的度量（如 input），无 function 维度时返回 ''
     // 第20轮：function 不是维度——售卖单元的 fn 字段直接存储（''/缺失 → 显示 —）；兼容旧数据：无 fn 字段但 dim 含 function 维度时拆出
     function fnOfUnit(u) {
@@ -1317,15 +1403,15 @@
           return;
         }
       }
-      // 第43轮：组合在 Function 之上——列序 售卖空间/维度:度量组合/Function/售卖单元；排序 spaceKey → dim|measure 组合 → fn → id
+      // 第49轮：Function 在维度组合之上——列序 售卖空间/Function/维度:度量组合/售卖单元；排序 spaceKey → fn → dim|measure 组合 → id
       const comboKey = u => (u.dim || '') + '||' + (u.measure || '');
       const sorted = listUnits.slice().sort((a, b) => {
         const sa = a.spaceKey || '', sb = b.spaceKey || '';
         if (sa !== sb) return sa.localeCompare(sb);
-        const ca = comboKey(a), cb = comboKey(b);
-        if (ca !== cb) return ca.localeCompare(cb);
         const fa = fnOfUnit(a) || '', fb = fnOfUnit(b) || '';
         if (fa !== fb) return fa.localeCompare(fb);
+        const ca = comboKey(a), cb = comboKey(b);
+        if (ca !== cb) return ca.localeCompare(cb);
         return (a.id || '').localeCompare(b.id || '');
       });
       let prevFn = null, prevSpace = null, prevCombo = null, fnSpan = 0, spSpan = 0, cbSpan = 0;
@@ -1333,23 +1419,24 @@
         const fn = fnOfUnit(u) || '';
         const spaceKey = u.spaceKey || '';
         const combo = comboKey(u);
+        // 第49轮层级：空间 > Function > 维度组合
         const showSpace = spaceKey !== prevSpace || prevSpace === null;
-        const showCombo = showSpace || combo !== prevCombo || prevCombo === null;
-        const showFn = showCombo || fn !== prevFn || prevFn === null;
-        if (showSpace) { cbSpan = 0; fnSpan = 0; }
-        if (showCombo) { fnSpan = 0; }
-        // 统计连续相同段长度（向后看）：空间段=同空间全部行；组合段=空间内同组合行；fn 段=组合内同 fn 行
+        const showFn = showSpace || fn !== prevFn || prevFn === null;
+        const showCombo = showFn || combo !== prevCombo || prevCombo === null;
+        if (showSpace) { fnSpan = 0; cbSpan = 0; }
+        if (showFn) { cbSpan = 0; }
+        // 统计连续相同段长度（向后看）：空间段=同空间全部行；fn 段=空间内同 fn 行；组合段=fn 内同组合行
         if (showSpace) {
           let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey) j++;
           spSpan = j - i;
         }
-        if (showCombo) {
-          let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey && comboKey(sorted[j]) === combo) j++;
-          cbSpan = j - i;
-        }
         if (showFn) {
-          let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey && comboKey(sorted[j]) === combo && (fnOfUnit(sorted[j]) || '') === fn) j++;
+          let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey && (fnOfUnit(sorted[j]) || '') === fn) j++;
           fnSpan = j - i;
+        }
+        if (showCombo) {
+          let j = i; while (j < sorted.length && (sorted[j].spaceKey || '') === spaceKey && (fnOfUnit(sorted[j]) || '') === fn && comboKey(sorted[j]) === combo) j++;
+          cbSpan = j - i;
         }
         prevFn = fn; prevSpace = spaceKey; prevCombo = combo;
         const st = unitStatusOf(u.id);
@@ -1364,8 +1451,8 @@
         return `
         <tr class="hover:bg-slate-50">
           ${showSpace ? `<td rowspan="${spSpan}" class="px-3 py-2 align-top border-r border-slate-100"><div class="font-mono text-xs">${spaceKey || '—'}</div>${spSt ? `<span class="badge ${spSt.cls} mt-1 inline-block">${spSt.text}</span>` : ''}</td>` : ''}
-          ${showCombo ? `<td rowspan="${cbSpan}" class="px-3 py-2 text-xs align-top border-r border-slate-100">${formatDimMeasure(u)}</td>` : ''}
           ${showFn ? `<td rowspan="${fnSpan}" class="px-3 py-2 text-xs font-medium align-top border-r border-slate-100">${fn || '—'}</td>` : ''}
+          ${showCombo ? `<td rowspan="${cbSpan}" class="px-3 py-2 text-xs align-top border-r border-slate-100">${formatDimMeasure(u)}</td>` : ''}
           <td class="px-3 py-2 font-mono text-xs">${u.id}</td>
           <td class="px-3 py-2"><span class="badge ${st.cls}">${st.text}</span></td>
           <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code + '<button type="button" onclick="copyChargeCode(\'' + charge.code + '\', this)" class="ml-1 text-slate-400 hover:text-slate-600" title="复制code"><i class="fa-solid fa-copy"></i></button>' : '—'}</td>
@@ -1395,29 +1482,29 @@
       }
       return r[scalar];
     }
-    // 第43轮：售卖计划 Tab 按售卖空间筛选——''（全部）或空间 key；默认=当前生效空间（无则全部）
+    // 第43轮：售卖计划 Tab 按售卖空间筛选；第49轮：不能看全部——必须选定一个售卖空间，默认=当前生效空间（无则首个空间）
     let planSpaceFilter = null; // null=未初始化（进入 Tab 时自动定位当前生效空间）
     function onPlanSpaceFilter(v) {
-      planSpaceFilter = v || '';
+      planSpaceFilter = v || (Object.keys(spaces)[0] || '');
       renderPlan();
     }
     function syncPlanSpaceFilterOptions() {
       const sel = document.getElementById('plan-filter-space');
       if (!sel) return;
-      // 默认值：null=首次进入 → 当前生效空间（effectiveSpaceAtAll 当前时刻）；无生效空间 → ''
+      // 默认值：null=首次进入 → 当前生效空间（effectiveSpaceAtAll 当前时刻）；无生效空间 → 首个空间
       if (planSpaceFilter === null) {
         const at = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        planSpaceFilter = effectiveSpaceAtAll(at) || '';
+        planSpaceFilter = effectiveSpaceAtAll(at) || Object.keys(spaces)[0] || '';
       }
-      const opts = ['<option value="">全部</option>'].concat(
-        Object.keys(spaces).map(k => `<option value="${k}">${k}${spaces[k].name ? '（' + spaces[k].name + '）' : ''}</option>`)
-      ).join('');
+      // 第49轮：无「全部」选项——只能按具体售卖空间筛选
+      if (!planSpaceFilter || !spaces[planSpaceFilter]) planSpaceFilter = Object.keys(spaces)[0] || '';
+      const opts = Object.keys(spaces).map(k => `<option value="${k}">${k}${spaces[k].name ? '（' + spaces[k].name + '）' : ''}</option>`).join('');
       sel.innerHTML = opts;
       sel.value = planSpaceFilter;
     }
     function renderPlan() {
       syncPlanSpaceFilterOptions();
-      // 第43轮：按售卖空间筛选计划单元（默认只展示当前生效空间的计划单元；''=全部）
+      // 第43轮/第49轮：按售卖空间筛选计划单元（必选具体空间，默认当前生效空间；无空间可选时列表为空）
       const fk = planSpaceFilter || '';
       // 先构建全部计划单元行
       const rows = [];
@@ -1433,7 +1520,7 @@
       });
       const tbody = document.getElementById('plan-tbody');
       if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="19" class="px-3 py-8 text-center text-xs text-slate-400">暂无计划单元，请先创建售卖计划</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="19" class="px-3 py-8 text-center text-xs text-slate-400">该售卖空间暂无计划单元，请先创建售卖计划</td></tr>`;
         return;
       }
       tbody.innerHTML = rows.map(row => {
@@ -1445,7 +1532,6 @@
         const typeBadge = unitState === 'off'
           ? '<span class="badge bg-slate-100 text-slate-500">下架</span>'
           : '<span class="badge bg-green-100 text-green-700">上架</span>';
-        const effSpan = `${r.effStart} ~ ${r.effEnd}`;
         return `
           <tr class="hover:bg-slate-50">
             <td class="px-3 py-2 font-mono text-xs">${puId}</td>
@@ -1466,7 +1552,8 @@
             <td class="px-3 py-2 text-right text-xs">${planFieldVal(r, uid, 'maxQty')}</td>
             <td class="px-3 py-2 text-right text-xs">${planFieldVal(r, uid, 'stepQty')}</td>
             <td class="px-3 py-2 text-xs">${r.priority}</td>
-            <td class="px-3 py-2 text-xs whitespace-nowrap">${effSpan}</td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap font-mono">${r.effStart}</td>
+            <td class="px-3 py-2 text-xs whitespace-nowrap font-mono">${r.effEnd}</td>
           </tr>`;
       }).join('');
     }
@@ -1733,6 +1820,10 @@
       document.getElementById('detail-title-code').textContent = `（${currentProduct.code}）`;
       closeDetailNameEdit(); // 第38轮：重置名称就地编辑状态
       planSpaceFilter = null; // 第43轮：进入商品详情重置计划空间筛选（重新定位当前生效空间）
+      // 第49轮：折算系数/SLO 配置 Tab 仅 vTPM 商品显示
+      const isVtpmType = currentProduct.type === 'maas-product-vtpm';
+      document.getElementById('inner-tab-btn-factor-config').classList.toggle('hidden', !isVtpmType);
+      document.getElementById('inner-tab-btn-slo-config').classList.toggle('hidden', !isVtpmType);
       // 第10轮编辑锁：进入详情页初始化编辑状态——锁记录若属当前用户则恢复编辑态，否则浏览态（他人持锁显示提示）
       const lock0 = editLocks[currentProduct.code] || null;
       editMode = (lock0 && lock0.passport === currentUser.passport) ? 'owner' : false;
@@ -1856,7 +1947,7 @@
         });
       });
       if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖空间</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="px-3 py-8 text-center text-xs text-slate-400">暂无售卖空间</td></tr>`;
         return;
       }
       // 空间间排序：状态（已发布→待发布→已停用）→ 优先级降序 → 创建时间逆序（seq 降序，后创建在前）
@@ -1893,14 +1984,23 @@
           <td rowspan="${spanCnt}" class="px-3 py-2"><button type="button" onclick="openSpacePlanDetail('${k}')" class="font-mono text-xs text-violet-600 hover:underline font-medium">${k}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
           <td rowspan="${spanCnt}" class="px-3 py-2"><span class="badge ${meta.cls}">${meta.text}</span></td>
           <td rowspan="${spanCnt}" class="px-3 py-2 text-xs">${sp.name || '—'}</td>` : '';
+        // 第49轮：维度组合=该 fn 各勾选维度下的度量集合（体现 per-fn 配置；0 维 fn 显示 --）
+        const meas = ((sp.fnMeasures || {})[f] || {});
+        const comboHtml = dims.length
+          ? dims.map(d => {
+              // 该 fn 在该维度下勾选的度量（纯叉乘口径：组合=各维度勾选度量笛卡尔积）
+              const ms = (meas[d] || []);
+              return `<div class="text-xs"><span class="text-slate-500">${d}:</span><span class="text-slate-800 font-medium ml-1">${ms.length ? ms.join('、') : '—'}</span></div>`;
+            }).join('')
+          : '--';
         return `
         <tr class="hover:bg-slate-50">
           ${spaceCells}
           <td class="px-3 py-2 text-xs font-medium">${f || '—'}</td>
-          <td class="px-3 py-2 text-xs">${dims.length ? dims.join(' + ') : '--'}</td>
+          <td class="px-3 py-2">${comboHtml}</td>
           <td class="px-3 py-2 text-xs text-right">${unitCnt}</td>
           ${spCell}
-          ${showSpace ? `<td rowspan="${spanCnt}" class="px-3 py-2"><span class="font-mono text-xs whitespace-nowrap">${sp.effStart} ~ ${sp.effEnd}</span><div class="text-[10px] mt-0.5">${isEff ? '<span class="text-green-600">生效期内</span>' : '<span class="text-slate-400">生效期外</span>'}</div></td>` : ''}
+          ${showSpace ? `<td rowspan="${spanCnt}" class="px-3 py-2"><span class="font-mono text-xs whitespace-nowrap">${sp.effStart}</span><div class="text-[10px] mt-0.5">${isEff ? '<span class="text-green-600">生效期内</span>' : '<span class="text-slate-400">生效期外</span>'}</div></td><td rowspan="${spanCnt}" class="px-3 py-2"><span class="font-mono text-xs whitespace-nowrap">${sp.effEnd}</span></td>` : ''}
         </tr>`;
       }).join('');
     }
@@ -2177,13 +2277,14 @@
       } else {
         actionsEl.innerHTML = `<div class="flex flex-wrap items-center justify-end gap-2">${copyBtn}</div>`;
       }
-      // 字段区：名称 + 优先级 + 生效起止
+      // 字段区：名称 + 优先级 + 生效开始/结束（第49轮拆两列）
       const field = (label, val) => `<div class="bg-slate-50 rounded-md px-2.5 py-1.5"><p class="text-slate-500">${label}</p><p class="text-slate-800 font-medium">${val ?? '—'}</p></div>`;
       document.getElementById('spaceplan-detail-fields').innerHTML = [
         field('空间code', k),
         field('名称', sp.name),
         field('优先级', sp.priority),
-        field('生效起止', sp.effStart + ' ~ ' + sp.effEnd)
+        field('生效开始', sp.effStart),
+        field('生效结束', sp.effEnd)
       ].join('');
       // 售卖单元列表（第40轮：该空间的售卖单元清单——每单元一行：售卖单元/Function/维度:度量）
       const tbody = document.getElementById('spaceplan-detail-tbody');
@@ -2275,7 +2376,7 @@
       const tbody = document.getElementById('plan-detail-tbody');
       const units = r.units || [];
       if (units.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="17" class="px-3 py-6 text-center text-xs text-slate-400">无计划单元</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="18" class="px-3 py-6 text-center text-xs text-slate-400">无计划单元</td></tr>`;
       } else {
         // 是否生效：由生效起止时间决定（与状态不耦合）
         const nowStr = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -2283,7 +2384,8 @@
         const effBadge = isEff
           ? '<span class="badge bg-green-100 text-green-700">生效中</span>'
           : '<span class="badge bg-slate-100 text-slate-500">未生效</span>';
-        const effSpan = `<div class="flex flex-col gap-0.5"><span class="text-xs font-mono">${r.effStart} ~ ${r.effEnd}</span>${effBadge}</div>`;
+        const effStartCell = `<div class="flex flex-col gap-0.5"><span class="text-xs font-mono whitespace-nowrap">${r.effStart}</span>${isEff ? '<span class="text-[10px] text-green-600">生效中</span>' : ''}</div>`;
+        const effEndCell = `<span class="text-xs font-mono whitespace-nowrap">${r.effEnd}</span>`;
         tbody.innerHTML = units.map(uid => {
           const u = saleUnits.find(x => x.id === uid) || {};
           const charge = chargeItems.find(c => c.code === (r.chargeCodes && r.chargeCodes[uid]));
@@ -2299,7 +2401,8 @@
             <td class="px-3 py-2 text-xs">${spaceNameOf(u)}</td>
             <td class="px-3 py-2">${formatDimMeasure(u)}</td>
             <td class="px-3 py-2">${stateBadge}</td>
-            <td class="px-3 py-2">${effSpan}</td>
+            <td class="px-3 py-2">${effStartCell}</td>
+            <td class="px-3 py-2">${effEndCell}</td>
             <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code : '—'}</td>
             <td class="px-3 py-2 font-mono text-xs">${quota ? (quota.id + '（数量 ' + quota.qty + '）') : '—'}</td>
             <td class="px-3 py-2 font-mono text-xs">${inv ? (inv.id + '（数量 ' + inv.qty + '）') : '—'}</td>
@@ -2340,6 +2443,21 @@
         .map(c => c.value);
     }
     // 页面打开入口（创建模式）
+    // 第49轮：online-text 商品售卖计划只配置计费项+配额项——3.3~3.7 区块隐藏，保存时这些字段强制 unified
+    const PLAN_VTPM_ONLY_SECTIONS = ['plan-section-inventory', 'plan-section-factor-slo', 'plan-section-payload', 'plan-section-qty'];
+    function isVtpmProduct() { return !!(currentProduct && currentProduct.type === 'maas-product-vtpm'); }
+    function syncPlanCreateSectionsByType() {
+      const isVtpm = isVtpmProduct();
+      PLAN_VTPM_ONLY_SECTIONS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('hidden', !isVtpm);
+      });
+      // online-text：隐藏的开关复位为 unified
+      if (!isVtpm) ['inventory', 'factor', 'slo', 'payload', 'qty'].forEach(k => {
+        const m = document.getElementById('plan-mode-' + k);
+        if (m) m.checked = false;
+      });
+    }
     function openPlanCreatePage() {
       editingPlanIdx = -1;
       document.getElementById('plan-create-page-title').textContent = '创建售卖计划';
@@ -2347,6 +2465,7 @@
       document.getElementById('plan-priority').value = '';
       document.getElementById('plan-eff-start').value = '2026-11-01T00:00:00';
       document.getElementById('plan-eff-end').value = '2027-11-01T00:00:00';
+      syncPlanCreateSectionsByType();
       // 第45轮：空间下拉只列已发布空间（售卖计划只能挂在已发布的售卖空间上）
       const sel = document.getElementById('plan-space-sel');
       const keys = Object.keys(spaces).filter(k => spaces[k].status === 'published');
@@ -2496,31 +2615,35 @@
     }
     // 从 DOM 收集当前各字段组的值到 planDraft
     function collectDraftFromDOM() {
+      // 第49轮：online-text 商品 inventory/factor/slo/payload/qty 区块已隐藏——其 DOM 残留 mock 值不可信，跳过收集
+      const collectKeys = ['charge', 'quota'].concat(isVtpmProduct() ? ['inventory'] : []);
       const grab = (key, sel, uid) => {
         const d = planDraft[key];
         if (uid) { if (sel) d.units[uid] = sel.value; }
         else { if (sel) d.unified = sel.value; }
       };
-      ['charge', 'quota', 'inventory'].forEach(key => {
+      collectKeys.forEach(key => {
         const cls = '.plan-' + key + '-select';
         const usel = document.querySelector('#plan-' + key + '-unified select' + cls);
         grab(key, usel, null);
         document.querySelectorAll('#plan-' + key + '-perunit select' + cls).forEach(s => grab(key, s, s.dataset.unit));
       });
-      ['factor', 'slo'].forEach(key => {
-        const usel = document.querySelector('#plan-' + key + '-unified select');
-        grab(key, usel, null);
-        document.querySelectorAll('#plan-' + key + '-perunit select').forEach(s => grab(key, s, s.dataset.unit));
-      });
-      const pu = document.querySelector('#plan-payload-unified select');
-      grab('payload', pu, null);
-      document.querySelectorAll('#plan-payload-perunit select').forEach(s => grab('payload', s, s.dataset.unit));
+      if (isVtpmProduct()) {
+        ['factor', 'slo'].forEach(key => {
+          const usel = document.querySelector('#plan-' + key + '-unified select');
+          grab(key, usel, null);
+          document.querySelectorAll('#plan-' + key + '-perunit select').forEach(s => grab(key, s, s.dataset.unit));
+        });
+        const pu = document.querySelector('#plan-payload-unified select');
+        grab('payload', pu, null);
+        document.querySelectorAll('#plan-payload-perunit select').forEach(s => grab('payload', s, s.dataset.unit));
+      }
       // qty unified
       const qmin = document.querySelector('#plan-qty-unified input[data-q="min"]');
       const qmax = document.querySelector('#plan-qty-unified input[data-q="max"]');
       const qstep = document.querySelector('#plan-qty-unified input[data-q="step"]');
-      if (qmin) planDraft.qty.unified = { min: qmin.value, max: qmax.value, step: qstep.value };
-      document.querySelectorAll('#plan-qty-perunit input[data-unit]').forEach(inp => {
+      if (isVtpmProduct() && qmin) planDraft.qty.unified = { min: qmin.value, max: qmax.value, step: qstep.value };
+      if (isVtpmProduct()) document.querySelectorAll('#plan-qty-perunit input[data-unit]').forEach(inp => {
         const uid = inp.dataset.unit; const q = inp.dataset.q;
         if (!planDraft.qty.units[uid]) planDraft.qty.units[uid] = { min: '', max: '', step: '' };
         planDraft.qty.units[uid][q] = inp.value;
@@ -2676,9 +2799,12 @@
       // unitStates：勾选且上架=on；勾选但下架=off
       const unitStates = {};
       document.querySelectorAll('.plan-unit-check').forEach(c => { if (c.checked) unitStates[c.value] = (c.dataset.state === 'off' ? 'off' : 'on'); });
-      // modes
+      // modes（第49轮：online-text 商品 inventory/factor/slo/payload/qty 无配置界面 → 一律 unified）
       const modes = {};
-      ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty'].forEach(k => { modes[k] = document.getElementById('plan-mode-' + k).checked ? 'perUnit' : 'unified'; });
+      const vtpmOnlyKeys = isVtpmProduct() ? [] : ['inventory', 'factor', 'slo', 'payload', 'qty'];
+      ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty'].forEach(k => {
+        modes[k] = (!vtpmOnlyKeys.includes(k) && document.getElementById('plan-mode-' + k).checked) ? 'perUnit' : 'unified';
+      });
       // 收集函数：unified→标量，perUnit→map（只为已上架售卖单元）
       const mapOr = (key, uid, unifiedVal) => modes[key] === 'perUnit' ? (planDraft[key].units[uid] !== undefined ? planDraft[key].units[uid] : unifiedVal) : unifiedVal;
       const chargeCodes = {}, quotaCodes = {}, inventoryCodes = {};
@@ -2690,9 +2816,10 @@
         const qid = modes.quota === 'perUnit' ? planDraft.quota.units[uid] : planDraft.quota.unified;
         if (!qid) { alert('请为本计划上架的售卖单元 ' + uid + ' 关联一个配额项'); return; }
         quotaCodes[uid] = qid;
-        const iid = modes.inventory === 'perUnit' ? planDraft.inventory.units[uid] : planDraft.inventory.unified;
-        if (!iid) { alert('请为本计划上架的售卖单元 ' + uid + ' 关联一个库存项'); return; }
-        inventoryCodes[uid] = iid;
+        // 第49轮：online-text 商品无库存项配置——完全不收集（隐藏区块的 mock 残留值不可信）；vTPM 商品 unified/perUnit 正常收集必填
+        const iid = isVtpmProduct() ? (modes.inventory === 'perUnit' ? planDraft.inventory.units[uid] : planDraft.inventory.unified) : '';
+        if (!iid && isVtpmProduct()) { alert('请为本计划上架的售卖单元 ' + uid + ' 关联一个库存项'); return; }
+        if (iid) inventoryCodes[uid] = iid;
       }
       // factor / slo / payload
       const pickCfg = (key, uid) => {
@@ -2748,6 +2875,7 @@
       editingPlanIdx = idx;
       const r = planRows[idx];
       closePlanDetail();
+      syncPlanCreateSectionsByType();
       document.getElementById('plan-create-page-title').textContent = '修改售卖计划：' + (r.name || '—');
       document.getElementById('plan-name').value = r.name || '';
       document.getElementById('plan-priority').value = r.priority;

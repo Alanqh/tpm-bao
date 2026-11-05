@@ -137,10 +137,10 @@ ok(np.chargeCodes['su-1'] === 'maas-product-vtpm-std.30d', 'chargeCodes 从 unif
 ok(np.inventoryCodes['su-1'] === 'inv-vtpm-custom', 'inventoryCodes 保存自定义库存项');
 ok(document.getElementById('plan-create-view').classList.contains('hidden'), '保存后页面关闭返回列表');
 
-// ================= 售卖计划 Tab 19 列 + 详情 =================
-section('售卖计划 Tab（19 列，含类型列+Function 列+售卖空间列）+ 详情页');
+// ================= 售卖计划 Tab 20 列 + 详情 =================
+section('售卖计划 Tab（20 列，第49轮生效起止拆两列）+ 详情页');
 const headCells = Array.from(document.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(headCells.length === 19, '表头 19 列（第20轮加售卖空间列）: ' + headCells.length);
+ok(headCells.length === 20, '表头 20 列（第49轮生效起止拆两列）: ' + headCells.length);
 ok(headCells[2] === '类型', '第 3 列 = 类型');
 ok(headCells.includes('Function'), '表头含 Function 列（第19轮：function 专门展示列）');
 ok(headCells.includes('售卖空间'), '表头含售卖空间列（第20轮）');
@@ -151,7 +151,7 @@ const pd = document.getElementById('plan-detail-view').textContent;
 // 详情页（第9轮）：基础信息仅名称+优先级；其余信息并入计划单元表（含生效起止）
 const pdFields = document.getElementById('plan-detail-fields').textContent;
 ok(pdFields.includes('名称') && pdFields.includes('优先级') && !pdFields.includes('生效售卖单元'), '详情页基础信息仅名称+优先级');
-ok(pd.includes('生效起止'), '详情页计划单元表含「生效起止」列');
+ok(pd.includes('生效开始') && pd.includes('生效结束'), '详情页计划单元表含「生效开始/生效结束」列（第49轮拆两列）');
 ok(pd.includes('见计划单元') === false || true, 'unified 模式下详情页显示标量值');
 ok(document.getElementById('plan-detail-tbody').textContent.includes('inv-vtpm-custom'), '详情页计划单元表展示自定义库存项');
 

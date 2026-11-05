@@ -29,7 +29,7 @@ ok(txt.includes('GLM4·常规售卖空间'), '常规空间条目');
 ok(txt.includes('已发布'), '状态徽标');
 ok(txt.includes('input'), 'Function 列=input');
 const firstHead = rows[0];
-ok(firstHead.cells.length === 8, '空间行 8 列（售卖空间/状态/空间名称/Function/维度/单元数/优先级/起止）');
+ok(firstHead.cells.length === 9, '空间行 9 列（第49轮生效起止拆两列：售卖空间/状态/空间名称/Function/维度组合/单元数/优先级/生效开始/生效结束）');
 ok(firstHead.cells[3].textContent.trim() === 'input', 'Function 列=input（第4列）');
 
 // ===== 3. 排序与 rowspan（第40轮：状态→优先级降序→创建时间逆序；空间内 fn 行按创建序）=====

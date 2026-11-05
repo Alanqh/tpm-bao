@@ -44,7 +44,7 @@ section('2. 空间列表');
 const spRows = Array.from(document.querySelectorAll('#space-tbody tr'));
 ok(spRows.length === 3, '空间列表 3 行（sp1 三 fn 行，第48轮单空间），实得 ' + spRows.length);
 const spHead = Array.from(document.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(spHead.length === 8 && spHead[0] === '售卖空间' && spHead[1] === '状态' && spHead[2] === '空间名称' && spHead[3] === 'Function' && spHead[4] === '空间维度', '空间列表 8 列（售卖空间/状态/空间名称/Function/空间维度/售卖单元数/优先级/生效起止）');
+ok(spHead.length === 9 && spHead[0] === '售卖空间' && spHead[1] === '状态' && spHead[2] === '空间名称' && spHead[3] === 'Function' && spHead[4] === '维度组合' && spHead[7] === '生效开始' && spHead[8] === '生效结束', '空间列表 9 列（第49轮拆生效两列：售卖空间/状态/空间名称/Function/维度组合/售卖单元数/优先级/生效开始/生效结束）');
 ok(!spHead.includes('空间单元'), '第40轮已删「空间单元」列');
 ok(!spRows[0].textContent.includes('pu-sp-'), '无空间单元编号（pu-sp 已删）');
 // 第34轮：每行完整渲染；第48轮单空间三 fn 行 input/output/cache
@@ -67,15 +67,15 @@ const suRows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 // 第42轮：默认=当前时刻（11-04），单空间口径 → 只显 sp1 的 4 单元（第48轮：input 2+output 1+cache 1）
 ok(suRows.length === 4, 'glm4 售卖单元默认 4 行（唯一生效空间 sp1，第48轮），实得 ' + suRows.length);
 const suHead = Array.from(document.querySelector('#saleunit-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(suHead.length === 14 && suHead[0] === '售卖空间' && suHead[1] === '维度:度量' && suHead[2] === 'Function' && suHead[3] === '售卖单元', '售卖单元表头 14 列，前四列=售卖空间/维度:度量/Function/售卖单元（第43轮组合居次）');
+ok(suHead.length === 14 && suHead[0] === '售卖空间' && suHead[1] === 'Function' && suHead[2] === '维度:度量' && suHead[3] === '售卖单元', '售卖单元表头 14 列，前四列=售卖空间/Function/维度:度量/售卖单元（第49轮 fn 上调）');
 const r0 = suRows[0].cells;
-ok(r0[0].textContent.includes('sp1') && r0[0].rowSpan === 4 && r0[1].textContent.trim() === '--' && r0[2].textContent.trim() === 'cache' && r0[3].textContent.trim() === 'su-4', 'sp1 空间列 rowspan=4（第48轮 4 单元合并；首行=0维组合/--/cache/su-4）');
+ok(r0[0].textContent.includes('sp1') && r0[0].rowSpan === 4 && r0[1].textContent.trim() === 'cache' && r0[2].textContent.trim() === '--' && r0[3].textContent.trim() === 'su-4', 'sp1 空间列 rowspan=4（第48轮 4 单元合并；首行=cache/0维组合--/su-4，第49轮 fn 居次）');
 ok(!suRows.some(r => r.textContent.includes('sp2')), '默认视图不含 sp2（第48轮已删）');
 // 时间旅行 11-15：单空间口径 → 仍显 sp1 四单元
 window.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSaleUnits();');
 const suRowsMid = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(suRowsMid.length === 4 && suRowsMid[0].cells[0].textContent.includes('sp1') && suRowsMid[0].cells[0].rowSpan === 4, '11-15 仍显 sp1 四单元（第48轮单空间）');
-ok(suRowsMid[2].cells[0].textContent.includes('1M+') && suRowsMid[2].cells[0].rowSpan === 2 && suRowsMid[3].cells[0].textContent.trim() === 'output', '输入区间:1M+ 组合 rowspan=2 跨 input/output（行3 首列=fn）');
+ok(suRowsMid[2].cells[0].textContent.includes('1M+') && suRowsMid[3].cells[0].textContent.trim() === 'output', '输入区间:1M+ 组合列在各自 fn 行内独立（第49轮：跨 fn 不合并，行3 首列=output fn）');
 window.eval('timeFilter = null; renderSaleUnits();');
 
 // ===== 5. SU 创建链路已删（第37轮） =====

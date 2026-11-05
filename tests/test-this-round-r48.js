@@ -128,13 +128,15 @@ function boot() {
     const su1 = rows.find(r => r.u && r.u.id === 'su-1');
     check('④ std su-1 在售（非 offline 非 unconf）', su1 && !su1.st.offline && !su1.st.unconf);
   }
-  // 验证 renderPending 过滤实现：取 pending-tbody 渲染（列表页全商品汇总）
+  // 验证列表未上架 Tab 渲染（第49轮四 Tab：未上架=未配置+禁售，只看当前生效空间）
   {
-    // 列表禁售 Tab 渲染：std su-3 应出现（真禁售），pre 任意单元不应出现（未配置）
+    // vTPM未上架 Tab：std su-3（真禁售）与 pre 3 单元（未配置）都应出现
     window.eval(`renderPending()`);
-    const pendingText = doc.getElementById('pending-tbody').textContent;
-    check('④ 禁售 Tab 含 std su-3（真禁售）', pendingText.includes('su-3'));
-    check('④ 禁售 Tab 不含 pro su-2/su-4（未配置）', !(pendingText.includes('su-2') && pendingText.includes('maas-product-vtpm-pro')));
+    const unlistedText = doc.getElementById('vtpm-unlisted-tbody').textContent;
+    const listedText = doc.getElementById('vtpm-listed-tbody').textContent;
+    check('④ 未上架 Tab 含 std su-3（真禁售）', unlistedText.includes('su-3'));
+    check('④ 未上架 Tab 含 pre（未配置）', unlistedText.includes('maas-product-vtpm-pre'));
+    check('④ 已上架 Tab 不含 pre/std su-3', !listedText.includes('maas-product-vtpm-pre') && !listedText.includes('maas-product-vtpm-std.90d'));
   }
 }
 

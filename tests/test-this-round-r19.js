@@ -39,19 +39,20 @@ ok(fmtTxt.includes('输入token区间:0～128K') && fmtTxt.includes('输出token
 const fmtHtml = evalInPage('formatDimMeasure(saleUnits[0])');
 ok(!String(fmtHtml).includes('function'), 'formatDimMeasure 不含 function');
 
-// ===== 2. 售卖单元 Tab（第43轮：列序=售卖空间/维度:度量组合/Function/售卖单元；组合在 fn 之上）=====
+// ===== 2. 售卖单元 Tab（第49轮：列序=售卖空间/Function/维度:度量组合/售卖单元；fn 在组合之上）=====
 section('2. 售卖单元 Tab');
 let rows = Array.from(document.querySelectorAll('#saleunit-tbody tr'));
 ok(rows.length === 2, '售卖单元 2 行');
 const suRow = rows[0];
 ok(suRow.cells[0].textContent.trim().startsWith('sp-x') && suRow.cells[0].textContent.includes('已发布'), '第一列 售卖空间=sp-x+三态徽标（第39轮空间列居首）: ' + suRow.cells[0].textContent.trim());
 ok(suRow.cells[0].rowSpan === 2, 'sp-x 空间列 rowspan=2（最外层合并）');
-ok(suRow.cells[1].textContent.includes('输入token区间') && suRow.cells[1].textContent.includes('输出token区间') && suRow.cells[1].rowSpan === 2, '第二列 维度:度量组合（同组合跨 fn 合并 rowspan=2）');
-ok(suRow.cells[2].textContent.trim() === 'input', '第三列 Function=input');
+ok(suRow.cells[1].textContent.trim() === 'input', '第二列 Function=input（第49轮 fn 列上调）');
+ok(suRow.cells[2].textContent.includes('输入token区间') && suRow.cells[2].textContent.includes('输出token区间'), '第三列 维度:度量组合');
 ok(suRow.cells[3].textContent.trim() === 'su-1', '第四列 售卖单元=su-1');
-// su-2 fn 变化但空间/组合相同 → 空间+组合被合并，fn td 新起
-ok(rows[1].cells[0].textContent.trim() === 'output', 'su-2 行 fn td=output（空间/组合列被合并）');
-ok(rows[1].cells[1].textContent.trim() === 'su-2', 'su-2 行第二 td=su-2');
+// su-2 fn 变化 → 空间被合并，fn td 与组合 td 均新起（第49轮组合合并含 fn 条件）
+ok(rows[1].cells[0].textContent.trim() === 'output', 'su-2 行第一 td=output（fn 新起；空间列被合并）');
+ok(rows[1].cells[1].textContent.includes('输入token区间'), 'su-2 行第二 td=维度:度量组合（fn 不同不合并）');
+ok(rows[1].cells[2].textContent.trim() === 'su-2', 'su-2 行第三 td=su-2');
 ok(!suRow.textContent.includes('function'), '维度:度量列不含 function');
 
 // ===== 3. 售卖计划 Tab（第20轮 19 列：售卖单元→Function→售卖空间→维度:度量） =====
@@ -60,7 +61,7 @@ window.eval('switchInnerTab("plan"); renderPlan();');
 const planHead = Array.from(document.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
 ok(planHead[4] === '售卖单元' && planHead[5] === 'Function' && planHead[6] === '售卖空间' && planHead[7] === '维度:度量', '售卖单元后为 Function→售卖空间→维度:度量');
 const planRowEl = document.querySelector('#plan-tbody tr');
-ok(planRowEl.cells.length === 19, '计划单元行 19 列（第20轮加售卖空间列）');
+ok(planRowEl.cells.length === 20, '计划单元行 20 列（第49轮生效起止拆两列）');
 ok(planRowEl.cells[4].textContent.trim() === 'su-1' && planRowEl.cells[5].textContent.trim() === 'input', '计划 Tab Function 列=input（第 6 列）');
 ok(planRowEl.cells[6].textContent.trim() === 'sp-x', '计划 Tab 售卖空间列（第 7 列；第35轮=code）');
 
@@ -70,7 +71,7 @@ window.eval('openPlanDetail(0)');
 const pdHead = Array.from(document.querySelector('#plan-detail-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
 ok(pdHead[1] === '售卖单元' && pdHead[2] === 'Function' && pdHead[3] === '售卖空间' && pdHead[4] === '维度:度量', '详情表：售卖单元→Function→售卖空间→维度:度量');
 const pdRow = document.querySelector('#plan-detail-tbody tr');
-ok(pdRow.cells.length === 17, '详情行 17 列（第20轮加售卖空间列）');
+ok(pdRow.cells.length === 18, '详情行 18 列（第49轮生效起止拆两列）');
 ok(pdRow.cells[2].textContent.trim() === 'input', '详情 Function 列=input');
 ok(pdRow.cells[3].textContent.trim() === 'sp-x', '详情 售卖空间列=sp-x（第35轮=code）');
 
@@ -103,7 +104,7 @@ ok(rows[0].cells[0].textContent.trim().startsWith('sp1'), 'vtpm 第一列 售卖
 ok(rows[0].cells[3].textContent.trim() === 'su-1' && rows[0].cells[1].textContent.trim() !== '--', 'vtpm 首行=su-1（第48轮：无空组合，首行即勾选组合）');
 const su1Row = rows.find(r => Array.from(r.cells).some(c => c.textContent.trim() === 'su-1'));
 ok(su1Row && su1Row.textContent.includes('购买量区间') && su1Row.textContent.includes('购买周期'), 'vtpm 维度:度量组合正常展示（第43轮组合列居次）');
-ok(rows[0].cells[2].textContent.trim() === '—', 'vtpm 第三列 Function=—（无 function）');
+ok(rows[0].cells[1].textContent.trim() === '—' && rows[0].cells[2].textContent.trim() !== '--', 'vtpm 第二列 Function=—（无 function，第49轮 fn 列居次）');
 // vtpm 无 function（第37轮：SU 弹窗已删——售卖单元由空间计划叉乘生成）
 ok(!document.getElementById('modal-su-confirm'), 'SU 弹窗已删除（第37轮）');
 ok(typeof window.openSuConfirmModal === 'undefined', 'openSuConfirmModal 函数已删');

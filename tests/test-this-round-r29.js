@@ -49,7 +49,7 @@ let act = d.getElementById('spaceplan-detail-actions');
 ok(act.textContent.includes('停用') && act.textContent.includes('复制'), '已发布操作=停用+复制');
 ok(!act.innerHTML.includes('editSpacePlan'), '第38轮：无修改操作（空间完全不可改，变更=复制新建）');
 const fields = d.getElementById('spaceplan-detail-fields').textContent;
-ok(fields.includes('sp1') && fields.includes('GLM4·常规售卖空间') && fields.includes('100') && fields.includes('2026-11-01 00:00:00 ~ 2027-11-01 00:00:00'), '字段区：code/名称/优先级/生效起止');
+ok(fields.includes('sp1') && fields.includes('GLM4·常规售卖空间') && fields.includes('100') && fields.includes('生效开始') && fields.includes('生效结束') && fields.includes('2026-11-01 00:00:00') && fields.includes('2027-11-01 00:00:00'), '字段区：code/名称/优先级/生效开始+生效结束（第49轮拆两列）');
 const dtRows = d.querySelectorAll('#spaceplan-detail-tbody tr');
 ok(dtRows.length === 4 && dtRows[0].textContent.includes('su-4') && dtRows[0].textContent.trim().endsWith('--') && dtRows[3].textContent.includes('su-3') && !dtRows[0].textContent.includes('pu-sp-'), '详情售卖单元清单（第48轮：4 单元=cache 0维 su-4 居首 + input×2 + output；组合序空串最前，无 pu-sp 编号）');
 

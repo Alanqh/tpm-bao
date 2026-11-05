@@ -70,7 +70,7 @@ let tabTxt = w.document.getElementById('space-tbody').textContent;
 ok(tabTxt.includes('sp1') && !tabTxt.includes('sp2'), '列表展示 sp1（第48轮无 sp2）');
 ok(tabTxt.includes('GLM4·常规售卖空间'), '列表展示空间名称');
 const ths = w.document.querySelectorAll('#inner-tab-space thead th');
-ok(ths.length === 8, '售卖空间表头 8 列（第40轮删空间单元列），实得 ' + ths.length);
+ok(ths.length === 9, '售卖空间表头 9 列（第49轮生效起止拆生效开始/结束两列），实得 ' + ths.length);
 // 时间旅行 11-15：档期徽标（sp1 生效期内）
 T.timeFilter = { point: '2026-11-15 12:00:00' };
 T.renderSpaceTab();
