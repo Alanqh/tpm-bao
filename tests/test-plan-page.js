@@ -20,12 +20,13 @@ section('页面结构');
 ok(!!document.getElementById('plan-create-view'), '存在独立页面 #plan-create-view');
 ok(!document.getElementById('modal-plan-create'), '原弹窗 #modal-plan-create 已删除');
 const pcView = document.getElementById('plan-create-view');
-ok(pcView.textContent.includes('基础信息') && pcView.textContent.includes('开始生效时间'), '区块1：基础信息（第36轮去括注）');
-ok(pcView.textContent.includes('本售卖计划对哪些售卖单元生效'), '区块2：生效售卖单元');
-ok(pcView.textContent.includes('3. 计划字段配置'), '区块3：计划字段配置');
-['3.1 关联计费项', '3.2 关联配额项', '3.3 关联库存项', '3.4 关联vTPM折算系数', '3.5 关联SLO赔付规则', '3.6 关联payload', '3.7 购买量'].forEach(t => {
-  ok(pcView.textContent.includes(t), '区块3：' + t);
+ok(pcView.textContent.includes('基础信息') && pcView.textContent.includes('开始生效时间'), '基础信息区（第36轮去括注；第51轮去区块序号）');
+ok(pcView.textContent.includes('本售卖计划对哪些售卖单元生效'), '生效售卖单元区');
+ok(pcView.textContent.includes('计划字段配置'), '计划字段配置区（第51轮去区块序号）');
+['关联计费项', '关联配额项', '关联库存项', '关联vTPM折算系数配置', '关联SLO赔付规则配置', '关联payload', '购买量'].forEach(t => {
+  ok(pcView.textContent.includes(t), '字段配置区：' + t);
 });
+ok(!/[123]\.\d?\s*(基础信息|关联|购买量|计划字段)/.test(pcView.textContent), '区块序号已删（第51轮）');
 ok(!pcView.textContent.includes('售卖起止时间'), '已去掉售卖起止时间字段组');
 ['charge', 'quota', 'inventory', 'factor', 'slo', 'payload', 'qty'].forEach(k => {
   ok(!!document.getElementById('plan-mode-' + k), '字段开关存在：' + k);
@@ -41,12 +42,12 @@ window.switchInnerTab('plan');
 window.openPlanCreatePage();
 ok(!document.getElementById('plan-create-view').classList.contains('hidden'), '页面显示');
 ok(document.getElementById('detail-view').classList.contains('hidden'), '商品详情页隐藏');
-// 第38轮：先在区块1选择售卖空间，区块2 渲染空间内单元
-ok(document.getElementById('plan-units-charge-container').textContent.includes('请先在区块1选择售卖空间'), '未选空间时区块2 提示先选空间');
+// 第38轮：先选售卖空间，单元区渲染空间内单元（第51轮：提示文案去区块编号）
+ok(document.getElementById('plan-units-charge-container').textContent.includes('请先选择售卖空间'), '未选空间时单元区提示先选空间');
 document.getElementById('plan-space-sel').value = 'sp1';
 window.onPlanSpaceChange();
 const checks = Array.from(document.querySelectorAll('.plan-unit-check'));
-ok(checks.length === 3 && checks.every(c => c.checked), '区块2 默认全选 3 个售卖单元（第48轮纯叉乘）');
+ok(checks.length === 3 && checks.every(c => c.checked), '单元区默认全选 3 个售卖单元（第48轮纯叉乘）');
 ok(checks.every(c => c.dataset.state === 'on'), '默认全部「上架」');
 // 上架/下架按钮存在 + 每行展示 function 与维度组合
 ok(pcView.querySelectorAll('button').length > 0 && pcView.textContent.includes('下架'), '上架/下架切换按钮渲染');

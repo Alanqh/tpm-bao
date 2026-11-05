@@ -21,7 +21,7 @@ w.eval('startEdit()');
 w.eval('openPlanCreatePage()');
 ok(d.querySelectorAll('.plan-filter-fn-check').length === 0, 'fn 复选组已删（第38轮锁空间）');
 ok(d.getElementById('plan-filter-space') && d.getElementById('plan-filter-space').closest('#inner-tab-plan') !== null, '空间筛选下拉在售卖计划 Tab 工具条（第43轮），非创建页');
-ok(d.getElementById('plan-units-charge-container').textContent.includes('请先在区块1选择售卖空间'), '未选空间区块2 提示');
+ok(d.getElementById('plan-units-charge-container').textContent.includes('请先选择售卖空间'), '未选空间单元区提示');
 const sel = d.getElementById('plan-space-sel');
 ok(sel && sel.options.length === 2, '创建页空间下拉 2 项（请选择+sp1，第48轮单空间）: ' + sel.options.length);
 // 2. 选 sp1 → 只展示 sp1 内单元

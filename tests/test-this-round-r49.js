@@ -80,7 +80,7 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   // 售卖计划 Tab 20 列拆分
   window.eval(`switchInnerTab('plan'); renderPlan()`);
   const planHead = Array.from(doc.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-  check('③ 计划 Tab 表头 20 列且末两列=生效开始/生效结束', planHead.length === 20 && planHead[18] === '生效开始' && planHead[19] === '生效结束');
+  check('③ 计划 Tab 表头 20 列且末列=优先级（第51轮：生效起止移至所属售卖计划之后，优先级置末）', planHead.length === 20 && planHead[5] === '生效开始' && planHead[6] === '生效结束' && planHead[19] === '优先级');
   // 计划详情 18 列拆分
   window.eval(`openPlanDetail(0)`);
   const pdHead = Array.from(doc.querySelector('#plan-detail-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());

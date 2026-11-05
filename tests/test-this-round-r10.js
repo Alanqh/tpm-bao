@@ -118,24 +118,27 @@ const editBtn = document.getElementById('detail-name-edit-btn');
 const titleSpan = document.getElementById('detail-title-name');
 const infoSpan = document.getElementById('detail-info-name');
 const infoEditBtn = document.getElementById('detail-info-name-edit-btn');
-ok(!!editBtn && !!titleSpan && !!infoSpan && !!infoEditBtn, '标题旁+基本信息卡片铅笔均存在');
+ok(!editBtn, '标题旁铅笔已删（第51轮：仅详情页基本信息卡入口）');
+ok(!!titleSpan && !!infoSpan && !!infoEditBtn, '标题 span + 基本信息卡片铅笔存在');
 ok(!document.getElementById('detail-name-edit-wrap') && !document.getElementById('detail-name-input'), '旧输入条/输入框已删除（contenteditable 方案）');
 ok(titleSpan.getAttribute('contenteditable') !== 'true', '初始非编辑态（无 contenteditable）');
-// 打开编辑：就地 contenteditable + 描边
-window.openDetailNameEdit('title');
-ok(titleSpan.getAttribute('contenteditable') === 'true', '点击铅笔 → 标题 span contenteditable=true');
-ok(titleSpan.classList.contains('outline'), '编辑态描边样式');
+// 打开编辑：就地 contenteditable + 描边（第51轮：仅基本信息卡片入口）
+window.openDetailNameEdit('info');
+ok(infoSpan.getAttribute('contenteditable') === 'true', '点击基本信息卡铅笔 → info span contenteditable=true');
+ok(infoSpan.classList.contains('outline'), '编辑态描边样式');
 // 空名拦截
-titleSpan.textContent = '';
+infoSpan.textContent = '';
 window.confirmDetailNameEdit();
 ok(alertMsg.includes('不能为空'), '空名称拦截');
-titleSpan.textContent = '预发布商品改名版';
+// 空名拦截会关闭编辑态（source 复位），需重新打开
+window.openDetailNameEdit('info');
+infoSpan.textContent = '预发布商品改名版';
 window.confirmDetailNameEdit();
-ok(titleSpan.getAttribute('contenteditable') !== 'true', '确认后关闭编辑态');
-ok(titleSpan.textContent === '预发布商品改名版' && window.eval('currentProduct.name') === '预发布商品改名版', '保存后 currentProduct.name 已更新（无需编辑锁）');
-ok(infoSpan.textContent === '预发布商品改名版', '基本信息卡片名称同步（两处共享）');
+ok(infoSpan.getAttribute('contenteditable') !== 'true', '确认后关闭编辑态');
+ok(infoSpan.textContent === '预发布商品改名版' && window.eval('currentProduct.name') === '预发布商品改名版', '保存后 currentProduct.name 已更新（无需编辑锁）');
+ok(titleSpan.textContent === '预发布商品改名版', '标题名称同步（两处共享）');
 ok(window.eval('allProducts.find(p=>p.code==="maas-product-vtpm-pre").name') === '预发布商品改名版', '改名写回 allProducts（重新进入详情不回退）');
-// 基本信息卡片入口
+// 基本信息卡片入口再次编辑
 window.openDetailNameEdit('info');
 ok(infoSpan.getAttribute('contenteditable') === 'true' && titleSpan.getAttribute('contenteditable') !== 'true', '从基本信息卡片进入编辑（仅 info span 可编辑）');
 window.closeDetailNameEdit();

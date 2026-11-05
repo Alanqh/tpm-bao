@@ -55,35 +55,35 @@ ok(rows[1].cells[1].textContent.includes('输入token区间'), 'su-2 行第二 t
 ok(rows[1].cells[2].textContent.trim() === 'su-2', 'su-2 行第三 td=su-2');
 ok(!suRow.textContent.includes('function'), '维度:度量列不含 function');
 
-// ===== 3. 售卖计划 Tab（第20轮 19 列：售卖单元→Function→售卖空间→维度:度量） =====
+// ===== 3. 售卖计划 Tab（第51轮：售卖空间列提前+生效起止紧跟所属售卖计划；列序 售卖空间→所属售卖计划→生效开始/结束→售卖单元→Function→维度:度量） =====
 section('3. 售卖计划 Tab');
 window.eval('switchInnerTab("plan"); renderPlan();');
 const planHead = Array.from(document.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(planHead[4] === '售卖单元' && planHead[5] === 'Function' && planHead[6] === '售卖空间' && planHead[7] === '维度:度量', '售卖单元后为 Function→售卖空间→维度:度量');
+ok(planHead[3] === '售卖空间' && planHead[4] === '所属售卖计划' && planHead[5] === '生效开始' && planHead[6] === '生效结束' && planHead[7] === '售卖单元' && planHead[8] === 'Function', '售卖空间在所属售卖计划前，生效起止紧随其后（第51轮）');
 const planRowEl = document.querySelector('#plan-tbody tr');
 ok(planRowEl.cells.length === 20, '计划单元行 20 列（第49轮生效起止拆两列）');
-ok(planRowEl.cells[4].textContent.trim() === 'su-1' && planRowEl.cells[5].textContent.trim() === 'input', '计划 Tab Function 列=input（第 6 列）');
-ok(planRowEl.cells[6].textContent.trim() === 'sp-x', '计划 Tab 售卖空间列（第 7 列；第35轮=code）');
+ok(planRowEl.cells[7].textContent.trim() === 'su-1' && planRowEl.cells[8].textContent.trim() === 'input', '计划 Tab 售卖单元→Function（第 8/9 列）');
+ok(planRowEl.cells[3].textContent.trim() === 'sp-x', '计划 Tab 售卖空间列（第 4 列；第51轮前移）');
 
-// ===== 4. 售卖计划详情页（第20轮 17 列） =====
+// ===== 4. 售卖计划详情页（第51轮：售卖空间列提前至售卖单元之前） =====
 section('4. 计划详情');
 window.eval('openPlanDetail(0)');
 const pdHead = Array.from(document.querySelector('#plan-detail-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(pdHead[1] === '售卖单元' && pdHead[2] === 'Function' && pdHead[3] === '售卖空间' && pdHead[4] === '维度:度量', '详情表：售卖单元→Function→售卖空间→维度:度量');
+ok(pdHead[1] === '售卖空间' && pdHead[2] === '售卖单元' && pdHead[3] === 'Function' && pdHead[4] === '维度:度量', '详情表：售卖空间→售卖单元→Function→维度:度量（第51轮）');
 const pdRow = document.querySelector('#plan-detail-tbody tr');
 ok(pdRow.cells.length === 18, '详情行 18 列（第49轮生效起止拆两列）');
-ok(pdRow.cells[2].textContent.trim() === 'input', '详情 Function 列=input');
-ok(pdRow.cells[3].textContent.trim() === 'sp-x', '详情 售卖空间列=sp-x（第35轮=code）');
+ok(pdRow.cells[3].textContent.trim() === 'input', '详情 Function 列=input');
+ok(pdRow.cells[1].textContent.trim() === 'sp-x', '详情 售卖空间列=sp-x（第 2 列；第51轮前移）');
 
-// ===== 5. 计划创建页区块1/2（第38轮：计划锁定单空间——区块1 空间下拉，区块2 只展示所选空间内单元；旧筛选已删） =====
+// ===== 5. 计划创建页基础信息/单元区（第38轮：计划锁定单空间——空间下拉，单元区只展示所选空间内单元；旧筛选已删） =====
 section('5. 计划创建页');
 window.eval('closePlanDetail(); startEdit(); openPlanCreatePage()');
-ok(document.querySelectorAll('.plan-filter-fn-check').length === 0, '第38轮：fn 复选筛选已删（改为区块1 锁定空间）');
+ok(document.querySelectorAll('.plan-filter-fn-check').length === 0, '第38轮：fn 复选筛选已删（改为空间下拉锁定）');
 const spaceSel = document.getElementById('plan-space-sel');
-ok(!!spaceSel, '区块1 有售卖空间下拉（第38轮）');
+ok(!!spaceSel, '基础信息区有售卖空间下拉（第38轮）');
 ok(spaceSel.options.length === 2 && spaceSel.options[1].value === 'sp-x', '空间下拉候选含 sp-x（1 个空间）');
-// 未选空间 → 区块2 提示
-ok(document.getElementById('plan-units-charge-container').textContent.includes('请先在区块1选择售卖空间'), '未选空间时区块2 提示先选空间');
+// 未选空间 → 单元区提示
+ok(document.getElementById('plan-units-charge-container').textContent.includes('请先选择售卖空间'), '未选空间时单元区提示先选空间');
 // 选中空间 → 区块2 只展示该空间内单元
 spaceSel.value = 'sp-x';
 spaceSel.dispatchEvent(new window.Event('change', { bubbles: true }));
