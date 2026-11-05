@@ -821,46 +821,49 @@
     </div>
   </div>
 
-  <!-- Modal: 售卖空间创建（第38轮：由空间计划弹窗演化——空间本体携带优先级/生效期/维度度量配置，保存时叉乘生成该空间全部售卖单元） -->
-  <div id="modal-spaceplan" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-900/50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
-      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
-        <h3 id="spaceplan-modal-title" class="text-sm font-semibold text-slate-900">创建售卖空间</h3>
-        <button type="button" onclick="closeModal('spaceplan')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+  <!-- 页面：售卖空间创建/修改（第53轮：弹窗改完整页面，对齐售卖计划创建页样式） -->
+  <div id="spaceplan-create-view" class="hidden">
+    <div class="admin-card bg-white rounded-xl border border-slate-200 p-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <h3 id="spaceplan-form-title" class="text-lg font-semibold text-slate-900">创建售卖空间</h3>
+        <div class="flex gap-2">
+          <button type="button" onclick="closeSpacePlanPage()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-xmark mr-1"></i>取消</button>
+          <button type="button" onclick="confirmSpacePlan()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>保存</button>
+        </div>
       </div>
-      <div class="p-5 grid grid-cols-1 gap-4">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="form-label">空间名称</label>
-            <input id="sp-name" class="form-input" placeholder="如 常规售卖空间 / 双11大促空间">
-          </div>
-          <div>
-            <label class="form-label">优先级</label>
-            <input id="sp-priority" type="number" class="form-input" placeholder="如 100">
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="form-label">生效开始</label>
-            <input id="sp-eff-start" type="datetime-local" step="1" class="form-input">
-          </div>
-          <div>
-            <label class="form-label">生效结束</label>
-            <input id="sp-eff-end" type="datetime-local" step="1" class="form-input">
-          </div>
-        </div>
+      <div class="pt-4 grid grid-cols-1 gap-5">
+        <!-- 基础信息（第52轮：名称/优先级/生效起止） -->
         <div>
-          <label class="form-label">售卖 function</label>
+          <p class="text-sm font-semibold text-slate-800 mb-2.5">基础信息</p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label class="form-label">空间名称</label>
+              <input id="sp-name" class="form-input" placeholder="如 常规售卖空间 / 双11大促空间">
+            </div>
+            <div>
+              <label class="form-label">优先级</label>
+              <input id="sp-priority" type="number" class="form-input" placeholder="如 100">
+            </div>
+            <div>
+              <label class="form-label">生效开始</label>
+              <input id="sp-eff-start" type="datetime-local" step="1" class="form-input">
+            </div>
+            <div>
+              <label class="form-label">生效结束</label>
+              <input id="sp-eff-end" type="datetime-local" step="1" class="form-input">
+            </div>
+          </div>
+        </div>
+        <!-- 区块1：售卖 function -->
+        <div>
+          <p class="text-sm font-semibold text-slate-800 mb-2.5">售卖 function</p>
           <div id="sp-fnspaces" class="flex flex-wrap gap-3"></div>
         </div>
+        <!-- 区块2：各 function 的维度度量值（第47轮嵌套式） -->
         <div>
-          <label class="form-label">各 function 的维度度量值</label>
+          <p class="text-sm font-semibold text-slate-800 mb-2.5">各 function 的维度度量值</p>
           <div id="sp-dimmeas" class="space-y-2"></div>
         </div>
-      </div>
-      <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
-        <button type="button" onclick="closeModal('spaceplan')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
-        <button type="button" onclick="confirmSpacePlan()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>保存</button>
       </div>
     </div>
   </div>
@@ -916,7 +919,11 @@
  <script>
     // ===== 通用 =====
     function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); document.getElementById('modal-' + id).classList.add('flex'); }
-    function closeModal(id) { document.getElementById('modal-' + id).classList.add('hidden'); document.getElementById('modal-' + id).classList.remove('flex'); if (id === 'spaceplan') editingSpaceKey = null; }
+    function closeModal(id) {
+      if (id === 'spaceplan') { closeSpacePlanPage(); return; } // 第53轮页面化：转发（兼容历史调用）
+      const el = document.getElementById('modal-' + id); if (!el) return;
+      el.classList.add('hidden'); el.classList.remove('flex');
+    }
 
     function toggleMenu(id, el) {
       const menu = document.getElementById(id);
@@ -1857,7 +1864,8 @@
       currentSpacePlanDetailIdx = -1;
       document.getElementById('plan-detail-view').classList.add('hidden');
       document.getElementById('plan-create-view').classList.add('hidden');
-      document.getElementById('spaceplan-detail-view').classList.add('hidden');
+      document.getElementById('spaceplan-create-view').classList.add('hidden');
+      document.getElementById('detail-view').classList.remove('hidden');
       switchInnerTab('space');
    }
     function backToList() {
@@ -2090,6 +2098,7 @@
     // 第45轮：待发布空间可编辑——openSpacePlanModal(k) 编辑模式回填配置；confirmSpacePlan 原地更新 + 差量叉乘
     // 第47轮：改回嵌套式——先勾 function，每个勾选 fn 独立一张卡片（维度候选按商品类型 productDimSpecs 过滤，可不选维度=0维 fn）
     let editingSpaceKey = null; // 当前编辑的空间 key（null=创建模式）
+    // 第53轮：创建售卖空间改完整页面（原弹窗）；函数名保留 openSpacePlanModal 兼容历史调用
     function openSpacePlanModal(k) {
       editingSpaceKey = k || null;
       // 第52轮：复制入口——创建模式 + 预填源空间内容（名称=原名-副本）；保存才真正落库
@@ -2102,7 +2111,7 @@
       document.getElementById('sp-priority').value = sp ? (sp.priority ?? '') : '';
       document.getElementById('sp-eff-start').value = sp ? (sp.effStart || '').replace(' ', 'T') : nowLocalStr();
       document.getElementById('sp-eff-end').value = sp ? (sp.effEnd || '').replace(' ', 'T') : '2099-12-31T23:59:59';
-      document.getElementById('spaceplan-modal-title').textContent = sp ? (isCopyPrefill ? '创建售卖空间（复制自 ' + spaceCopySrcName + '）' : '修改售卖空间：' + (sp.name || k)) : '创建售卖空间';
+      document.getElementById('spaceplan-form-title').textContent = sp ? (isCopyPrefill ? '创建售卖空间（复制自 ' + spaceCopySrcName + '）' : '修改售卖空间：' + (sp.name || k)) : '创建售卖空间';
       // 区块1 勾 function；第47轮：勾/取消即重渲区块2（每 fn 独立卡片）；编辑模式按空间 fnDims 键勾选
       document.getElementById('sp-fnspaces').innerHTML = (fnPool().length > 0 ? fnPool() : ['']).map(f => `<label class="flex items-center gap-1.5 text-xs cursor-pointer text-slate-700 border border-slate-200 rounded-md px-2.5 py-1.5 bg-white">
           <input type="checkbox" class="sp-fn-check" data-fn="${f}" ${sp && (sp.fnDims || {}).hasOwnProperty(f) ? 'checked' : ''} onchange="renderSpFnCards()" style="accent-color:#7C3AED">
@@ -2111,7 +2120,15 @@
       document.getElementById('sp-dimmeas').innerHTML = '';
       if (!sp) spMeasDraft = {};
       renderSpFnCards(dimCands, sp);
-      openModal('spaceplan');
+      // 第53轮：切页面视图（原 openModal('spaceplan')）；隐藏其余视图
+      ['detail-view', 'plan-detail-view', 'spaceplan-detail-view', 'plan-create-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById('spaceplan-create-view').classList.remove('hidden');
+    }
+    // 取消：返回商品详情（不保存；编辑键/复制暂存复位）
+    function closeSpacePlanPage() {
+      editingSpaceKey = null;
+      document.getElementById('spaceplan-create-view').classList.add('hidden');
+      document.getElementById('detail-view').classList.remove('hidden');
     }
     // 第47轮：渲染区块2——按当前勾选的 fn 逐个生成卡片；每卡片内维度候选（按商品类型过滤）+ 该维度度量复选
     // 卡片内度量复选带 data-fn；编辑模式按 sp.fnMeasures[f] 回填；不选维度=0维 fn
@@ -2201,7 +2218,7 @@
         createdUnits.push(...genSaleUnitsForSpace(key, f, fnDims[f], fnMeasures[f]));
       });
       editingSpaceKey = null;
-      closeModal('spaceplan');
+      closeSpacePlanPage(); // 第53轮：页面化（原 closeModal('spaceplan')）
       renderSpaceTab();
       renderSaleUnits();
       renderPlan();
@@ -2878,12 +2895,24 @@
     }
     // ===== 时间格式化（第52轮：UTC 口径与全站 mock 一致） =====
     function pcpVal(v, def) { return (v || def).replace('T', ' '); }
-    // 当前时刻（UTC 字符串 YYYY-MM-DDTHH:MM:SS，与档期字典序口径一致）
-    function nowLocalStr() { return new Date().toISOString().slice(0, 19); }
-    // 当前时刻的后续整 30 分钟时刻（第52轮：售卖计划默认生效开始）
+    // 本地时刻串 YYYY-MM-DDTHH:MM:SS（第53轮：toISOString 返回 UTC 比本地慢时差——改本地时区拼串；与档期字典序口径一致）
+    function nowLocalStr() {
+      const d = new Date(); const p = n => String(n).padStart(2, '0');
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+    }
+    // 当前时刻的后续整 30 分钟时刻（第52轮：售卖计划默认生效开始；第53轮：本地时区口径）
     function nextHalfHourStr() {
       const HALF = 30 * 60 * 1000;
-      return new Date(Math.floor(Date.now() / HALF) * HALF + HALF).toISOString().slice(0, 19);
+      const d = new Date(Math.floor(Date.now() / HALF) * HALF + HALF);
+      const p = n => String(n).padStart(2, '0');
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':00';
+    }
+    // 最近 30 分钟整点时刻（含当前，用于「晚于当前+10 分钟」口径换算的对照）
+    function lastHalfHourLocalStr() {
+      const HALF = 30 * 60 * 1000;
+      const d = new Date(Math.floor(Date.now() / HALF) * HALF);
+      const p = n => String(n).padStart(2, '0');
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':00';
     }
     // 保存（创建/修改共用）：收集页面数据 → planRows（需持有编辑锁；锁丢失时退出编辑页防止改动丢失后静默失败）
     function confirmPlanCreate() {
@@ -2903,9 +2932,12 @@
       if (!effStart || !effEnd) { alert('请填写开始生效时间与结束生效时间'); return; }
       if (effStart > effEnd) { alert('开始生效时间不能晚于结束生效时间'); return; }
       // 第52轮：新计划（含复制）生效开始须晚于当前时刻 10 分钟；修改旧计划不受此限
+      // 第53轮：earliest 按本地时区生成，且与 effStart 同为空格口径（'T' 口径字典序恒小于空格口径，同日全误拦）
       const isCopyModeNow = planCopyFromIdx >= 0 && editingPlanIdx === planCopyFromIdx;
       if (editingPlanIdx < 0 || isCopyModeNow) {
-        const earliest = pcpVal(new Date(Date.now() + 10 * 60 * 1000).toISOString().slice(0, 19), '');
+        const eMin = new Date(Date.now() + 10 * 60 * 1000);
+        const p = n => String(n).padStart(2, '0');
+        const earliest = eMin.getFullYear() + '-' + p(eMin.getMonth() + 1) + '-' + p(eMin.getDate()) + ' ' + p(eMin.getHours()) + ':' + p(eMin.getMinutes()) + ':' + p(eMin.getSeconds());
         if (effStart <= earliest) { alert('生效开始时间须晚于当前时刻 10 分钟（' + earliest + ' 之后）'); return; }
       }
       if (effStart < sp.effStart || effEnd > sp.effEnd) {
