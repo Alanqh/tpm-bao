@@ -527,6 +527,51 @@
           <div id="spaceplan-detail-actions" class="flex flex-wrap items-center justify-end gap-2 mt-3"></div>
         </div>
       </div>
+      <!-- 售卖空间创建/修改（第53轮：弹窗改完整页面；第54轮：移入 main 内标准视图布局） -->
+      <div id="spaceplan-create-view" class="hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 id="spaceplan-form-title" class="text-lg font-semibold text-slate-900">创建售卖空间</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeSpacePlanPage()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-arrow-left mr-1"></i>返回商品详情</button>
+            <button type="button" onclick="confirmSpacePlan()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>保存售卖空间</button>
+          </div>
+        </div>
+
+        <!-- 基础信息（第52轮：名称/优先级/生效起止） -->
+        <div class="admin-card p-4 mb-4">
+          <p class="text-sm font-medium text-slate-900 mb-3">基础信息</p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label class="form-label">空间名称</label>
+              <input id="sp-name" class="form-input" placeholder="如 常规售卖空间 / 双11大促空间">
+            </div>
+            <div>
+              <label class="form-label">优先级</label>
+              <input id="sp-priority" type="number" class="form-input" placeholder="如 100">
+            </div>
+            <div>
+              <label class="form-label">生效开始</label>
+              <input id="sp-eff-start" type="datetime-local" step="1" class="form-input">
+            </div>
+            <div>
+              <label class="form-label">生效结束</label>
+              <input id="sp-eff-end" type="datetime-local" step="1" class="form-input">
+            </div>
+          </div>
+        </div>
+        <!-- 售卖 function（第47轮区块1） -->
+        <div class="admin-card p-4 mb-4">
+          <p class="text-sm font-medium text-slate-900 mb-3">售卖 function</p>
+          <div id="sp-fnspaces" class="flex flex-wrap gap-3"></div>
+        </div>
+        <!-- 各 function 的维度度量值（第47轮嵌套式区块2） -->
+        <div class="admin-card p-4">
+          <p class="text-sm font-medium text-slate-900 mb-3">各 function 的维度度量值</p>
+          <div id="sp-dimmeas" class="space-y-2"></div>
+        </div>
+      </div>
       <!-- 售卖计划创建/修改（独立页面，从「创建售卖计划」按钮/修改进入） -->
       <div id="plan-create-view" class="hidden">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -817,53 +862,6 @@
       <div class="flex justify-end gap-2 px-5 py-3 border-t border-slate-200">
         <button type="button" onclick="closeModal('create-billing')" class="admin-btn-default text-xs px-3 py-1.5 rounded-md">取消</button>
         <button type="button" onclick="confirmCreateBilling()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md">创建</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 页面：售卖空间创建/修改（第53轮：弹窗改完整页面，对齐售卖计划创建页样式） -->
-  <div id="spaceplan-create-view" class="hidden">
-    <div class="admin-card bg-white rounded-xl border border-slate-200 p-5">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-        <h3 id="spaceplan-form-title" class="text-lg font-semibold text-slate-900">创建售卖空间</h3>
-        <div class="flex gap-2">
-          <button type="button" onclick="closeSpacePlanPage()" class="admin-btn-default text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-xmark mr-1"></i>取消</button>
-          <button type="button" onclick="confirmSpacePlan()" class="admin-btn-primary text-xs px-3 py-1.5 rounded-md"><i class="fa-solid fa-check mr-1"></i>保存</button>
-        </div>
-      </div>
-      <div class="pt-4 grid grid-cols-1 gap-5">
-        <!-- 基础信息（第52轮：名称/优先级/生效起止） -->
-        <div>
-          <p class="text-sm font-semibold text-slate-800 mb-2.5">基础信息</p>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div>
-              <label class="form-label">空间名称</label>
-              <input id="sp-name" class="form-input" placeholder="如 常规售卖空间 / 双11大促空间">
-            </div>
-            <div>
-              <label class="form-label">优先级</label>
-              <input id="sp-priority" type="number" class="form-input" placeholder="如 100">
-            </div>
-            <div>
-              <label class="form-label">生效开始</label>
-              <input id="sp-eff-start" type="datetime-local" step="1" class="form-input">
-            </div>
-            <div>
-              <label class="form-label">生效结束</label>
-              <input id="sp-eff-end" type="datetime-local" step="1" class="form-input">
-            </div>
-          </div>
-        </div>
-        <!-- 区块1：售卖 function -->
-        <div>
-          <p class="text-sm font-semibold text-slate-800 mb-2.5">售卖 function</p>
-          <div id="sp-fnspaces" class="flex flex-wrap gap-3"></div>
-        </div>
-        <!-- 区块2：各 function 的维度度量值（第47轮嵌套式） -->
-        <div>
-          <p class="text-sm font-semibold text-slate-800 mb-2.5">各 function 的维度度量值</p>
-          <div id="sp-dimmeas" class="space-y-2"></div>
-        </div>
       </div>
     </div>
   </div>
@@ -2303,13 +2301,14 @@
       if (sp.status !== 'pending_publish') { alert('仅待发布状态的空间可编辑（已发布/已停用空间请使用复制后新建）'); return; }
       openSpacePlanModal(k);
     }
-    // 复制空间（第38轮：不受锁；第52轮改口径——不直接保存，打开创建弹窗预填副本内容，用户保存才落库）
+    // 复制空间（第38轮：不受锁；第52轮改预填不直接保存；第54轮：复制实为创建操作 → 须持编辑锁）
     // 实现：把源空间挂到临时 prefill（名称=原名-副本），openSpacePlanModal 以「创建模式+预填」打开
     let spaceCopyPrefill = null; // 待预填的源空间对象（非 null 时 openSpacePlanModal 创建模式用它回填）
-    let spaceCopySrcName = '';   // 复制来源空间名（弹窗标题提示用）
+    let spaceCopySrcName = '';   // 复制来源空间名（页面标题提示用）
     function copySpacePlan(k) {
       const src = spaces[k];
       if (!src) return;
+      if (!canEdit()) { alert('请先点击右上角「发起变更」进入编辑态后再复制'); return; }
       let copyName = (src.name || '售卖空间') + '-副本';
       let n = 2;
       while (Object.values(spaces).some(sp => sp.name === copyName)) { copyName = (src.name || '售卖空间') + '-副本' + n; n++; }
