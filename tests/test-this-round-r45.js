@@ -66,7 +66,7 @@ function boot() {
   check('② 待发布空间详情页有「修改」按钮', !!editBtn && editBtn.textContent.includes('修改'));
   editBtn.click();
   check('② 修改回填名称', doc.getElementById('sp-name').value === 'r45-edit-me');
-  check('② 修改弹窗标题含「修改」', doc.getElementById('spaceplan-modal-title').textContent.includes('修改'));
+  check('② 修改弹窗标题含「修改」', doc.getElementById('spaceplan-form-title').textContent.includes('修改'));
   check('② 修改回填 fn 勾选', doc.querySelector('.sp-fn-check[data-fn="input"]').checked && doc.querySelector('.sp-fn-check[data-fn="cache"]').checked && !doc.querySelector('.sp-fn-check[data-fn="output"]').checked);
   check('② 修改回填度量勾选（per-fn）', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]').checked);
   check('② 未勾选度量不回填', !doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="128K～1M"]').checked);
@@ -91,7 +91,7 @@ function boot() {
   window.alert = () => {};
   // 创建模式弹窗标题复位
   window.eval(`openSpacePlanModal()`);
-  check('② 创建模式标题复位', !doc.getElementById('spaceplan-modal-title').textContent.includes('修改'));
+  check('② 创建模式标题复位', !doc.getElementById('spaceplan-form-title').textContent.includes('修改'));
   window.eval(`backToList()`);
 }
 

@@ -87,7 +87,7 @@ document.getElementById('sp-name').value = 'r38 空间C';
 alertMsg = '';
 window.confirmSpacePlan();
 ok(evalInPage('Object.keys(spaces).length') === 3 && evalInPage('spaces["sp3"]') !== undefined, '维度集合与已有空间相同 → 不拦截，总是新建（sp3）');
-window.eval('closeModal("spaceplan")');
+window.eval('closeSpacePlanPage()');
 // 未发布 → 无生效空间；发布 sp1 后接管
 ok(evalInPage('currentSpaceOfFn("")') === '', '未发布任何空间 → fn("") 无生效空间');
 window.eval('publishSpacePlan("sp1")');
@@ -105,7 +105,7 @@ section('5. 复制空间');
 const sp1Units = evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length');
 alertMsg = '';
 window.copySpacePlan('sp1');
-ok(document.getElementById('spaceplan-modal-title').textContent.includes('复制自'), '复制打开创建弹窗（标题含复制自）');
+ok(document.getElementById('spaceplan-form-title').textContent.includes('复制自'), '复制打开创建弹窗（标题含复制自）');
 ok(document.getElementById('sp-name').value.includes('-副本'), '预填名称含 -副本');
 ok(evalInPage('Object.keys(spaces).length') === 3, '复制未直接新建（仍 3 个空间，保存才落库）');
 window.confirmSpacePlan();

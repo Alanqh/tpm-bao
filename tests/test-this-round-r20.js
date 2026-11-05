@@ -33,7 +33,7 @@ ok(!tabs.includes('空间计划'), '「空间计划」Tab 已删（第38轮并�
 const activeTab = document.querySelector('#plan-tabs-card .admin-tab.active');
 ok(activeTab && activeTab.textContent.trim() === '售卖空间', '进入详情默认打开售卖空间 Tab');
 ok(!document.getElementById('spaceplan-create-btn'), '创建空间计划按钮已移除');
-ok(!!document.getElementById('modal-spaceplan'), '空间弹窗存在（第38轮=创建售卖空间）');
+ok(!!document.getElementById('spaceplan-create-view'), '空间弹窗存在（第38轮=创建售卖空间）');
 ok(!!document.getElementById('spaceplan-new-btn'), '创建售卖空间按钮存在（列表左上）');
 ok(!document.getElementById('space-new-btn'), '批量创建售卖空间按钮已删除');
 ok(!document.getElementById('fn-space-cards'), 'fn 配置卡已删（第23轮合并进列表）');
@@ -127,15 +127,15 @@ window.confirmSpacePlan();
 ok(alertMsg.includes('至少勾选一个 function'), '空 fn 拦截: ' + alertMsg);
 // 第45轮：待发布空间 sp2 可编辑且编辑弹窗回填
 window.eval('openSpacePlanModal("sp2")');
-ok(document.getElementById('spaceplan-modal-title').textContent.includes('修改'), '第45轮：待发布空间弹窗为修改模式');
+ok(document.getElementById('spaceplan-form-title').textContent.includes('修改'), '第45轮：待发布空间弹窗为修改模式');
 ok(document.querySelector('.sp-fn-check[data-fn="output"]').checked, '编辑模式回填 fn 勾选（output）');
 ok(document.querySelector('.sp-measure-check[data-fn="output"][data-dim="输入区间"][value="0～128K"]').checked, '编辑模式回填度量勾选（第47轮 per-fn）');
-window.eval('closeModal("spaceplan")');
+window.eval('closeSpacePlanPage()');
 // 已发布空间编辑拦截
 alertMsg = '';
 window.eval('editSpacePlan("sp1")');
 ok(alertMsg.includes('仅待发布'), '第45轮：已发布空间编辑拦截: ' + alertMsg.slice(0, 20));
-window.eval('closeModal("spaceplan")');
+window.eval('closeSpacePlanPage()');
 
 // ===== 7. 编辑度量功能已删除（第23轮） + 空间不可改（第38轮） =====
 section('7. 不可改');

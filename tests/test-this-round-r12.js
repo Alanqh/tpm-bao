@@ -109,8 +109,8 @@ const unitsInOld = window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey
 window.copySpacePlan(newKey);
 // 第52轮：复制不再直接落库——打开创建弹窗预填副本内容（名称=-副本）
 ok(window.eval('Object.keys(spaces).length') === spaceCnt, '复制 → 打开弹窗预填（不直接新建空间）');
-ok(!document.getElementById('modal-spaceplan').classList.contains('hidden'), '复制打开创建弹窗');
-ok(document.getElementById('spaceplan-modal-title').textContent.includes('复制自'), '弹窗标题含「复制自」');
+ok(!document.getElementById('spaceplan-create-view').classList.contains('hidden'), '复制打开创建弹窗');
+ok(document.getElementById('spaceplan-form-title').textContent.includes('复制自'), '弹窗标题含「复制自」');
 ok(document.getElementById('sp-name').value.includes('-副本'), '预填名称含「-副本」');
 ok(document.getElementById('sp-eff-start').value !== '', '预填生效开始');
 // 保存后落库

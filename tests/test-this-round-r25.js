@@ -66,7 +66,7 @@ d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-10T00:00:00';
 w.eval('confirmSpacePlan()');
 ok(alerts.some(m => m.includes('编辑') || m.includes('锁')), '未持锁保存被 guardEdit 拦截');
-w.eval('closeModal("spaceplan")');
+w.eval('closeSpacePlanPage()');
 
 // ===== 8. 创建→保存（待发布不接管）→发布（接管）→停用（回落）=====
 w.eval('startEdit()');
@@ -74,7 +74,7 @@ w.eval('openSpacePlanModal()');
 alerts.length = 0;
 w.eval('confirmSpacePlan()');
 ok(alerts.some(m => m.includes('请填写')), '空名称拦截');
-let modal = d.getElementById('modal-spaceplan');
+let modal = d.getElementById('spaceplan-create-view');
 const boxes = modal.querySelectorAll('.sp-fn-check');
 ok(boxes.length >= 3, '弹窗按商品 function 渲染复选行，实得 ' + boxes.length);
 // 至少一个 fn 校验

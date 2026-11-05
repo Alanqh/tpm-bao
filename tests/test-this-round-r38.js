@@ -43,11 +43,11 @@ ok(alerts.some(m => m.includes('仅待发布')), '已发布空间调用编辑 �
 w.eval('exitEdit()');
 alerts.length = 0;
 w.eval("copySpacePlan('sp1')");
-ok(alerts.length === 0 && !d.getElementById('modal-spaceplan').classList.contains('hidden'), '退锁状态复制打开预填弹窗（不落库）');
+ok(alerts.length === 0 && !d.getElementById('spaceplan-create-view').classList.contains('hidden'), '退锁状态复制打开预填弹窗（不落库）');
 alerts.length = 0;
 w.eval('confirmSpacePlan()');
 ok(alerts.some(m => m.includes('发起变更')), '退锁保存被拦截（复制保存须持锁）');
-w.eval('closeModal("spaceplan")');
+w.eval('closeSpacePlanPage()');
 // 持锁复制 + 保存 → 落库
 w.eval('startEdit()');
 w.eval("copySpacePlan('sp1')");
@@ -64,9 +64,9 @@ w.eval('startEdit(); openSpacePlanDetail("sp2")');
 ok(d.getElementById('spaceplan-detail-actions').textContent.includes('修改'), '待发布空间详情操作含修改（第45轮）');
 // 编辑回填验证
 d.getElementById('spaceplan-detail-actions').querySelector('button[onclick*="editSpacePlan"]').click();
-ok(d.getElementById('spaceplan-modal-title').textContent.includes('修改'), '待发布空间编辑弹窗为修改模式');
+ok(d.getElementById('spaceplan-form-title').textContent.includes('修改'), '待发布空间编辑弹窗为修改模式');
 ok(d.querySelector('.sp-fn-check[data-fn="input"]').checked, '编辑弹窗回填 fn 勾选（inherited input）');
-w.eval('closeModal("spaceplan"); exitEdit()');
+w.eval('closeSpacePlanPage(); exitEdit()');
 
 // ===== 5. 售卖计划锁定空间（三重校验：必选/单元属空间/时间⊆空间档期）=====
 // 5a. 未选空间拦截

@@ -57,8 +57,8 @@ window.closePlanCreatePage();
 // 空间计划弹窗可开（第37轮：售卖单元由此叉乘生成）
 window.startEdit();
 window.openSpacePlanModal();
-ok(!document.getElementById('modal-spaceplan').classList.contains('hidden'), '可打开创建空间计划弹窗');
-window.eval('closeModal("spaceplan")');
+ok(!document.getElementById('spaceplan-create-view').classList.contains('hidden'), '可打开创建空间计划弹窗');
+window.eval('closeSpacePlanPage()');
 // 发布已有待发布计划：先把计划0改待发布再发布
 window.eval('planRowStatuses[0] = "pending_publish"; renderPlan();');
 window.openPlanDetail(0);

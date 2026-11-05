@@ -78,7 +78,7 @@ d.querySelector('.sp-measure-check[data-dim="购买周期"][value="30天"]').che
 w.eval('confirmSpacePlan()');
 ok(w.eval('spaceSeq') === 3 && w.eval('spaces["sp3"].fnDims[""].length') === 2, '维度集合与 sp1 相同 → 不拦截，新建 sp3（总是新建）');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 1, 'sp3 纯叉乘 1 组合（1～100×30天，无空组合）');
-w.eval('closeModal("spaceplan")');
+w.eval('closeSpacePlanPage()');
 // 10. SU 弹窗已删（第37轮）
 ok(!d.getElementById('modal-su-confirm'), 'SU 弹窗已删');
 ok(w.eval('typeof openSuConfirmModal') === 'undefined', 'openSuConfirmModal 已删');

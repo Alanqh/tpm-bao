@@ -87,8 +87,8 @@ ok(d.getElementById('spaceplan-detail-status').textContent === '已发布', '重
 // 8a. 持锁状态复制（当前已 startEdit）
 alerts.length = 0;
 w.eval("copySpacePlan('sp2')");
-ok(!d.getElementById('modal-spaceplan').classList.contains('hidden'), '复制打开创建弹窗（预填，不直接落库）');
-ok(d.getElementById('spaceplan-modal-title').textContent.includes('复制自'), '弹窗标题含「复制自」');
+ok(!d.getElementById('spaceplan-create-view').classList.contains('hidden'), '复制打开创建弹窗（预填，不直接落库）');
+ok(d.getElementById('spaceplan-form-title').textContent.includes('复制自'), '弹窗标题含「复制自」');
 ok(d.getElementById('sp-name').value === 'r48演练空间-副本', '预填名称=原名-副本');
 ok(d.getElementById('sp-eff-start').value.startsWith('2026-12-01'), '预填档期继承');
 ok(w.eval('spaces["sp3"]') === undefined, '未保存前不新建空间');
@@ -106,13 +106,13 @@ w.eval('exitEdit()');
 alerts.length = 0;
 w.eval("copySpacePlan('sp3')");
 ok(alerts.length === 0 && (w.eval('spaces["sp4"]') === undefined), '退锁后不产生新空间（弹窗预填不落库）');
-ok(!d.getElementById('modal-spaceplan').classList.contains('hidden'), '弹窗仍打开（预填）');
+ok(!d.getElementById('spaceplan-create-view').classList.contains('hidden'), '弹窗仍打开（预填）');
 ok(d.getElementById('sp-name').value === 'r48演练空间-副本-副本', '连续复制=源名+副本命名（预填）');
 // 未持锁保存被 guardEdit 拦截
 alerts.length = 0;
 w.eval('confirmSpacePlan()');
 ok(alerts.some(m => m.includes('发起变更')), '退锁后保存被拦截（须持锁）');
-w.eval('closeModal("spaceplan")');
+w.eval('closeSpacePlanPage()');
 
 // ===== 9. 待发布详情页：发布+复制（未持锁置灰）=====
 w.eval("openSpacePlanDetail('sp3')");

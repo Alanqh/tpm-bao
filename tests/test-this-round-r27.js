@@ -70,7 +70,7 @@ d.getElementById('sp-name').value = 'r38双fn空间';
 d.getElementById('sp-eff-start').value = '2026-12-01T00:00:00';
 d.getElementById('sp-eff-end').value = '2026-12-05T00:00:00';
 // 第47轮：三个 fn 全勾（各渲染独立卡片）+ 每 fn 卡片勾选同样两维度度量（输入0～128K + 费用发生日周一至周五 → 第48轮纯叉乘每 fn 1×1=1 组合）
-Array.from(d.querySelectorAll('#modal-spaceplan .sp-fn-check')).forEach(b => { b.checked = true; b.dispatchEvent(new w.Event('change', { bubbles: true })); });
+Array.from(d.querySelectorAll('#spaceplan-create-view .sp-fn-check')).forEach(b => { b.checked = true; b.dispatchEvent(new w.Event('change', { bubbles: true })); });
 ['input', 'output', 'cache'].forEach(f => {
   d.querySelector('.sp-measure-check[data-fn="' + f + '"][data-dim="输入区间"][value="0～128K"]').checked = true;
   d.querySelector('.sp-measure-check[data-fn="' + f + '"][data-dim="费用发生日"][value="周一至周五"]').checked = true;

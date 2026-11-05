@@ -33,17 +33,19 @@ function bootConfirmSpy() {
   const rawConfirm = dom.window.confirm;
   dom.window.confirm = (m) => { confirmCalls.push(String(m)); return true; };
   window.eval(`openSpacePlanModal(null)`);
-  const now = new Date().toISOString().slice(0, 19);
-  check('① 创建弹窗默认生效开始≈当前时刻（分钟级）', doc.getElementById('sp-eff-start').value.slice(0, 16) === now.slice(0, 16));
+  // 第53轮：nowLocalStr 改本地时区口径（原 toISOString=UTC 比本地慢时差）→ 断言用本地拼串
+  const dd = new Date(); const pp = n => String(n).padStart(2, '0');
+  const now = dd.getFullYear() + '-' + pp(dd.getMonth() + 1) + '-' + pp(dd.getDate()) + 'T' + pp(dd.getHours()) + ':' + pp(dd.getMinutes());
+  check('① 创建弹窗默认生效开始≈当前时刻（分钟级，本地时区）', doc.getElementById('sp-eff-start').value.slice(0, 16) === now);
   check('① 创建弹窗默认生效结束=2099-12-31T23:59:59', doc.getElementById('sp-eff-end').value === '2099-12-31T23:59:59');
   // 静态 HTML 不再有写死的 value
   const sHtml = html;
   check('① 静态 sp-eff-start 无写死 value', !/id="sp-eff-start"[^>]*value=/.test(sHtml) && !/value="[^"]*"[^>]*id="sp-eff-start"/.test(sHtml));
   // 编辑模式回填原值（sp1：2026-10-01 ~ 2027-11-01）
-  window.eval(`closeModal('spaceplan'); openSpacePlanModal('sp1')`);
+  window.eval(`closeSpacePlanPage(); openSpacePlanModal('sp1')`);
   check('① 编辑模式回填原档期开始', doc.getElementById('sp-eff-start').value.startsWith('2026-10-01T'));
   check('① 编辑模式回填原档期结束', doc.getElementById('sp-eff-end').value.startsWith('2027-11-01T'));
-  window.eval(`closeModal('spaceplan'); exitEdit(); backToList()`);
+  window.eval(`closeSpacePlanPage(); exitEdit(); backToList()`);
 }
 
 // ===== ② 创建售卖计划默认时间 =====
@@ -116,16 +118,17 @@ function bootConfirmSpy() {
     window.eval('confirmPlanCreate()');
     return { ok: alertMsg === '' && window.eval('planRows.length') === before + 1, msg: alertMsg };
   };
-  // 生效开始=当前时刻（默认下一整30分钟虽满足，这里手动改回过去时间）
-  const past = new Date(Date.now() - 60 * 60 * 1000).toISOString().slice(0, 19);
-  const r1 = mk(past.replace('T', 'T').slice(0, 16), '2026-12-31T00:00');
+  // 第53轮：earliest 已改本地时区口径 → 测试时间也用本地拼串（原 toISOString=UTC 恒早被误判）
+  const localStr = (ms) => { const d2 = new Date(Date.now() + ms); const p2 = n => String(n).padStart(2, '0'); return d2.getFullYear() + '-' + p2(d2.getMonth() + 1) + '-' + p2(d2.getDate()) + 'T' + p2(d2.getHours()) + ':' + p2(d2.getMinutes()); };
+  // 生效开始=当前-1 小时 → 拦截
+  const r1 = mk(localStr(-60 * 60 * 1000), '2026-12-31T00:00');
   check('④ 生效开始早于当前被拦截', !r1.ok && r1.msg.includes('10 分钟'));
   // 生效开始=当前+5 分钟 → 仍拦截
-  const near = new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16);
+  const near = localStr(5 * 60 * 1000);
   const r2 = mk(near, '2026-12-31T00:00');
   check('④ 生效开始=当前+5分钟被拦截', !r2.ok && r2.msg.includes('10 分钟'));
   // 生效开始=当前+20 分钟 → 通过（第52轮真 bug 修复：earliest 统一空格口径比较，同日时间不再恒被拦截）
-  const far = new Date(Date.now() + 20 * 60 * 1000).toISOString().slice(0, 16);
+  const far = localStr(20 * 60 * 1000);
   const r3 = mk(far, '2026-12-31T00:00');
   check('④ 生效开始=当前+20分钟保存成功', r3.ok);
   const savedStart = window.eval(`planRows[planRows.length-1].effStart`);
@@ -194,9 +197,9 @@ function bootConfirmSpy() {
   // 复制 → 不直接落库，弹窗预填
   window.eval(`startEdit(); copySpacePlan('sp1')`);
   check('⑥ 复制后空间数不变（1）', window.eval('Object.keys(spaces).length') === spaceCount);
-  const modal = doc.getElementById('modal-spaceplan');
+  const modal = doc.getElementById('spaceplan-create-view');
   check('⑥ 复制打开创建弹窗', modal && !modal.classList.contains('hidden'));
-  check('⑥ 弹窗标题=创建售卖空间（复制自 标准·常驻售卖空间）', doc.getElementById('spaceplan-modal-title').textContent === '创建售卖空间（复制自 标准·常驻售卖空间）');
+  check('⑥ 弹窗标题=创建售卖空间（复制自 标准·常驻售卖空间）', doc.getElementById('spaceplan-form-title').textContent === '创建售卖空间（复制自 标准·常驻售卖空间）');
   check('⑥ 预填名称=标准·常驻售卖空间-副本', doc.getElementById('sp-name').value === '标准·常驻售卖空间-副本');
   check('⑥ 预填档期=源空间档期', doc.getElementById('sp-eff-start').value.startsWith('2026-10-01T') && doc.getElementById('sp-eff-end').value.startsWith('2027-11-01T'));
   const fnChecked = Array.from(doc.querySelectorAll('.sp-fn-check:checked')).map(c => c.dataset.fn);
