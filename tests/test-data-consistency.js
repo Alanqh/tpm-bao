@@ -9,6 +9,8 @@ const dom = new JSDOM(html, { runScripts: 'dangerously', pretendToBeVisual: true
 const { window } = dom;
 const { document } = window;
 const evalInPage = (expr) => window.eval(expr);
+// 第52轮：发布/停用须弹窗 confirm → 测试默认同意
+window.confirm = () => true;
 
 let pass = 0, fail = 0;
 const ok = (c, msg) => { c ? (pass++, console.log('  ✓ ' + msg)) : (fail++, console.log('  ✗ ' + msg)); };

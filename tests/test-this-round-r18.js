@@ -77,18 +77,29 @@ ok(!!suIn, '售卖单元 dim 不含 function（input 有 dim=费用发生日 单
 ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1" && u.fn==="output").length') === 1, 'sp1 output 单元 1 个');
 ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp2").length') === 1, '空间二（input+输入区间×1M+）生成 1 单元（无全缺省）');
 
-// ===== 4. 复制不受状态影响 =====
+// ===== 4. 复制不受状态影响（第52轮：复制=打开创建页预填（编辑态），保存才落库；需编辑锁） =====
 section('4. 复制不受状态影响');
 // 用 std（三计划：published）
 window.backToList();
 window.openDetailByCode('maas-product-vtpm-std');
-// 4.1 浏览态（无编辑锁）复制
+// 4.1 浏览态（无编辑锁）复制被拦截（第52轮：复制打开编辑页，需先持锁）
 const cnt0 = evalInPage('planRows.length');
 alertMsg = '';
 window.copyPlanRow(0);
-ok(alertMsg.includes('已复制'), '浏览态（无锁）复制成功: ' + alertMsg.slice(0, 24) + '…');
-ok(evalInPage('planRows.length') === cnt0 + 1, '无锁复制计划数 +1');
-// 4.2 三种状态操作区都有可点的复制按钮
+ok(alertMsg.includes('发起变更'), '浏览态（无锁）复制被拦截提示先发起变更: ' + alertMsg.slice(0, 24) + '…');
+ok(evalInPage('planRows.length') === cnt0, '无锁复制不落库（计划数不变）');
+// 4.2 持锁后复制 → 打开创建页预填（标题含复制自）
+window.eval('startEdit()');
+window.copyPlanRow(0);
+ok(!document.getElementById('plan-create-view').classList.contains('hidden'), '复制打开创建售卖计划页');
+ok(document.getElementById('plan-create-page-title').textContent.includes('复制自'), '创建页标题含「复制自」');
+ok(document.getElementById('plan-name').value.includes('-副本'), '预填名称含 -副本');
+ok(evalInPage('planRows.length') === cnt0 + 1, '临时副本挂尾部（保存时转正/取消时摘除）');
+// 取消 → 临时副本摘除
+window.eval('closePlanCreatePage()');
+ok(evalInPage('planRows.length') === cnt0, '取消复制 → 临时副本摘除（不落库）');
+// 4.3 三种状态操作区都有可点的复制按钮（先浏览态查置灰再持锁停用）
+window.eval('exitEdit()');
 window.openPlanDetail(0); // published
 let actionsHtml = document.getElementById('plan-detail-actions').innerHTML;
 ok(actionsHtml.includes('copyPlanRow'), '已发布计划操作区含复制按钮');
@@ -96,21 +107,24 @@ const noLockGrey = actionsHtml.includes('pointer-events-none');
 ok(noLockGrey, '浏览态修改/停用按钮置灰（pointer-events-none）');
 const greyBlock = (actionsHtml.match(/class="flex flex-wrap items-center gap-2 pointer-events-none opacity-40">[\s\S]*?<\/div>/) || [''])[0];
 ok(!greyBlock.includes('copyPlanRow'), '复制按钮在置灰容器之外（不受锁限制）');
-// 待发布（刚复制的副本）
-window.openPlanDetail(3); // 副本=待发布
-ok(document.getElementById('plan-detail-actions').innerHTML.includes('copyPlanRow'), '待发布计划操作区含复制按钮');
-// 已停用
+// 停用后编辑态复制仍可（走保存路径）
 window.eval('startEdit()');
 window.eval('stopPlanRow(0)');
 window.openPlanDetail(0);
 const stoppedActions = document.getElementById('plan-detail-actions');
 ok(stoppedActions.textContent.includes('复制'), '已停用计划操作区含复制按钮');
-// 停用后浏览态复制仍可
-window.eval('exitEdit()');
 alertMsg = '';
 const cnt1 = evalInPage('planRows.length');
 window.copyPlanRow(0);
-ok(evalInPage('planRows.length') === cnt1 + 1, '已停用+浏览态复制仍成功');
+// 创建页内改生效时间为合法值后保存（新计划生效须晚于当前 10 分钟）
+const fs2 = document.getElementById('plan-eff-start');
+const fe2 = document.getElementById('plan-eff-end');
+fs2.value = '2026-11-06T12:00:00';
+fe2.value = '2026-12-31T00:00:00';
+window.eval('confirmPlanCreate()');
+ok(evalInPage('planRows.length') === cnt1 + 1, '已停用计划复制保存后落库 +1');
+ok(evalInPage('planRows[planRows.length-1].name').includes('-副本'), '落库副本名称含 -副本');
+ok(evalInPage('planRowStatuses[planRowStatuses.length-1]') === 'pending_publish', '副本待发布');
 
 console.log('\n结果: ' + pass + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

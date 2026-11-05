@@ -67,7 +67,7 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   // 空间列表：表头 9 列 + 拆列
   window.eval(`openDetailByCode('maas-product-vtpm-std'); switchInnerTab('space')`);
   const spHead = Array.from(doc.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-  check('③ 空间列表表头 9 列且末两列=生效开始/生效结束', spHead.length === 9 && spHead[7] === '生效开始' && spHead[8] === '生效结束');
+  check('③ 空间列表表头 10 列且末两列=生效开始/生效结束（第52轮：末列加操作）', spHead.length === 10 && spHead[7] === '生效开始' && spHead[8] === '生效结束' && spHead[9] === '操作');
   const spRow = Array.from(doc.querySelectorAll('#space-tbody tr')).find(r => r.querySelector('td') && !r.querySelector('td[colspan]') && r.textContent.includes('sp1'));
   const spRowTxt = spRow.textContent;
   check('③ 空间行分别展示 effStart/effEnd（std sp1=2026-10-01/2027-11-01）', spRowTxt.includes('2026-10-01 00:00:00') && spRowTxt.includes('2027-11-01 00:00:00'));
@@ -80,7 +80,7 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   // 售卖计划 Tab 20 列拆分
   window.eval(`switchInnerTab('plan'); renderPlan()`);
   const planHead = Array.from(doc.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-  check('③ 计划 Tab 表头 20 列且末列=优先级（第51轮：生效起止移至所属售卖计划之后，优先级置末）', planHead.length === 20 && planHead[5] === '生效开始' && planHead[6] === '生效结束' && planHead[19] === '优先级');
+  check('③ 计划 Tab 表头 21 列（第51轮：生效起止移至所属售卖计划之后，优先级第20；第52轮：末列加操作）', planHead.length === 21 && planHead[5] === '生效开始' && planHead[6] === '生效结束' && planHead[19] === '优先级' && planHead[20] === '操作');
   // 计划详情 18 列拆分
   window.eval(`openPlanDetail(0)`);
   const pdHead = Array.from(doc.querySelector('#plan-detail-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
@@ -155,8 +155,8 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   doc.querySelectorAll('.plan-unit-check').forEach(c => { c.checked = true; });
   // 计费项/配额项逐单元下拉（unified 模式默认值即可）
   doc.getElementById('plan-name').value = 'r49-ot-plan';
-  // jsdom datetime-local 会丢秒（'00:00' vs 档期 '00:00:00' 字典序偏低）→ 选档期内远离边界的时刻
-  doc.getElementById('plan-eff-start').value = '2026-11-02T00:00';
+  // jsdom datetime-local 会丢秒（'00:00' vs 档期 '00:00:00' 字典序偏低）→ 选档期内远离边界且晚于当前+10分钟的时刻（第52轮：生效开始须晚于当前时刻 10 分钟）
+  doc.getElementById('plan-eff-start').value = '2026-12-01T00:00';
   doc.getElementById('plan-eff-end').value = '2026-12-31T00:00';
   const okSave = window.eval(`(() => {
     try { confirmPlanCreate(); return true; } catch (e) { return 'ERR:' + e.message; }

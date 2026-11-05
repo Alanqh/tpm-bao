@@ -100,12 +100,15 @@ ok(!document.getElementById('su-create-btn'), 'SU Tab 创建按钮已删除');
 ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length') === 1, '空间A 叉乘 1 单元（1～100，第48轮无空组合）');
 ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").map(u=>u.dim).join("|")') === '购买量区间', '单元 dims=购买量区间（无全缺省）: ' + evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").map(u=>u.dim).join("|")'));
 
-// ===== 5. 复制=唯一变更路径（第38轮：空间不可改） =====
+// ===== 5. 复制=预填弹窗（第38轮空间不可改；第52轮：复制不直接保存，弹窗保存才落库） =====
 section('5. 复制空间');
 const sp1Units = evalInPage('saleUnits.filter(u=>u.spaceKey==="sp1").length');
 alertMsg = '';
 window.copySpacePlan('sp1');
-ok(alertMsg.includes('副本'), '复制提示含副本');
+ok(document.getElementById('spaceplan-modal-title').textContent.includes('复制自'), '复制打开创建弹窗（标题含复制自）');
+ok(document.getElementById('sp-name').value.includes('-副本'), '预填名称含 -副本');
+ok(evalInPage('Object.keys(spaces).length') === 3, '复制未直接新建（仍 3 个空间，保存才落库）');
+window.confirmSpacePlan();
 ok(evalInPage('spaces["sp4"] && spaces["sp4"].status') === 'pending_publish', '副本空间 sp4 待发布');
 ok(evalInPage('Object.keys(spaces).length') === 4, '共 4 个空间（不增殖原空间）');
 ok(evalInPage('saleUnits.filter(u=>u.spaceKey==="sp4").length') === sp1Units, '副本空间叉乘生成 ' + sp1Units + ' 个单元（同构）');

@@ -46,11 +46,11 @@ function boot() {
   section('② 售卖计划列序');
   window.eval('openDetailByCode("maas-product-vtpm-std"); switchInnerTab("plan"); renderPlan()');
   const head = Array.from(doc.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-  check('计划 Tab 表头 20 列', head.length === 20);
+  check('计划 Tab 表头 21 列（第52轮：末列加操作）', head.length === 21);
   check('售卖空间列在所属售卖计划之前（第 4/5 列）', head[3] === '售卖空间' && head[4] === '所属售卖计划');
   check('生效开始/结束紧随所属售卖计划（第 6/7 列）', head[5] === '生效开始' && head[6] === '生效结束');
   check('售卖单元→Function→维度:度量（第 8/9/10 列）', head[7] === '售卖单元' && head[8] === 'Function' && head[9] === '维度:度量');
-  check('优先级置末（第 20 列）', head[19] === '优先级');
+  check('优先级第 20 列、操作末列（第 21 列）', head[19] === '优先级' && head[20] === '操作');
   const row = doc.querySelector('#plan-tbody tr');
   check('行 td 顺序：售卖空间(td4)=sp1 / 所属售卖计划(td5)=计划名', row.cells[3].textContent.trim() === 'sp1' && row.cells[4].textContent.trim().length > 0);
   // 计划详情页一致
@@ -82,7 +82,8 @@ function boot() {
   doc.getElementById('plan-space-sel').value = 'sp1';
   window.eval('onPlanSpaceChange()');
   doc.getElementById('plan-name').value = 'r51 默认perUnit计划';
-  doc.getElementById('plan-eff-start').value = '2026-11-02T00:00:00';
+  // 第52轮：生效开始须晚于当前时刻 10 分钟 → 用远期时间
+  doc.getElementById('plan-eff-start').value = '2026-12-01T00:00:00';
   doc.getElementById('plan-eff-end').value = '2026-12-31T00:00:00';
   window.eval('confirmPlanCreate()');
   const saved = window.eval('planRows[planRows.length-1]');

@@ -25,6 +25,18 @@ window.submitProduct();
 ok(alertMsg === '', '直接提交不拦截（无维度校验）');
 ok(evalInPage('currentProduct.dims') === undefined, 'currentProduct 无 dims 字段');
 
+// 第52轮：复制不再直接落库——打开创建页预填（需编辑锁），保存才入库
+// helper：持锁状态下复制 idx 并在创建页内保存（生效时间改为合法值）
+function copyAndSave(idx) {
+  window.copyPlanRow(idx);
+  const fsEl = document.getElementById('plan-eff-start');
+  const feEl = document.getElementById('plan-eff-end');
+  fsEl.value = '2026-11-06T12:00:00';
+  feEl.value = '2026-12-31T00:00:00';
+  window.eval('confirmPlanCreate()');
+  return evalInPage('planRows.length') - 1;
+}
+
 // ===== 2. 复制：待发布计划 =====
 section('2. 复制待发布计划');
 window.backToList();
@@ -33,17 +45,14 @@ window.eval('startEdit()');
 // pre 计划 0 = 待发布
 ok(evalInPage('planRowStatuses[0]') === 'pending_publish', 'pre 计划0为待发布');
 const rowsBefore = evalInPage('planRows.length');
-alertMsg = '';
-window.copyPlanRow(0);
-ok(alertMsg.includes('已复制'), '复制提示: ' + alertMsg);
-ok(evalInPage('planRows.length') === rowsBefore + 1, '计划数 +1');
-const copyIdx = rowsBefore; // 新副本索引
+const copyIdx = copyAndSave(0);
+ok(evalInPage('planRows.length') === rowsBefore + 1, '计划数 +1（保存后落库）');
 ok(evalInPage(`planRows[${copyIdx}].name`) === evalInPage('planRows[0].name') + '-副本', '副本名称=原名-副本');
 ok(evalInPage(`planRowStatuses[${copyIdx}]`) === 'pending_publish', '副本状态=待发布');
 ok(evalInPage(`JSON.stringify(planRows[${copyIdx}].chargeCodes)`) === evalInPage('JSON.stringify(planRows[0].chargeCodes)'), '计费项配置完整拷贝');
 ok(evalInPage(`JSON.stringify(planRows[${copyIdx}].unitStates)`) === evalInPage('JSON.stringify(planRows[0].unitStates)'), 'unitStates 完整拷贝');
 ok(evalInPage(`planRows[${copyIdx}].priority`) === evalInPage('planRows[0].priority'), '优先级拷贝');
-ok(evalInPage(`planRows[${copyIdx}].effStart`) === evalInPage('planRows[0].effStart'), '生效起止拷贝');
+ok(evalInPage(`planRows[${copyIdx}].spaceKey`) === evalInPage('planRows[0].spaceKey'), '所属空间拷贝');
 // 深拷贝验证：修改副本不影响原计划
 window.eval(`planRows[${copyIdx}].priority = 999`);
 ok(evalInPage('planRows[0].priority') !== 999, '深拷贝：改副本不影响原件');
@@ -55,9 +64,9 @@ window.openDetailByCode('maas-product-vtpm-std');
 window.eval('startEdit()');
 ok(evalInPage('planRowStatuses[0]') === 'published', 'std 计划0为已发布');
 const stdBefore = evalInPage('planRows.length');
-window.copyPlanRow(0);
+const c2 = copyAndSave(0);
 ok(evalInPage('planRows.length') === stdBefore + 1, '已发布计划可复制（+1）');
-ok(evalInPage(`planRowStatuses[${stdBefore}]`) === 'pending_publish', '副本状态仍=待发布（不继承已发布）');
+ok(evalInPage(`planRowStatuses[${c2}]`) === 'pending_publish', '副本状态仍=待发布（不继承已发布）');
 
 // ===== 4. 复制：已停用计划 + 详情页按钮 =====
 section('4. 已停用计划与按钮');
@@ -68,11 +77,12 @@ const actions = document.getElementById('plan-detail-actions').textContent;
 ok(actions.includes('复制') && !actions.includes('发布') && !actions.includes('停用'), '已停用计划操作区仅剩「复制」: ' + actions.trim());
 const copyBtn = document.querySelector('#plan-detail-actions button[onclick^="copyPlanRow"]');
 ok(!!copyBtn, '操作区含复制按钮');
-alertMsg = '';
-copyBtn.click();
-ok(alertMsg.includes('已复制'), '已停用计划复制成功');
+copyBtn.click(); // 打开创建页预填（编辑态已持有）
+ok(!document.getElementById('plan-create-view').classList.contains('hidden'), '已停用计划复制打开创建页（预填）');
+ok(document.getElementById('plan-name').value.includes('-副本'), '预填副本名');
+window.eval('closePlanCreatePage()'); // 取消——摘除临时副本
 ok(evalInPage('planRowStatuses.length') === evalInPage('planRows.length'), '状态数组与计划同步');
-// 待发布副本计划操作区也含复制（副本索引=stdBefore，在发布后新增）
+// 待发布副本计划操作区也含复制
 window.openPlanDetail(stdBefore);
 const actCopy = document.getElementById('plan-detail-actions').textContent;
 ok(actCopy.includes('复制') && actCopy.includes('发布'), '待发布操作区=修改+复制+发布: ' + actCopy.trim());
@@ -83,23 +93,24 @@ ok(actPub.includes('复制') && actPub.includes('停用') && !actPub.includes('�
 
 // ===== 5. 副本重名自动加序号 =====
 section('5. 重名序号');
+window.closePlanDetail();
 const base = evalInPage('planRows[0].name');
 const beforeCnt = evalInPage('planRows.length');
 const priorCopies = evalInPage(`planRows.filter(r => r.name.startsWith('${base}-副本')).length`);
-window.copyPlanRow(0); // 对同一原件再次复制 → 与既有副本序列重名 → 追加下一序号
-ok(evalInPage('planRows.length') === beforeCnt + 1, '再次复制 +1');
+const c3 = copyAndSave(0); // 对同一原件再次复制 → 与既有副本序列重名 → 追加下一序号
+ok(evalInPage('planRows.length') === beforeCnt + 1, '再次复制 +1（保存后）');
 const expectName = `${base}-副本${priorCopies + 1}`;
-ok(evalInPage(`planRows[${beforeCnt}].name`) === expectName, '重名副本自动加序号: ' + evalInPage(`planRows[${beforeCnt}].name`) + '（期望 ' + expectName + '）');
-ok(!evalInPage('planRows.some(r=>r.name===' + JSON.stringify('') + ')') || true, '无空名计划');
+ok(evalInPage(`planRows[${c3}].name`) === expectName, '重名副本自动加序号: ' + evalInPage(`planRows[${c3}].name`) + '（期望 ' + expectName + '）');
 
-// ===== 6. 复制不受编辑锁限制（第18轮口径） =====
-section('6. 编辑锁豁免');
+// ===== 6. 复制需编辑锁（第52轮口径：复制打开编辑页） =====
+section('6. 编辑锁');
 window.closePlanDetail();
 window.eval('exitEdit()');
 alertMsg = '';
 const cntNoLock = evalInPage('planRows.length');
 window.copyPlanRow(0);
-ok(evalInPage('planRows.length') === cntNoLock + 1, '未持有编辑锁时复制成功（第18轮：复制豁免编辑锁）');
+ok(alertMsg.includes('发起变更'), '未持有编辑锁时复制被拦截（第52轮：需先发起变更）');
+ok(evalInPage('planRows.length') === cntNoLock, '拦截后计划数不变');
 alertMsg = '';
 window.editPlanRow(0);
 ok(alertMsg.includes('发起变更') || alertMsg.includes('正在编辑') || alertMsg === '', '修改仍受编辑锁保护（guardEdit 不变）');

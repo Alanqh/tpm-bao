@@ -39,11 +39,19 @@ alerts.length = 0;
 w.eval("editSpacePlan('sp1')");
 ok(alerts.some(m => m.includes('仅待发布')), '已发布空间调用编辑 → 拦截');
 
-// ===== 4. 复制=唯一变更路径：深拷贝+继承配置+叉乘新单元+不受锁 =====
+// ===== 4. 复制=预填弹窗（第52轮：不直接保存，保存才落库、须持锁）=====
 w.eval('exitEdit()');
 alerts.length = 0;
 w.eval("copySpacePlan('sp1')");
-ok(alerts.some(m => m.includes('已复制售卖空间')), '退锁状态复制成功（复制豁免编辑锁）');
+ok(alerts.length === 0 && !d.getElementById('modal-spaceplan').classList.contains('hidden'), '退锁状态复制打开预填弹窗（不落库）');
+alerts.length = 0;
+w.eval('confirmSpacePlan()');
+ok(alerts.some(m => m.includes('发起变更')), '退锁保存被拦截（复制保存须持锁）');
+w.eval('closeModal("spaceplan")');
+// 持锁复制 + 保存 → 落库
+w.eval('startEdit()');
+w.eval("copySpacePlan('sp1')");
+w.eval('confirmSpacePlan()');
 ok(w.eval('spaceSeq') === 2, '副本 key=sp2（第48轮：glm4 仅 sp1，副本顺延）');
 ok(w.eval('spaces["sp2"].name') === 'GLM4·常规售卖空间-副本', '副本命名=原名-副本');
 ok(w.eval('spaces["sp2"].status') === 'pending_publish', '副本=待发布');
@@ -68,19 +76,25 @@ d.getElementById('plan-priority').value = '50';
 alerts.length = 0;
 w.eval('confirmPlanCreate()');
 ok(alerts.some(m => m.includes('请选择售卖空间')), '未选空间 → 拦截');
-// 5b. 时间超出空间档期拦截（sp2 副本为待发布 → 第45轮不可选；改用 sp1 全量空间测试档期校验，填 10 月起档被拦）
+// 5b. 时间超出空间档期拦截（第52轮：生效开始还须晚于当前+10min——用未来但超空间档期的时间触发档期拦截）
 d.getElementById('plan-space-sel').value = 'sp1';
 w.eval('onPlanSpaceChange()');
-d.getElementById('plan-eff-start').value = '2026-10-15T00:00:00';
-d.getElementById('plan-eff-end').value = '2027-10-01T00:00:00';
+d.getElementById('plan-eff-start').value = '2026-11-06T12:00:00';
+d.getElementById('plan-eff-end').value = '2028-10-01T00:00:00';
 alerts.length = 0;
 w.eval('confirmPlanCreate()');
 ok(alerts.some(m => m.includes('必须在售卖空间') && m.includes('生效范围')), '计划时间超过空间档期 → 拦截');
 // 5c. 合法保存（sp1 + 合档时间 + 单元全选默认）——第45轮：sp2 待发布不可下拉选中，改用 sp1
 d.getElementById('plan-space-sel').value = 'sp1';
 w.eval('onPlanSpaceChange()');
-d.getElementById('plan-eff-start').value = '2026-11-05T00:00:00';
+d.getElementById('plan-eff-start').value = '2026-11-06T12:00:00';
 d.getElementById('plan-eff-end').value = '2027-10-01T00:00:00';
+// 5c-0. 第52轮：生效开始早于当前+10 分钟 → 拦截
+d.getElementById('plan-eff-start').value = '2026-11-05T00:00:00';
+alerts.length = 0;
+w.eval('confirmPlanCreate()');
+ok(alerts.some(m => m.includes('晚于当前时刻 10 分钟')), '生效开始过早（<当前+10min）→ 拦截（第52轮）');
+d.getElementById('plan-eff-start').value = '2026-11-06T12:00:00';
 alerts.length = 0;
 w.eval('confirmPlanCreate()');
 const lastIdx = w.eval('planRows.length - 1');

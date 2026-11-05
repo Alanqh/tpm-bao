@@ -70,7 +70,7 @@ let tabTxt = w.document.getElementById('space-tbody').textContent;
 ok(tabTxt.includes('sp1') && !tabTxt.includes('sp2'), '列表展示 sp1（第48轮无 sp2）');
 ok(tabTxt.includes('GLM4·常规售卖空间'), '列表展示空间名称');
 const ths = w.document.querySelectorAll('#inner-tab-space thead th');
-ok(ths.length === 9, '售卖空间表头 9 列（第49轮生效起止拆生效开始/结束两列），实得 ' + ths.length);
+ok(ths.length === 10, '售卖空间表头 10 列（第49轮生效起止拆两列；第52轮末列加操作），实得 ' + ths.length);
 // 时间旅行 11-15：档期徽标（sp1 生效期内）
 T.timeFilter = { point: '2026-11-15 12:00:00' };
 T.renderSpaceTab();
@@ -117,12 +117,19 @@ T.stopSpacePlan(newKey);
 ok(T.spaces[newKey].status === 'stopped' && T.effectiveSpaceAt('output', '2026-12-05 00:00:00').key === 'sp1', '计划停用后空间可停用 → 12-05 output 回落 sp1');
 T.timeFilter = null;
 
-// ===== 8. 空间复制：深拷贝 → 新 key → 待发布 → 叉乘 =====
+// ===== 8. 空间复制（第52轮：复制不直接保存，打开创建弹窗预填，保存才落库）=====
 const unitsBeforeCopy = T.saleUnits.filter(u => u.spaceKey === newKey).length;
 const seqBefore2 = T.spaceSeq;
 T.copySpacePlan(newKey);
 const copyKey = 'sp' + (seqBefore2 + 1);
-ok(!!T.spaces[copyKey] && T.spaces[copyKey].status === 'pending_publish', '复制出新空间 ' + copyKey + ' 待发布');
+const spModal = w.document.getElementById('modal-spaceplan');
+ok(!T.spaces[copyKey], '复制后未直接落库（无 ' + copyKey + '）');
+ok(spModal && !spModal.classList.contains('hidden'), '复制打开创建弹窗');
+ok(w.document.getElementById('spaceplan-modal-title').textContent.includes('复制自'), '弹窗标题含「复制自」');
+ok(w.document.getElementById('sp-name').value.includes('副本'), '弹窗预填名称含「副本」');
+// 保存才落库
+T.confirmSpacePlan();
+ok(!!T.spaces[copyKey] && T.spaces[copyKey].status === 'pending_publish', '保存后新空间 ' + copyKey + ' 待发布');
 ok(T.spaces[copyKey].name.includes('副本'), '副本名称含「副本」');
 ok(T.saleUnits.filter(u => u.spaceKey === copyKey).length === unitsBeforeCopy, '副本空间叉乘生成同数售卖单元（' + unitsBeforeCopy + ' 个）');
 

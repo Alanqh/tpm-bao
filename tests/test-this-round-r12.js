@@ -101,16 +101,23 @@ ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length') 
 const dims = window.eval('JSON.stringify(saleUnits.filter(u => u.spaceKey === "' + newKey + '").map(u => u.dim + "=" + u.measure).sort())');
 ok(dims.includes('输入区间 + 费用发生日=0～128K + 周一至周五') && dims.includes('输入区间 + 费用发生日=0～128K + 周末') && !dims.includes('"="'), '第48轮：仅完整组合（无缺省/空组合）: ' + dims.slice(0, 90));
 
-// ===== 6. 空间不可改：无修改入口；复制=唯一变更路径（新空间+同构单元，旧空间保留） =====
+// ===== 6. 空间不可改：无修改入口；复制=预填弹窗（第52轮：不直接保存） =====
 section('6. 空间不可改/复制');
 ok(typeof window.editSpacePlan === 'function', '第45轮：editSpacePlan 恢复（待发布空间可编辑）');
 const spaceCnt = window.eval('Object.keys(spaces).length');
 const unitsInOld = window.eval('saleUnits.filter(u => u.spaceKey === "' + newKey + '").length');
 window.copySpacePlan(newKey);
-ok(window.eval('Object.keys(spaces).length') === spaceCnt + 1, '复制 → 新建空间');
-ok(alertMsg.includes('副本'), '复制提示含副本: ' + alertMsg.slice(-40));
+// 第52轮：复制不再直接落库——打开创建弹窗预填副本内容（名称=-副本）
+ok(window.eval('Object.keys(spaces).length') === spaceCnt, '复制 → 打开弹窗预填（不直接新建空间）');
+ok(!document.getElementById('modal-spaceplan').classList.contains('hidden'), '复制打开创建弹窗');
+ok(document.getElementById('spaceplan-modal-title').textContent.includes('复制自'), '弹窗标题含「复制自」');
+ok(document.getElementById('sp-name').value.includes('-副本'), '预填名称含「-副本」');
+ok(document.getElementById('sp-eff-start').value !== '', '预填生效开始');
+// 保存后落库
+window.confirmSpacePlan();
 const keys = window.eval('Object.keys(spaces).sort((a,b)=>spaces[a].seq-spaces[b].seq)');
 const copyKey = keys[keys.length - 1];
+ok(window.eval('Object.keys(spaces).length') === spaceCnt + 1, '弹窗保存 → 新建空间');
 ok(window.eval('spaces["' + copyKey + '"].status') === 'pending_publish', '副本空间待发布');
 ok(window.eval('spaces["' + copyKey + '"].name.includes("副本")'), '副本名称含「副本」');
 ok(window.eval('saleUnits.filter(u => u.spaceKey === "' + copyKey + '").length') === unitsInOld, '副本空间叉乘生成同数单元（' + unitsInOld + ' 个）');

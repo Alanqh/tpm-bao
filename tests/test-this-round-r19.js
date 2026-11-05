@@ -61,7 +61,7 @@ window.eval('switchInnerTab("plan"); renderPlan();');
 const planHead = Array.from(document.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
 ok(planHead[3] === '售卖空间' && planHead[4] === '所属售卖计划' && planHead[5] === '生效开始' && planHead[6] === '生效结束' && planHead[7] === '售卖单元' && planHead[8] === 'Function', '售卖空间在所属售卖计划前，生效起止紧随其后（第51轮）');
 const planRowEl = document.querySelector('#plan-tbody tr');
-ok(planRowEl.cells.length === 20, '计划单元行 20 列（第49轮生效起止拆两列）');
+ok(planRowEl.cells.length === 21, '计划单元行 21 列（第49轮生效起止拆两列；第52轮加操作列）');
 ok(planRowEl.cells[7].textContent.trim() === 'su-1' && planRowEl.cells[8].textContent.trim() === 'input', '计划 Tab 售卖单元→Function（第 8/9 列）');
 ok(planRowEl.cells[3].textContent.trim() === 'sp-x', '计划 Tab 售卖空间列（第 4 列；第51轮前移）');
 

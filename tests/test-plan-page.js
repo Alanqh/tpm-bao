@@ -128,6 +128,9 @@ document.getElementById('plan-mode-charge').checked = false;
 document.getElementById('plan-mode-quota').checked = false;
 window.renderPlanCreateSections();
 document.querySelector('#plan-charge-unified select.plan-charge-select').value = 'maas-product-vtpm-std.30d';
+// 第52轮：默认生效开始=下一整30分钟（晚于当前+10分钟 ✓）、结束留空 → 须手动填结束时间
+document.getElementById('plan-eff-start').value = '2026-12-01T00:00';
+document.getElementById('plan-eff-end').value = '2026-12-31T00:00';
 window.confirmPlanCreate();
 ok(evalInPage('planRows.length') === 4, '计划追加（3+1）');
 const np = evalInPage('planRows[3]');
@@ -141,7 +144,7 @@ ok(document.getElementById('plan-create-view').classList.contains('hidden'), '�
 // ================= 售卖计划 Tab 20 列 + 详情 =================
 section('售卖计划 Tab（20 列，第49轮生效起止拆两列）+ 详情页');
 const headCells = Array.from(document.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(headCells.length === 20, '表头 20 列（第49轮生效起止拆两列）: ' + headCells.length);
+ok(headCells.length === 21, '表头 21 列（第49轮生效起止拆两列；第52轮末列加操作）: ' + headCells.length);
 ok(headCells[2] === '类型', '第 3 列 = 类型');
 ok(headCells.includes('Function'), '表头含 Function 列（第19轮：function 专门展示列）');
 ok(headCells.includes('售卖空间'), '表头含售卖空间列（第20轮）');

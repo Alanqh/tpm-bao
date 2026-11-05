@@ -83,26 +83,36 @@ act && ok(act.textContent.includes('复制'), '已停用保留复制');
 w.eval("publishSpacePlan('sp2')");
 ok(d.getElementById('spaceplan-detail-status').textContent === '已发布', '重新发布后状态回已发布');
 
-// ===== 8. 复制：生成待发布副本，不受锁限制 =====
+// ===== 8. 复制：预填弹窗（第52轮：不直接保存，保存才落库） =====
 // 8a. 持锁状态复制（当前已 startEdit）
 alerts.length = 0;
 w.eval("copySpacePlan('sp2')");
-ok(alerts.some(m => m.includes('已复制售卖空间')), '复制提示');
-ok(w.eval('spaceSeq') === 3 && w.eval('spaces["sp3"] && spaces["sp3"].name') === 'r48演练空间-副本', '副本空间 sp3 入列（-副本命名）');
+ok(!d.getElementById('modal-spaceplan').classList.contains('hidden'), '复制打开创建弹窗（预填，不直接落库）');
+ok(d.getElementById('spaceplan-modal-title').textContent.includes('复制自'), '弹窗标题含「复制自」');
+ok(d.getElementById('sp-name').value === 'r48演练空间-副本', '预填名称=原名-副本');
+ok(d.getElementById('sp-eff-start').value.startsWith('2026-12-01'), '预填档期继承');
+ok(w.eval('spaces["sp3"]') === undefined, '未保存前不新建空间');
+// 保存 → 落库
+w.eval('confirmSpacePlan()');
+ok(w.eval('spaceSeq') === 3 && w.eval('spaces["sp3"] && spaces["sp3"].name') === 'r48演练空间-副本', '副本空间 sp3 入列（-副本命名，保存后）');
 ok(w.eval('spaces["sp3"].status') === 'pending_publish', '副本=待发布');
 ok(w.eval('spaces["sp3"].priority') === 500 && w.eval('spaces["sp3"].effStart').startsWith('2026-12-01'), '副本继承优先级/档期');
 ok(w.eval('spaces["sp3"].fnDims["input"].join(",")') === '输入区间', '副本继承 fn 配置');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp3").length') === 2, '副本叉乘生成 2 售卖单元（2 勾选组合，第48轮无空组合）');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2").length') === 2, '原空间 sp2 单元保留（2 个，永不删除）');
 
-// 8b. 退锁后复制不受限（复制豁免编辑锁）
+// 8b. 退锁后复制被拦截（第52轮：复制打开编辑弹窗需确认保存，须持锁）
 w.eval('exitEdit()');
 alerts.length = 0;
 w.eval("copySpacePlan('sp3')");
-ok(alerts.some(m => m.includes('已复制')), '退锁后复制不受限');
-ok(w.eval('spaces["sp4"].name') === 'r48演练空间-副本-副本', '连续复制=源名+副本命名');
-// 清理测试造的空间 4（sp3 保留验证待发布详情页）
-w.eval('delete spaces["sp4"]; saleUnits = saleUnits.filter(u => u.spaceKey !== "sp4"); spaceSeq = 3; renderSpaceTab(); renderSaleUnits();');
+ok(alerts.length === 0 && (w.eval('spaces["sp4"]') === undefined), '退锁后不产生新空间（弹窗预填不落库）');
+ok(!d.getElementById('modal-spaceplan').classList.contains('hidden'), '弹窗仍打开（预填）');
+ok(d.getElementById('sp-name').value === 'r48演练空间-副本-副本', '连续复制=源名+副本命名（预填）');
+// 未持锁保存被 guardEdit 拦截
+alerts.length = 0;
+w.eval('confirmSpacePlan()');
+ok(alerts.some(m => m.includes('发起变更')), '退锁后保存被拦截（须持锁）');
+w.eval('closeModal("spaceplan")');
 
 // ===== 9. 待发布详情页：发布+复制（未持锁置灰）=====
 w.eval("openSpacePlanDetail('sp3')");
