@@ -168,5 +168,49 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   window.eval(`closePlanCreatePage(); exitEdit(); backToList()`);
 }
 
+// ===== ⑦ 第50轮：online-text（maas）各列表隐藏折算系数及之后的 vTPM 专属列 =====
+{
+  const dom = boot(); const { window } = dom; const doc = window.document;
+  // 列表页 maas 两 Tab：表头只到「所选时间执行价」=8 列；行 8 cells
+  const mh = Array.from(doc.querySelectorAll('#top-tab-maas-listed thead th')).map(th => th.textContent.trim());
+  check('⑦ maas已上架 Tab 表头 8 列（末列=所选时间执行价）', mh.length === 8 && mh[mh.length - 1] === '所选时间执行价');
+  check('⑦ maas Tab 表头无折算系数/SLO/payload/购买量', !mh.some(t => ['折算系数', 'SLO', 'payload', '最小购买量', '最大购买量', '购买量step'].includes(t)));
+  const muTab = Array.from(doc.querySelector('#top-tab-maas-unlisted thead').querySelectorAll('th'));
+  check('⑦ maas未上架 Tab 表头同样 8 列', muTab.length === 8);
+  const mrows = Array.from(doc.querySelectorAll('#maas-listed-tbody tr')).filter(r => r.cells[0] && /^su-/.test(r.cells[0].textContent.trim()));
+  check('⑦ maas 行 8 cells（尾部 vTPM 列不输出）', mrows.length === 4 && mrows.every(r => r.cells.length === 8));
+  // vTPM 两 Tab 对照：14 列不变
+  const vh = Array.from(doc.querySelectorAll('#top-tab-vtpm-listed thead th')).map(th => th.textContent.trim());
+  check('⑦ vTPM Tab 表头 14 列（含折算系数）', vh.length === 14 && vh.includes('折算系数'));
+  const vrowsTab = Array.from(doc.querySelectorAll('#vtpm-listed-tbody tr')).filter(r => r.cells[0] && /^su-/.test(r.cells[0].textContent.trim()));
+  check('⑦ vTPM 行 14 cells', vrowsTab.length === 4 && vrowsTab.every(r => r.cells.length === 14));
+  // 详情页三处：SU Tab / 售卖计划 Tab / 计划详情——col-vtpm th+td 同步 hidden
+  window.eval(`openDetailByCode('maas-online-text-glm4'); switchInnerTab('saleunit'); renderSaleUnits()`);
+  const suHead = Array.from(doc.querySelector('#saleunit-tbody').closest('table').querySelectorAll('thead th'));
+  check('⑦ glm4 SU Tab：6 个 vTPM 专属 th 隐藏', suHead.filter(t => t.classList.contains('hidden')).length === 6);
+  const suRow = Array.from(doc.querySelectorAll('#saleunit-tbody tr'))[0];
+  check('⑦ glm4 SU 行：6 个 vTPM 专属 td 隐藏', Array.from(suRow.cells).filter(c => c.classList.contains('hidden')).length === 6);
+  check('⑦ glm4 SU 可见末列=所选时间执行价', suHead.filter(t => !t.classList.contains('hidden')).map(t => t.textContent.trim()).pop() === '所选时间执行价');
+  window.eval(`switchInnerTab('plan'); renderPlan()`);
+  const planHead = Array.from(doc.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th'));
+  check('⑦ glm4 计划 Tab：7 个隐藏 th（库存项+折算及之后6列）', planHead.filter(t => t.classList.contains('hidden')).length === 7);
+  const planRow = Array.from(doc.querySelectorAll('#plan-tbody tr')).filter(r => r.cells.length > 3)[0];
+  check('⑦ glm4 计划行：7 个隐藏 td', planRow && Array.from(planRow.cells).filter(c => c.classList.contains('hidden')).length === 7);
+  window.eval(`openPlanDetail(0)`);
+  const pdHead = Array.from(doc.querySelector('#plan-detail-tbody').closest('table').querySelectorAll('thead th'));
+  check('⑦ glm4 计划详情：7 个隐藏 th（库存项+折算及之后6列）', pdHead.filter(t => t.classList.contains('hidden')).length === 7);
+  const pdRow = Array.from(doc.querySelectorAll('#plan-detail-tbody tr')).filter(r => r.cells.length > 3)[0];
+  check('⑦ glm4 计划详情行：7 个隐藏 td', pdRow && Array.from(pdRow.cells).filter(c => c.classList.contains('hidden')).length === 7);
+  window.eval(`closePlanDetail(); backToList()`);
+  // vTPM 商品对照：全显示
+  window.eval(`openDetailByCode('maas-product-vtpm-std'); switchInnerTab('saleunit'); renderSaleUnits()`);
+  const stdHead = Array.from(doc.querySelector('#saleunit-tbody').closest('table').querySelectorAll('thead th'));
+  check('⑦ std SU Tab：无隐藏列（对照组）', stdHead.filter(t => t.classList.contains('hidden')).length === 0);
+  window.eval(`switchInnerTab('plan'); renderPlan()`);
+  const stdPlanHead = Array.from(doc.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th'));
+  check('⑦ std 计划 Tab：无隐藏列（对照组）', stdPlanHead.filter(t => t.classList.contains('hidden')).length === 0);
+  window.eval(`backToList()`);
+}
+
 console.log('第49轮: ' + pass + ' 通过, ' + fail + ' 失败');
 process.exit(fail > 0 ? 1 : 0);

@@ -24,13 +24,16 @@ ok(prows.length === 4, 'maas已上架 Tab 平铺 4 行（glm4 sp1 全部 4 单�
 ok(lrows.length === 4, 'vTPM已上架 Tab 平铺 4 行（std 2 在售 + pro 2 在售）: ' + lrows.length);
 ok(vrows.length === 6, 'vTPM未上架 Tab 平铺 6 行（pre 3 未配置 + pro 2 未配置 + std su-3 禁售）: ' + vrows.length);
 const lhead = Array.from(document.querySelectorAll('#top-tab-maas-listed thead th')).map(th => th.textContent.trim());
-ok(lhead.length === 14, '已上架 Tab 表头 14 列: ' + lhead.length);
+ok(lhead.length === 8, 'maas已上架 Tab 表头 8 列（第50轮：折算系数及之后 vTPM 专属列删除）: ' + lhead.length);
 ok(lhead[0] === '售卖单元' && lhead[1] === '状态' && lhead[2] === 'SKU', '前3列=售卖单元/状态/SKU（SKU 第三列）');
 ok(!lhead.includes('操作'), '无操作列');
-ok(lhead.includes('关联计费项') && lhead.includes('刊例价') && lhead.includes('购买量step'), '列内容与详情页售卖单元 Tab 一致');
+ok(lhead.includes('关联计费项') && lhead.includes('刊例价') && !lhead.includes('购买量step') && !lhead.includes('折算系数'), 'maas Tab 无 vTPM 专属列（第50轮）');
 ok(!lhead.includes('商品code') && !lhead.includes('商品名称') && !lhead.includes('商品类型'), '旧商品列已删除');
 const vhead = Array.from(document.querySelectorAll('#top-tab-vtpm-unlisted thead th')).map(th => th.textContent.trim());
-ok(vhead.length === 14 && vhead[2] === 'SKU', 'vTPM未上架 Tab 表头 14 列且含 SKU');
+ok(vhead.length === 14 && vhead[2] === 'SKU' && vhead.includes('折算系数') && vhead.includes('购买量step'), 'vTPM未上架 Tab 表头 14 列含 vTPM 专属列（对照组）');
+// maas 行 8 cells；vTPM 行 14 cells（第50轮）
+ok(prows.every(r => r.cells.length === 8), 'maas已上架 行 8 cells（第50轮）');
+ok(vrows.every(r => r.cells.length === 14), 'vTPM未上架 行 14 cells');
 // 类型归属：glm4（online-text）只出现在 maas 组；std/pro/pre（vTPM）只出现在 vTPM 组
 ok(prows.every(r => r.cells[2].textContent.trim() === 'maas-online-text-glm4'), 'maas已上架 Tab 全部为 glm4 单元');
 ok(!lrows.some(r => r.cells[2].textContent.trim() === 'maas-online-text-glm4'), 'glm4 不出现在 vTPM已上架 Tab');
