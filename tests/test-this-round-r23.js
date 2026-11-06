@@ -16,12 +16,12 @@ function ok(cond, msg) { step++; if (!cond) { fail++; console.log('FAIL[' + step
 w.eval('openDetailByCode("maas-online-text-glm4")');
 // 2. 列表结构：8 列表头（第40轮：删空间单元列，售卖空间居首）
 const spHead = Array.from(d.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(JSON.stringify(spHead) === JSON.stringify(['售卖空间','状态','空间名称','Function','维度组合','售卖单元数','优先级','生效开始','生效结束','操作']), '表头 10 列（第49轮生效起止拆两列；第52轮加操作列）: ' + spHead.join('/'));
+ok(JSON.stringify(spHead) === JSON.stringify(['售卖空间','状态','空间名称','生效时间','失效时间','优先级','Function','维度组合','操作']), '表头 9 列（第55轮：code/状态/名称/生效/失效/优先级/Function/维度组合/操作）: ' + spHead.join('/'));
 // 3. 行序（第39轮：排序=状态→优先级降序→创建时间逆序；第48轮：单空间 sp1，fn 按创建序 input/output/cache）
 const rows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows.length === 3, '3 个空间行（第48轮：单空间 sp1×3fn）');
 ok(rows[0].cells[0].textContent.trim() === 'sp1' && rows[0].cells[0].rowSpan === 3, 'sp1 空间列 rowspan=3');
-ok(rows[0].cells[3].textContent.trim() === 'input' && rows[1].cells[0].textContent.trim() === 'output' && rows[2].cells[0].textContent.trim() === 'cache', 'sp1 三行按创建序 input/output/cache');
+ok(rows[0].cells[6].textContent.trim() === 'input' && rows[1].cells[0].textContent.trim() === 'output' && rows[2].cells[0].textContent.trim() === 'cache', 'sp1 三行按创建序 input/output/cache（第55轮：fn 列=cells[6]）');
 ok(!rows[0].textContent.includes('pu-sp-'), '第40轮已删空间单元列（无 pu-sp 编号）');
 // 4. 状态列（第38轮：三态徽标 + 档期内/外标注）
 ok(rows[0].textContent.includes('已发布'), 'sp1 首行已发布徽标（续行被 rowspan 合并无徽标）');
@@ -40,9 +40,9 @@ w.eval('backToList()');
 w.eval('openDetailByCode("maas-product-vtpm-std")');
 const vRows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(vRows.length === 1, 'vtpm 单行（sp1 常驻空间）');
-ok(vRows[0].cells[3].textContent.includes('—'), '无 fn 显示 —');
+ok(vRows[0].cells[6].textContent.includes('—'), '无 fn 显示 —（第55轮：fn 列=cells[6]）');
 ok(vRows[0].textContent.includes('已发布'), 'sp1 已发布');
-ok(vRows[0].cells[5].textContent.trim() === '3', 'sp1 售卖单元数=3（第48轮 std 纯叉乘 3 单元）');
+ok(!vRows[0].textContent.includes('售卖单元数'), '第55轮：售卖单元数列已删');
 // 8. 创建新空间：未发布 → 不参与仲裁；发布且高优先级 → 生效（第43轮两步：fn→直接勾度量）
 w.eval('startEdit()');
 w.eval('openSpacePlanModal()');

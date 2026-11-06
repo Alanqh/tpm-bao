@@ -67,7 +67,7 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   // 空间列表：表头 9 列 + 拆列
   window.eval(`openDetailByCode('maas-product-vtpm-std'); switchInnerTab('space')`);
   const spHead = Array.from(doc.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-  check('③ 空间列表表头 10 列且末两列=生效开始/生效结束（第52轮：末列加操作）', spHead.length === 10 && spHead[7] === '生效开始' && spHead[8] === '生效结束' && spHead[9] === '操作');
+  check('③ 空间列表表头 9 列（第55轮：code/状态/名称/生效时间/失效时间/优先级/Function/维度组合/操作）', spHead.length === 9 && spHead[3] === '生效时间' && spHead[4] === '失效时间' && spHead[8] === '操作');
   const spRow = Array.from(doc.querySelectorAll('#space-tbody tr')).find(r => r.querySelector('td') && !r.querySelector('td[colspan]') && r.textContent.includes('sp1'));
   const spRowTxt = spRow.textContent;
   check('③ 空间行分别展示 effStart/effEnd（std sp1=2026-10-01/2027-11-01）', spRowTxt.includes('2026-10-01 00:00:00') && spRowTxt.includes('2027-11-01 00:00:00'));

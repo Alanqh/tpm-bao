@@ -76,7 +76,7 @@ ok(alerts.some(m => m.includes('请选择售卖空间')), '未选空间 → 拦�
 // 5b. 时间超出空间档期拦截（第52轮：生效开始还须晚于当前+10min——用未来但超空间档期的时间触发档期拦截）
 d.getElementById('plan-space-sel').value = 'sp1';
 w.eval('onPlanSpaceChange()');
-d.getElementById('plan-eff-start').value = '2026-11-06T12:00:00';
+d.getElementById('plan-eff-start').value = '2026-12-06T12:00:00';
 d.getElementById('plan-eff-end').value = '2028-10-01T00:00:00';
 alerts.length = 0;
 w.eval('confirmPlanCreate()');
@@ -84,14 +84,14 @@ ok(alerts.some(m => m.includes('必须在售卖空间') && m.includes('生效范
 // 5c. 合法保存（sp1 + 合档时间 + 单元全选默认）——第45轮：sp2 待发布不可下拉选中，改用 sp1
 d.getElementById('plan-space-sel').value = 'sp1';
 w.eval('onPlanSpaceChange()');
-d.getElementById('plan-eff-start').value = '2026-11-06T12:00:00';
+d.getElementById('plan-eff-start').value = '2026-12-06T12:00:00';
 d.getElementById('plan-eff-end').value = '2027-10-01T00:00:00';
 // 5c-0. 第52轮：生效开始早于当前+10 分钟 → 拦截
 d.getElementById('plan-eff-start').value = '2026-11-05T00:00:00';
 alerts.length = 0;
 w.eval('confirmPlanCreate()');
 ok(alerts.some(m => m.includes('晚于当前时刻 10 分钟')), '生效开始过早（<当前+10min）→ 拦截（第52轮）');
-d.getElementById('plan-eff-start').value = '2026-11-06T12:00:00';
+d.getElementById('plan-eff-start').value = '2026-12-06T12:00:00';
 alerts.length = 0;
 w.eval('confirmPlanCreate()');
 const lastIdx = w.eval('planRows.length - 1');

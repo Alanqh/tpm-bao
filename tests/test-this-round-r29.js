@@ -36,9 +36,9 @@ ok(!d.getElementById('space-tbody').innerHTML.includes('publishSpacePlan('), '�
 ok(!d.getElementById('space-tbody').innerHTML.includes('stopSpacePlan('), '列表行内无停用按钮');
 ok(!d.getElementById('space-tbody').innerHTML.includes('editSpacePlan('), '第38轮：列表行内无修改入口（空间不可改）');
 
-// ===== 4. 详情入口：售卖空间 code = 进详情链接 =====
-const btn = Array.from(d.querySelectorAll('#space-tbody button')).find(b => b.textContent.trim() === 'sp1');
-ok(btn && btn.getAttribute('onclick').includes("openSpacePlanDetail('sp1')"), '空间 code 徽标=详情链接 openSpacePlanDetail(sp1)');
+// ===== 4. 详情入口：空间名称 = 进详情链接（第55轮：跳转从 code 移到空间名称）=====
+const btn = Array.from(d.querySelectorAll('#space-tbody button')).find(b => b.textContent.includes('GLM4·常规售卖空间'));
+ok(btn && btn.getAttribute('onclick').includes("openSpacePlanDetail('sp1')"), '空间名称列=详情链接 openSpacePlanDetail(sp1)');
 
 // ===== 5. 详情页：已发布（sp1，第48轮单空间）→ 停用+复制 =====
 w.eval("openSpacePlanDetail('sp1')");

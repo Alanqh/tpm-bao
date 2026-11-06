@@ -103,7 +103,7 @@ w.eval('exitEdit(); backToList()');
 w.eval('openDetailByCode("maas-product-vtpm-std")');
 const vRows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(vRows.length === 1, 'vtpm 单行（sp1 常驻空间）');
-ok(vRows[0].cells[3].textContent.includes('—'), 'Function 列显示 —');
+ok(vRows[0].cells[6].textContent.includes('—'), 'Function 列显示 —（第55轮：7 空间级列后）');
 ok(w.eval('currentSpaceOfFn("")') === 'sp1', 'vtpm 当前 sp1');
 // 12. snapshot 链路（第38轮）：glm4 新建空间后返回列表再进入，spaces/spaceSeq 恢复
 w.eval('openDetailByCode("maas-online-text-glm4")');

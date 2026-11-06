@@ -44,13 +44,13 @@ section('2. 空间列表');
 const spRows = Array.from(document.querySelectorAll('#space-tbody tr'));
 ok(spRows.length === 3, '空间列表 3 行（sp1 三 fn 行，第48轮单空间），实得 ' + spRows.length);
 const spHead = Array.from(document.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(spHead.length === 10 && spHead[0] === '售卖空间' && spHead[1] === '状态' && spHead[2] === '空间名称' && spHead[3] === 'Function' && spHead[4] === '维度组合' && spHead[7] === '生效开始' && spHead[8] === '生效结束' && spHead[9] === '操作', '空间列表 10 列（第49轮拆生效两列；第52轮加操作列）');
+ok(spHead.length === 9 && spHead[0] === '售卖空间' && spHead[1] === '状态' && spHead[2] === '空间名称' && spHead[3] === '生效时间' && spHead[4] === '失效时间' && spHead[5] === '优先级' && spHead[6] === 'Function' && spHead[7] === '维度组合' && spHead[8] === '操作', '空间列表 9 列（第55轮列序）');
 ok(!spHead.includes('空间单元'), '第40轮已删「空间单元」列');
 ok(!spRows[0].textContent.includes('pu-sp-'), '无空间单元编号（pu-sp 已删）');
 // 第34轮：每行完整渲染；第48轮单空间三 fn 行 input/output/cache
-ok(spRows[0].cells[0].textContent.trim() === 'sp1' && spRows[0].cells[3].textContent.trim() === 'input', '首行 space=sp1 fn=input（fnDims 键序）');
-ok(spRows[1].cells[0].textContent.trim() === 'output' && spRows[1].cells[2].textContent.trim() === '1', 'sp1 output 行单元数=1（第48轮：输入区间 1M+ 1 组合）');
-ok(spRows[2].cells[0].textContent.trim() === 'cache' && spRows[2].cells[2].textContent.trim() === '1', 'sp1 cache 行单元数=1（0 维=唯一空单元）');
+ok(spRows[0].cells[0].textContent.trim() === 'sp1' && spRows[0].cells[6].textContent.trim() === 'input', '首行 space=sp1 fn=input（fnDims 键序；第55轮 fn 列=cells[6]）');
+ok(spRows[1].cells[0].textContent.trim() === 'output' && spRows[1].cells.length === 2, 'sp1 output 续行仅 fn/维度组合 2 列（第55轮：单元数列已删）');
+ok(spRows[2].cells[0].textContent.trim() === 'cache' && spRows[2].cells.length === 2, 'sp1 cache 续行仅 fn/维度组合 2 列（第55轮）');
 
 // ===== 3. effectiveSpaceAt（第38轮：纯空间本体仲裁；第48轮单空间任意时刻均 sp1） =====
 section('3. 生效空间推导');
@@ -171,7 +171,7 @@ window.openDetailByCode('maas-product-vtpm-std');
 window.eval('switchInnerTab("space")');
 const vRows = Array.from(document.querySelectorAll('#space-tbody tr'));
 ok(vRows.length === 1, '无 fn 商品空间列表单行（sp1 常驻空间）');
-ok(vRows[0].cells[3].textContent.trim() === '—', 'Function 列显示 —（无 function）');
+ok(vRows[0].cells[6].textContent.trim() === '—', 'Function 列显示 —（无 function；第55轮 fn 列=cells[6]）');
 ok(vRows[0].cells[1].textContent.includes('已发布'), 'sp1 状态徽标=已发布');
 ok(vRows[0].cells[0].textContent.trim() === 'sp1', '空间列=sp1');
 ok(evalInPage('currentSpaceOfFn("")') === 'sp1', 'currentSpaceOfFn("")=sp1（fn=""→sp1）');

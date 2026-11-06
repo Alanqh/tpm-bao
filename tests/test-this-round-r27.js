@@ -29,12 +29,12 @@ ok(txt.includes('GLM4·常规售卖空间'), '常规空间条目');
 ok(txt.includes('已发布'), '状态徽标');
 ok(txt.includes('input'), 'Function 列=input');
 const firstHead = rows[0];
-ok(firstHead.cells.length === 10, '空间行 10 列（第49轮生效起止拆两列+第52轮操作列）');
-ok(firstHead.cells[3].textContent.trim() === 'input', 'Function 列=input（第4列）');
+ok(firstHead.cells.length === 9, '空间行 9 列（第55轮：7 空间级列+fn+维度组合，末列操作 rowspan）');
+ok(firstHead.cells[6].textContent.trim() === 'input', 'Function 列=input（第55轮：第 7 列）');
 
 // ===== 3. 排序与 rowspan（第40轮：状态→优先级降序→创建时间逆序；空间内 fn 行按创建序）=====
 ok(rows[0].cells[0].textContent.trim() === 'sp1' && rows[0].cells[0].rowSpan === 3, 'sp1 空间列 rowspan=3');
-ok(rows[0].cells[3].textContent.trim() === 'input', 'sp1 首行 fn=input（创建时勾选序）');
+ok(rows[0].cells[6].textContent.trim() === 'input', 'sp1 首行 fn=input（创建时勾选序；第55轮 fn 列=cells[6]）');
 
 // ===== 4. 空间详情页（第40轮：基本信息 + 售卖单元清单；无修改）=====
 w.eval('openSpacePlanDetail("sp1")');
@@ -78,11 +78,11 @@ Array.from(d.querySelectorAll('#spaceplan-create-view .sp-fn-check')).forEach(b 
 w.eval('confirmSpacePlan()');
 rows = Array.from(d.querySelectorAll('#space-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
 ok(rows.length === 6, '新空间加入后 6 行（sp1×3 + sp2×3，第48轮单空间基数），实得 ' + rows.length);
-const sp3First = rows.find(r => r.cells.length >= 8 && r.cells[0] && r.cells[0].textContent.trim() === 'sp2');
+const sp3First = rows.find(r => r.cells.length >= 6 && r.cells[0] && r.cells[0].textContent.trim() === 'sp2');
 const sp3Idx = rows.indexOf(sp3First);
-ok(!!sp3First && rows[sp3Idx+1] && rows[sp3Idx+2] && rows[sp3Idx+1].cells.length === 3 && rows[sp3Idx+2].cells.length === 3,
-  'sp2 三 fn 行（首行 8 列带空间级列，两续行仅 fn/维度/单元数 3 列）');
-ok(sp3First.cells[0].rowSpan === 3 && sp3First.cells[3].textContent.trim() === 'input', 'sp2 空间列 rowspan=3（首行 fn=input，创建时勾选序 input→output→cache）');
+ok(!!sp3First && rows[sp3Idx+1] && rows[sp3Idx+2] && rows[sp3Idx+1].cells.length === 2 && rows[sp3Idx+2].cells.length === 2,
+  'sp2 三 fn 行（首行 9 列带空间级列+操作，两续行仅 fn/维度组合 2 列）');
+ok(sp3First.cells[0].rowSpan === 3 && sp3First.cells[6].textContent.trim() === 'input', 'sp2 空间列 rowspan=3（首行 fn=input，创建时勾选序 input→output→cache；第55轮 fn 列=cells[6]）');
 ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2").length') === 3, 'sp2 每 fn 1 组合（纯叉乘）×3 fn 共 3 单元（第48轮）');
 
 // ===== 8. vtpm 商品：常驻空间单行=====
