@@ -144,7 +144,7 @@ ok(document.getElementById('plan-create-view').classList.contains('hidden'), '�
 // ================= 售卖计划 Tab 20 列 + 详情 =================
 section('售卖计划 Tab（20 列，第49轮生效起止拆两列）+ 详情页');
 const headCells = Array.from(document.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(headCells.length === 21, '表头 21 列（第49轮生效起止拆两列；第52轮末列加操作）: ' + headCells.length);
+ok(headCells.length === 20, '表头 20 列（第49轮拆两列；第57轮：操作列已删）: ' + headCells.length);
 ok(headCells[2] === '类型', '第 3 列 = 类型');
 ok(headCells.includes('Function'), '表头含 Function 列（第19轮：function 专门展示列）');
 ok(headCells.includes('售卖空间'), '表头含售卖空间列（第20轮）');

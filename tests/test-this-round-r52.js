@@ -184,15 +184,16 @@ function bootConfirmSpy() {
   const dom = boot(); const { window } = dom; const doc = window.document;
   section('⑥ 空间复制（列表页按钮 → 弹窗预填）');
   window.eval(`openDetailByCode('maas-product-vtpm-std'); switchInnerTab('space'); renderSpaceTab()`);
-  // 列表行有复制按钮
+  // 第57轮：列表操作列已删——行内无复制按钮（复制入口=详情页操作区）；函数链路照走
   const spRow = Array.from(doc.querySelectorAll('#space-tbody tr')).find(r => r.textContent.includes('sp1') && r.querySelector('button'));
-  check('⑥ 空间列表行含复制按钮', !!spRow && spRow.textContent.includes('复制'));
+  check('⑥ 空间列表行无复制按钮（第57轮：操作列已删；剩余按钮=空间名称跳转）', !spRow || !spRow.textContent.includes('复制'));
   const spaceCount = window.eval('Object.keys(spaces).length');
   // std sp1 单 fn 但 1 行（第34轮每 fn 完整渲染）；操作列在本行。rowspan 合并用 glm4 对照（3 fn → rowspan=3）
   window.eval(`backToList(); openDetailByCode('maas-online-text-glm4'); switchInnerTab('space'); renderSpaceTab()`);
   const glm4Rows = Array.from(doc.querySelectorAll('#space-tbody tr')).filter(r => r.cells.length >= 3);
   const firstBtnCell = Array.from(glm4Rows[0].cells).find(c => c.querySelector('button'));
-  check('⑥ 操作列按空间 rowspan 合并（glm4 sp1 三 fn → rowspan=3，续行 3 cells 无按钮）', firstBtnCell && firstBtnCell.rowSpan === 3 && glm4Rows.slice(1).every(r => !Array.from(r.cells).some(c => c.querySelector('button'))));
+  // 第57轮：操作列已删——glm4 三行空间级 6 列 rowspan 合并（名称跳转按钮在首行），续行仅 2 cells
+  check('⑥ 空间级列 rowspan 合并（glm4 sp1 三 fn → rowspan=3，续行 2 cells 无按钮）', glm4Rows[0].cells[0].rowSpan === 3 && glm4Rows.slice(1).every(r => r.cells.length === 2 && !Array.from(r.cells).some(c => c.querySelector('button'))));
   window.eval(`backToList(); openDetailByCode('maas-product-vtpm-std'); renderSpaceTab()`);
   // 复制 → 不直接落库，弹窗预填
   window.eval(`startEdit(); copySpacePlan('sp1')`);
@@ -219,9 +220,9 @@ function bootConfirmSpy() {
   const dom = boot(); const { window } = dom; const doc = window.document;
   section('⑥ 计划复制（列表页按钮 → 编辑页预填）');
   window.eval(`openDetailByCode('maas-product-vtpm-std'); switchInnerTab('plan'); renderPlan()`);
-  // 列表行复制按钮（操作列）
-  const planRow = Array.from(doc.querySelectorAll('#plan-tbody tr')).find(r => r.querySelector('button'));
-  check('⑥ 计划列表行含复制按钮', !!planRow && planRow.textContent.includes('复制'));
+  // 第57轮：列表操作列已删——计划行内无复制按钮；函数链路照走（window.eval 直接调函数）
+  const planRow = Array.from(doc.querySelectorAll('#plan-tbody tr')).find(r => r.textContent.includes('复制'));
+  check('⑥ 计划列表行无复制按钮（第57轮：操作列已删）', !planRow);
   const cnt = window.eval('planRows.length');
   // 未持锁复制 → 拦截
   let alertMsg = '';

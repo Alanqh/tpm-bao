@@ -67,7 +67,7 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   // 空间列表：表头 9 列 + 拆列
   window.eval(`openDetailByCode('maas-product-vtpm-std'); switchInnerTab('space')`);
   const spHead = Array.from(doc.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-  check('③ 空间列表表头 9 列（第55轮：code/状态/名称/生效时间/失效时间/优先级/Function/维度组合/操作）', spHead.length === 9 && spHead[3] === '生效时间' && spHead[4] === '失效时间' && spHead[8] === '操作');
+  check('③ 空间列表表头 8 列（第57轮：操作列已删；code/状态/名称/生效时间/失效时间/优先级/Function/维度组合）', spHead.length === 8 && spHead[3] === '生效时间' && spHead[4] === '失效时间');
   const spRow = Array.from(doc.querySelectorAll('#space-tbody tr')).find(r => r.querySelector('td') && !r.querySelector('td[colspan]') && r.textContent.includes('sp1'));
   const spRowTxt = spRow.textContent;
   check('③ 空间行分别展示 effStart/effEnd（std sp1=2026-10-01/2027-11-01）', spRowTxt.includes('2026-10-01 00:00:00') && spRowTxt.includes('2027-11-01 00:00:00'));
@@ -80,7 +80,7 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   // 售卖计划 Tab 20 列拆分
   window.eval(`switchInnerTab('plan'); renderPlan()`);
   const planHead = Array.from(doc.querySelector('#plan-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-  check('③ 计划 Tab 表头 21 列（第51轮列序；第56轮：生效时间/失效时间+配额项隐藏）', planHead.length === 21 && planHead[5] === '生效时间' && planHead[6] === '失效时间' && planHead[19] === '优先级' && planHead[20] === '操作');
+  check('③ 计划 Tab 表头 20 列（第57轮：操作列已删；生效时间/失效时间第 6/7；配额项隐藏）', planHead.length === 20 && planHead[5] === '生效时间' && planHead[6] === '失效时间' && planHead[19] === '优先级');
   // 计划详情 18 列拆分
   window.eval(`openPlanDetail(0)`);
   const pdHead = Array.from(doc.querySelector('#plan-detail-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());

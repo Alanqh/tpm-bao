@@ -22,7 +22,7 @@ ok(w.eval('typeof querySpaceAt') === 'undefined' && w.eval('typeof resetSpaceAt'
 
 // ===== 2. 初始列表：4 行（sp2×input + sp1×input/output/cache），9 列表头 =====
 const ths = d.querySelectorAll('#inner-tab-space thead th');
-ok(ths.length === 9 && ths[0].textContent.trim() === '售卖空间', '售卖空间表头 9 列（第55轮列序；售卖空间居首），实得 ' + ths.length);
+ok(ths.length === 8 && ths[0].textContent.trim() === '售卖空间', '售卖空间表头 8 列（第57轮：操作列已删；售卖空间居首），实得 ' + ths.length);
 let rows = dataRows();
 ok(rows.length === 3, 'glm4 初始 3 行（第48轮：单空间 sp1 三 fn），实得 ' + rows.length);
 ok(rows[0].cells[0] && rows[0].cells[0].textContent.trim() === 'sp1' && rows[0].cells[0].rowSpan === 3, 'sp1 空间列 rowspan=3');
@@ -31,7 +31,7 @@ const fnOfRow = r => r.cells.length === 2 ? r.cells[0].textContent.trim() : r.ce
 const fnsSp1 = [fnOfRow(rows[0]), fnOfRow(rows[1]), fnOfRow(rows[2])];
 ok(fnsSp1.join(',') === 'input,output,cache', 'sp1 三行按创建序 input→output→cache，实得 ' + fnsSp1.join(','));
 ok(!d.getElementById('space-tbody').textContent.includes('pu-sp-'), '第40轮：列表无 pu-sp 编号');
-ok(rows[0].cells.length === 9 && rows[1].cells.length === 2 && rows[2].cells.length === 2, 'sp1 首行 9 列带空间级列+操作、两续行仅 fn/维度组合 2 列（第55轮：单元数列已删）');
+ok(rows[0].cells.length === 8 && rows[1].cells.length === 2 && rows[2].cells.length === 2, 'sp1 首行 8 列带空间级列（第57轮：操作列已删）、两续行仅 fn/维度组合 2 列');
 ok(rows[0].textContent.includes('生效期内'), 'sp1 生效期内');
 
 // ===== 3. 仲裁（第38轮保留：priority 降序→seq 降序）走 timeFilter 变量 =====

@@ -44,7 +44,7 @@ section('2. 空间列表');
 const spRows = Array.from(document.querySelectorAll('#space-tbody tr'));
 ok(spRows.length === 3, '空间列表 3 行（sp1 三 fn 行，第48轮单空间），实得 ' + spRows.length);
 const spHead = Array.from(document.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(spHead.length === 9 && spHead[0] === '售卖空间' && spHead[1] === '状态' && spHead[2] === '空间名称' && spHead[3] === '生效时间' && spHead[4] === '失效时间' && spHead[5] === '优先级' && spHead[6] === 'Function' && spHead[7] === '维度组合' && spHead[8] === '操作', '空间列表 9 列（第55轮列序）');
+ok(spHead.length === 8 && spHead[0] === '售卖空间' && spHead[1] === '状态' && spHead[2] === '空间名称' && spHead[3] === '生效时间' && spHead[4] === '失效时间' && spHead[5] === '优先级' && spHead[6] === 'Function' && spHead[7] === '维度组合', '空间列表 8 列（第57轮：操作列已删）');
 ok(!spHead.includes('空间单元'), '第40轮已删「空间单元」列');
 ok(!spRows[0].textContent.includes('pu-sp-'), '无空间单元编号（pu-sp 已删）');
 // 第34轮：每行完整渲染；第48轮单空间三 fn 行 input/output/cache

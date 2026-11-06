@@ -16,7 +16,7 @@ function ok(cond, msg) { step++; if (!cond) { fail++; console.log('FAIL[' + step
 w.eval('openDetailByCode("maas-online-text-glm4")');
 // 2. 列表结构：8 列表头（第40轮：删空间单元列，售卖空间居首）
 const spHead = Array.from(d.querySelector('#space-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
-ok(JSON.stringify(spHead) === JSON.stringify(['售卖空间','状态','空间名称','生效时间','失效时间','优先级','Function','维度组合','操作']), '表头 9 列（第55轮：code/状态/名称/生效/失效/优先级/Function/维度组合/操作）: ' + spHead.join('/'));
+ok(JSON.stringify(spHead) === JSON.stringify(['售卖空间','状态','空间名称','生效时间','失效时间','优先级','Function','维度组合']), '表头 8 列（第57轮：操作列已删）: ' + spHead.join('/'));
 // 3. 行序（第39轮：排序=状态→优先级降序→创建时间逆序；第48轮：单空间 sp1，fn 按创建序 input/output/cache）
 const rows = Array.from(d.querySelectorAll('#space-tbody tr'));
 ok(rows.length === 3, '3 个空间行（第48轮：单空间 sp1×3fn）');
