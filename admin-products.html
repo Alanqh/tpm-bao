@@ -211,6 +211,7 @@
                  <th class="text-left px-3 py-2 font-medium">Function</th>
                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                  <th class="text-left px-3 py-2 font-medium">关联计费项</th>
+                 <th class="text-left px-3 py-2 font-medium">计费项标签</th>
                  <th class="text-right px-3 py-2 font-medium">刊例价</th>
                  <th class="text-right px-3 py-2 font-medium">所选时间执行价</th>
                </tr>
@@ -231,6 +232,7 @@
                  <th class="text-left px-3 py-2 font-medium">Function</th>
                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                  <th class="text-left px-3 py-2 font-medium">关联计费项</th>
+                 <th class="text-left px-3 py-2 font-medium">计费项标签</th>
                  <th class="text-right px-3 py-2 font-medium">刊例价</th>
                  <th class="text-right px-3 py-2 font-medium">所选时间执行价</th>
                </tr>
@@ -251,6 +253,7 @@
                  <th class="text-left px-3 py-2 font-medium">Function</th>
                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                  <th class="text-left px-3 py-2 font-medium">关联计费项</th>
+                 <th class="text-left px-3 py-2 font-medium">计费项标签</th>
                  <th class="text-right px-3 py-2 font-medium">刊例价</th>
                  <th class="text-right px-3 py-2 font-medium">所选时间执行价</th>
                  <th class="text-left px-3 py-2 font-medium">折算系数</th>
@@ -277,6 +280,7 @@
                  <th class="text-left px-3 py-2 font-medium">Function</th>
                  <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                  <th class="text-left px-3 py-2 font-medium">关联计费项</th>
+                 <th class="text-left px-3 py-2 font-medium">计费项标签</th>
                  <th class="text-right px-3 py-2 font-medium">刊例价</th>
                  <th class="text-right px-3 py-2 font-medium">所选时间执行价</th>
                  <th class="text-left px-3 py-2 font-medium">折算系数</th>
@@ -402,13 +406,13 @@
                   <th class="text-left px-3 py-2 font-medium">类型</th>
                   <th class="text-left px-3 py-2 font-medium">售卖空间</th>
                   <th class="text-left px-3 py-2 font-medium">所属售卖计划</th>
-                  <th class="text-left px-3 py-2 font-medium">生效开始</th>
-                  <th class="text-left px-3 py-2 font-medium">生效结束</th>
+                  <th class="text-left px-3 py-2 font-medium">生效时间</th>
+                  <th class="text-left px-3 py-2 font-medium">失效时间</th>
                   <th class="text-left px-3 py-2 font-medium">售卖单元</th>
                   <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">计费项</th>
-                  <th class="text-left px-3 py-2 font-medium">配额项</th>
+                  <th class="text-left px-3 py-2 font-medium col-quota">配额项</th>
                   <th class="text-left px-3 py-2 font-medium col-vtpm">库存项</th>
                   <th class="text-left px-3 py-2 font-medium col-vtpm">折算系数</th>
                   <th class="text-left px-3 py-2 font-medium col-vtpm">SLO</th>
@@ -473,10 +477,10 @@
                   <th class="text-left px-3 py-2 font-medium">Function</th>
                   <th class="text-left px-3 py-2 font-medium">维度:度量</th>
                   <th class="text-left px-3 py-2 font-medium">类型</th>
-                  <th class="text-left px-3 py-2 font-medium">生效开始</th>
-                  <th class="text-left px-3 py-2 font-medium">生效结束</th>
+                  <th class="text-left px-3 py-2 font-medium">生效时间</th>
+                  <th class="text-left px-3 py-2 font-medium">失效时间</th>
                   <th class="text-left px-3 py-2 font-medium">计费项</th>
-                  <th class="text-left px-3 py-2 font-medium">配额项</th>
+                  <th class="text-left px-3 py-2 font-medium col-quota">配额项</th>
                   <th class="text-left px-3 py-2 font-medium col-vtpm">库存项</th>
                   <th class="text-left px-3 py-2 font-medium">刊例价</th>
                   <th class="text-left px-3 py-2 font-medium col-vtpm">折算系数</th>
@@ -551,11 +555,11 @@
               <input id="sp-priority" type="number" class="form-input" placeholder="如 100">
             </div>
             <div>
-              <label class="form-label">生效开始</label>
+              <label class="form-label">生效时间</label>
               <input id="sp-eff-start" type="datetime-local" step="1" class="form-input">
             </div>
             <div>
-              <label class="form-label">生效结束</label>
+              <label class="form-label">失效时间</label>
               <input id="sp-eff-end" type="datetime-local" step="1" class="form-input">
             </div>
           </div>
@@ -599,11 +603,11 @@
               <input id="plan-name" class="form-input" placeholder="如 vTPM 预留·标准·30天">
             </div>
             <div>
-              <label class="form-label">开始生效时间</label>
+              <label class="form-label">生效时间</label>
               <input id="plan-eff-start" type="datetime-local" step="1" class="form-input" onchange="onPlanSpaceChange()" onblur="onPlanTimeBlur()">
             </div>
             <div>
-              <label class="form-label">结束生效时间</label>
+              <label class="form-label">失效时间</label>
               <input id="plan-eff-end" type="datetime-local" step="1" class="form-input" onchange="onPlanSpaceChange()" onblur="onPlanTimeBlur()">
             </div>
             <div>
@@ -1292,7 +1296,8 @@
          <td class="px-3 py-2 font-mono text-xs"><button type="button" onclick="openDetailByCode('${code}')" class="text-violet-600 hover:underline" title="进入商品详情">${code}<i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i></button></td>
          <td class="px-3 py-2 text-xs">${fnOfUnit(u) || '—'}</td>
          <td class="px-3 py-2">${formatDimMeasure(u)}</td>
-         <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code + '<button type="button" onclick="copyChargeCode(\'' + charge.code + '\', this)" class="ml-1 text-slate-400 hover:text-slate-600" title="复制code"><i class="fa-solid fa-copy"></i></button>' : '—'}</td>
+         <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code : '—'}</td>
+         <td class="px-3 py-2 text-sm">${charge && charge.tags && charge.tags.length ? charge.tags.map(t => `<span class="inline-block bg-slate-100 text-slate-600 rounded px-1.5 py-0.5 mr-1 mb-0.5 text-[10px] leading-4">${t}</span>`).join('') : '—'}</td>
          <td class="px-3 py-2 text-right font-mono text-xs">${charge ? charge.price.toFixed(4) : '—'}</td>
          <td class="px-3 py-2 text-right font-mono text-xs">${execPrice}</td>
          ${isVtpm ? `
@@ -1330,7 +1335,7 @@
         return computeUnitRowsOf(code).filter(row => actUnits.some(u => u.id === row.u.id));
       }).filter(row => listed ? !row.st.offline : (row.st.offline || row.st.unconf));
       document.getElementById(tbodyId).innerHTML = rows.length === 0
-        ? '<tr><td colspan="' + (group === 'vtpm' ? 14 : 8) + '" class="px-3 py-8 text-center text-xs text-slate-400">' + emptyText + '</td></tr>' // 第50轮：maas 组 8 列（vTPM 专属列已删）
+        ? '<tr><td colspan="' + (group === 'vtpm' ? 15 : 9) + '" class="px-3 py-8 text-center text-xs text-slate-400">' + emptyText + '</td></tr>' // 第56轮：计费项标签列 +1（maas 9/vTPM 15）
         : rows.map(renderUnitRow).join('');
     }
     function renderListed() {
@@ -1555,7 +1560,7 @@
             <td class="px-3 py-2 text-xs">${fnOfUnit(u) || '—'}</td>
             <td class="px-3 py-2">${formatDimMeasure(u)}</td>
             <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code : '—'}</td>
-            <td class="px-3 py-2 font-mono text-xs">${quota ? quota.id : '—'}</td>
+            <td class="px-3 py-2 font-mono text-xs col-quota">${quota ? quota.id : '—'}</td>
             <td class="px-3 py-2 font-mono text-xs col-vtpm">${inv ? inv.id : '—'}</td>
             <td class="px-3 py-2 text-xs col-vtpm">${planFieldVal(r, uid, 'factor')}</td>
             <td class="px-3 py-2 text-xs col-vtpm">${planFieldVal(r, uid, 'slo')}</td>
@@ -2184,7 +2189,7 @@
       const priority = parseInt(document.getElementById('sp-priority').value) || 0;
       const effStart = pcpVal(document.getElementById('sp-eff-start').value, nowLocalStr());
       const effEnd = pcpVal(document.getElementById('sp-eff-end').value, '2099-12-31T23:59:59');
-      if (effStart > effEnd) { alert('生效开始不能晚于生效结束'); return; }
+      if (effStart > effEnd) { alert('生效时间不能晚于失效时间'); return; }
       // 第47轮：嵌套式收集——每个勾选 fn 从自己的卡片收集维度度量（.sp-measure-check[data-fn]）
       const checkedFns = Array.from(document.querySelectorAll('.sp-fn-check')).filter(c => c.checked).map(c => c.dataset.fn);
       if (checkedFns.length === 0) { alert('至少勾选一个 function'); return; }
@@ -2365,8 +2370,8 @@
         field('空间code', k),
         field('名称', sp.name),
         field('优先级', sp.priority),
-        field('生效开始', sp.effStart),
-        field('生效结束', sp.effEnd)
+        field('生效时间', sp.effStart),
+        field('失效时间', sp.effEnd)
       ].join('');
       // 售卖单元列表（第40轮：该空间的售卖单元清单——每单元一行：售卖单元/Function/维度:度量）
       const tbody = document.getElementById('spaceplan-detail-tbody');
@@ -2486,7 +2491,7 @@
             <td class="px-3 py-2">${effStartCell}</td>
             <td class="px-3 py-2">${effEndCell}</td>
             <td class="px-3 py-2 font-mono text-xs">${charge ? charge.code : '—'}</td>
-            <td class="px-3 py-2 font-mono text-xs">${quota ? (quota.id + '（数量 ' + quota.qty + '）') : '—'}</td>
+            <td class="px-3 py-2 font-mono text-xs col-quota">${quota ? (quota.id + '（数量 ' + quota.qty + '）') : '—'}</td>
             <td class="px-3 py-2 font-mono text-xs col-vtpm">${inv ? (inv.id + '（数量 ' + inv.qty + '）') : '—'}</td>
             <td class="px-3 py-2 text-right font-mono text-xs">${charge ? charge.price.toFixed(4) + ' / ' + charge.unit : '—'}</td>
             <td class="px-3 py-2 text-xs col-vtpm">${planFieldVal(r, uid, 'factor') || '—'}</td>
@@ -2534,6 +2539,8 @@
     function syncUnitListColumnsByType() {
       const show = isVtpmProduct();
       document.querySelectorAll('.col-vtpm').forEach(el => el.classList.toggle('hidden', !show));
+      // 第56轮：配额项列暂不展示（计划 Tab + 计划详情）
+      document.querySelectorAll('.col-quota').forEach(el => el.classList.add('hidden'));
       // 第51轮：online-text（maas）商品 SU Tab 表格紧凑化——切 compact-cells（min-width 1600→1000 + 行距收紧）
       const suTable = document.getElementById('saleunit-table');
       if (suTable) suTable.classList.toggle('compact-cells', !show);
@@ -2926,8 +2933,8 @@
       if (outOfSpace.length > 0) { alert('以下售卖单元不属于所选空间：' + outOfSpace.join('、')); return; }
       const effStart = pcpVal(document.getElementById('plan-eff-start').value, '');
       const effEnd = pcpVal(document.getElementById('plan-eff-end').value, '');
-      if (!effStart || !effEnd) { alert('请填写开始生效时间与结束生效时间'); return; }
-      if (effStart > effEnd) { alert('开始生效时间不能晚于结束生效时间'); return; }
+      if (!effStart || !effEnd) { alert('请填写生效时间与失效时间'); return; }
+      if (effStart > effEnd) { alert('生效时间不能晚于失效时间'); return; }
       // 第52轮：新计划（含复制）生效开始须晚于当前时刻 10 分钟；修改旧计划不受此限
       // 第53轮：earliest 按本地时区生成，且与 effStart 同为空格口径（'T' 口径字典序恒小于空格口径，同日全误拦）
       const isCopyModeNow = planCopyFromIdx >= 0 && editingPlanIdx === planCopyFromIdx;
@@ -2935,7 +2942,7 @@
         const eMin = new Date(Date.now() + 10 * 60 * 1000);
         const p = n => String(n).padStart(2, '0');
         const earliest = eMin.getFullYear() + '-' + p(eMin.getMonth() + 1) + '-' + p(eMin.getDate()) + ' ' + p(eMin.getHours()) + ':' + p(eMin.getMinutes()) + ':' + p(eMin.getSeconds());
-        if (effStart <= earliest) { alert('生效开始时间须晚于当前时刻 10 分钟（' + earliest + ' 之后）'); return; }
+        if (effStart <= earliest) { alert('生效时间须晚于当前时刻 10 分钟（' + earliest + ' 之后）'); return; }
       }
       if (effStart < sp.effStart || effEnd > sp.effEnd) {
         alert('售卖计划生效时间（' + effStart + ' ~ ' + effEnd + '）必须在售卖空间 ' + spaceKey + ' 的生效范围（' + sp.effStart + ' ~ ' + sp.effEnd + '）内');
