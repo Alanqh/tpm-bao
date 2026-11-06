@@ -57,7 +57,7 @@ document.getElementById('sp-eff-start').value = '2026-12-10T00:00:00';
 document.getElementById('sp-eff-end').value = '2026-12-01T00:00:00';
 alertMsg = '';
 window.confirmSpacePlan();
-ok(alertMsg.includes('生效开始不能晚于生效结束'), '起止倒置 → 拦截: ' + alertMsg);
+ok(alertMsg.includes('生效时间不能晚于失效时间'), '起止倒置 → 拦截: ' + alertMsg);
 
 // 场景6（第43轮）：勾 fn 但不勾任何度量 → 全缺省组合=唯一单元（0 维度空间）
 window.openSpacePlanModal();

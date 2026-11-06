@@ -20,7 +20,7 @@ section('页面结构');
 ok(!!document.getElementById('plan-create-view'), '存在独立页面 #plan-create-view');
 ok(!document.getElementById('modal-plan-create'), '原弹窗 #modal-plan-create 已删除');
 const pcView = document.getElementById('plan-create-view');
-ok(pcView.textContent.includes('基础信息') && pcView.textContent.includes('开始生效时间'), '基础信息区（第36轮去括注；第51轮去区块序号）');
+ok(pcView.textContent.includes('基础信息') && pcView.textContent.includes('生效时间'), '基础信息区（第36轮去括注；第51轮去区块序号）');
 ok(pcView.textContent.includes('本售卖计划对哪些售卖单元生效'), '生效售卖单元区');
 ok(pcView.textContent.includes('计划字段配置'), '计划字段配置区（第51轮去区块序号）');
 ['关联计费项', '关联配额项', '关联库存项', '关联vTPM折算系数配置', '关联SLO赔付规则配置', '关联payload', '购买量'].forEach(t => {
@@ -61,7 +61,7 @@ ok(document.querySelector('#plan-inventory-unified option').textContent.includes
 // qty/sell unified 输入框
 ok(document.querySelectorAll('#plan-qty-unified input').length === 3, '购买量 unified 三输入框');
 ok(!document.getElementById('plan-sell-unified'), '售卖时间容器已删除');
-ok(document.getElementById('plan-eff-start') && pcView.textContent.includes('开始生效时间'), '生效时间在基础信息区块内');
+ok(document.getElementById('plan-eff-start') && pcView.textContent.includes('生效时间'), '生效时间在基础信息区块内');
 
 // ================= 在售/禁售 =================
 section('上架/下架切换');
@@ -155,7 +155,7 @@ const pd = document.getElementById('plan-detail-view').textContent;
 // 详情页（第9轮）：基础信息仅名称+优先级；其余信息并入计划单元表（含生效起止）
 const pdFields = document.getElementById('plan-detail-fields').textContent;
 ok(pdFields.includes('名称') && pdFields.includes('优先级') && !pdFields.includes('生效售卖单元'), '详情页基础信息仅名称+优先级');
-ok(pd.includes('生效开始') && pd.includes('生效结束'), '详情页计划单元表含「生效开始/生效结束」列（第49轮拆两列）');
+ok(pd.includes('生效时间') && pd.includes('失效时间'), '详情页计划单元表含「生效时间/失效时间」列（第56轮改名）');
 ok(pd.includes('见计划单元') === false || true, 'unified 模式下详情页显示标量值');
 ok(document.getElementById('plan-detail-tbody').textContent.includes('inv-vtpm-custom'), '详情页计划单元表展示自定义库存项');
 
