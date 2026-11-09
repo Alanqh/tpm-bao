@@ -1,11 +1,17 @@
 # TPM 保障包项目长期笔记
 
 ## 项目概述
-硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第58轮（main b4f081a / gh-pages 3236b01，31 套 1285 项全绿）。
+硅基流动（SiliconFlow）「预留 vTPM / 在线文本」商品管理前端原型（纯 HTML + Tailwind CDN + 内联 JS mock，静态可部署）。仓库根：`/Users/lqh/Documents/ChatGPT/TPM保障包/`，页面在 `prototype/` 下。已迭代至第59轮（main a46552f / gh-pages 7fa9357，31 套 1236 项全绿）。
 
-## 第58轮（现行）：空 fn（—）固定排在空间内首行
-- renderSpaceTab 行排序：同空间内 `if (!a.f) return -1; if (!b.f) return 1;` 置于 fnDims 键序比较之前——空 fn（显示 —，如 vTPM 商品）无论创建勾选顺序如何均排空间首行，其余 fn 按键序。
-- 注入 sp9（fnDims 键序 input→''→cache）验证：渲染序 —→input→cache；sp1 的 input/output/cache 与 vTPM std 的 —（单行）不受影响。31 套 1285 项全绿（无需测试适配，mock 空 fn 空间原本就在首位）。线上 md5 682c8dea697760165bbbe3c8afb59bda。
+## 第59轮（现行）：maas-online-text fn 候选池与 glm4 mock 增加—（空 fn）
+- **①fnPool**：hasFn 类型（online-text）的 fn 候选=`[''].concat(input/output/cache)` 共 4 项（— 排首位，创建空间弹窗可勾选「无 function」）。
+- **②glm4 sp1 mock 四 fn**：fnDims 键序 `{'', input, output, cache}`（— 空 fn 0 维、input 两档、output 一档、cache 0 维）；su 编号重排 su-1(—)→su-2/3(input)→su-4(output)→su-5(cache) 共 5 单元。计划 mock units 4→5 全 on（chargeCodes/quotaCodes/inventoryCodes/unitStates 同步 5 键）。
+- **全链路影响**：空间列表 3→4 行（—首行 rowspan=4）、SU Tab/计划 Tab/列表页已上架均 4→5 行、创建页 fn 复选 3→4、空间详情单元表 4→5 行（排序=空串组合序最前 su-1，其余 fn 字典序 cache<input<output：su-5→su-2→su-3→su-4）。
+- 测试适配 16 套：smoke-r26/r12/r13/r19(fnPool ',input,output,cache')/r20/r22/r23/r24/r25/r27/r28/r29/r38/r47/r48/r49/r51/r52。31 套 1236 项全绿。线上 md5 67c2ad8b548c7be1da649a2f1b3c2577。
+- **教训：功能加选项须三处同步——fnPool 候选池、mock 数据（defaultSpaces/defaultSaleUnits/defaultPlans）、UI 渲染排序**；jsdom 调试脚本需 NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules（jsdom 不在项目 node_modules）。
+
+## 第58轮：空 fn（—）固定排在空间内首行
+- renderSpaceTab 行排序：同空间内 `if (!a.f) return -1; if (!b.f) return 1;` 置于 fnDims 键序比较之前——空 fn（显示 —）无论创建勾选顺序如何均排空间首行，其余 fn 按键序。
 
 ## 第57轮：删列表操作列 + 恢复计费项小复制按钮
 - **①空间列表操作列删**：9→8 列（售卖空间/状态/空间名称/生效时间/失效时间/优先级/Function/维度组合）；renderSpaceTab 删操作 td、空态 colspan=8；空间级 rowspan 列仍 6 个。
@@ -103,12 +109,12 @@ index.html 官网 / terms.html 购买须知 / wallet.html 前台充值（package
 - backToList snapshotCurrentProduct 回写；openDetailByCode 统一入口；计费项前缀=商品code。
 
 ## 已废弃链路（防止复建）
-第44~46轮「fn 与度量分离共享勾选」弹窗→47轮嵌套式；第37轮前手动 SU；第38轮前独立空间计划实体/跨空间勾选；第45轮前「空间完全不可改」；第39轮前空间 Tab 时间点查询；第40轮前 pu-sp-N-M 前缀；第33轮前「已上架」文案；第47轮前「缺省完整叉乘」；第48轮前 glm4 sp2 双11 mock；第49轮前列表两 Tab/「空间维度」「生效起止」合并列/SU 组合列在 fn 之上/计划筛选「全部」/online-text 显示折算 SLO Tab；第51轮前：计划 Tab 生效两列在表尾/空间列第 7 位/详情空间列第 4 位/计费配额默认 unified/优先级第 3 位/区块编号/标题铅笔/onPlanSpaceChange 只重渲单元区；**第52轮前：空间列表 9 列、计划 Tab 20 列（现=10/21 含操作列）、计划默认生效时间写死（现=下一整 30 分钟）、失效默认 2099（计划现=留空；空间仍=2099）、发布停用无 confirm、详情页复制（现=列表页复制按钮）、复制直接落库（现=预填编辑态保存才落库）、复制豁免编辑锁（现=须持锁）**；**第53轮前：空间创建/编辑/复制用弹窗 #modal-spaceplan（现=#spaceplan-create-view 完整页面）、默认时间与 earliest 用 toISOString UTC 口径（现=本地时区拼串，earliest 空格口径）**；**第54轮前：空间复制不受编辑锁（现=copySpacePlan 前置 canEdit，须持锁）**；**第55轮前：空间列表 10 列（现=9）、Function 列.cells[3]（现=.cells[6]）、详情跳转在 space code 上（现=空间名称列）、有「售卖单元数」列（现=删）、续行 3 cells（现=2）**；**第56轮前：列表页计费项 code 旁有复制按钮（现=删）、列表无计费项标签列（现=有，maas 9/vtpm 15）、计划 Tab/计划详情展示配额项列（现=隐藏 col-quota）、生效文案为「生效开始/生效结束」（现=生效时间/失效时间）**；**第57轮前：空间列表 9 列/计划 Tab 21 列含末列「操作」（现=8/20，操作列删）、复制入口在列表操作列（现=收敛至详情页操作区）、列表页计费项 code 旁无小复制按钮（现=恢复）**；**第58轮前：空 fn（—）按 fnDims 键序排序（现=固定排空间内首行）**。
+第44~46轮「fn 与度量分离共享勾选」弹窗→47轮嵌套式；第37轮前手动 SU；第38轮前独立空间计划实体/跨空间勾选；第45轮前「空间完全不可改」；第39轮前空间 Tab 时间点查询；第40轮前 pu-sp-N-M 前缀；第33轮前「已上架」文案；第47轮前「缺省完整叉乘」；第48轮前 glm4 sp2 双11 mock；第49轮前列表两 Tab/「空间维度」「生效起止」合并列/SU 组合列在 fn 之上/计划筛选「全部」/online-text 显示折算 SLO Tab；第51轮前：计划 Tab 生效两列在表尾/空间列第 7 位/详情空间列第 4 位/计费配额默认 unified/优先级第 3 位/区块编号/标题铅笔/onPlanSpaceChange 只重渲单元区；**第52轮前：空间列表 9 列、计划 Tab 20 列（现=10/21 含操作列）、计划默认生效时间写死（现=下一整 30 分钟）、失效默认 2099（计划现=留空；空间仍=2099）、发布停用无 confirm、详情页复制（现=列表页复制按钮）、复制直接落库（现=预填编辑态保存才落库）、复制豁免编辑锁（现=须持锁）**；**第53轮前：空间创建/编辑/复制用弹窗 #modal-spaceplan（现=#spaceplan-create-view 完整页面）、默认时间与 earliest 用 toISOString UTC 口径（现=本地时区拼串，earliest 空格口径）**；**第54轮前：空间复制不受编辑锁（现=copySpacePlan 前置 canEdit，须持锁）**；**第55轮前：空间列表 10 列（现=9）、Function 列.cells[3]（现=.cells[6]）、详情跳转在 space code 上（现=空间名称列）、有「售卖单元数」列（现=删）、续行 3 cells（现=2）**；**第56轮前：列表页计费项 code 旁有复制按钮（现=删）、列表无计费项标签列（现=有，maas 9/vtpm 15）、计划 Tab/计划详情展示配额项列（现=隐藏 col-quota）、生效文案为「生效开始/生效结束」（现=生效时间/失效时间）**；**第57轮前：空间列表 9 列/计划 Tab 21 列含末列「操作」（现=8/20，操作列删）、复制入口在列表操作列（现=收敛至详情页操作区）、列表页计费项 code 旁无小复制按钮（现=恢复）**；**第58轮前：空 fn（—）按 fnDims 键序排序（现=固定排空间内首行）**；**第59轮前：maas-online-text fnPool 不含—（现=首位必含）、glm4 sp1 三 fn/4 单元（现=四 fn 含—/5 单元）、计划 units 4（现=5）**。
 
 ## 技术约定与部署
 - 每页顶部深色「原型导航」栏；后台紫色主色 #7C3AED；管理员「吕」。数据全 JS mock。
 - **部署（Pages legacy 分支部署）**：gh-pages=HTML 根直出+.nojekyll。推 main → `git worktree add ../tpm-bao-ghpages gh-pages` → rm+cp prototype/*.html → add/commit/push → sleep~105s → curl 验证 md5 → worktree remove。URL：https://alanqh.github.io/tpm-bao/admin-products.html
-- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules；统一从仓库根目录跑）**：31 套全绿（第55轮口径，1285 项）——this-round(31)/r9(26)/r10(52)/r11(30)/r12(43)/r13(39)/r14(49)/r15(41)/r16(29)/r18(34)/r19(39)/r20(68)/r22(35)/r23(33)/r24(16)/r25(47)/r27(32)/r28(31)/r29(50)/r38(44)/r45(40)/r47(45)/r48(32)/r49(62)/r51(43)/r52(48)/r53(23)/smoke-r26(49)/plan-page(79)/data-consistency(30)/su-dim-validate(13)。第55轮断言口径：空间列表 9 列（code/状态/名称/生效时间/失效时间/优先级/Function/维度组合/操作）、fn 列=cells[6]、续行 2 cells、详情链接=空间名称列按钮；r38 测试时间已用远未来（2026-12-06）防跨日 flaky。
+- **测试（tests/，NODE_PATH=/Users/lqh/.workbuddy/binaries/node/workspace/node_modules；统一从仓库根目录跑）**：31 套全绿（第59轮口径，1236 项）——this-round(31)/r9(26)/r10(52)/r11(30)/r12(43)/r13(39)/r14(49)/r15(41)/r16(29)/r18(34)/r19(39)/r20(69)/r22(35)/r23(33)/r24(16)/r25(47)/r27(33)/r28(31)/r29(50)/r38(44)/r45(40)/r47(46)/r48(32)/r49(62)/r51(43)/r52(48)/r53(23)/smoke-r26(49)/plan-page(79)/data-consistency(30)/su-dim-validate(13)。第59轮断言口径：sp1 四 fn（—首行 rowspan=4）、SU/计划/列表页均 5 单元、详情单元表序 su-1(—)→su-5(cache)→su-2/3(input)→su-4(output)（fn 字典序）、fnPool=,input,output,cache；空间列表 8 列 fn=cells[6]、续行 2 cells、详情链接=空间名称列按钮；r38 测试时间已用远未来（2026-12-06）防跨日 flaky。
 - **jsdom 踩坑汇总**：runScripts:'dangerously'；confirm/alert 打桩；页面顶层 const 用 window.eval 取；rowspan 合并行 cells 索引偏移；勾选联动 dispatchEvent(change,{bubbles:true})；跨商品切换先 backToList()；保存成功无 alert（断言数据变化）；datetime-local 丢秒（默认值/断言用分钟级）；跑批 >150s 被杀分批跑。
 - 语法校验：node -e 提取 `<script>` 用 new Function()。修页面后先跑全套找红再逐套改断言。
 - 网络偶发 502：push 失败等 1-2 分钟重试。文本批量替换：`/usr/bin/sed -i '' -e 's/旧/新/g'`。
