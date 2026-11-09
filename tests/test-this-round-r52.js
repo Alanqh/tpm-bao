@@ -192,8 +192,8 @@ function bootConfirmSpy() {
   window.eval(`backToList(); openDetailByCode('maas-online-text-glm4'); switchInnerTab('space'); renderSpaceTab()`);
   const glm4Rows = Array.from(doc.querySelectorAll('#space-tbody tr')).filter(r => r.cells.length >= 3);
   const firstBtnCell = Array.from(glm4Rows[0].cells).find(c => c.querySelector('button'));
-  // 第57轮：操作列已删——glm4 三行空间级 6 列 rowspan 合并（名称跳转按钮在首行），续行仅 2 cells
-  check('⑥ 空间级列 rowspan 合并（glm4 sp1 三 fn → rowspan=3，续行 2 cells 无按钮）', glm4Rows[0].cells[0].rowSpan === 3 && glm4Rows.slice(1).every(r => r.cells.length === 2 && !Array.from(r.cells).some(c => c.querySelector('button'))));
+  // 第57轮：操作列已删；第59轮四 fn——glm4 四行空间级 6 列 rowspan 合并（名称跳转按钮在首行），续行仅 2 cells
+  check('⑥ 空间级列 rowspan 合并（glm4 sp1 四 fn → rowspan=4，续行 2 cells 无按钮）', glm4Rows[0].cells[0].rowSpan === 4 && glm4Rows.slice(1).every(r => r.cells.length === 2 && !Array.from(r.cells).some(c => c.querySelector('button'))));
   window.eval(`backToList(); openDetailByCode('maas-product-vtpm-std'); renderSpaceTab()`);
   // 复制 → 不直接落库，弹窗预填
   window.eval(`startEdit(); copySpacePlan('sp1')`);

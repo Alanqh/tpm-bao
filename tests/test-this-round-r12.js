@@ -51,7 +51,7 @@ section('3. 弹窗结构（第47轮：fn 勾选联动渲染 per-fn 卡片）');
 window.openDetailByCode('maas-online-text-glm4');
 window.startEdit();
 window.openSpacePlanModal();
-ok(document.querySelectorAll('.sp-fn-check').length === 3, '3 个 fn 复选行');
+ok(document.querySelectorAll('.sp-fn-check').length === 4, '4 个 fn 复选行（第59轮+—无fn 排首位）');
 ok(document.querySelectorAll('.sp-dim-check').length === 0, '维度复选已删（直接勾度量）');
 ok(document.querySelectorAll('.sp-measure-check').length === 0 && document.getElementById('sp-dimmeas').textContent.includes('先勾选'), '未勾 fn 时无度量复选（提示先勾选 function）');
 const inBox = document.querySelector('.sp-fn-check[data-fn="input"]');

@@ -51,7 +51,7 @@ ok(!act.innerHTML.includes('editSpacePlan'), '第38轮：无修改操作（空�
 const fields = d.getElementById('spaceplan-detail-fields').textContent;
 ok(fields.includes('sp1') && fields.includes('GLM4·常规售卖空间') && fields.includes('100') && fields.includes('生效时间') && fields.includes('失效时间') && fields.includes('2026-11-01 00:00:00') && fields.includes('2027-11-01 00:00:00'), '字段区：code/名称/优先级/生效时间+失效时间（第56轮改名）');
 const dtRows = d.querySelectorAll('#spaceplan-detail-tbody tr');
-ok(dtRows.length === 4 && dtRows[0].textContent.includes('su-4') && dtRows[0].textContent.trim().endsWith('--') && dtRows[3].textContent.includes('su-3') && !dtRows[0].textContent.includes('pu-sp-'), '详情售卖单元清单（第48轮：4 单元=cache 0维 su-4 居首 + input×2 + output；组合序空串最前，无 pu-sp 编号）');
+ok(dtRows.length === 5 && dtRows[0].textContent.includes('su-1') && dtRows[0].textContent.trim().endsWith('--') && dtRows[4].textContent.includes('su-4') && !dtRows[0].textContent.includes('pu-sp-'), '详情售卖单元清单（第59轮：5 单元=su-1 — 0维居首（组合序空串最前）+ cache su-5 + input×2 + output su-4 末行，无 pu-sp 编号）');
 
 // ===== 6. 停用拦截：空间内有生效中的售卖计划时不允许停用 =====
 alerts.length = 0;
@@ -133,7 +133,7 @@ w.eval('openDetailByCode("maas-online-text-glm4")');
 ok(d.getElementById('spaceplan-detail-view').classList.contains('hidden') && !d.getElementById('detail-view').classList.contains('hidden'), '重进详情页正常');
 // 清理 sp3 恢复 mock 现场
 w.eval('delete spaces["sp2"]; delete spaces["sp3"]; saleUnits = saleUnits.filter(u => u.spaceKey !== "sp2" && u.spaceKey !== "sp3"); spaceSeq = 1; renderSpaceTab(); renderSaleUnits();');
-ok(dataRows().length === 3, '清理后回到 3 行（第48轮单空间 sp1×3）');
+ok(dataRows().length === 4, '清理后回到 4 行（第59轮四 fn 含—）');
 
 console.log('结果: ' + step + ' 通过, ' + fail + ' 失败');
 process.exit(fail ? 1 : 0);

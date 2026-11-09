@@ -19,9 +19,9 @@ ok(tabs.join(',') === 'space,saleunit,plan,pricing,factor-config,slo-config', 'T
 ok(d.querySelector('#plan-tabs-card .admin-tab[data-tab="space"]').classList.contains('active'), '默认打开售卖空间 Tab');
 ok(!d.getElementById('inner-tab-spaceplan'), '空间计划 Tab 容器已删');
 
-// ===== 2. 售卖空间 Tab 平铺：glm4 初始 3 行（第40轮：8 列无空间单元列；第48轮：单空间）=====
+// ===== 2. 售卖空间 Tab 平铺：glm4 初始 4 行（第59轮：sp1 四 fn 含—；8 列无空间单元列）=====
 let rows = Array.from(d.querySelectorAll('#space-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
-ok(rows.length === 3, '初始 3 行（sp1×3fn，第48轮单空间），实得 ' + rows.length);
+ok(rows.length === 4, '初始 4 行（第59轮：sp1 四 fn 含—），实得 ' + rows.length);
 const txt = d.getElementById('space-tbody').textContent;
 ok(!txt.includes('pu-sp-'), '第40轮：空间单元列已删（无 pu-sp 编号）');
 ok(!txt.includes('双11大促'), '第48轮：双11空间已删');
@@ -30,11 +30,11 @@ ok(txt.includes('已发布'), '状态徽标');
 ok(txt.includes('input'), 'Function 列=input');
 const firstHead = rows[0];
 ok(firstHead.cells.length === 8, '空间行 8 列（第57轮：操作列已删；6 空间级列+fn+维度组合）');
-ok(firstHead.cells[6].textContent.trim() === 'input', 'Function 列=input（第55轮：第 7 列）');
+ok(firstHead.cells[6].textContent.trim() === '—', 'Function 列=—（第58/59轮：空 fn 首行）');
 
-// ===== 3. 排序与 rowspan（第40轮：状态→优先级降序→创建时间逆序；空间内 fn 行按创建序）=====
-ok(rows[0].cells[0].textContent.trim() === 'sp1' && rows[0].cells[0].rowSpan === 3, 'sp1 空间列 rowspan=3');
-ok(rows[0].cells[6].textContent.trim() === 'input', 'sp1 首行 fn=input（创建时勾选序；第55轮 fn 列=cells[6]）');
+// ===== 3. 排序与 rowspan（第40轮：状态→优先级降序→创建时间逆序；第59轮：空 fn 首位+其余键序）=====
+ok(rows[0].cells[0].textContent.trim() === 'sp1' && rows[0].cells[0].rowSpan === 4, 'sp1 空间列 rowspan=4');
+ok(rows[1].cells[0].textContent.trim() === 'input', 'sp1 次行 fn=input（键序）');
 
 // ===== 4. 空间详情页（第40轮：基本信息 + 售卖单元清单；无修改）=====
 w.eval('openSpacePlanDetail("sp1")');
@@ -45,10 +45,11 @@ ok(!d.getElementById('spaceplan-detail-actions').textContent.includes('修改'),
 const dtThs = Array.from(d.querySelector('#spaceplan-detail-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
 ok(dtThs.join('/') === '售卖单元/Function/维度:度量', '详情单元表 3 列（售卖单元/Function/维度:度量）: ' + dtThs.join('/'));
 const dtRows = Array.from(d.querySelectorAll('#spaceplan-detail-tbody tr'));
-ok(dtRows.length === 4, '详情单元表 4 行（sp1 全部售卖单元，第48轮 per-fn 纯叉乘）');
-ok(dtRows[0].textContent.includes('su-4') && dtRows[0].textContent.trim().endsWith('--'), '首行=su-4 cache 0维（--，组合序空串最前）');
-ok(dtRows.some(r => r.textContent.includes('su-1') && r.textContent.includes('input')), 'su-1/input 在清单中');
-ok(dtRows[3].textContent.includes('su-3') && dtRows[3].textContent.includes('1M+'), '末行=su-3（output/输入区间:1M+）');
+ok(dtRows.length === 5, '详情单元表 5 行（sp1 全部售卖单元，第59轮含—空单元）');
+ok(dtRows[0].textContent.includes('su-1') && dtRows[0].textContent.trim().endsWith('--'), '首行=su-1 — 0维（--，组合序空串最前）');
+ok(dtRows.some(r => r.textContent.includes('su-2') && r.textContent.includes('input')), 'su-2/input 在清单中');
+ok(dtRows[1].textContent.includes('su-5') && dtRows[1].textContent.trim().endsWith('--'), '第2行=su-5 cache 0维（--，fn 字典序 cache 最前）');
+ok(dtRows[4].textContent.includes('su-4') && dtRows[4].textContent.includes('output') && dtRows[4].textContent.includes('1M+'), '末行=su-4 output（fn 字典序 output 最后）');
 w.eval('closeSpacePlanDetail()');
 
 // ===== 5. 纯空间仲裁（第38轮；第48轮：单空间无切换）=====
@@ -77,13 +78,13 @@ Array.from(d.querySelectorAll('#spaceplan-create-view .sp-fn-check')).forEach(b 
 });
 w.eval('confirmSpacePlan()');
 rows = Array.from(d.querySelectorAll('#space-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
-ok(rows.length === 6, '新空间加入后 6 行（sp1×3 + sp2×3，第48轮单空间基数），实得 ' + rows.length);
+ok(rows.length === 8, '新空间加入后 8 行（sp1×4 + sp2×4，第59轮测试勾全部 4 fn 含—），实得 ' + rows.length);
 const sp3First = rows.find(r => r.cells.length >= 6 && r.cells[0] && r.cells[0].textContent.trim() === 'sp2');
 const sp3Idx = rows.indexOf(sp3First);
-ok(!!sp3First && rows[sp3Idx+1] && rows[sp3Idx+2] && rows[sp3Idx+1].cells.length === 2 && rows[sp3Idx+2].cells.length === 2,
-  'sp2 三 fn 行（首行 9 列带空间级列+操作，两续行仅 fn/维度组合 2 列）');
-ok(sp3First.cells[0].rowSpan === 3 && sp3First.cells[6].textContent.trim() === 'input', 'sp2 空间列 rowspan=3（首行 fn=input，创建时勾选序 input→output→cache；第55轮 fn 列=cells[6]）');
-ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2").length') === 3, 'sp2 每 fn 1 组合（纯叉乘）×3 fn 共 3 单元（第48轮）');
+ok(!!sp3First && rows[sp3Idx+1] && rows[sp3Idx+2] && rows[sp3Idx+3] && rows[sp3Idx+1].cells.length === 2 && rows[sp3Idx+2].cells.length === 2 && rows[sp3Idx+3].cells.length === 2,
+  'sp2 四 fn 行（首行 8 列带空间级列，三续行仅 fn/维度组合 2 列）');
+ok(sp3First.cells[0].rowSpan === 4 && sp3First.cells[6].textContent.trim() === '—', 'sp2 空间列 rowspan=4（首行 fn=—，第58轮空 fn 首位）');
+ok(w.eval('saleUnits.filter(u => u.spaceKey === "sp2").length') === 4, 'sp2 空 fn 1 + 每 fn 1 组合（纯叉乘）×3 fn 共 4 单元（第48/59轮）');
 
 // ===== 8. vtpm 商品：常驻空间单行=====
 w.eval('exitEdit(); backToList(); openDetailByCode("maas-product-vtpm-std")');

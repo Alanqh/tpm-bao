@@ -24,7 +24,7 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   const tabs = Array.from(doc.querySelectorAll('#list-view .admin-card .admin-tab')).map(b => b.getAttribute('data-tab'));
   check('① 四 Tab data-tab 序列', JSON.stringify(tabs) === JSON.stringify(['maas-listed', 'maas-unlisted', 'vtpm-listed', 'vtpm-unlisted']));
   check('① 四个 tbody 齐备', ['maas-listed', 'maas-unlisted', 'vtpm-listed', 'vtpm-unlisted'].every(id => !!doc.getElementById(id + '-tbody')));
-  check('① maas已上架=4 行（glm4 全在售）', rowsOf(doc, 'maas-listed').length === 4);
+  check('① maas已上架=5 行（glm4 全在售；第59轮五单元含—）', rowsOf(doc, 'maas-listed').length === 5);
   check('① maas未上架=0 行（空态占位）', rowsOf(doc, 'maas-unlisted').length === 0);
   check('① vTPM已上架=4 行（std 2 + pro 2）', rowsOf(doc, 'vtpm-listed').length === 4);
   check('① vTPM未上架=6 行（pre 3 未配置 + pro 2 未配置 + std su-3 禁售）', rowsOf(doc, 'vtpm-unlisted').length === 6);
@@ -48,17 +48,17 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   const head = Array.from(doc.querySelector('#saleunit-tbody').closest('table').querySelectorAll('thead th')).map(t => t.textContent.trim());
   check('② SU 表头：售卖空间→Function→维度:度量→售卖单元', head[0] === '售卖空间' && head[1] === 'Function' && head[2] === '维度:度量' && head[3] === '售卖单元');
   const rows = Array.from(doc.querySelectorAll('#saleunit-tbody tr'));
-  check('② SU Tab 4 行', rows.length === 4);
-  check('② 首行=su-4 cache 0维', rows[0].textContent.includes('su-4') && rows[0].textContent.includes('cache'));
-  // fn 列在空间列内合并：input 组首行 fn td rowspan=2（跨 su-1/su-2），su-2 行无 fn td
-  const inputRow = rows.find(r => r.textContent.includes('su-1'));
+  check('② SU Tab 5 行（第59轮含—空单元）', rows.length === 5);
+  check('② 首行=su-1 — 0维（第59轮组合序空串最前）', rows[0].textContent.includes('su-1') && rows[0].textContent.includes('—'));
+  // fn 列在空间列内合并（第59轮编号）：input 组=su-2/su-3，首行 su-2 fn td rowspan=2，su-3 行无 fn td
+  const inputRow = rows.find(r => r.textContent.includes('su-2'));
   const fnTd = Array.from(inputRow.cells).find(c => c.textContent.trim() === 'input');
-  check('② input 组首行 fn td rowspan=2（空间内 fn 合并）', fnTd && fnTd.rowSpan === 2);
-  const su2Row = rows.find(r => r.textContent.includes('su-2'));
-  check('② su-2 行无 fn td（被 input rowspan 覆盖），组合 td=输入区间:1M+', !Array.from(su2Row.cells).some(c => c.textContent.trim() === 'input') && Array.from(su2Row.cells).some(c => c.textContent.includes('1M+') && !c.textContent.includes('glm4')));
-  // 跨 fn 同组合不合并（第49轮回调）：su-2(input/1M+) 与 su-3(output/1M+) 组合相同但 fn 不同 → 各自独立组合 td
-  const su3Row = rows.find(r => r.textContent.includes('su-3'));
-  check('② su-3 行 output td 新起 + 组合 td 独立（跨 fn 不合并）', Array.from(su3Row.cells).some(c => c.textContent.trim() === 'output') && Array.from(su3Row.cells).some(c => c.textContent.includes('1M+') && !c.textContent.includes('glm4')));
+  check('② input 组首行（su-2）fn td rowspan=2（空间内 fn 合并）', fnTd && fnTd.rowSpan === 2);
+  const su3Row0 = rows.find(r => r.textContent.includes('su-3'));
+  check('② su-3 行无 fn td（被 input rowspan 覆盖），组合 td=输入区间:1M+', !Array.from(su3Row0.cells).some(c => c.textContent.trim() === 'input') && Array.from(su3Row0.cells).some(c => c.textContent.includes('1M+') && !c.textContent.includes('glm4')));
+  // 跨 fn 同组合不合并（第49轮回调）：su-3(input/1M+) 与 su-4(output/1M+) 组合相同但 fn 不同 → 各自独立组合 td
+  const su4Row = rows.find(r => r.textContent.includes('su-4'));
+  check('② su-4 行 output td 新起 + 组合 td 独立（跨 fn 不合并）', Array.from(su4Row.cells).some(c => c.textContent.trim() === 'output') && Array.from(su4Row.cells).some(c => c.textContent.includes('1M+') && !c.textContent.includes('glm4')));
 }
 
 // ===== ③ 多表生效起止拆两列 =====
@@ -178,7 +178,7 @@ const rowsOf = (doc, id) => Array.from(doc.querySelectorAll('#' + id + '-tbody t
   const muTab = Array.from(doc.querySelector('#top-tab-maas-unlisted thead').querySelectorAll('th'));
   check('⑦ maas未上架 Tab 表头同样 9 列', muTab.length === 9);
   const mrows = Array.from(doc.querySelectorAll('#maas-listed-tbody tr')).filter(r => r.cells[0] && /^su-/.test(r.cells[0].textContent.trim()));
-  check('⑦ maas 行 9 cells（尾部 vTPM 列不输出；第56轮+标签）', mrows.length === 4 && mrows.every(r => r.cells.length === 9));
+  check('⑦ maas 行 9 cells（尾部 vTPM 列不输出；第56轮+标签；第59轮 5 行）', mrows.length === 5 && mrows.every(r => r.cells.length === 9));
   // vTPM 两 Tab 对照：15 列（第56轮+标签列）
   const vh = Array.from(doc.querySelectorAll('#top-tab-vtpm-listed thead th')).map(th => th.textContent.trim());
   check('⑦ vTPM Tab 表头 15 列（含折算系数；第56轮+标签列）', vh.length === 15 && vh.includes('折算系数'));

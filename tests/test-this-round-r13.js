@@ -20,7 +20,7 @@ section('1. 列表结构');
 const lrows = rowsOf('vtpm-listed');
 const prows = rowsOf('maas-listed');
 const vrows = rowsOf('vtpm-unlisted');
-ok(prows.length === 4, 'maas已上架 Tab 平铺 4 行（glm4 sp1 全部 4 单元在售）: ' + prows.length);
+ok(prows.length === 5, 'maas已上架 Tab 平铺 5 行（第59轮：glm4 sp1 全部 5 单元在售，含—空fn）: ' + prows.length);
 ok(lrows.length === 4, 'vTPM已上架 Tab 平铺 4 行（std 2 在售 + pro 2 在售）: ' + lrows.length);
 ok(vrows.length === 6, 'vTPM未上架 Tab 平铺 6 行（pre 3 未配置 + pro 2 未配置 + std su-3 禁售）: ' + vrows.length);
 const lhead = Array.from(document.querySelectorAll('#top-tab-maas-listed thead th')).map(th => th.textContent.trim());

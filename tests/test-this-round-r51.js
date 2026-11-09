@@ -89,7 +89,7 @@ function boot() {
   const saved = window.eval('planRows[planRows.length-1]');
   check('online-text 默认 perUnit 保存成功', saved && saved.name === 'r51 默认perUnit计划' && saved.spaceKey === 'sp1');
   check('保存 modes.charge=perUnit / quota=perUnit（online-text 仅计费配额）', saved.modes.charge === 'perUnit' && saved.modes.quota === 'perUnit');
-  check('保存 chargeCodes 按单元 map（4 键）', Object.keys(saved.chargeCodes || {}).length === 4);
+  check('保存 chargeCodes 按单元 map（5 键，第59轮五单元）', Object.keys(saved.chargeCodes || {}).length === 5);
   // 编辑模式仍回填 r.modes（旧 unified 计划编辑后开关=unified）
   window.eval('closePlanCreatePage(); backToList()');
 }

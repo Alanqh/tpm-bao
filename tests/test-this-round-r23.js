@@ -19,9 +19,9 @@ const spHead = Array.from(d.querySelector('#space-tbody').closest('table').query
 ok(JSON.stringify(spHead) === JSON.stringify(['售卖空间','状态','空间名称','生效时间','失效时间','优先级','Function','维度组合']), '表头 8 列（第57轮：操作列已删）: ' + spHead.join('/'));
 // 3. 行序（第39轮：排序=状态→优先级降序→创建时间逆序；第48轮：单空间 sp1，fn 按创建序 input/output/cache）
 const rows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows.length === 3, '3 个空间行（第48轮：单空间 sp1×3fn）');
-ok(rows[0].cells[0].textContent.trim() === 'sp1' && rows[0].cells[0].rowSpan === 3, 'sp1 空间列 rowspan=3');
-ok(rows[0].cells[6].textContent.trim() === 'input' && rows[1].cells[0].textContent.trim() === 'output' && rows[2].cells[0].textContent.trim() === 'cache', 'sp1 三行按创建序 input/output/cache（第55轮：fn 列=cells[6]）');
+ok(rows.length === 4, '4 个空间行（第59轮：单空间 sp1 四 fn 含—）');
+ok(rows[0].cells[0].textContent.trim() === 'sp1' && rows[0].cells[0].rowSpan === 4, 'sp1 空间列 rowspan=4');
+ok(rows[0].cells[6].textContent.trim() === '—' && rows[1].cells[0].textContent.trim() === 'input' && rows[2].cells[0].textContent.trim() === 'output' && rows[3].cells[0].textContent.trim() === 'cache', 'sp1 四行序 —/input/output/cache（第58/59轮：空 fn 首位）');
 ok(!rows[0].textContent.includes('pu-sp-'), '第40轮已删空间单元列（无 pu-sp 编号）');
 // 4. 状态列（第38轮：三态徽标 + 档期内/外标注）
 ok(rows[0].textContent.includes('已发布'), 'sp1 首行已发布徽标（续行被 rowspan 合并无徽标）');
@@ -32,7 +32,7 @@ ok(w.eval('typeof setSpaceActive') === 'undefined', 'setSpaceActive 函数已删
 // 6. 时间切换后档期标注（第48轮：单空间，11-15 仍生效期内）
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
 const rows2 = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows2.length === 3, '11-15 仍 3 行（全空间展示不按时刻过滤）');
+ok(rows2.length === 4, '11-15 仍 4 行（全空间展示不按时刻过滤；第59轮 4 fn）');
 ok(rows2[0].textContent.includes('生效期内'), '11-15 sp1 行=生效期内');
 w.eval('timeFilter = null; renderSpaceTab()');
 // 7. 浏览态：vtpm std（常驻空间 sp1 单行）

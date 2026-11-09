@@ -65,7 +65,7 @@ function boot() {
 // ===== ③ 四商品 mock 自洽（纯叉乘口径）+ 单元数 =====
 {
   const dom = boot(); const { window } = dom;
-  const expects = { 'maas-product-vtpm-std': 3, 'maas-product-vtpm-pro': 4, 'maas-product-vtpm-pre': 3, 'maas-online-text-glm4': 4 };
+  const expects = { 'maas-product-vtpm-std': 3, 'maas-product-vtpm-pro': 4, 'maas-product-vtpm-pre': 3, 'maas-online-text-glm4': 5 };
   Object.keys(expects).forEach(code => {
     window.eval(`openDetailByCode('${code}')`);
     check('③ 每商品仅 1 个空间（' + code + '）', window.eval(`Object.keys(spaces).length`) === 1);
@@ -145,13 +145,13 @@ function boot() {
   const dom = boot(); const { window } = dom; const doc = window.document;
   window.eval(`openDetailByCode('maas-online-text-glm4'); switchInnerTab('space')`);
   const trs = Array.from(doc.querySelectorAll('#space-tbody tr')).filter(r => r.querySelector('td') && !r.querySelector('td[colspan]'));
-  check('⑤ 空间列表 3 行（单空间 sp1 的三个 fn 行，第34轮不合并）', trs.length === 3);
+  check('⑤ 空间列表 4 行（第59轮：sp1 四 fn 含—首行）', trs.length === 4);
   check('⑤ 首行含 sp1 且无 sp2', trs.some(r => r.textContent.includes('sp1')) && trs.every(r => !r.textContent.includes('sp2')));
-  check('⑤ 三行分别 input/output/cache', ['input', 'output', 'cache'].every((f, i) => trs[i].textContent.includes(f)));
-  // SU Tab 排序：su-4（cache，dim=''）应排首行
+  check('⑤ 四行分别 —/input/output/cache（第59轮）', ['input', 'output', 'cache'].every((f, i) => trs[i + 1].textContent.includes(f)));
+  // SU Tab 排序：su-1（—，dim=''）应排首行（第59轮）
   window.eval(`switchInnerTab('saleunit'); renderSaleUnits()`);
   const firstSu = Array.from(doc.querySelectorAll('#saleunit-tbody tr'))[0].textContent;
-  check('⑤ SU Tab 首行=su-4 cache 0维（排序最前）', firstSu.includes('su-4') && firstSu.includes('cache'));
+  check('⑤ SU Tab 首行=su-1 — 0维（排序最前，第59轮）', firstSu.includes('su-1') && firstSu.includes('—'));
   window.eval(`backToList()`);
 }
 

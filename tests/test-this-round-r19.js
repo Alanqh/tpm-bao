@@ -32,7 +32,7 @@ window.eval(`
 section('1. 取值逻辑');
 ok(evalInPage('fnOfUnit(saleUnits[0])') === 'input', 'fnOfUnit 读取 u.fn=input');
 ok(evalInPage('fnOfUnit(saleUnits[1])') === 'output', 'fnOfUnit(output)');
-ok(evalInPage('fnPool().join(",")') === 'input,output,cache', 'fnPool=按类型给 input/output/cache');
+ok(evalInPage('fnPool().join(",")') === ',input,output,cache', 'fnPool=按类型给 —/input/output/cache（第59轮+—首位）');
 const fmtTxt = evalInPage('formatDimMeasureText(saleUnits[0])');
 ok(!fmtTxt.includes('function'), 'formatDimMeasureText 不含 function: ' + fmtTxt);
 ok(fmtTxt.includes('输入token区间:0～128K') && fmtTxt.includes('输出token区间:0～4K'), '维度:度量=维度字段（token 区间）');

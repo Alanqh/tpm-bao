@@ -24,14 +24,14 @@ ok(w.eval('typeof querySpaceAt') === 'undefined' && w.eval('typeof resetSpaceAt'
 const ths = d.querySelectorAll('#inner-tab-space thead th');
 ok(ths.length === 8 && ths[0].textContent.trim() === '售卖空间', '售卖空间表头 8 列（第57轮：操作列已删；售卖空间居首），实得 ' + ths.length);
 let rows = dataRows();
-ok(rows.length === 3, 'glm4 初始 3 行（第48轮：单空间 sp1 三 fn），实得 ' + rows.length);
-ok(rows[0].cells[0] && rows[0].cells[0].textContent.trim() === 'sp1' && rows[0].cells[0].rowSpan === 3, 'sp1 空间列 rowspan=3');
-// sp1 组内按创建序（fnDims 键序 input→output→cache）
+ok(rows.length === 4, 'glm4 初始 4 行（第59轮：sp1 四 fn 含—首行），实得 ' + rows.length);
+ok(rows[0].cells[0] && rows[0].cells[0].textContent.trim() === 'sp1' && rows[0].cells[0].rowSpan === 4, 'sp1 空间列 rowspan=4');
+// sp1 组内空 fn 首位（第59轮）+ 其余按创建序（fnDims 键序 input→output→cache）
 const fnOfRow = r => r.cells.length === 2 ? r.cells[0].textContent.trim() : r.cells[6].textContent.trim();
-const fnsSp1 = [fnOfRow(rows[0]), fnOfRow(rows[1]), fnOfRow(rows[2])];
-ok(fnsSp1.join(',') === 'input,output,cache', 'sp1 三行按创建序 input→output→cache，实得 ' + fnsSp1.join(','));
+const fnsSp1 = [fnOfRow(rows[0]), fnOfRow(rows[1]), fnOfRow(rows[2]), fnOfRow(rows[3])];
+ok(fnsSp1.join(',') === '—,input,output,cache', 'sp1 四行=—首行+创建序 input→output→cache，实得 ' + fnsSp1.join(','));
 ok(!d.getElementById('space-tbody').textContent.includes('pu-sp-'), '第40轮：列表无 pu-sp 编号');
-ok(rows[0].cells.length === 8 && rows[1].cells.length === 2 && rows[2].cells.length === 2, 'sp1 首行 8 列带空间级列（第57轮：操作列已删）、两续行仅 fn/维度组合 2 列');
+ok(rows[0].cells.length === 8 && rows[1].cells.length === 2 && rows[2].cells.length === 2 && rows[3].cells.length === 2, 'sp1 首行 8 列带空间级列（第57轮：操作列已删）、三续行仅 fn/维度组合 2 列');
 ok(rows[0].textContent.includes('生效期内'), 'sp1 生效期内');
 
 // ===== 3. 仲裁（第38轮保留：priority 降序→seq 降序）走 timeFilter 变量 =====
@@ -68,7 +68,7 @@ w.eval(`
     inp.dispatchEvent(new window.Event('change', { bubbles: true }));
   })()
 `);
-ok(d.querySelectorAll('#saleunit-tbody tr').length === 4, '清空时间 → 立即恢复当前时刻唯一生效空间 sp1 的 4 行（第48轮 per-fn 纯叉乘；第42轮默认也过滤）');
+ok(d.querySelectorAll('#saleunit-tbody tr').length === 5, '清空时间 → 立即恢复当前时刻唯一生效空间 sp1 的 5 行（第59轮四 fn 含—；第42轮默认也过滤）');
 w.eval('switchInnerTab("space")');
 
 // ===== 6. 排序专项：优先级降序 → 创建时间逆序（seq 降序）=====
@@ -84,10 +84,10 @@ b0.checked = true; b0.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked = true;
 w.eval('confirmSpacePlan()');
 rows = dataRows();
-ok(rows.length === 4, '新增空间后 4 行（sp1×3+sp2×1），实得 ' + rows.length);
+ok(rows.length === 5, '新增空间后 5 行（sp1×4+sp2×1，第59轮基数），实得 ' + rows.length);
 // 状态组：published（sp2/sp1）在前，pending（sp3 新建）在后
 ok(rows[0].cells[0].textContent.trim() === 'sp1', 'published 组在前（sp1）');
-ok(rows[3].cells[0].textContent.trim() === 'sp2' && rows[3].cells[1].textContent.trim() === '待发布', '新建空间 sp2 排末尾（pending 组）');
+ok(rows[4].cells[0].textContent.trim() === 'sp2' && rows[4].cells[1].textContent.trim() === '待发布', '新建空间 sp2 排末尾（pending 组）');
 // 再建一个 pending 且优先级 800 的空间 → 仍排在 pending 组内最前（优先级降序）
 w.eval('openSpacePlanModal()');
 d.getElementById('sp-name').value = 'r39次优空间';
@@ -99,12 +99,12 @@ b1.checked = true; b1.dispatchEvent(new w.Event('change', { bubbles: true }));
 d.querySelector('.sp-measure-check[data-dim="输入区间"][value="0～128K"]').checked = true;
 w.eval('confirmSpacePlan()');
 rows = dataRows();
-ok(rows.length === 5, '再增 1 行共 5 行');
-ok(rows[3].cells[0].textContent.trim() === 'sp2' && rows[4].cells[0].textContent.trim() === 'sp3', 'pending 组内优先级降序（sp2 900 > sp3 800）');
+ok(rows.length === 6, '再增 1 行共 6 行');
+ok(rows[4].cells[0].textContent.trim() === 'sp2' && rows[5].cells[0].textContent.trim() === 'sp3', 'pending 组内优先级降序（sp2 900 > sp3 800）');
 // 停用 sp2 → stopped 组排最后
 w.eval('stopSpacePlan("sp2")');
 rows = dataRows();
-ok(rows[4].cells[0].textContent.trim() === 'sp2' && rows[4].cells[1].textContent.trim() === '已停用', '停用后 sp2 落到 stopped 组末尾');
+ok(rows[5].cells[0].textContent.trim() === 'sp2' && rows[5].cells[1].textContent.trim() === '已停用', '停用后 sp2 落到 stopped 组末尾');
 // 发布 sp3 → 优先级 800 > sp1 100 → published 组内第一
 w.eval('publishSpacePlan("sp3")');
 rows = dataRows();
@@ -113,7 +113,7 @@ ok(rows[0].cells[0].textContent.trim() === 'sp3' && rows[1].cells[0].textContent
 // 清理：删除测试造的空间恢复现场
 w.eval('delete spaces["sp2"]; delete spaces["sp3"]; saleUnits = saleUnits.filter(u => u.spaceKey !== "sp2" && u.spaceKey !== "sp3"); spaceSeq = 1; renderSpaceTab(); renderSaleUnits();');
 w.eval('exitEdit()');
-ok(dataRows().length === 3, '清理后回到 3 行（第48轮单空间）');
+ok(dataRows().length === 4, '清理后回到 4 行（第59轮四 fn 含—）');
 
 // ===== 7. vtpm：常驻空间单行 =====
 w.eval('backToList(); openDetailByCode("maas-product-vtpm-std")');

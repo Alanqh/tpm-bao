@@ -44,11 +44,11 @@ ok(w.eval('nextSpaceSwitchOfFn("output")') === null, 'output 无未来切换 →
 // ===== 5. 空间 Tab（第38轮：全空间展示不按时刻过滤；档期徽标按查询时刻） =====
 w.eval('renderSpaceTab()');
 let rows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows.length === 3, '3 行（sp1×3fn）');
+ok(rows.length === 4, '4 行（第59轮：sp1 四 fn 含—）');
 ok(rows.every(r => !r.textContent.includes('起切换')), '无切换预告文案（第35轮删）');
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
 rows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(rows.length === 3, '11-15 时仍 3 行（全空间展示）');
+ok(rows.length === 4, '11-15 时仍 4 行（全空间展示；第59轮）');
 const sp1r = rows.find(r => r.cells[0] && r.cells[0].textContent.trim() === 'sp1');
 ok(sp1r && sp1r.textContent.includes('生效期内'), '11-15 sp1 行=生效期内');
 w.eval('timeFilter = null; renderSpaceTab()');

@@ -65,7 +65,7 @@ ok(T.nextSpaceSwitchOfFn('input', '2026-11-25 12:00:00') === null, '11-25 后无
 // ===== 6. 售卖空间 Tab：全空间展示（不再按时刻过滤；档期徽标按查询时刻）=====
 T.renderSpaceTab();
 let rows = w.document.querySelectorAll('#space-tbody tr');
-ok(rows.length === 3, '全空间展示 3 行（sp1 三 fn，第34轮不合并），实得 ' + rows.length);
+ok(rows.length === 4, '全空间展示 4 行（sp1 四 fn：—/input/output/cache，第59轮+—；不合并），实得 ' + rows.length);
 let tabTxt = w.document.getElementById('space-tbody').textContent;
 ok(tabTxt.includes('sp1') && !tabTxt.includes('sp2'), '列表展示 sp1（第48轮无 sp2）');
 ok(tabTxt.includes('GLM4·常规售卖空间'), '列表展示空间名称');
@@ -143,7 +143,7 @@ ok(T.spaces[copyKey] && T.spaces[copyKey].status === 'pending_publish', '快照�
 // glm4 常规计划（idx0）锁定 sp1：时间在 sp1 档期内
 const p0 = T.planRows[0];
 ok(p0.spaceKey === 'sp1' && p0.effStart >= T.spaces.sp1.effStart && p0.effEnd <= T.spaces.sp1.effEnd, '常规计划锁定 sp1 且时间 ⊆ sp1 档期');
-ok(p0.units.length === 4 && p0.units.every(u => T.saleUnits.find(s => s.id === u).spaceKey === 'sp1'), '常规计划 4 单元均在 sp1 内（第48轮）');
+ok(p0.units.length === 5 && p0.units.every(u => T.saleUnits.find(s => s.id === u).spaceKey === 'sp1'), '常规计划 5 单元均在 sp1 内（第59轮：+—空单元）');
 // 创建计划：不选空间 → 拦截（需编辑态）
 T.startEdit();
 T.openPlanCreatePage();

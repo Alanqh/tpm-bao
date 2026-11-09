@@ -21,7 +21,7 @@ function boot() {
   window.eval(`openDetailByCode('maas-online-text-glm4'); startEdit();`);
   window.eval(`openSpacePlanModal()`);
   const fnChecks = Array.from(doc.querySelectorAll('.sp-fn-check'));
-  check('① 3 个 fn 复选（input/output/cache）', fnChecks.length === 3);
+  check('① 4 个 fn 复选（第59轮：—/input/output/cache）', fnChecks.length === 4);
   check('① fn 复选带 onchange 联动', fnChecks.every(c => (c.getAttribute('onchange') || '').includes('renderSpFnCards')));
   check('① 未勾 fn 时区块2 提示先勾选', doc.getElementById('sp-dimmeas').textContent.includes('先勾选'));
   // 勾 input → 出现 input 卡片，内含 online-text 三维
@@ -126,7 +126,8 @@ function boot() {
   window.eval(`openDetailByCode('maas-online-text-glm4'); startEdit();`);
   window.eval(`openSpacePlanModal('sp1')`);
   check('④ 三 fn 勾选回填', ['input', 'output', 'cache'].every(f => doc.querySelector('.sp-fn-check[data-fn="' + f + '"]').checked === true));
-  check('④ 三张 fn 卡片渲染', doc.querySelectorAll('[data-fncard]').length === 3);
+  check('④ 空 fn（—）勾选回填（第59轮）', doc.querySelector('.sp-fn-check[data-fn=""]').checked === true);
+  check('④ 四张 fn 卡片渲染（含—空 fn，第59轮）', doc.querySelectorAll('[data-fncard]').length === 4);
   // input 卡片回填输入区间两档（第48轮口径：sp1 input 仅输入区间维度）
   check('④ input 回填 0～128K', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="0～128K"]').checked === true);
   check('④ input 回填 1M+', doc.querySelector('.sp-measure-check[data-fn="input"][data-dim="输入区间"][value="1M+"]').checked === true);
@@ -175,17 +176,17 @@ function boot() {
   });
 }
 
-// ===== ⑥ glm4 mock 数量与售卖单元视图（第48轮：单空间 sp1 = input 2/output 1/cache 1 共 4） =====
+// ===== ⑥ glm4 mock 数量与售卖单元视图（第59轮：单空间 sp1 = — 1/input 2/output 1/cache 1 共 5） =====
 {
   const dom = boot(); const { window } = dom; const doc = window.document;
   window.eval(`openDetailByCode('maas-online-text-glm4')`);
-  check('⑥ sp1 4 单元', window.eval(`saleUnits.filter(u => u.spaceKey === 'sp1').length`) === 4);
+  check('⑥ sp1 5 单元（第59轮含—空单元）', window.eval(`saleUnits.filter(u => u.spaceKey === 'sp1').length`) === 5);
   check('⑥ 无 sp2（第48轮删双11空间）', window.eval(`saleUnits.filter(u => u.spaceKey === 'sp2').length`) === 0);
-  check('⑥ sp1 input 2 / output 1 / cache 1', window.eval(`['input','output','cache'].map(f => saleUnits.filter(u => u.spaceKey === 'sp1' && u.fn === f).length).join()`) === '2,1,1');
-  check('⑥ glm4 售卖单元数据共 4', window.eval(`saleUnits.length`) === 4);
+  check('⑥ sp1 — 1 / input 2 / output 1 / cache 1', window.eval(`['','input','output','cache'].map(f => saleUnits.filter(u => u.spaceKey === 'sp1' && u.fn === f).length).join()`) === '1,2,1,1');
+  check('⑥ glm4 售卖单元数据共 5', window.eval(`saleUnits.length`) === 5);
   window.eval(`switchInnerTab('saleunit'); renderSaleUnits()`);
   const rows = Array.from(doc.querySelectorAll('#saleunit-tbody tr'));
-  check('⑥ SU Tab 默认 4 行（当前时刻唯一生效空间 sp1）', rows.length === 4);
+  check('⑥ SU Tab 默认 5 行（第59轮：含—空单元）', rows.length === 5);
   window.eval(`backToList()`);
 }
 

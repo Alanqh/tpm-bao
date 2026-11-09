@@ -21,7 +21,7 @@ ok(w.eval('spaces["sp1"].status') === 'published' && w.eval('spaces["sp1"].prior
 ok(w.eval('spaces["sp1"].fnMeasures.input["输入区间"].join(",")') === '0～128K,1M+', 'sp1 input 输入区间两档（0～128K、1M+）');
 // 2. 详情列表（第48轮：sp1 三行=input/output/cache）
 const spRows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(spRows.length === 3, '空间列表 3 行（sp1×3fn）');
+ok(spRows.length === 4, '空间列表 4 行（第59轮：sp1 四 fn 含—）');
 ok(spRows.some(r => r.textContent.includes('输入区间')), '维度列展示 dims');
 // 3. currentSpaceOfFn（第38轮：纯空间仲裁）
 ok(w.eval('currentSpaceOfFn("input")') === 'sp1', 'input 当前 sp1');
@@ -31,7 +31,7 @@ ok(w.eval('currentSpaceOfFn("cache")') === 'sp1', 'cache 当前 sp1');
 w.eval('timeFilter = { point: "2026-11-15 00:00:00" }; renderSpaceTab()');
 ok(w.eval('currentSpaceOfFn("input")') === 'sp1', '11-15 无双11空间 → input 仍 sp1（第48轮）');
 const midRows = Array.from(d.querySelectorAll('#space-tbody tr'));
-ok(midRows.length === 3 && midRows[0].textContent.includes('生效期内'), '11-15 列表 sp1 行仍显示生效期内');
+ok(midRows.length === 4 && midRows[0].textContent.includes('生效期内'), '11-15 列表 sp1 行仍显示生效期内（第59轮 4 行）');
 w.eval('timeFilter = null; renderSpaceTab()');
 // 5. SU 创建链路已删（第37轮）
 ok(!d.getElementById('modal-su-confirm'), 'SU 弹窗已删除');
