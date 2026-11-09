@@ -999,11 +999,11 @@
       'maas-product-vtpm': { dims: ['购买量区间', '购买周期'], hasFn: false },
       'maas-online-text': { dims: ['输入区间', '费用发生日', '费用发生时间'], hasFn: true }
     };
-    // 商品的 function 候选（第20轮）：hasFn 类型 → input/output/cache；否则为空（售卖单元 Function 显示 —）
+    // 商品的 function 候选（第20轮；第59轮起 hasFn 类型首位加「—（无 function）」）：hasFn 类型 → —/input/output/cache；否则为空（售卖单元 Function 显示 —）
     function fnPool() {
       if (!currentProduct) return [];
       const spec = productDimSpecs[currentProduct.type];
-      return (spec && spec.hasFn) ? (measureOptions['function'] || []) : [];
+      return (spec && spec.hasFn) ? [''].concat(measureOptions['function'] || []) : [];
     }
     // 售卖单元（按 SKU code 存储；function 暂不考虑，统一显示 — ；维度+度量，多维度笛卡尔积；确认后只增不减）
     // 注意：默认数据必须是"已勾选度量集合的完整笛卡尔积"，保证售卖单元列表与确认弹窗勾选状态一致
@@ -1029,12 +1029,13 @@
         { id: 'su-2', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 60天' },
         { id: 'su-3', fn: '', spaceKey: 'sp1', dim: '购买量区间 + 购买周期', measure: '1～100 + 90天' }
       ],
-      // glm4（第48轮：单空间 per-fn 差异化）：input 输入区间两档=2 / output 输入区间一档=1 / cache 0维=1 → 共 4
+      // glm4（第48轮单空间 per-fn 差异化；第59轮加 — 无fn）：— 0维=1 / input 输入区间两档=2 / output 一档=1 / cache 0维=1 → 共 5
       'maas-online-text-glm4': [
-        { id: 'su-1', fn: 'input', spaceKey: 'sp1', dim: '输入区间', measure: '0～128K' },
-        { id: 'su-2', fn: 'input', spaceKey: 'sp1', dim: '输入区间', measure: '1M+' },
-        { id: 'su-3', fn: 'output', spaceKey: 'sp1', dim: '输入区间', measure: '1M+' },
-        { id: 'su-4', fn: 'cache', spaceKey: 'sp1', dim: '', measure: '' }
+        { id: 'su-1', fn: '', spaceKey: 'sp1', dim: '', measure: '' },
+        { id: 'su-2', fn: 'input', spaceKey: 'sp1', dim: '输入区间', measure: '0～128K' },
+        { id: 'su-3', fn: 'input', spaceKey: 'sp1', dim: '输入区间', measure: '1M+' },
+        { id: 'su-4', fn: 'output', spaceKey: 'sp1', dim: '输入区间', measure: '1M+' },
+        { id: 'su-5', fn: 'cache', spaceKey: 'sp1', dim: '', measure: '' }
       ]
     };
     let saleUnits = [];
@@ -1055,9 +1056,9 @@
       'maas-product-vtpm-pre': {
         'sp1': { seq: 1, name: '预发布·常驻售卖空间', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { '': ['购买量区间', '购买周期'] }, fnMeasures: { '': { '购买量区间': ['1～100'], '购买周期': ['30天', '60天', '90天'] } } }
       },
-      // glm4（第48轮：仅一个空间，per-fn 差异化）：input 输入区间两档 / output 输入区间一档 / cache 0维
+      // glm4（第48轮仅一个空间 per-fn 差异化；第59轮：加 — 无fn 排首位）
       'maas-online-text-glm4': {
-        'sp1': { seq: 1, name: 'GLM4·常规售卖空间', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { input: ['输入区间'], output: ['输入区间'], cache: [] }, fnMeasures: { input: { '输入区间': ['0～128K', '1M+'] }, output: { '输入区间': ['1M+'] }, cache: {} } }
+        'sp1': { seq: 1, name: 'GLM4·常规售卖空间', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00', status: 'published', fnDims: { '': [], input: ['输入区间'], output: ['输入区间'], cache: [] }, fnMeasures: { '': {}, input: { '输入区间': ['0～128K', '1M+'] }, output: { '输入区间': ['1M+'] }, cache: {} } }
       }
     };
     let spaces = {}; // 运行时副本（进入详情页面时从 defaultSpaces[code] 装载）
@@ -1115,9 +1116,9 @@
       'maas-product-vtpm-pre': [
         { name: 'vTPM 预留·预发布·30天', spaceKey: 'sp1', units: ['su-1'], unitStates: { 'su-1': 'on' }, chargeCodes: { 'su-1': 'maas-product-vtpm-pre.30d' }, quotaCodes: { 'su-1': 'quota-vtpm-30d' }, inventoryCodes: { 'su-1': 'inv-vtpm-30d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-deepseek v3.3', slo: 'slo-rule-95 v5.1', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', priority: 100, effStart: '2026-10-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ],
-      // glm4（第48轮：单空间单计划）：4 售卖单元全 on → 全部在售
+      // glm4（第48轮单空间单计划；第59轮：加 — 无fn 单元 → 5 售卖单元全 on → 全部在售）
       'maas-online-text-glm4': [
-        { name: 'GLM4·常规售卖', spaceKey: 'sp1', units: ['su-1', 'su-2', 'su-3', 'su-4'], unitStates: { 'su-1': 'on', 'su-2': 'on', 'su-3': 'on', 'su-4': 'on' }, chargeCodes: { 'su-1': 'maas-online-text-glm4.60d', 'su-2': 'maas-online-text-glm4.60d', 'su-3': 'maas-online-text-glm4.60d', 'su-4': 'maas-online-text-glm4.60d' }, quotaCodes: { 'su-1': 'quota-vtpm-60d', 'su-2': 'quota-vtpm-60d', 'su-3': 'quota-vtpm-60d', 'su-4': 'quota-vtpm-60d' }, inventoryCodes: { 'su-1': 'inv-vtpm-60d', 'su-2': 'inv-vtpm-60d', 'su-3': 'inv-vtpm-60d', 'su-4': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
+        { name: 'GLM4·常规售卖', spaceKey: 'sp1', units: ['su-1', 'su-2', 'su-3', 'su-4', 'su-5'], unitStates: { 'su-1': 'on', 'su-2': 'on', 'su-3': 'on', 'su-4': 'on', 'su-5': 'on' }, chargeCodes: { 'su-1': 'maas-online-text-glm4.60d', 'su-2': 'maas-online-text-glm4.60d', 'su-3': 'maas-online-text-glm4.60d', 'su-4': 'maas-online-text-glm4.60d', 'su-5': 'maas-online-text-glm4.60d' }, quotaCodes: { 'su-1': 'quota-vtpm-60d', 'su-2': 'quota-vtpm-60d', 'su-3': 'quota-vtpm-60d', 'su-4': 'quota-vtpm-60d', 'su-5': 'quota-vtpm-60d' }, inventoryCodes: { 'su-1': 'inv-vtpm-60d', 'su-2': 'inv-vtpm-60d', 'su-3': 'inv-vtpm-60d', 'su-4': 'inv-vtpm-60d', 'su-5': 'inv-vtpm-60d' }, modes: { charge: 'unified', quota: 'unified', inventory: 'unified', factor: 'unified', slo: 'unified', payload: 'unified', qty: 'unified' }, factor: 'vtpm-factor-glm v2.1', slo: 'slo-rule-95 v5.2', minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', priority: 100, effStart: '2026-11-01 00:00:00', effEnd: '2027-11-01 00:00:00' }
       ]
     };
 
