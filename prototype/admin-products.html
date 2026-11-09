@@ -2034,7 +2034,9 @@
       rows.sort((a, b) => {
         const ia = spaceOrder.indexOf(a.k), ib = spaceOrder.indexOf(b.k);
         if (ia !== ib) return ia - ib;
-        // 同空间内按创建时的 fn 顺序（fnDims 键序），pu-sp 编号与创建时一一对应
+        // 空 fn（显示 —）固定排在空间内首行（第58轮）；其余按创建时 fn 顺序（fnDims 键序）
+        if (!a.f) return -1;
+        if (!b.f) return 1;
         const fa = Object.keys(a.sp.fnDims || {}).indexOf(a.f), fb = Object.keys(b.sp.fnDims || {}).indexOf(b.f);
         return fa - fb;
       });
