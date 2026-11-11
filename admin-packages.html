@@ -318,20 +318,20 @@
         <button onclick="closeModal('grant')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- Step 1: 确定 subject_id 和 pool -->
+      <!-- Step 1: 确定 subject_id 和 工作组 -->
       <div class="border border-slate-200 rounded-lg p-3 mb-3">
-        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">1</span>确定 subject_id 和 pool</p>
+        <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">1</span>确定 subject_id 和 工作组</p>
         <div class="flex gap-2">
           <input id="grant-subject" type="text" list="grant-subject-list" oninput="schedulePoolQuery()" onblur="flushPoolQuery()" placeholder="输入 subject_id，如 sub_3x9a2b1c" class="flex-1 rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
           <datalist id="grant-subject-list">
             <option value="sub_3x9a2b1c">智象科技</option>
             <option value="sub_7k2m5n8p">星河互娱</option>
           </datalist>
-          <button type="button" onclick="flushPoolQuery(true)" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium whitespace-nowrap">查询 Pool</button>
+          <button type="button" onclick="flushPoolQuery(true)" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium whitespace-nowrap">查询工作组</button>
         </div>
-        <p id="grant-pool-hint" class="text-[11px] text-slate-400 mt-1.5">可选择多个 Pool 同时交付。</p>
+        <p id="grant-pool-hint" class="text-[11px] text-slate-400 mt-1.5">可选择多个工作组同时交付。</p>
         <div class="mt-3 hidden" id="grant-pool-block">
-          <label class="block text-xs font-medium text-slate-700 mb-1">选择 Pool</label>
+          <label class="block text-xs font-medium text-slate-700 mb-1">选择工作组</label>
           <div id="grant-pool-list" class="space-y-2 mb-2">
             <!-- JS 填充 checkbox -->
           </div>
@@ -369,7 +369,7 @@
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-700 mb-1">价格预览</label>
-              <div class="bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 text-xs text-slate-600">单价 × 购买数量</div>
+              <div id="grant-price-label" class="bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 text-xs text-slate-600">确定购买量与购买周期后显示单价</div>
               <p id="grant-total-preview" class="text-[11px] text-violet-600 font-medium mt-1"></p>
             </div>
           </div>
@@ -436,13 +436,13 @@
   <div id="modal-create-pool" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
     <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5 border border-slate-200">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-sm font-semibold text-slate-900">创建新 Pool</h3>
+        <h3 class="text-sm font-semibold text-slate-900">创建新工作组</h3>
         <button onclick="closeCreatePoolModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="space-y-3 text-xs">
         <div>
-          <label class="block text-slate-600 mb-1">Pool 名称 <span class="text-red-500">*</span></label>
-          <input id="create-pool-name" type="text" placeholder="如 proj-delta" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500">
+          <label class="block text-slate-600 mb-1">工作组名称 <span class="text-red-500">*</span></label>
+          <input id="create-pool-name" type="text" placeholder="如 wg-marketing" class="w-full border border-slate-300 rounded px-2 py-1.5 outline-none focus:border-violet-500">
         </div>
         <div>
           <label class="block text-slate-600 mb-1">超量路由配置 <span class="text-red-500">*</span></label>
@@ -468,6 +468,10 @@
       <div class="mt-5 flex justify-end gap-2">
         <button onclick="closeCreatePoolModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
         <button onclick="confirmCreatePool()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">创建</button>
+      </div>
+    </div>
+  </div>
+
       </div>
     </div>
   </div>
@@ -500,18 +504,18 @@
     // ===== 手动交付：数据与联动 =====
     let poolQueryTimer = null;
     const grantPoolQuery = { lastSid: null };
-    // subject → pool 列表（pool 携带超量路由配置：'limit' = 超量限流（返回 429）；'serverless' = 超量路由 Serverless（同模型按量计费））
+    // subject → 工作组列表（工作组携带超量路由配置：'limit' = 超量限流（返回 429）；'serverless' = 超量路由 Serverless（同模型按量计费））
     const subjectPools = {
       'sub_3x9a2b1c': {
         name: '智象科技',
-        pools: [
+        workgroups: [
           { id: 'pool_3x9_alpha', name: 'proj-alpha', route: 'limit' },
           { id: 'pool_3x9_beta', name: 'proj-beta', route: 'serverless' }
         ]
       },
       'sub_7k2m5n8p': {
         name: '星河互娱',
-        pools: [
+        workgroups: [
           { id: 'pool_7k2_gamma', name: 'proj-gamma', route: 'limit' }
         ]
       }
@@ -604,7 +608,7 @@
       document.getElementById('grant-subject').value = '';
       document.getElementById('grant-pool-block').classList.add('hidden');
       document.getElementById('grant-pool-list').innerHTML = '';
-      document.getElementById('grant-pool-hint').textContent = '填写 subject_id 后自动查询该客户下的 Pool；可关联任意多个，也可不关联。';
+      document.getElementById('grant-pool-hint').textContent = '填写 subject_id 后自动查询该客户下的工作组；可关联任意多个，也可不关联。';
       document.getElementById('grant-note').value = '';
       initSkuSelection();
       openModal('grant');
@@ -632,12 +636,12 @@
       const err = document.getElementById('create-pool-error');
 
       if (!name) {
-        err.textContent = '请填写 Pool 名称。';
+        err.textContent = '请填写工作组名称。';
         err.classList.remove('hidden');
         return;
       }
-      if (customer.pools.some(p => p.name === name)) {
-        err.textContent = '该 Pool 名称已存在。';
+      if (customer.workgroups.some(p => p.name === name)) {
+        err.textContent = '该工作组名称已存在。';
         err.classList.remove('hidden');
         return;
       }
@@ -646,10 +650,10 @@
       const route = routeInput ? routeInput.value : 'limit';
       const safe = name.replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 8);
       const newId = 'pool_' + sid.replace(/[^a-z0-9]/gi, '').slice(0, 6) + '_' + (safe || String(Date.now()).slice(-6));
-      customer.pools.push({ id: newId, name, route });
+      customer.workgroups.push({ id: newId, name, route });
       renderPoolList(customer);
       closeCreatePoolModal();
-      document.getElementById('grant-pool-hint').textContent = `已创建 Pool「${name}」（超量路由：${route === 'serverless' ? '路由 Serverless' : '超量限流'}），按需勾选关联。`;
+      document.getElementById('grant-pool-hint').textContent = `已创建工作组「${name}」（超量路由：${route === 'serverless' ? '路由 Serverless' : '超量限流'}），按需勾选关联。`;
     }
 
     function schedulePoolQuery() {
@@ -658,10 +662,10 @@
       if (!sid) {
         document.getElementById('grant-pool-block').classList.add('hidden');
         document.getElementById('grant-pool-list').innerHTML = '';
-        document.getElementById('grant-pool-hint').textContent = '填写 subject_id 后自动查询该客户下的 Pool；可关联任意多个，也可不关联。';
+        document.getElementById('grant-pool-hint').textContent = '填写 subject_id 后自动查询该客户下的工作组；可关联任意多个，也可不关联。';
         return;
       }
-      document.getElementById('grant-pool-hint').textContent = '正在查询该 subject_id 下的 Pool...';
+      document.getElementById('grant-pool-hint').textContent = '正在查询该 subject_id 下的工作组...';
       poolQueryTimer = setTimeout(() => loadPools(), 350);
     }
 
@@ -684,19 +688,19 @@
       if (!customer) {
         poolBlock.classList.add('hidden');
         document.getElementById('grant-pool-list').innerHTML = '';
-        document.getElementById('grant-pool-hint').innerHTML = `<span class="text-red-500">未找到该客户的 Pool。</span>`;
+        document.getElementById('grant-pool-hint').innerHTML = `<span class="text-red-500">未找到该客户的工作组。</span>`;
         return;
       }
-      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，共 ${customer.pools.length} 个 Pool：可勾选关联，也可不勾选`;
+      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」，共 ${customer.workgroups.length} 个工作组：可勾选关联，也可不勾选`;
       renderPoolList(customer);
       poolBlock.classList.remove('hidden');
     }
 
     function renderPoolList(customer) {
       const list = document.getElementById('grant-pool-list');
-      // 保留已勾选的 Pool（重渲后仍保持关联状态）
+      // 保留已勾选的工作组（重渲后仍保持关联状态）
       const checkedIds = Array.from(document.querySelectorAll('input[name="grant-pool"]:checked')).map(cb => cb.value);
-      list.innerHTML = customer.pools.map((p, idx) => `
+      list.innerHTML = customer.workgroups.map((p, idx) => `
         <label class="flex items-center gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
           <input type="checkbox" name="grant-pool" value="${p.id}" ${checkedIds.includes(p.id) ? 'checked' : ''} onchange="onPoolChange()" class="mt-0.5">
           <span class="text-xs font-medium text-slate-800">${p.name}</span>
@@ -704,7 +708,7 @@
         </label>
       `).join('') + `
         <button type="button" onclick="openCreatePoolModal()" class="flex items-center justify-center gap-1.5 border border-dashed border-slate-300 rounded-lg p-2.5 text-xs text-slate-500 hover:border-violet-400 hover:text-violet-600 transition-colors">
-          <i class="fa-solid fa-plus"></i>快速创建新 Pool
+          <i class="fa-solid fa-plus"></i>快速创建新工作组
         </button>
       `;
     }
@@ -714,12 +718,12 @@
       const customer = subjectPools[sid];
       if (!customer) return [];
       const checked = Array.from(document.querySelectorAll('input[name="grant-pool"]:checked')).map(cb => cb.value);
-      return customer.pools.filter(p => checked.includes(p.id));
+      return customer.workgroups.filter(p => checked.includes(p.id));
     }
 
     function onPoolChange() {
       const selectedPools = getSelectedPools();
-      document.getElementById('grant-sku-hint').textContent = `选择 Pool 为可选关联；当前${selectedPools.length > 0 ? `已选 ${selectedPools.length} 个` : '未关联'}。`;
+      document.getElementById('grant-sku-hint').textContent = `选择工作组为可选关联；当前${selectedPools.length > 0 ? `已选 ${selectedPools.length} 个` : '未关联'}。`;
       renderGrantSummary();
     }
 
@@ -797,7 +801,7 @@
         <div class="grid grid-cols-4 gap-3">
           <div>
             <p class="text-slate-400">单价（${unit.cycleDays}天周期）</p>
-            <p class="text-slate-800 font-semibold mt-0.5">¥${charge ? charge.price.toFixed(4) : '—'} <span class="text-slate-400 font-normal">/ 万 vTPM</span></p>
+            <p class="text-slate-800 font-semibold mt-0.5">待选择购买量后显示 <span class="text-slate-400 font-normal">/ 万 vTPM</span></p>
             ${charge ? `<p class="text-slate-400 mt-0.5 font-mono">${charge.code}</p>` : ''}
           </div>
           <div>
@@ -824,11 +828,12 @@
 
       // 购买量：按售卖单元 minQty/maxQty/stepQty（万 vTPM）生成下拉
       const qtySelect = document.getElementById('grant-multiplier');
-      let qtyOpts = '';
+      let qtyOpts = '<option value="" disabled selected>请选择购买量</option>';
       for (let q = unit.minQty; q <= unit.maxQty; q += unit.stepQty) {
         qtyOpts += `<option value="${q}">${q} 万 vTPM</option>`;
       }
       qtySelect.innerHTML = qtyOpts || '<option value="" disabled>无可选购买量</option>';
+      qtySelect.onchange = onQtyChange;
       document.getElementById('grant-qty-range').textContent = `可选范围 ${unit.minQty.toLocaleString()} ~ ${unit.maxQty.toLocaleString()} 万 vTPM，step ${unit.stepQty.toLocaleString()}`;
 
       config.classList.remove('hidden');
@@ -836,12 +841,26 @@
       renderGrantSummary();
     }
 
+    let qtyConfirmed = false;
+    function onQtyChange() {
+      qtyConfirmed = true;
+      renderGrantSummary();
+    }
     function renderGrantSummary() {
       const product = productById(document.getElementById('grant-sku').value);
       const unit = product ? currentUnit(product) : null;
       if (!unit) return;
       const charge = unitCharge(unit);
-      const qty = parseInt(document.getElementById('grant-multiplier').value || String(unit.minQty), 10) || unit.minQty;
+      const qtyRaw = document.getElementById('grant-multiplier').value;
+      const qty = parseInt(qtyRaw, 10);
+      const priceLabel = document.getElementById('grant-price-label');
+      if (!qtyConfirmed || isNaN(qty) || qty <= 0) {
+        // 购买量未确定：不展示对应单价
+        priceLabel.textContent = '确定购买量与购买周期后显示单价';
+        document.getElementById('grant-total-preview').textContent = '已确定购买周期 ' + unit.cycleDays + ' 天，选择购买量后显示对应单价';
+        return;
+      }
+      priceLabel.textContent = '单价 × 购买数量';
       // 价格 = 单价（该周期计费项刊例价）× 购买数量
       const price = charge ? charge.price * qty : null;
       document.getElementById('grant-total-preview').textContent = price === null
@@ -863,10 +882,11 @@
       if (unit.status !== 'on') { alert('该售卖单元当前不在售，无法交付。请选择在售状态的售卖单元。'); return; }
       const charge = unitCharge(unit);
       const qty = parseInt(document.getElementById('grant-multiplier').value, 10);
+      if (isNaN(qty) || qty <= 0) { alert('请先选择购买量，以确定对应单价后再交付。'); return; }
       const note = document.getElementById('grant-note').value.trim();
       const totalPrice = charge ? charge.price * qty : null;
       closeModal('grant');
-      alert(`已交付：关联 ${selectedPools.length} 个 Pool 的预留 vTPM 包。\n商品：${product.name}（${product.code}）\n单价：${charge ? '¥' + charge.price.toFixed(4) + ' / 万 vTPM（' + unit.cycleDays + '天周期）' : '—'}\nPayload：${unit.payloadId}\n购买量：${qty.toLocaleString()} 万 vTPM\n购买周期：${unit.cycleDays} 天（随售卖单元）\n费用：${totalPrice === null ? '—' : '¥' + totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}\n各 Pool 超量路由配置：\n${(selectedPools.length ? selectedPools.map(p => `  · ${p.name}：${p.route === 'serverless' ? '超量路由 Serverless' : '超量限流（429）'}`).join('\n') : '  无关联 Pool')}\n备注：${note || '无'}`);
+      alert(`已交付：关联 ${selectedPools.length} 个工作组的预留 vTPM 包。\n商品：${product.name}（${product.code}）\n单价：${charge ? '¥' + charge.price.toFixed(4) + ' / 万 vTPM（' + unit.cycleDays + '天周期）' : '—'}\nPayload：${unit.payloadId}\n购买量：${qty.toLocaleString()} 万 vTPM\n购买周期：${unit.cycleDays} 天（随售卖单元）\n费用：${totalPrice === null ? '—' : '¥' + totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}\n各工作组超量路由配置：\n${(selectedPools.length ? selectedPools.map(p => `  · ${p.name}：${p.route === 'serverless' ? '超量路由 Serverless' : '超量限流（429）'}`).join('\n') : '  无关联 Workgroup')}\n备注：${note || '无'}`);
     }
 
     function fmtDate(d) {
@@ -883,7 +903,7 @@
     const detailData = {
       'P001': {
         subject: 'sub_3x9a2b1c', subjectName: '智象科技',
-        pools: [{ id: 'pool_3x9_alpha', name: 'proj-alpha', route: 'limit' }],
+        workgroups: [{ id: 'pool_3x9_alpha', name: 'proj-alpha', route: 'limit' }],
         productCode: 'maas-product-vtpm-std', productId: '001', productName: 'vTPM 预留资源包（标准）',
         unitDims: '1～100 / 30天', payloadId: 'payload-vtpm-001', payloadName: 'payload-vtpm-001（DeepSeek-V4.1）',
         amount: 3000, unit: '万 vTPM', cycle: 30, chargeCode: 'maas-product-vtpm-std.30d', unitPrice: 0.0084,
@@ -894,14 +914,14 @@
       },
       'P002': {
         subject: 'sub_7k2m5n8p', subjectName: '星河互娱',
-        pools: [{ id: 'pool_7k2_gamma', name: 'proj-gamma', route: 'serverless' }],
+        workgroups: [{ id: 'pool_7k2_gamma', name: 'proj-gamma', route: 'serverless' }],
         productCode: 'maas-product-vtpm-pro', productId: '002', productName: 'vTPM 预留资源包（专业）',
         unitDims: '1～100 / 30天', payloadId: 'payload-glm-001', payloadName: 'payload-glm-001（GLM-4）',
         amount: 2000, unit: '万 vTPM', cycle: 30, chargeCode: 'maas-product-vtpm-pro.30d', unitPrice: 0.0062,
         status: '生效中', statusCls: 'bg-green-100 text-green-700',
         startTime: '2026-09-01 00:00', endTime: '2026-10-02 00:00',
         overflowRoute: '超量路由 Serverless（按量计费）',
-        note: '活动客户补偿交付，关联默认 Pool。'
+        note: '活动客户补偿交付，关联默认工作组。'
       }
     };
 
@@ -909,8 +929,8 @@
       const d = detailData[id];
       if (!d) return;
       document.getElementById('detail-title').textContent = `${d.subjectName} 预留 vTPM 资源包详情`;
-      const pools = d.pools.length
-        ? d.pools.map(p => `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-violet-50 text-violet-700 text-[11px] font-medium">${p.name}${poolRouteBadge(p.route)}</span>`).join(' ')
+      const workgroups = d.workgroups.length
+        ? d.workgroups.map(p => `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-violet-50 text-violet-700 text-[11px] font-medium">${p.name}${poolRouteBadge(p.route)}</span>`).join(' ')
         : '<span class="text-slate-400">未关联</span>';
       document.getElementById('detail-body').innerHTML = `
         <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
@@ -923,7 +943,7 @@
 
         <div class="grid grid-cols-3 gap-3">
           <div><span class="text-slate-500">subject_id</span><p class="font-medium text-slate-900 mt-0.5">${d.subject}</p></div>
-          <div><span class="text-slate-500">Pool（含超量路由）</span><p class="mt-1 flex flex-wrap gap-1.5">${pools}</p></div>
+          <div><span class="text-slate-500">工作组（含超量路由）</span><p class="mt-1 flex flex-wrap gap-1.5">${workgroups}</p></div>
           <div><span class="text-slate-500">商品（SKU）</span><p class="font-medium text-slate-900 mt-0.5">${d.productName}<span class="font-mono text-slate-400 text-[11px] ml-1">${d.productCode}</span></p></div>
           <div><span class="text-slate-500">售卖单元（维度:度量）</span><p class="font-medium text-slate-900 mt-0.5">${d.unitDims}</p></div>
           <div><span class="text-slate-500">Payload</span><p class="font-medium text-slate-900 mt-0.5">${d.payloadName}</p></div>
