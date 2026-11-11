@@ -346,10 +346,17 @@
             <label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU 商品</label>
             <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
           </div>
-          <!-- 维度级联选择：依次选择各维度的度量，实际是选择在售售卖单元 -->
+          <!-- 直接输入购买量 + 选择购买周期 → 自动匹配在售售卖单元 -->
           <div id="grant-dims-block" class="hidden">
-            <label class="block text-xs font-medium text-slate-700 mb-1">选择售卖单元（按维度依次选择度量，仅列在售单元）</label>
-            <div id="grant-dims" class="grid grid-cols-2 gap-2"></div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">输入购买量并选择购买周期（自动匹配在售售卖单元）</label>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <input id="grant-qty-input" type="number" min="1" oninput="onQtyInput()" placeholder="输入购买量（万 vTPM）" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+              </div>
+              <div>
+                <select id="grant-cycle" onchange="onQtyInput()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+              </div>
+            </div>
           </div>
           <!-- 售卖单元售卖参数详情 -->
           <div id="grant-unit-detail" class="hidden bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600"></div>
@@ -363,8 +370,8 @@
         <div id="grant-config" class="hidden space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-700 mb-1">购买量（万 vTPM）</label>
-              <select id="grant-multiplier" onchange="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+              <p class="block text-xs font-medium text-slate-700 mb-1">购买量（万 vTPM）</p>
+              <p id="grant-qty-chosen" class="bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 text-xs text-slate-600">未输入</p>
               <p class="text-[11px] text-slate-400 mt-1" id="grant-qty-range"></p>
             </div>
             <div>
@@ -468,10 +475,6 @@
       <div class="mt-5 flex justify-end gap-2">
         <button onclick="closeCreatePoolModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
         <button onclick="confirmCreatePool()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">创建</button>
-      </div>
-    </div>
-  </div>
-
       </div>
     </div>
   </div>
@@ -833,19 +836,13 @@
         qtyOpts += `<option value="${q}">${q} 万 vTPM</option>`;
       }
       qtySelect.innerHTML = qtyOpts || '<option value="" disabled>无可选购买量</option>';
-      qtySelect.onchange = onQtyChange;
-      document.getElementById('grant-qty-range').textContent = `可选范围 ${unit.minQty.toLocaleString()} ~ ${unit.maxQty.toLocaleString()} 万 vTPM，step ${unit.stepQty.toLocaleString()}`;
+            document.getElementById('grant-qty-range').textContent = `可选范围 ${unit.minQty.toLocaleString()} ~ ${unit.maxQty.toLocaleString()} 万 vTPM，step ${unit.stepQty.toLocaleString()}`;
 
       config.classList.remove('hidden');
       document.getElementById('grant-config-hint').classList.add('hidden');
       renderGrantSummary();
     }
 
-    let qtyConfirmed = false;
-    function onQtyChange() {
-      qtyConfirmed = true;
-      renderGrantSummary();
-    }
     function renderGrantSummary() {
       const product = productById(document.getElementById('grant-sku').value);
       const unit = product ? currentUnit(product) : null;
