@@ -18,14 +18,16 @@
     .admin-btn-primary:hover { background: #6D28D9; }
     .admin-btn-default { background: #fff; color: #374151; border: 1px solid #D1D5DB; }
     .admin-btn-default:hover { background: #F9FAFB; }
-    .grant-label { display: block; font-size: 0.75rem; font-weight: 500; color: #374151; margin-bottom: 0.375rem; }
-    .grant-field { width: 100%; border: 1px solid #D1D5DB; border-radius: 0.375rem; padding: 0.375rem 0.625rem; font-size: 0.75rem; outline: none; }
-    .grant-field:focus { border-color: #7C3AED; }
-    .grant-section { padding: 1rem 0; border-bottom: 1px solid #F3F4F6; }
-    .grant-section:last-child { border-bottom: 0; padding-bottom: 0; }
-    .grant-section:first-child { padding-top: 0; }
-    .grant-section-title { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; font-weight: 600; color: #111827; margin-bottom: 0.625rem; }
-    .grant-step-no { display: inline-flex; width: 1.125rem; height: 1.125rem; border-radius: 9999px; background: #EDE9FE; color: #6D28D9; font-size: 0.625rem; font-weight: 700; align-items: center; justify-content: center; }
+
+    /* 页面级表单控件（与后台其他管理页一致） */
+    .fld { width: 100%; border: 1px solid #D1D5DB; border-radius: 0.375rem; padding: 0.4375rem 0.6875rem; font-size: 0.8125rem; line-height: 1.35; outline: none; background: #fff; transition: border-color .15s; }
+    .fld:focus { border-color: #7C3AED; box-shadow: 0 0 0 3px rgba(124,58,237,.08); }
+    .fld[readonly] { background: #F9FAFB; color: #6B7280; cursor: not-allowed; }
+    .fld-label { display: block; font-size: 0.8125rem; font-weight: 500; color: #374151; margin-bottom: 0.4375rem; }
+    .fld-hint { font-size: 0.75rem; color: #9CA3AF; margin-top: 0.375rem; line-height: 1.5; }
+    .sec-head { display: flex; align-items: center; justify-content: space-between; padding: 0.875rem 1.25rem; border-bottom: 1px solid #E5E7EB; }
+    .sec-title { font-size: 0.875rem; font-weight: 600; color: #111827; }
+    .sec-body { padding: 1.25rem; }
   </style>
 </head>
 <body class="bg-[#F3F4F6] text-slate-800">
@@ -108,105 +110,146 @@
 
     <!-- 主内容区 -->
     <main class="flex-1 p-4 min-w-0">
-      <div class="max-w-2xl">
-        <!-- 面包屑 -->
-        <nav class="text-xs text-slate-500 mb-4">
-          <a href="admin-packages.html" class="hover:text-violet-600">预留vTPM管理</a>
-          <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
-          <span class="text-slate-700">手动交付资源包</span>
-        </nav>
+      <!-- 面包屑 -->
+      <nav class="text-xs text-slate-500 mb-4">
+        <span class="text-slate-700">活动运营</span>
+        <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
+        <a href="admin-packages.html" class="text-slate-700 hover:text-violet-600">预留vTPM管理</a>
+        <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
+        <span class="text-slate-700">手动交付资源包</span>
+      </nav>
 
-        <div class="mb-4">
+      <!-- 页面标题 + 操作栏 -->
+      <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+        <div>
           <h2 class="text-lg font-semibold text-slate-900">手动交付资源包</h2>
-          <p class="text-xs text-slate-500 mt-0.5">选择客户、商品与购买量后交付预留 vTPM 资源包。</p>
+          <p class="text-xs text-slate-500 mt-0.5">为指定客户交付预留 vTPM 资源包，可按需关联工作组。</p>
         </div>
+        <div class="flex items-center gap-2">
+          <a href="admin-packages.html" class="inline-flex items-center px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</a>
+          <button onclick="confirmGrant()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
+            <i class="fa-solid fa-check text-[10px]"></i>确认交付
+          </button>
+        </div>
+      </div>
 
-        <div class="admin-card px-4 py-1 mb-4">
-          <!-- ① 客户与工作组 -->
-          <div class="grant-section">
-            <p class="grant-section-title"><span class="grant-step-no">1</span>客户与工作组</p>
-            <div class="flex gap-2">
-              <input id="grant-subject" type="text" list="grant-subject-list" oninput="schedulePoolQuery()" onblur="flushPoolQuery()" placeholder="subject_id，如 sub_3x9a2b1c" class="grant-field flex-1">
-              <datalist id="grant-subject-list">
-                <option value="sub_3x9a2b1c">智象科技</option>
-                <option value="sub_7k2m5n8p">星河互娱</option>
-              </datalist>
-              <button type="button" onclick="flushPoolQuery(true)" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium whitespace-nowrap">查询</button>
+      <!-- 主体：左侧表单（宽）+ 右侧摘要（吸顶） -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+
+        <!-- ============ 左：交付信息表单 ============ -->
+        <div class="lg:col-span-2 space-y-4 min-w-0">
+
+          <!-- 客户与工作组 -->
+          <div class="admin-card">
+            <div class="sec-head">
+              <h3 class="sec-title">客户与工作组</h3>
+              <span class="text-xs text-slate-400">工作组可多选，也可不关联</span>
             </div>
-            <p id="grant-pool-hint" class="text-[11px] text-slate-400 mt-1.5">输入 subject_id，自动查询该客户的工作组。</p>
-            <div class="mt-2.5 hidden" id="grant-pool-block">
-              <div id="grant-pool-list" class="space-y-1.5"></div>
+            <div class="sec-body">
+              <div class="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-3 items-end">
+                <div>
+                  <label class="fld-label" for="grant-subject">客户 subject_id</label>
+                  <input id="grant-subject" type="text" list="grant-subject-list" oninput="schedulePoolQuery()" onblur="flushPoolQuery()" placeholder="输入 subject_id，如 sub_3x9a2b1c" class="fld">
+                  <datalist id="grant-subject-list">
+                    <option value="sub_3x9a2b1c">智象科技</option>
+                    <option value="sub_7k2m5n8p">星河互娱</option>
+                  </datalist>
+                </div>
+                <button type="button" onclick="flushPoolQuery(true)" class="px-3 py-2 rounded admin-btn-default text-xs font-medium whitespace-nowrap">查询工作组</button>
+              </div>
+              <p id="grant-pool-hint" class="fld-hint">输入 subject_id，自动查询该客户的工作组。</p>
+
+              <div id="grant-pool-block" class="hidden mt-3 pt-3 border-t border-slate-100">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-medium text-slate-700">关联工作组</span>
+                  <span class="text-[11px] text-slate-400">勾选后资源包将投放到所选工作组</span>
+                </div>
+                <div id="grant-pool-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+              </div>
             </div>
           </div>
 
-          <!-- ② 商品与购买量 -->
-          <div class="grant-section">
-            <p class="grant-section-title"><span class="grant-step-no">2</span>商品与购买量</p>
-            <div id="grant-sku-block" class="space-y-2">
-              <div>
-                <label class="grant-label">SKU 商品</label>
-                <select id="grant-sku" onchange="onSkuChange()" class="grant-field"></select>
-              </div>
-              <div id="grant-dims-block" class="hidden">
-                <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <label class="grant-label">购买量（万 vTPM）</label>
-                    <input id="grant-qty-input" type="number" min="1" oninput="onQtyInput()" placeholder="如 3000" class="grant-field">
-                  </div>
-                  <div>
-                    <label class="grant-label">购买周期</label>
-                    <select id="grant-cycle" onchange="onQtyInput()" class="grant-field"></select>
+          <!-- 商品与购买量 -->
+          <div class="admin-card">
+            <div class="sec-head">
+              <h3 class="sec-title">商品与购买量</h3>
+              <span class="text-xs text-slate-400">按购买量自动匹配在售售卖单元</span>
+            </div>
+            <div class="sec-body">
+              <div id="grant-sku-block" class="space-y-4">
+                <div>
+                  <label class="fld-label" for="grant-sku">SKU 商品</label>
+                  <select id="grant-sku" onchange="onSkuChange()" class="fld"></select>
+                </div>
+                <div id="grant-dims-block" class="hidden">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label class="fld-label" for="grant-qty-input">购买量（万 vTPM）</label>
+                      <input id="grant-qty-input" type="number" min="1" oninput="onQtyInput()" placeholder="如 3000" class="fld">
+                    </div>
+                    <div>
+                      <label class="fld-label" for="grant-cycle">购买周期</label>
+                      <select id="grant-cycle" onchange="onQtyInput()" class="fld"></select>
+                    </div>
                   </div>
                 </div>
               </div>
+              <p id="grant-sku-hint" class="fld-hint">选择商品后输入购买量与购买周期，系统自动匹配在售售卖单元并计算费用。</p>
             </div>
-            <p id="grant-sku-hint" class="text-[11px] text-slate-400 mt-2">选择商品后输入购买量与周期，自动匹配在售区间。</p>
           </div>
 
-          <!-- ③ 交付摘要 -->
-          <div class="grant-section" id="grant-summary-section">
-            <p class="grant-section-title"><span class="grant-step-no">3</span>交付摘要</p>
-            <p id="grant-summary-hint" class="text-[11px] text-slate-400">输入购买量与周期后显示单价与总价。</p>
-            <p id="grant-summary-error" class="hidden text-[11px] text-red-600"></p>
+          <!-- 备注 -->
+          <div class="admin-card">
+            <div class="sec-head">
+              <h3 class="sec-title">备注</h3>
+              <span class="text-xs text-slate-400">选填</span>
+            </div>
+            <div class="sec-body">
+              <textarea id="grant-note" rows="3" placeholder="填写交付原因、审批单号或其他说明" class="fld"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ 右：交付摘要（吸顶） ============ -->
+        <div class="admin-card lg:sticky lg:top-[6.5rem]">
+          <div class="sec-head">
+            <h3 class="sec-title">交付摘要</h3>
+            <span class="text-xs text-slate-400">实时计算</span>
+          </div>
+          <div class="sec-body">
+            <p id="grant-summary-hint" class="text-xs text-slate-400 leading-relaxed">完成左侧选择后，此处显示命中的售卖区间、单价与总价。</p>
+            <p id="grant-summary-error" class="hidden text-xs text-red-600 leading-relaxed"></p>
 
             <div id="grant-summary" class="hidden">
-              <div class="bg-slate-50 rounded-lg px-3.5 py-3 space-y-1.5">
-                <div class="flex justify-between text-xs">
-                  <span class="text-slate-500">商品</span>
-                  <span id="sum-product" class="text-slate-800 font-medium text-right"></span>
+              <dl class="space-y-0">
+                <div class="flex items-baseline justify-between py-2 border-b border-slate-100">
+                  <dt class="text-xs text-slate-500">商品</dt>
+                  <dd id="sum-product" class="text-xs font-medium text-slate-800 text-right ml-3"></dd>
                 </div>
-                <div class="flex justify-between text-xs">
-                  <span class="text-slate-500">购买量 / 周期</span>
-                  <span id="sum-qty" class="text-slate-800"></span>
+                <div class="flex items-baseline justify-between py-2 border-b border-slate-100">
+                  <dt class="text-xs text-slate-500">购买量 / 周期</dt>
+                  <dd id="sum-qty" class="text-xs text-slate-800 text-right ml-3"></dd>
                 </div>
-                <div class="flex justify-between text-xs">
-                  <span class="text-slate-500">命中区间</span>
-                  <span id="sum-range" class="text-slate-800"></span>
+                <div class="flex items-baseline justify-between py-2 border-b border-slate-100">
+                  <dt class="text-xs text-slate-500">命中区间</dt>
+                  <dd id="sum-range" class="text-xs text-slate-800 text-right ml-3"></dd>
                 </div>
-                <div class="flex justify-between text-xs">
-                  <span class="text-slate-500">单价</span>
-                  <span id="sum-price" class="text-slate-800"></span>
+                <div class="flex items-baseline justify-between py-2 border-b border-slate-100">
+                  <dt class="text-xs text-slate-500">单价</dt>
+                  <dd id="sum-price" class="text-xs text-slate-800 text-right ml-3"></dd>
                 </div>
-                <div class="flex justify-between items-baseline pt-1.5 border-t border-slate-200">
-                  <span class="text-xs text-slate-500">总价</span>
-                  <span id="sum-total" class="text-base font-semibold text-violet-700"></span>
+                <div class="flex items-baseline justify-between py-2">
+                  <dt class="text-xs text-slate-500">有效期</dt>
+                  <dd id="sum-period" class="text-xs text-slate-600 text-right ml-3"></dd>
                 </div>
-                <div class="flex justify-between text-[11px] pt-0.5">
-                  <span class="text-slate-400">有效期</span>
-                  <span id="sum-period" class="text-slate-500"></span>
-                </div>
+              </dl>
+              <div class="mt-3 pt-3 border-t border-slate-200 flex items-baseline justify-between">
+                <span class="text-sm font-medium text-slate-700">总价</span>
+                <span id="sum-total" class="text-xl font-semibold text-violet-700"></span>
               </div>
-              <div class="mt-2.5">
-                <label class="grant-label">备注（选填）</label>
-                <textarea id="grant-note" rows="2" placeholder="交付原因或其他说明" class="grant-field"></textarea>
-              </div>
+              <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">费用为按命中单价与购买量计算的参考值，不含折扣与优惠。</p>
             </div>
           </div>
-        </div>
-
-        <div class="flex justify-end gap-2">
-          <a href="admin-packages.html" class="inline-flex items-center px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</a>
-          <button onclick="confirmGrant()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">确认交付</button>
         </div>
       </div>
     </main>
