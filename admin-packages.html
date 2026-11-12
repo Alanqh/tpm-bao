@@ -338,7 +338,7 @@
         </div>
       </div>
 
-      <!-- Step 2: 选择预留 vTPM 商品（SKU），按维度选度量 → 售卖单元 -->
+      <!-- Step 2: 选择 SKU → 直接输入购买量 + 选购买周期 → 自动匹配在售售卖单元 -->
       <div class="border border-slate-200 rounded-lg p-3 mb-3">
         <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">2</span>选择预留 vTPM 商品（SKU）</p>
         <div id="grant-sku-block" class="space-y-2">
@@ -346,15 +346,22 @@
             <label class="block text-xs font-medium text-slate-700 mb-1">选择 SKU 商品</label>
             <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
           </div>
-          <!-- 维度级联选择：依次选择各维度的度量，实际是选择在售售卖单元 -->
+          <!-- 直接输入购买量 + 选择购买周期 → 自动匹配在售售卖单元 -->
           <div id="grant-dims-block" class="hidden">
-            <label class="block text-xs font-medium text-slate-700 mb-1">选择售卖单元（按维度依次选择度量，仅列在售单元）</label>
-            <div id="grant-dims" class="grid grid-cols-2 gap-2"></div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">输入购买量并选择购买周期（自动匹配在售售卖单元）</label>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <input id="grant-qty-input" type="number" min="1" oninput="onQtyInput()" placeholder="输入购买量（万 vTPM）" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+              </div>
+              <div>
+                <select id="grant-cycle" onchange="onQtyInput()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+              </div>
+            </div>
           </div>
           <!-- 售卖单元售卖参数详情 -->
           <div id="grant-unit-detail" class="hidden bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600"></div>
         </div>
-        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择商品并依次选择维度度量后展示售卖参数。</p>
+        <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择商品后，直接输入购买量并选择购买周期，自动匹配在售售卖单元并展示单价。</p>
       </div>
 
       <!-- Step 3: 交付配置 -->
@@ -363,8 +370,8 @@
         <div id="grant-config" class="hidden space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-700 mb-1">购买量（万 vTPM）</label>
-              <select id="grant-multiplier" onchange="renderGrantSummary()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+              <p class="block text-xs font-medium text-slate-700 mb-1">购买量（万 vTPM）</p>
+              <p id="grant-qty-chosen" class="bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 text-xs text-slate-600">未输入</p>
               <p class="text-[11px] text-slate-400 mt-1" id="grant-qty-range"></p>
             </div>
             <div>
@@ -468,10 +475,6 @@
       <div class="mt-5 flex justify-end gap-2">
         <button onclick="closeCreatePoolModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
         <button onclick="confirmCreatePool()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">创建</button>
-      </div>
-    </div>
-  </div>
-
       </div>
     </div>
   </div>
@@ -597,13 +600,6 @@
     function productById(id) { return products.find(s => s.id === id); }
     function chargeByCode(code) { return chargeItems.find(c => c.code === code); }
     function unitCharge(unit) { return chargeByCode(unit.chargeCode) || null; }
-    // 当前选中的在售售卖单元（维度度量级联筛选结果）
-    function currentUnit(product) {
-      const selections = Array.from(document.querySelectorAll('#grant-dims select')).map(s => s.value);
-      return product.sellUnits.find(u =>
-        u.status === 'on' && u.dims.every((d, i) => String(selections[i]) === d.measure)
-      ) || null;
-    }
     function openGrantModal() {
       document.getElementById('grant-subject').value = '';
       document.getElementById('grant-pool-block').classList.add('hidden');
@@ -741,7 +737,7 @@
       onSkuChange();
     }
 
-    // SKU 变化 → 重置维度级联（每个维度一个下拉，选项来自该商品在售单元的度量并集，按维度顺序依次选择）
+    // SKU 变化 → 重置购买量输入与购买周期下拉（用户直接填购买量，不选区间）
     function onSkuChange() {
       const product = productById(document.getElementById('grant-sku').value);
       const dimsBlock = document.getElementById('grant-dims-block');
@@ -752,7 +748,6 @@
       document.getElementById('grant-config-hint').classList.remove('hidden');
       if (!product) { dimsBlock.classList.add('hidden'); return; }
 
-      // 维度名列表（取第一个在售单元的 dims 顺序）
       const onUnits = product.sellUnits.filter(u => u.status === 'on');
       if (onUnits.length === 0) {
         dimsBlock.classList.add('hidden');
@@ -760,48 +755,90 @@
         return;
       }
       document.getElementById('grant-sku-hint').classList.add('hidden');
-      const dimNames = onUnits[0].dims.map(d => d.dim);
-      document.getElementById('grant-dims').innerHTML = dimNames.map(dim => {
-        // 该维度的可选度量（在售单元并集，保持出现顺序）
-        const measures = [];
-        onUnits.forEach(u => u.dims.forEach(d => { if (d.dim === dim && !measures.includes(d.measure)) measures.push(d.measure); }));
-        return `
-          <div>
-            <label class="block text-[11px] text-slate-400 mb-1">${dim}</label>
-            <select onchange="onDimChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
-              <option value="">请选择${dim}度量</option>
-              ${measures.map(m => `<option value="${m}">${m}</option>`).join('')}
-            </select>
-          </div>`;
-      }).join('');
+
+      // 购买周期下拉：在售售卖单元的周期并集（用户只需直接输入购买量 + 选周期）
+      const cycleSelect = document.getElementById('grant-cycle');
+      const cycles = [];
+      onUnits.forEach(u => u.dims.forEach(d => { if (d.dim === '购买周期' && !cycles.includes(d.measure)) cycles.push(d.measure); }));
+      cycleSelect.innerHTML = '<option value="" disabled selected>请选择购买周期</option>' + cycles.map(m => `<option value="${m}">${m}</option>`).join('');
+      document.getElementById('grant-qty-input').value = '';
       dimsBlock.classList.remove('hidden');
-      onDimChange();
+      onQtyInput();
     }
 
-    // 维度度量变化 → 匹配在售售卖单元 → 展示售卖参数详情 / 解锁交付配置
-    function onDimChange() {
+    function onQtyInput() { renderGrantSummary(); }
+
+    // 区间度量解析：'1～100' → [1,100]；'500+' → [500,∞)
+    function parseRange(measure) {
+      if (measure.includes('～')) {
+        const parts = measure.split('～');
+        const min = parseFloat(parts[0].replace(/[^\d.]/g, ''));
+        const max = parseFloat(parts[1].replace(/[^\d.]/g, ''));
+        if (!isNaN(min) && !isNaN(max)) return [min, max];
+      } else if (measure.includes('+')) {
+        const min = parseFloat(measure.replace(/[^\d.]/g, ''));
+        if (!isNaN(min)) return [min, Infinity];
+      }
+      return null;
+    }
+    // 用户直接输入购买量 + 选择购买周期 → 自动判断落在哪个售卖单元（以 minQty/maxQty 为准，区间标签仅展示）
+    function matchUnit(product, qty, cycleMeasure) {
+      const onUnits = product.sellUnits.filter(u => u.status === 'on');
+      for (const u of onUnits) {
+        const cycleDim = u.dims.find(d => d.dim === '购买周期');
+        const rangeDim = u.dims.find(d => d.dim === '购买量区间');
+        if (!cycleDim || cycleDim.measure !== cycleMeasure || !rangeDim) continue;
+        if (qty >= u.minQty && qty <= u.maxQty) return { unit: u, rangeMeasure: rangeDim.measure };
+      }
+      return null;
+    }
+
+    // 输入购买量 + 选定周期 → 实时展示命中的区间、周期、单价与总价
+    function renderGrantSummary() {
       const product = productById(document.getElementById('grant-sku').value);
       const detail = document.getElementById('grant-unit-detail');
       const config = document.getElementById('grant-config');
-      const selections = Array.from(document.querySelectorAll('#grant-dims select')).map(s => s.value);
-      const allChosen = selections.length > 0 && selections.every(v => v !== '');
-      const unit = allChosen && product ? currentUnit(product) : null;
+      const priceLabel = document.getElementById('grant-price-label');
+      if (!product) return;
+      const qty = parseInt(document.getElementById('grant-qty-input').value, 10);
+      const cycleMeasure = document.getElementById('grant-cycle').value;
       detail.classList.add('hidden');
       config.classList.add('hidden');
-      if (!unit) {
-        document.getElementById('grant-config-hint').textContent = '请将各维度度量选择完整，以定位在售售卖单元。';
+
+      // 未输入购买量 / 未选周期 → 不展示单价
+      if (isNaN(qty) || qty <= 0 || !cycleMeasure) {
+        document.getElementById('grant-config-hint').textContent = '请直接输入购买量并选择购买周期，系统将自动匹配售卖区间与单价。';
         document.getElementById('grant-config-hint').classList.remove('hidden');
+        priceLabel.textContent = '确定购买量与购买周期后显示单价';
+        document.getElementById('grant-total-preview').textContent = '';
         return;
       }
 
-      // 售卖参数详情：单价（该周期计费项刊例价）/ payload / 折算（预览） / SLO（预览）
+      const matched = matchUnit(product, qty, cycleMeasure);
+      if (!matched) {
+        document.getElementById('grant-config-hint').innerHTML = '<span class="text-red-500">该购买量未命中任何在售售卖单元区间，请调整购买量或购买周期。</span>';
+        document.getElementById('grant-config-hint').classList.remove('hidden');
+        document.getElementById('grant-qty-chosen').textContent = qty.toLocaleString() + ' 万 vTPM';
+        document.getElementById('grant-qty-range').textContent = '';
+        priceLabel.textContent = '无匹配售卖单元';
+        document.getElementById('grant-total-preview').textContent = '';
+        return;
+      }
+
+      const unit = matched.unit;
       const charge = unitCharge(unit);
       const payloadModel = payloadModelMap[unit.payloadId] || '';
+
+      // 售卖单元详情：命中的区间 / 单价 / payload / 折算 / SLO
       detail.innerHTML = `
         <div class="grid grid-cols-4 gap-3">
           <div>
-            <p class="text-slate-400">单价（${unit.cycleDays}天周期）</p>
-            <p class="text-slate-800 font-semibold mt-0.5">待选择购买量后显示 <span class="text-slate-400 font-normal">/ 万 vTPM</span></p>
+            <p class="text-slate-400">命中购买量区间</p>
+            <p class="text-slate-800 font-semibold mt-0.5">${matched.rangeMeasure}<span class="text-slate-400 font-normal">（${qty.toLocaleString()} 万 vTPM 落入该区间）</span></p>
+          </div>
+          <div>
+            <p class="text-slate-400">单价（${cycleMeasure}）</p>
+            <p class="text-slate-800 font-semibold mt-0.5">${charge ? '¥' + charge.price.toFixed(4) : '—'} <span class="text-slate-400 font-normal">/ 万 vTPM</span></p>
             ${charge ? `<p class="text-slate-400 mt-0.5 font-mono">${charge.code}</p>` : ''}
           </div>
           <div>
@@ -810,83 +847,53 @@
             ${payloadModel ? `<p class="text-slate-400 mt-0.5">${payloadModel}</p>` : ''}
           </div>
           <div>
-            <p class="text-slate-400">vTPM 折算系数</p>
-            <p class="mt-1"><button type="button" onclick="showFactorPreview('${product.code}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium">${unit.factorRef}<i class="fa-solid fa-table text-[10px] ml-0.5"></i>预览</button></p>
-          </div>
-          <div>
-            <p class="text-slate-400">SLO 赔付规则</p>
-            <p class="mt-1"><button type="button" onclick="showSloPreview('${product.code}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium">${unit.sloRef}<i class="fa-solid fa-shield-halved text-[10px] ml-0.5"></i>预览</button></p>
+            <p class="text-slate-400">折算系数 / SLO</p>
+            <p class="mt-1 flex flex-wrap gap-1">
+              <button type="button" onclick="showFactorPreview('${product.code}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium">${unit.factorRef}<i class="fa-solid fa-table text-[10px] ml-0.5"></i>预览</button>
+              <button type="button" onclick="showSloPreview('${product.code}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium">${unit.sloRef}<i class="fa-solid fa-shield-halved text-[10px] ml-0.5"></i></button>
+            </p>
           </div>
         </div>
       `;
       detail.classList.remove('hidden');
 
-      // ===== Step 3 交付配置：由售卖单元参数驱动 =====
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      document.getElementById('grant-start').value = fmtDateTime(start);
+      // ===== Step 3 交付配置：命中售卖单元后驱动 =====
+      document.getElementById('grant-qty-chosen').textContent = qty.toLocaleString() + ' 万 vTPM';
+      document.getElementById('grant-qty-range').textContent = `命中区间：${matched.rangeMeasure}｜购买周期：${cycleMeasure}（${unit.cycleDays} 天）`;
+      priceLabel.textContent = charge
+        ? `单价 ¥${charge.price.toFixed(4)} / 万 vTPM（${matched.rangeMeasure} · ${cycleMeasure}）`
+        : '该售卖单元未关联计费项，无法计价';
+      const totalPrice = charge ? charge.price * qty : null;
+      document.getElementById('grant-total-preview').textContent = charge
+        ? `¥${charge.price.toFixed(4)} × ${qty.toLocaleString()} 万 vTPM = ¥${totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+        : '该售卖单元未关联计费项，无法计价';
 
-      // 购买量：按售卖单元 minQty/maxQty/stepQty（万 vTPM）生成下拉
-      const qtySelect = document.getElementById('grant-multiplier');
-      let qtyOpts = '<option value="" disabled selected>请选择购买量</option>';
-      for (let q = unit.minQty; q <= unit.maxQty; q += unit.stepQty) {
-        qtyOpts += `<option value="${q}">${q} 万 vTPM</option>`;
-      }
-      qtySelect.innerHTML = qtyOpts || '<option value="" disabled>无可选购买量</option>';
-      qtySelect.onchange = onQtyChange;
-      document.getElementById('grant-qty-range').textContent = `可选范围 ${unit.minQty.toLocaleString()} ~ ${unit.maxQty.toLocaleString()} 万 vTPM，step ${unit.stepQty.toLocaleString()}`;
-
-      config.classList.remove('hidden');
-      document.getElementById('grant-config-hint').classList.add('hidden');
-      renderGrantSummary();
-    }
-
-    let qtyConfirmed = false;
-    function onQtyChange() {
-      qtyConfirmed = true;
-      renderGrantSummary();
-    }
-    function renderGrantSummary() {
-      const product = productById(document.getElementById('grant-sku').value);
-      const unit = product ? currentUnit(product) : null;
-      if (!unit) return;
-      const charge = unitCharge(unit);
-      const qtyRaw = document.getElementById('grant-multiplier').value;
-      const qty = parseInt(qtyRaw, 10);
-      const priceLabel = document.getElementById('grant-price-label');
-      if (!qtyConfirmed || isNaN(qty) || qty <= 0) {
-        // 购买量未确定：不展示对应单价
-        priceLabel.textContent = '确定购买量与购买周期后显示单价';
-        document.getElementById('grant-total-preview').textContent = '已确定购买周期 ' + unit.cycleDays + ' 天，选择购买量后显示对应单价';
-        return;
-      }
-      priceLabel.textContent = '单价 × 购买数量';
-      // 价格 = 单价（该周期计费项刊例价）× 购买数量
-      const price = charge ? charge.price * qty : null;
-      document.getElementById('grant-total-preview').textContent = price === null
-        ? '该售卖单元未关联计费项，无法计价'
-        : `¥${charge.price.toFixed(4)} / 万 vTPM × ${qty.toLocaleString()} 万 vTPM = ¥${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-
-      // 结束时间 = 开始（操作日 0 点）+ 购买周期（随售卖单元）+ 1 天
       const start = new Date(); start.setHours(0, 0, 0, 0);
+      document.getElementById('grant-start').value = fmtDateTime(start);
       const end = new Date(start);
       end.setDate(end.getDate() + unit.cycleDays + 1);
       document.getElementById('grant-end').value = fmtDateTime(end);
+
+      config.classList.remove('hidden');
+      document.getElementById('grant-config-hint').classList.add('hidden');
     }
 
     function confirmGrant() {
       const selectedPools = getSelectedPools();
       const product = productById(document.getElementById('grant-sku').value);
-      const unit = product ? currentUnit(product) : null;
-      if (!product || !unit) { alert('请先完整选择售卖单元（各维度度量）'); return; }
-      if (unit.status !== 'on') { alert('该售卖单元当前不在售，无法交付。请选择在售状态的售卖单元。'); return; }
+      const qty = parseInt(document.getElementById('grant-qty-input').value, 10);
+      const cycleMeasure = document.getElementById('grant-cycle').value;
+      if (!product) { alert('请先选择 SKU 商品。'); return; }
+      if (isNaN(qty) || qty <= 0) { alert('请先输入购买量，以确定对应单价后再交付。'); return; }
+      if (!cycleMeasure) { alert('请先选择购买周期。'); return; }
+      const matched = matchUnit(product, qty, cycleMeasure);
+      if (!matched) { alert('该购买量未命中任何在售售卖单元区间，请调整购买量或购买周期。'); return; }
+      const unit = matched.unit;
       const charge = unitCharge(unit);
-      const qty = parseInt(document.getElementById('grant-multiplier').value, 10);
-      if (isNaN(qty) || qty <= 0) { alert('请先选择购买量，以确定对应单价后再交付。'); return; }
       const note = document.getElementById('grant-note').value.trim();
       const totalPrice = charge ? charge.price * qty : null;
       closeModal('grant');
-      alert(`已交付：关联 ${selectedPools.length} 个工作组的预留 vTPM 包。\n商品：${product.name}（${product.code}）\n单价：${charge ? '¥' + charge.price.toFixed(4) + ' / 万 vTPM（' + unit.cycleDays + '天周期）' : '—'}\nPayload：${unit.payloadId}\n购买量：${qty.toLocaleString()} 万 vTPM\n购买周期：${unit.cycleDays} 天（随售卖单元）\n费用：${totalPrice === null ? '—' : '¥' + totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}\n各工作组超量路由配置：\n${(selectedPools.length ? selectedPools.map(p => `  · ${p.name}：${p.route === 'serverless' ? '超量路由 Serverless' : '超量限流（429）'}`).join('\n') : '  无关联 Workgroup')}\n备注：${note || '无'}`);
+      alert(`已交付：关联 ${selectedPools.length} 个工作组的预留 vTPM 包。\n商品：${product.name}（${product.code}）\n命中购买量区间：${matched.rangeMeasure}\n单价：${charge ? '¥' + charge.price.toFixed(4) + ' / 万 vTPM（' + cycleMeasure + '）' : '—'}\nPayload：${unit.payloadId}\n购买量：${qty.toLocaleString()} 万 vTPM\n购买周期：${cycleMeasure}（${unit.cycleDays} 天）\n费用：${totalPrice === null ? '—' : '¥' + totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}\n各工作组超量路由配置：\n${(selectedPools.length ? selectedPools.map(p => `  · ${p.name}：${p.route === 'serverless' ? '超量路由 Serverless' : '超量限流（429）'}`).join('\n') : '  无关联工作组')}\n备注：${note || '无'}`);
     }
 
     function fmtDate(d) {
