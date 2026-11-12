@@ -369,18 +369,25 @@
       <div class="border border-slate-200 rounded-lg p-3 mb-3">
         <p class="text-xs font-semibold text-slate-800 mb-2"><span class="inline-flex w-4 h-4 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold items-center justify-center mr-1.5">3</span>交付配置</p>
         <div id="grant-config" class="hidden space-y-3">
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <p class="block text-xs font-medium text-slate-700 mb-1">购买量（万 vTPM）</p>
-              <p id="grant-qty-chosen" class="bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 text-xs text-slate-600">未输入</p>
-              <p class="text-[11px] text-slate-400 mt-1" id="grant-qty-range"></p>
+          <div class="grid grid-cols-4 gap-3">
+            <div class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+              <p class="text-[11px] text-slate-400">购买量</p>
+              <p id="grant-qty-chosen" class="text-sm font-semibold text-slate-800 mt-0.5">未输入</p>
             </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-700 mb-1">价格预览</label>
-              <div id="grant-price-label" class="bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 text-xs text-slate-600">确定购买量与购买周期后显示单价</div>
-              <p id="grant-total-preview" class="text-[11px] text-violet-600 font-medium mt-1"></p>
+            <div class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+              <p class="text-[11px] text-slate-400">命中购买量区间</p>
+              <p id="grant-qty-range" class="text-sm font-semibold text-slate-800 mt-0.5">—</p>
+            </div>
+            <div class="bg-violet-50 border border-violet-200 rounded-lg px-3 py-2.5">
+              <p class="text-[11px] text-violet-400">单价（命中周期）</p>
+              <p id="grant-price-label" class="text-sm font-semibold text-violet-700 mt-0.5">待输入购买量</p>
+            </div>
+            <div class="bg-violet-50 border border-violet-200 rounded-lg px-3 py-2.5">
+              <p class="text-[11px] text-violet-400">总价</p>
+              <p id="grant-total-preview" class="text-sm font-semibold text-violet-700 mt-0.5">—</p>
             </div>
           </div>
+          <p id="grant-match-hint" class="text-[11px] text-slate-400"></p>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-medium text-slate-700 mb-1">开始时间</label>
@@ -583,18 +590,18 @@
     // qty min/max/step 单位：万 vTPM；price = 关联计费项刊例价（元/万 vTPM，随周期变化的单价）；cycleDays = 该单元的购买周期天数
     const products = [
       { code: 'maas-product-vtpm-std', id: '001', name: 'vTPM 预留资源包（标准）', sellUnits: [
-        { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-std.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' },
-        { id: 'su-2', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '60天' }], chargeCode: 'maas-product-vtpm-std.60d', cycleDays: 60, minQty: 100, maxQty: 10000, stepQty: 500, payloadId: 'payload-vtpm-002', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' },
-        { id: 'su-3', status: 'off', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-std.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-vtpm-003', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' }
+        { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '100～10000' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-std.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-2', status: 'on', dims: [{ dim: '购买量区间', measure: '100～10000' }, { dim: '购买周期', measure: '60天' }], chargeCode: 'maas-product-vtpm-std.60d', cycleDays: 60, minQty: 100, maxQty: 10000, stepQty: 500, payloadId: 'payload-vtpm-002', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-3', status: 'off', dims: [{ dim: '购买量区间', measure: '1000～50000' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-std.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-vtpm-003', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' }
       ] },
       { code: 'maas-product-vtpm-pro', id: '002', name: 'vTPM 预留资源包（专业）', sellUnits: [
-        { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pro.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
-        { id: 'su-2', status: 'off', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-pro.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
-        { id: 'su-3', status: 'on', dims: [{ dim: '购买量区间', measure: '500+' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pro.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
-        { id: 'su-4', status: 'off', dims: [{ dim: '购买量区间', measure: '500+' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-pro.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' }
+        { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '100～10000' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pro.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-2', status: 'off', dims: [{ dim: '购买量区间', measure: '1000～50000' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-pro.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-3', status: 'on', dims: [{ dim: '购买量区间', measure: '5000～50000' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pro.30d', cycleDays: 30, minQty: 5000, maxQty: 50000, stepQty: 500, payloadId: 'payload-glm-001', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-4', status: 'off', dims: [{ dim: '购买量区间', measure: '5000～50000' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-pro.90d', cycleDays: 90, minQty: 5000, maxQty: 50000, stepQty: 500, payloadId: 'payload-glm-002', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' }
       ] },
       { code: 'maas-product-vtpm-pre', id: '003', name: 'vTPM 预留资源包（预）', sellUnits: [
-        { id: 'su-1', status: 'off', dims: [{ dim: '购买量区间', measure: '1～100' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pre.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', factorRef: 'vtpm-factor-deepseek v3.3', sloRef: 'slo-rule-95 v5.1' }
+        { id: 'su-1', status: 'off', dims: [{ dim: '购买量区间', measure: '100～10000' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pre.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', factorRef: 'vtpm-factor-deepseek v3.3', sloRef: 'slo-rule-95 v5.1' }
       ] }
     ];
 
@@ -782,16 +789,32 @@
       }
       return null;
     }
-    // 用户直接输入购买量 + 选择购买周期 → 自动判断落在哪个售卖单元（以 minQty/maxQty 为准，区间标签仅展示）
+    // 该周期下所有在售区间标签（无匹配时提示用户可选范围）
+    function availableRangesText(product, cycleMeasure) {
+      return product.sellUnits
+        .filter(u => u.status === 'on' && u.dims.some(d => d.dim === '购买周期' && d.measure === cycleMeasure))
+        .map(u => {
+          const r = u.dims.find(d => d.dim === '购买量区间');
+          return r ? r.measure : '';
+        }).filter(Boolean).join('、') || '无';
+    }
+    // 用户直接输入购买量 + 选择购买周期 → 自动判断落在哪个售卖单元
+    // 命中判定：qty 落在 [minQty, maxQty]（区间标签已与 minQty/maxQty 对齐）
     function matchUnit(product, qty, cycleMeasure) {
+      let fallback = null; // 区间标签与量程不一致的历史数据兜底
       const onUnits = product.sellUnits.filter(u => u.status === 'on');
       for (const u of onUnits) {
         const cycleDim = u.dims.find(d => d.dim === '购买周期');
         const rangeDim = u.dims.find(d => d.dim === '购买量区间');
         if (!cycleDim || cycleDim.measure !== cycleMeasure || !rangeDim) continue;
-        if (qty >= u.minQty && qty <= u.maxQty) return { unit: u, rangeMeasure: rangeDim.measure };
+        if (qty >= u.minQty && qty <= u.maxQty) {
+          // 若区间标签可解析且 qty 也在标签区间内，优先返回标签命中
+          const parsed = parseRange(rangeDim.measure);
+          if (parsed && qty >= parsed[0] && qty <= parsed[1]) return { unit: u, rangeMeasure: rangeDim.measure };
+          if (!fallback) fallback = { unit: u, rangeMeasure: rangeDim.measure };
+        }
       }
-      return null;
+      return fallback;
     }
 
     // 输入购买量 + 选定周期 → 实时展示命中的区间、周期、单价与总价
@@ -810,8 +833,11 @@
       if (isNaN(qty) || qty <= 0 || !cycleMeasure) {
         document.getElementById('grant-config-hint').textContent = '请直接输入购买量并选择购买周期，系统将自动匹配售卖区间与单价。';
         document.getElementById('grant-config-hint').classList.remove('hidden');
-        priceLabel.textContent = '确定购买量与购买周期后显示单价';
-        document.getElementById('grant-total-preview').textContent = '';
+        priceLabel.textContent = '待输入购买量';
+        document.getElementById('grant-qty-chosen').textContent = '未输入';
+        document.getElementById('grant-qty-range').textContent = '—';
+        document.getElementById('grant-total-preview').textContent = '—';
+        document.getElementById('grant-match-hint').textContent = '';
         return;
       }
 
@@ -820,9 +846,10 @@
         document.getElementById('grant-config-hint').innerHTML = '<span class="text-red-500">该购买量未命中任何在售售卖单元区间，请调整购买量或购买周期。</span>';
         document.getElementById('grant-config-hint').classList.remove('hidden');
         document.getElementById('grant-qty-chosen').textContent = qty.toLocaleString() + ' 万 vTPM';
-        document.getElementById('grant-qty-range').textContent = '';
-        priceLabel.textContent = '无匹配售卖单元';
-        document.getElementById('grant-total-preview').textContent = '';
+        document.getElementById('grant-qty-range').textContent = '未命中';
+        priceLabel.textContent = '—';
+        document.getElementById('grant-total-preview').textContent = '—';
+        document.getElementById('grant-match-hint').textContent = '该周期下的在售区间：' + availableRangesText(product, cycleMeasure);
         return;
       }
 
@@ -858,15 +885,16 @@
       `;
       detail.classList.remove('hidden');
 
-      // ===== Step 3 交付配置：命中售卖单元后驱动 =====
-      document.getElementById('grant-qty-chosen').textContent = qty.toLocaleString() + ' 万 vTPM';
-      document.getElementById('grant-qty-range').textContent = `命中区间：${matched.rangeMeasure}｜购买周期：${cycleMeasure}（${unit.cycleDays} 天）`;
-      priceLabel.textContent = charge
-        ? `单价 ¥${charge.price.toFixed(4)} / 万 vTPM（${matched.rangeMeasure} · ${cycleMeasure}）`
-        : '该售卖单元未关联计费项，无法计价';
+      // ===== Step 3 交付配置：命中售卖单元后驱动（结构化卡片） =====
       const totalPrice = charge ? charge.price * qty : null;
+      document.getElementById('grant-qty-chosen').textContent = qty.toLocaleString() + ' 万 vTPM';
+      document.getElementById('grant-qty-range').textContent = matched.rangeMeasure;
+      priceLabel.textContent = charge ? `¥${charge.price.toFixed(4)}` : '—';
       document.getElementById('grant-total-preview').textContent = charge
-        ? `¥${charge.price.toFixed(4)} × ${qty.toLocaleString()} 万 vTPM = ¥${totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+        ? `¥${totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+        : '—';
+      document.getElementById('grant-match-hint').textContent = charge
+        ? `计价：¥${charge.price.toFixed(4)} / 万 vTPM（区间 ${matched.rangeMeasure} · 周期 ${cycleMeasure}）× ${qty.toLocaleString()} 万 vTPM = ¥${totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}｜有效期 ${unit.cycleDays} 天`
         : '该售卖单元未关联计费项，无法计价';
 
       const start = new Date(); start.setHours(0, 0, 0, 0);
