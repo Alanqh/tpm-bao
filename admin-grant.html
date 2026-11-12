@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>后台-手动交付资源包</title>
+  <title>手动交付预留vTPM包 - 预留vTPM管理</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -39,8 +39,7 @@
         <a href="index.html" class="switcher-tab">官网首页</a>
         <a href="terms.html" class="switcher-tab">购买须知</a>
         <a href="wallet.html?tab=package" class="switcher-tab">资源包</a>
-        <a href="admin-packages.html" class="switcher-tab">后台-预留vTPM管理</a>
-        <a href="admin-grant.html" class="switcher-tab active">后台-手动交付资源包</a>
+        <a href="admin-packages.html" class="switcher-tab active">后台-预留vTPM管理</a>
         <a href="admin-workgroups.html" class="switcher-tab">后台-工作组管理</a>
         <a href="admin-products.html" class="switcher-tab">后台-商品管理</a>
       </div>
@@ -58,7 +57,7 @@
         <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
       </div>
       <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
-      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">手动交付资源包</h1>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">预留vTPM管理</h1>
     </div>
     <div class="flex items-center gap-3">
       <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full"><i class="fa-regular fa-moon"></i></button>
@@ -83,8 +82,7 @@
         <div class="pl-6 space-y-0.5">
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
           <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
-          <a href="admin-packages.html" class="admin-sidebar-link"><i class="fa-solid fa-box-open w-4 text-center"></i>预留vTPM管理</a>
-          <a href="admin-grant.html" class="admin-sidebar-link active"><i class="fa-solid fa-gift w-4 text-center"></i>手动交付资源包</a>
+          <a href="admin-packages.html" class="admin-sidebar-link active"><i class="fa-solid fa-box-open w-4 text-center"></i>预留vTPM管理</a>
         </div>
         <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
           <i class="fa-solid fa-chevron-right text-xs transition-transform"></i><span>MaaS 运营管理</span>
@@ -116,17 +114,17 @@
         <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
         <a href="admin-packages.html" class="text-slate-700 hover:text-violet-600">预留vTPM管理</a>
         <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
-        <span class="text-slate-700">手动交付资源包</span>
+        <span class="text-slate-700">手动交付预留vTPM包</span>
       </nav>
 
       <!-- 页面标题 + 操作栏 -->
       <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
-          <h2 class="text-lg font-semibold text-slate-900">手动交付资源包</h2>
-          <p class="text-xs text-slate-500 mt-0.5">为指定客户交付预留 vTPM 资源包，可按需关联工作组。</p>
+          <h2 class="text-lg font-semibold text-slate-900">手动交付预留vTPM包</h2>
+          <p class="text-xs text-slate-500 mt-0.5">为指定客户交付预留 vTPM 包，可按需关联工作组。</p>
         </div>
         <div class="flex items-center gap-2">
-          <a href="admin-packages.html" class="inline-flex items-center px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</a>
+          <a href="admin-packages.html" class="inline-flex items-center px-3 py-1.5 rounded admin-btn-default text-xs font-medium">返回列表</a>
           <button onclick="confirmGrant()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
             <i class="fa-solid fa-check text-[10px]"></i>确认交付
           </button>
