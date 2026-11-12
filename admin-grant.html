@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>后台-手动交付资源包 - 预留vTPM管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .switcher-tab {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      color: #cbd5e1;
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .switcher-tab:hover { background: rgba(255,255,255,0.1); color: white; }
+    .switcher-tab.active { background: #6e29f6; color: white; }
+
+    .admin-sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      color: #374151;
+      font-size: 0.8125rem;
+      transition: all 0.15s;
+    }
+    .admin-sidebar-link:hover { background: #F3F4F6; color: #7C3AED; }
+    .admin-sidebar-link.active { background: #F5F3FF; color: #7C3AED; font-weight: 500; }
+
+    .admin-card {
+      background: #fff;
+      border: 1px solid #E5E7EB;
+      border-radius: 0.5rem;
+    }
+    .admin-btn-primary {
+      background: #7C3AED;
+      color: white;
+      border: 1px solid #7C3AED;
+    }
+    .admin-btn-primary:hover { background: #6D28D9; }
+    .admin-btn-default {
+      background: #fff;
+      color: #374151;
+      border: 1px solid #D1D5DB;
+    }
+    .admin-btn-default:hover { background: #F9FAFB; }
+    .grant-step-title { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; font-weight: 600; color: #1F2937; margin-bottom: 0.75rem; }
+    .grant-step-no { display: inline-flex; width: 1.1rem; height: 1.1rem; border-radius: 9999px; background: #EDE9FE; color: #6D28D9; font-size: 0.625rem; font-weight: 700; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body class="bg-[#F3F4F6] text-slate-800">
+  <!-- 原型切换栏 -->
+  <div class="sticky top-0 z-[100] bg-slate-900 text-white text-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-10 gap-1 overflow-x-auto">
+        <span class="text-slate-400 mr-2 flex-shrink-0 text-xs"><i class="fa-solid fa-layer-group mr-1"></i>原型导航</span>
+        <a href="index.html" class="switcher-tab">官网首页</a>
+        <a href="terms.html" class="switcher-tab">购买须知</a>
+        <a href="wallet.html?tab=package" class="switcher-tab">资源包</a>
+        <a href="admin-packages.html" class="switcher-tab">后台-预留vTPM管理</a>
+        <a href="admin-grant.html" class="switcher-tab active">后台-手动交付资源包</a>
+        <a href="admin-workgroups.html" class="switcher-tab">后台-工作组管理</a>
+        <a href="admin-products.html" class="switcher-tab">后台-商品管理</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 顶部 Header -->
+  <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-10 z-50">
+    <div class="flex items-center gap-4">
+      <button class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md">
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">SF</div>
+        <span class="font-semibold text-slate-900 text-sm">硅基流动</span>
+      </div>
+      <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+      <h1 class="text-slate-700 text-sm font-medium hidden sm:block">手动交付资源包</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+        <i class="fa-regular fa-moon"></i>
+      </button>
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full">
+        <i class="fa-regular fa-bell"></i>
+      </button>
+      <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-medium">吕</div>
+    </div>
+  </header>
+
+  <div class="flex">
+    <!-- 左侧 Sidebar -->
+    <aside class="w-56 bg-white border-r border-slate-200 flex-shrink-0 hidden md:flex flex-col h-[calc(100vh-3.5rem-2.5rem)] sticky top-[6rem]">
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto text-sm">
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>管理后台</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>账户中心</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>活动运营</span>
+        </div>
+
+        <div class="pl-6 space-y-0.5">
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-ticket w-4 text-center"></i>卡券管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-qrcode w-4 text-center"></i>兑换码管理</a>
+          <a href="admin-packages.html" class="admin-sidebar-link"><i class="fa-solid fa-box-open w-4 text-center"></i>预留vTPM管理</a>
+          <a href="admin-grant.html" class="admin-sidebar-link active"><i class="fa-solid fa-gift w-4 text-center"></i>手动交付资源包</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700" onclick="toggleMenu('maas-menu', this)">
+          <i class="fa-solid fa-chevron-right text-xs transition-transform"></i>
+          <span>MaaS 运营管理</span>
+        </div>
+
+        <div id="maas-menu" class="pl-6 space-y-0.5 hidden">
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-server w-4 text-center"></i>客户任务/数据</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-layer-group w-4 text-center"></i>Serverless 管理</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-link w-4 text-center"></i>MaaS 专属端点</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-brain w-4 text-center"></i>推理服务</a>
+          <a href="#" class="admin-sidebar-link"><i class="fa-solid fa-flask w-4 text-center"></i>Playground</a>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>弹性 GPU 运营管理</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>商品定价中心</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-slate-500 px-2 py-2 cursor-pointer hover:text-slate-700">
+          <i class="fa-solid fa-chevron-down text-xs"></i>
+          <span>平台管理</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 p-4 min-w-0">
+      <div class="max-w-4xl">
+        <!-- 面包屑 -->
+        <nav class="text-xs text-slate-500 mb-4">
+          <span>活动运营</span>
+          <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
+          <a href="admin-packages.html" class="text-slate-700 hover:text-violet-600">预留vTPM管理</a>
+          <i class="fa-solid fa-chevron-right text-[10px] mx-1.5"></i>
+          <span class="text-slate-700">手动交付资源包</span>
+        </nav>
+
+        <!-- 标题 -->
+        <div class="mb-4">
+          <h2 class="text-lg font-semibold text-slate-900">手动交付资源包</h2>
+          <p class="text-xs text-slate-500 mt-0.5">向指定客户交付预留 vTPM 资源包，按需关联工作组。</p>
+        </div>
+
+        <!-- Step 1: 客户与工作组 -->
+        <div class="admin-card p-4 mb-3">
+          <p class="grant-step-title"><span class="grant-step-no">1</span>客户与工作组</p>
+          <div class="flex gap-2">
+            <input id="grant-subject" type="text" list="grant-subject-list" oninput="schedulePoolQuery()" onblur="flushPoolQuery()" placeholder="输入 subject_id，如 sub_3x9a2b1c" class="flex-1 rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+            <datalist id="grant-subject-list">
+              <option value="sub_3x9a2b1c">智象科技</option>
+              <option value="sub_7k2m5n8p">星河互娱</option>
+            </datalist>
+            <button type="button" onclick="flushPoolQuery(true)" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium whitespace-nowrap">查询工作组</button>
+          </div>
+          <p id="grant-pool-hint" class="text-[11px] text-slate-400 mt-1.5">填写 subject_id，自动查询该客户的工作组。</p>
+          <div class="mt-3 hidden" id="grant-pool-block">
+            <label class="block text-xs font-medium text-slate-700 mb-1">关联工作组（可选多个）</label>
+            <div id="grant-pool-list" class="space-y-2">
+              <!-- JS 填充 checkbox -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: 商品与购买量 -->
+        <div class="admin-card p-4 mb-3">
+          <p class="grant-step-title"><span class="grant-step-no">2</span>商品与购买量</p>
+          <div id="grant-sku-block" class="space-y-2">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">SKU 商品</label>
+              <select id="grant-sku" onchange="onSkuChange()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+            </div>
+            <div id="grant-dims-block" class="hidden">
+              <label class="block text-xs font-medium text-slate-700 mb-1">购买量与购买周期</label>
+              <div class="grid grid-cols-2 gap-2">
+                <input id="grant-qty-input" type="number" min="1" oninput="onQtyInput()" placeholder="输入购买量（万 vTPM）" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500">
+                <select id="grant-cycle" onchange="onQtyInput()" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500"></select>
+              </div>
+            </div>
+            <div id="grant-unit-detail" class="hidden bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600"></div>
+          </div>
+          <p id="grant-sku-hint" class="text-[11px] text-slate-400">选择商品后输入购买量并选择周期，自动匹配在售售卖单元。</p>
+        </div>
+
+        <!-- Step 3: 交付配置 -->
+        <div class="admin-card p-4 mb-3">
+          <p class="grant-step-title"><span class="grant-step-no">3</span>交付配置</p>
+          <div id="grant-config" class="hidden space-y-3">
+            <div class="grid grid-cols-4 gap-3">
+              <div class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+                <p class="text-[11px] text-slate-400">购买量</p>
+                <p id="grant-qty-chosen" class="text-sm font-semibold text-slate-800 mt-0.5">未输入</p>
+              </div>
+              <div class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+                <p class="text-[11px] text-slate-400">命中区间</p>
+                <p id="grant-qty-range" class="text-sm font-semibold text-slate-800 mt-0.5">—</p>
+              </div>
+              <div class="bg-violet-50 border border-violet-200 rounded-lg px-3 py-2.5">
+                <p class="text-[11px] text-violet-400">单价</p>
+                <p id="grant-price-label" class="text-sm font-semibold text-violet-700 mt-0.5">待输入</p>
+              </div>
+              <div class="bg-violet-50 border border-violet-200 rounded-lg px-3 py-2.5">
+                <p class="text-[11px] text-violet-400">总价</p>
+                <p id="grant-total-preview" class="text-sm font-semibold text-violet-700 mt-0.5">—</p>
+              </div>
+            </div>
+            <p id="grant-match-hint" class="text-[11px] text-slate-400"></p>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">开始时间</label>
+                <input id="grant-start" type="text" readonly class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 cursor-not-allowed">
+                <p class="text-[11px] text-slate-400 mt-1">操作日 0 点</p>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-700 mb-1">结束时间</label>
+                <input id="grant-end" type="text" readonly class="w-full rounded border-slate-200 px-2.5 py-1.5 border text-xs bg-slate-50 text-slate-500 cursor-not-allowed">
+                <p class="text-[11px] text-slate-400 mt-1">开始时间 + 周期天数 + 1 天</p>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1">备注</label>
+              <textarea id="grant-note" class="w-full rounded border-slate-300 px-2.5 py-1.5 border text-xs outline-none focus:border-violet-500" rows="2" placeholder="交付原因或其他说明（选填）"></textarea>
+            </div>
+          </div>
+          <p id="grant-config-hint" class="text-[11px] text-slate-400">命中在售售卖单元后，展示单价与总价。</p>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="flex justify-end gap-2">
+          <a href="admin-packages.html" class="inline-flex items-center px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</a>
+          <button onclick="confirmGrant()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">
+            <i class="fa-solid fa-check text-[10px]"></i>确认交付
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: 折算系数预览 -->
+  <div id="modal-preview-factor" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg w-full max-w-3xl mx-4 p-5 border border-slate-200 max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">vTPM 折算系数预览</h3>
+        <button onclick="closeFactorPreview()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="preview-factor-body" class="text-xs">
+        <!-- JS 填充 -->
+      </div>
+      <div class="mt-5 flex justify-end">
+        <button onclick="closeFactorPreview()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: SLO 赔付规则预览 -->
+  <div id="modal-preview-slo" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg w-full max-w-2xl mx-4 p-5 border border-slate-200 max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">SLO 赔付规则预览</h3>
+        <button onclick="closeSloPreview()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="preview-slo-body" class="text-xs">
+        <!-- JS 填充 -->
+      </div>
+      <div class="mt-5 flex justify-end">
+        <button onclick="closeSloPreview()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleMenu(id, el) {
+      const menu = document.getElementById(id);
+      const icon = el.querySelector('i');
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-down');
+      } else {
+        menu.classList.add('hidden');
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-right');
+      }
+    }
+
+    let poolQueryTimer = null;
+    const grantPoolQuery = { lastSid: null };
+    // subject → 工作组列表（工作组携带超量路由配置：'limit' = 超量限流（返回 429）；'serverless' = 超量路由 Serverless（同模型按量计费））
+    const subjectPools = {
+      'sub_3x9a2b1c': {
+        name: '智象科技',
+        workgroups: [
+          { id: 'pool_3x9_alpha', name: 'proj-alpha', route: 'limit' },
+          { id: 'pool_3x9_beta', name: 'proj-beta', route: 'serverless' }
+        ]
+      },
+      'sub_7k2m5n8p': {
+        name: '星河互娱',
+        workgroups: [
+          { id: 'pool_7k2_gamma', name: 'proj-gamma', route: 'limit' }
+        ]
+      }
+    };
+    function poolRouteBadge(route) {
+      return route === 'serverless'
+        ? '<span class="px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 text-[10px] font-medium">超量路由 Serverless</span>'
+        : '<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px] font-medium">超量限流（429）</span>';
+    }
+
+    // ===== 商品/售卖单元/计费项数据（与 admin-products.html 配置一致，第14轮修正） =====
+    // 计费项池（对应 admin-products defaultChargeItems：刊例价单位 = 元/万 vTPM，随周期递增）
+    const chargeItems = [
+      { id: 27291, code: 'maas-product-vtpm-std.30d', name: 'vTPM 预留·标准·30天·计费项', price: 0.0084, unit: '万 vTPM', currency: '元' },
+      { id: 27292, code: 'maas-product-vtpm-std.60d', name: 'vTPM 预留·标准·60天·计费项', price: 0.0077, unit: '万 vTPM', currency: '元' },
+      { id: 27293, code: 'maas-product-vtpm-std.90d', name: 'vTPM 预留·标准·90天·计费项', price: 0.0075, unit: '万 vTPM', currency: '元' },
+      { id: 27294, code: 'maas-product-vtpm-pro.30d', name: 'vTPM 预留·专业·30天·计费项', price: 0.0062, unit: '万 vTPM', currency: '元' },
+      { id: 27295, code: 'maas-product-vtpm-pro.90d', name: 'vTPM 预留·专业·90天·计费项', price: 0.0058, unit: '万 vTPM', currency: '元' },
+      { id: 27296, code: 'maas-product-vtpm-pre.30d', name: 'vTPM 预留·预发布·30天·计费项', price: 0.0081, unit: '万 vTPM', currency: '元' }
+    ];
+    // payload 候选池 + 来源模型（对应 admin-products playgroundPayloads / modelPlaygrounds）
+    const payloadModelMap = {
+      'payload-vtpm-001': 'DeepSeek-V4.1', 'payload-vtpm-002': 'DeepSeek-V4.1', 'payload-vtpm-003': 'DeepSeek-V4.1',
+      'payload-glm-001': 'GLM-4', 'payload-glm-002': 'GLM-4',
+      'payload-qwen-001': 'Qwen2.5'
+    };
+    // 折算系数 / SLO 版本（对应 admin-products defaultConfigs：name + 多版本 YAML，最新版在后）
+    const configVersions = {
+      'maas-product-vtpm-std': {
+        factor: { name: 'vtpm-factor-deepseek', versions: [
+          { version: 'v3.3', yaml: '# vTPM 折算系数 v3.3\nmodels:\n  deepseek-chat:\n    factor: 0.8\n  deepseek-coder:\n    factor: 0.9', createdAt: '2026-07-01 10:00:00' },
+          { version: 'v3.4', yaml: '# vTPM 折算系数 v3.4\nmodels:\n  deepseek-chat:\n    factor: 0.85\n  deepseek-coder:\n    factor: 0.95\n  deepseek-reasoner:\n    factor: 1.2', createdAt: '2026-08-01 10:00:00' }
+        ]},
+        slo: { name: 'slo-rule-95', versions: [
+          { version: 'v5.1', yaml: '# SLO赔付规则 v5.1\nslo:\n  availability: 99.5%\n  latency_p99: 500ms\ncompensation:\n  breach_1h: 10%\n  breach_4h: 30%', createdAt: '2026-07-01 10:00:00' },
+          { version: 'v5.2', yaml: '# SLO赔付规则 v5.2\nslo:\n  availability: 99.9%\n  latency_p99: 300ms\ncompensation:\n  breach_1h: 15%\n  breach_4h: 40%\n  breach_24h: 80%', createdAt: '2026-08-01 10:00:00' }
+        ]}
+      },
+      'maas-product-vtpm-pro': {
+        factor: { name: 'vtpm-factor-glm', versions: [
+          { version: 'v2.0', yaml: '# vTPM 折算系数 v2.0\nmodels:\n  glm-4:\n    factor: 0.7\n  glm-4-plus:\n    factor: 0.8', createdAt: '2026-06-01 10:00:00' },
+          { version: 'v2.1', yaml: '# vTPM 折算系数 v2.1\nmodels:\n  glm-4:\n    factor: 0.75\n  glm-4-plus:\n    factor: 0.85\n  glm-4-flash:\n    factor: 0.3', createdAt: '2026-07-01 10:00:00' }
+        ]},
+        slo: { name: 'slo-rule-95', versions: [
+          { version: 'v5.2', yaml: '# SLO赔付规则 v5.2\nslo:\n  availability: 99.9%\n  latency_p99: 300ms\ncompensation:\n  breach_1h: 15%\n  breach_4h: 40%\n  breach_24h: 80%', createdAt: '2026-08-01 10:00:00' }
+        ]}
+      },
+      'maas-product-vtpm-pre': {
+        factor: { name: 'vtpm-factor-deepseek', versions: [
+          { version: 'v3.3', yaml: '# vTPM 折算系数 v3.3\nmodels:\n  deepseek-chat:\n    factor: 0.8\n  deepseek-coder:\n    factor: 0.9', createdAt: '2026-07-01 10:00:00' }
+        ]},
+        slo: { name: 'slo-rule-95', versions: [
+          { version: 'v5.1', yaml: '# SLO赔付规则 v5.1\nslo:\n  availability: 99.5%\n  latency_p99: 500ms\ncompensation:\n  breach_1h: 10%\n  breach_4h: 30%', createdAt: '2026-07-01 10:00:00' }
+        ]}
+      }
+    };
+
+    // 商品（SKU）→ 售卖单元（与 admin-products defaultSaleUnits/defaultPlans 对齐）
+    // 状态口径（第8轮起）：在售 = 生效中（published 且 effStart≤now≤effEnd）的最高优先级计划将该单元上架；禁售 = 无生效中计划或最高优先级计划为下架/待发布
+    // 对齐 admin-products 实际数据（第48轮）：std su-1/su-2 在售、su-3 计划下架 → 禁售；pro su-1/su-3 在售（30天计划）、su-2/su-4 禁售（90天计划待发布）；pre 计划待发布 → 全部禁售（商品未上架）
+    // qty min/max/step 单位：万 vTPM；price = 关联计费项刊例价（元/万 vTPM，随周期变化的单价）；cycleDays = 该单元的购买周期天数
+    const products = [
+      { code: 'maas-product-vtpm-std', id: '001', name: 'vTPM 预留资源包（标准）', sellUnits: [
+        { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '100～10000' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-std.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-2', status: 'on', dims: [{ dim: '购买量区间', measure: '100～10000' }, { dim: '购买周期', measure: '60天' }], chargeCode: 'maas-product-vtpm-std.60d', cycleDays: 60, minQty: 100, maxQty: 10000, stepQty: 500, payloadId: 'payload-vtpm-002', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-3', status: 'off', dims: [{ dim: '购买量区间', measure: '1000～50000' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-std.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-vtpm-003', factorRef: 'vtpm-factor-deepseek v3.4', sloRef: 'slo-rule-95 v5.2' }
+      ] },
+      { code: 'maas-product-vtpm-pro', id: '002', name: 'vTPM 预留资源包（专业）', sellUnits: [
+        { id: 'su-1', status: 'on', dims: [{ dim: '购买量区间', measure: '100～10000' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pro.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-glm-001', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-2', status: 'off', dims: [{ dim: '购买量区间', measure: '1000～50000' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-pro.90d', cycleDays: 90, minQty: 1000, maxQty: 50000, stepQty: 1000, payloadId: 'payload-glm-002', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-3', status: 'on', dims: [{ dim: '购买量区间', measure: '5000～50000' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pro.30d', cycleDays: 30, minQty: 5000, maxQty: 50000, stepQty: 500, payloadId: 'payload-glm-001', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' },
+        { id: 'su-4', status: 'off', dims: [{ dim: '购买量区间', measure: '5000～50000' }, { dim: '购买周期', measure: '90天' }], chargeCode: 'maas-product-vtpm-pro.90d', cycleDays: 90, minQty: 5000, maxQty: 50000, stepQty: 500, payloadId: 'payload-glm-002', factorRef: 'vtpm-factor-glm v2.1', sloRef: 'slo-rule-95 v5.2' }
+      ] },
+      { code: 'maas-product-vtpm-pre', id: '003', name: 'vTPM 预留资源包（预）', sellUnits: [
+        { id: 'su-1', status: 'off', dims: [{ dim: '购买量区间', measure: '100～10000' }, { dim: '购买周期', measure: '30天' }], chargeCode: 'maas-product-vtpm-pre.30d', cycleDays: 30, minQty: 100, maxQty: 10000, stepQty: 100, payloadId: 'payload-vtpm-001', factorRef: 'vtpm-factor-deepseek v3.3', sloRef: 'slo-rule-95 v5.1' }
+      ] }
+    ];
+
+    function productById(id) { return products.find(s => s.id === id); }
+    function chargeByCode(code) { return chargeItems.find(c => c.code === code); }
+    function unitCharge(unit) { return chargeByCode(unit.chargeCode) || null; }
+
+    function schedulePoolQuery() {
+      clearTimeout(poolQueryTimer);
+      const sid = document.getElementById('grant-subject').value.trim();
+      if (!sid) {
+        document.getElementById('grant-pool-block').classList.add('hidden');
+        document.getElementById('grant-pool-list').innerHTML = '';
+        document.getElementById('grant-pool-hint').textContent = '填写 subject_id，自动查询该客户的工作组。';
+        return;
+      }
+      document.getElementById('grant-pool-hint').textContent = '正在查询工作组...';
+      poolQueryTimer = setTimeout(() => loadPools(), 350);
+    }
+
+    function flushPoolQuery(force) {
+      clearTimeout(poolQueryTimer);
+      const sid = document.getElementById('grant-subject').value.trim();
+      if (!sid) {
+        schedulePoolQuery();
+        return;
+      }
+      loadPools(force === true);
+    }
+
+    function loadPools(force) {
+      const sid = document.getElementById('grant-subject').value.trim();
+      const poolBlock = document.getElementById('grant-pool-block');
+      const customer = subjectPools[sid];
+      if (!force && sid === grantPoolQuery.lastSid) return;
+      grantPoolQuery.lastSid = sid;
+      if (!customer) {
+        poolBlock.classList.add('hidden');
+        document.getElementById('grant-pool-list').innerHTML = '';
+        document.getElementById('grant-pool-hint').innerHTML = `<span class="text-red-500">未找到该客户的工作组，可先到</span> <a href="admin-workgroups.html" class="text-violet-600 underline">工作组管理</a> <span class="text-red-500">创建。</span>`;
+        return;
+      }
+      document.getElementById('grant-pool-hint').innerHTML = `已匹配客户「${customer.name}」· 共 ${customer.workgroups.length} 个工作组`;
+      renderPoolList(customer);
+      poolBlock.classList.remove('hidden');
+    }
+
+    function renderPoolList(customer) {
+      const list = document.getElementById('grant-pool-list');
+      // 保留已勾选的工作组（重渲后仍保持关联状态）
+      const checkedIds = Array.from(document.querySelectorAll('input[name="grant-pool"]:checked')).map(cb => cb.value);
+      list.innerHTML = customer.workgroups.map((p, idx) => `
+        <label class="flex items-center gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+          <input type="checkbox" name="grant-pool" value="${p.id}" ${checkedIds.includes(p.id) ? 'checked' : ''} onchange="onPoolChange()" class="mt-0.5">
+          <span class="text-xs font-medium text-slate-800">${p.name}</span>
+          <span class="ml-auto">${poolRouteBadge(p.route)}</span>
+        </label>
+      `).join('');
+    }
+
+    function getSelectedPools() {
+      const sid = document.getElementById('grant-subject').value.trim();
+      const customer = subjectPools[sid];
+      if (!customer) return [];
+      const checked = Array.from(document.querySelectorAll('input[name="grant-pool"]:checked')).map(cb => cb.value);
+      return customer.workgroups.filter(p => checked.includes(p.id));
+    }
+
+    function onPoolChange() {
+      const selectedPools = getSelectedPools();
+      document.getElementById('grant-sku-hint').textContent = `选择工作组为可选关联；当前${selectedPools.length > 0 ? `已选 ${selectedPools.length} 个` : '未关联'}。`;
+      renderGrantSummary();
+    }
+
+    // 商品已上架 = 存在至少一个在售售卖单元（与 admin-products productIsListed 口径一致）；手动交付仅支持已上架商品
+    function productIsListed(product) {
+      return product.sellUnits.some(u => u.status === 'on');
+    }
+
+    function initSkuSelection() {
+      const listed = products.filter(p => productIsListed(p));
+      document.getElementById('grant-sku').innerHTML = listed.map(s =>
+        `<option value="${s.id}">${s.name}（${s.id}）</option>`
+      ).join('');
+      document.getElementById('grant-sku-block').classList.remove('hidden');
+      onSkuChange();
+    }
+
+    // SKU 变化 → 重置购买量输入与购买周期下拉（用户直接填购买量，不选区间）
+    function onSkuChange() {
+      const product = productById(document.getElementById('grant-sku').value);
+      const dimsBlock = document.getElementById('grant-dims-block');
+      const detail = document.getElementById('grant-unit-detail');
+      const config = document.getElementById('grant-config');
+      detail.classList.add('hidden');
+      config.classList.add('hidden');
+      document.getElementById('grant-config-hint').classList.remove('hidden');
+      if (!product) { dimsBlock.classList.add('hidden'); return; }
+
+      const onUnits = product.sellUnits.filter(u => u.status === 'on');
+      if (onUnits.length === 0) {
+        dimsBlock.classList.add('hidden');
+        document.getElementById('grant-sku-hint').innerHTML = '<span class="text-red-500">该商品当前无在售售卖单元。</span>';
+        return;
+      }
+      document.getElementById('grant-sku-hint').classList.add('hidden');
+
+      // 购买周期下拉：在售售卖单元的周期并集（用户只需直接输入购买量 + 选周期）
+      const cycleSelect = document.getElementById('grant-cycle');
+      const cycles = [];
+      onUnits.forEach(u => u.dims.forEach(d => { if (d.dim === '购买周期' && !cycles.includes(d.measure)) cycles.push(d.measure); }));
+      cycleSelect.innerHTML = '<option value="" disabled selected>请选择购买周期</option>' + cycles.map(m => `<option value="${m}">${m}</option>`).join('');
+      document.getElementById('grant-qty-input').value = '';
+      dimsBlock.classList.remove('hidden');
+      onQtyInput();
+    }
+
+    function onQtyInput() { renderGrantSummary(); }
+
+    // 区间度量解析：'1～100' → [1,100]；'500+' → [500,∞)
+    function parseRange(measure) {
+      if (measure.includes('～')) {
+        const parts = measure.split('～');
+        const min = parseFloat(parts[0].replace(/[^\d.]/g, ''));
+        const max = parseFloat(parts[1].replace(/[^\d.]/g, ''));
+        if (!isNaN(min) && !isNaN(max)) return [min, max];
+      } else if (measure.includes('+')) {
+        const min = parseFloat(measure.replace(/[^\d.]/g, ''));
+        if (!isNaN(min)) return [min, Infinity];
+      }
+      return null;
+    }
+    // 该周期下所有在售区间标签（无匹配时提示用户可选范围）
+    function availableRangesText(product, cycleMeasure) {
+      return product.sellUnits
+        .filter(u => u.status === 'on' && u.dims.some(d => d.dim === '购买周期' && d.measure === cycleMeasure))
+        .map(u => {
+          const r = u.dims.find(d => d.dim === '购买量区间');
+          return r ? r.measure : '';
+        }).filter(Boolean).join('、') || '无';
+    }
+    // 用户直接输入购买量 + 选择购买周期 → 自动判断落在哪个售卖单元
+    // 命中判定：qty 落在 [minQty, maxQty]（区间标签已与 minQty/maxQty 对齐）
+    function matchUnit(product, qty, cycleMeasure) {
+      let fallback = null; // 区间标签与量程不一致的历史数据兜底
+      const onUnits = product.sellUnits.filter(u => u.status === 'on');
+      for (const u of onUnits) {
+        const cycleDim = u.dims.find(d => d.dim === '购买周期');
+        const rangeDim = u.dims.find(d => d.dim === '购买量区间');
+        if (!cycleDim || cycleDim.measure !== cycleMeasure || !rangeDim) continue;
+        if (qty >= u.minQty && qty <= u.maxQty) {
+          // 若区间标签可解析且 qty 也在标签区间内，优先返回标签命中
+          const parsed = parseRange(rangeDim.measure);
+          if (parsed && qty >= parsed[0] && qty <= parsed[1]) return { unit: u, rangeMeasure: rangeDim.measure };
+          if (!fallback) fallback = { unit: u, rangeMeasure: rangeDim.measure };
+        }
+      }
+      return fallback;
+    }
+
+    // 输入购买量 + 选定周期 → 实时展示命中的区间、周期、单价与总价
+    function renderGrantSummary() {
+      const product = productById(document.getElementById('grant-sku').value);
+      const detail = document.getElementById('grant-unit-detail');
+      const config = document.getElementById('grant-config');
+      const priceLabel = document.getElementById('grant-price-label');
+      if (!product) return;
+      const qty = parseInt(document.getElementById('grant-qty-input').value, 10);
+      const cycleMeasure = document.getElementById('grant-cycle').value;
+      detail.classList.add('hidden');
+      config.classList.add('hidden');
+
+      // 未输入购买量 / 未选周期 → 不展示单价
+      if (isNaN(qty) || qty <= 0 || !cycleMeasure) {
+        document.getElementById('grant-config-hint').textContent = '输入购买量并选择周期后，自动匹配在售区间与单价。';
+        document.getElementById('grant-config-hint').classList.remove('hidden');
+        priceLabel.textContent = '待输入';
+        document.getElementById('grant-qty-chosen').textContent = '未输入';
+        document.getElementById('grant-qty-range').textContent = '—';
+        document.getElementById('grant-total-preview').textContent = '—';
+        document.getElementById('grant-match-hint').textContent = '';
+        return;
+      }
+
+      const matched = matchUnit(product, qty, cycleMeasure);
+      if (!matched) {
+        document.getElementById('grant-config-hint').innerHTML = '<span class="text-red-500">未命中在售售卖单元，请调整购买量或周期。</span>';
+        document.getElementById('grant-config-hint').classList.remove('hidden');
+        document.getElementById('grant-qty-chosen').textContent = qty.toLocaleString() + ' 万 vTPM';
+        document.getElementById('grant-qty-range').textContent = '未命中';
+        priceLabel.textContent = '—';
+        document.getElementById('grant-total-preview').textContent = '—';
+        document.getElementById('grant-match-hint').textContent = '该周期下的在售区间：' + availableRangesText(product, cycleMeasure);
+        return;
+      }
+
+      const unit = matched.unit;
+      const charge = unitCharge(unit);
+      const payloadModel = payloadModelMap[unit.payloadId] || '';
+
+      // 售卖单元详情：命中的区间 / 单价 / payload / 折算 / SLO
+      detail.innerHTML = `
+        <div class="grid grid-cols-4 gap-3">
+          <div>
+            <p class="text-slate-400">命中购买量区间</p>
+            <p class="text-slate-800 font-semibold mt-0.5">${matched.rangeMeasure}<span class="text-slate-400 font-normal">（${qty.toLocaleString()} 万 vTPM 落入该区间）</span></p>
+          </div>
+          <div>
+            <p class="text-slate-400">单价（${cycleMeasure}）</p>
+            <p class="text-slate-800 font-semibold mt-0.5">${charge ? '¥' + charge.price.toFixed(4) : '—'} <span class="text-slate-400 font-normal">/ 万 vTPM</span></p>
+            ${charge ? `<p class="text-slate-400 mt-0.5 font-mono">${charge.code}</p>` : ''}
+          </div>
+          <div>
+            <p class="text-slate-400">关联 payload_id</p>
+            <p class="text-slate-800 font-mono font-medium mt-0.5">${unit.payloadId}</p>
+            ${payloadModel ? `<p class="text-slate-400 mt-0.5">${payloadModel}</p>` : ''}
+          </div>
+          <div>
+            <p class="text-slate-400">折算系数 / SLO</p>
+            <p class="mt-1 flex flex-wrap gap-1">
+              <button type="button" onclick="showFactorPreview('${product.code}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium">${unit.factorRef}<i class="fa-solid fa-table text-[10px] ml-0.5"></i>预览</button>
+              <button type="button" onclick="showSloPreview('${product.code}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-violet-200 text-violet-700 hover:bg-violet-50 font-medium">${unit.sloRef}<i class="fa-solid fa-shield-halved text-[10px] ml-0.5"></i></button>
+            </p>
+          </div>
+        </div>
+      `;
+      detail.classList.remove('hidden');
+
+      // ===== Step 3 交付配置：命中售卖单元后驱动（结构化卡片） =====
+      const totalPrice = charge ? charge.price * qty : null;
+      document.getElementById('grant-qty-chosen').textContent = qty.toLocaleString() + ' 万 vTPM';
+      document.getElementById('grant-qty-range').textContent = matched.rangeMeasure;
+      priceLabel.textContent = charge ? `¥${charge.price.toFixed(4)}` : '—';
+      document.getElementById('grant-total-preview').textContent = charge
+        ? `¥${totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+        : '—';
+      document.getElementById('grant-match-hint').textContent = charge
+        ? `计价：¥${charge.price.toFixed(4)} / 万 vTPM（区间 ${matched.rangeMeasure} · 周期 ${cycleMeasure}）× ${qty.toLocaleString()} 万 vTPM = ¥${totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}｜有效期 ${unit.cycleDays} 天`
+        : '该售卖单元未关联计费项，无法计价';
+
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      document.getElementById('grant-start').value = fmtDateTime(start);
+      const end = new Date(start);
+      end.setDate(end.getDate() + unit.cycleDays + 1);
+      document.getElementById('grant-end').value = fmtDateTime(end);
+
+      config.classList.remove('hidden');
+      document.getElementById('grant-config-hint').classList.add('hidden');
+    }
+
+    function confirmGrant() {
+      const selectedPools = getSelectedPools();
+      const product = productById(document.getElementById('grant-sku').value);
+      const qty = parseInt(document.getElementById('grant-qty-input').value, 10);
+      const cycleMeasure = document.getElementById('grant-cycle').value;
+      if (!product) { alert('请先选择 SKU 商品。'); return; }
+      if (isNaN(qty) || qty <= 0) { alert('请先输入购买量，以确定对应单价后再交付。'); return; }
+      if (!cycleMeasure) { alert('请先选择购买周期。'); return; }
+      const matched = matchUnit(product, qty, cycleMeasure);
+      if (!matched) { alert('未命中在售售卖单元，请调整购买量或周期。'); return; }
+      const unit = matched.unit;
+      const charge = unitCharge(unit);
+      const note = document.getElementById('grant-note').value.trim();
+      const totalPrice = charge ? charge.price * qty : null;
+      alert(`交付成功\n\n商品：${product.name}（${product.code}）\n购买量：${qty.toLocaleString()} 万 vTPM · ${cycleMeasure}\n命中区间：${matched.rangeMeasure}\n单价：${charge ? '¥' + charge.price.toFixed(4) + ' / 万 vTPM' : '—'}\n费用：${totalPrice === null ? '—' : '¥' + totalPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}\n关联工作组：${selectedPools.length ? selectedPools.map(p => p.name).join('、') : '无'}\n备注：${note || '无'}`);
+      window.location.href = 'admin-packages.html';
+    }
+
+    function fmtDate(d) {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function fmtDateTime(d) {
+      return fmtDate(d) + ' 00:00';
+    }
+
+    // 折算/SLO 预览（第14轮修正：与 admin-products 配置一致——按商品 code 取 configVersions，展示最新版本 YAML）
+    function latestVersion(productCode, type) {
+      const cfg = configVersions[productCode] && configVersions[productCode][type];
+      if (!cfg || !cfg.versions.length) return null;
+      return { name: cfg.name, v: cfg.versions[cfg.versions.length - 1] };
+    }
+    function showFactorPreview(productCode) {
+      const latest = latestVersion(productCode, 'factor');
+      if (!latest) return;
+      document.getElementById('preview-factor-body').innerHTML = `
+        <p class="text-xs font-medium text-slate-700 mb-2">${latest.name} ${latest.v.version}（${latest.v.createdAt}）— vTPM 折算系数</p>
+        <pre class="text-[11px] font-mono bg-slate-50 border border-slate-200 rounded-lg p-3 whitespace-pre-wrap text-slate-700">${latest.v.yaml}</pre>
+      `;
+      const modal = document.getElementById('modal-preview-factor');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeFactorPreview() {
+      const modal = document.getElementById('modal-preview-factor');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function showSloPreview(productCode) {
+      const latest = latestVersion(productCode, 'slo');
+      if (!latest) return;
+      document.getElementById('preview-slo-body').innerHTML = `
+        <p class="text-xs font-medium text-slate-700 mb-2">${latest.name} ${latest.v.version}（${latest.v.createdAt}）— SLO 赔付规则</p>
+        <pre class="text-[11px] font-mono bg-slate-50 border border-slate-200 rounded-lg p-3 whitespace-pre-wrap text-slate-700">${latest.v.yaml}</pre>
+      `;
+      const modal = document.getElementById('modal-preview-slo');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSloPreview() {
+      const modal = document.getElementById('modal-preview-slo');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+
+    // 页面初始化（原 modal open 逻辑改为页内直载）
+    function initGrantPage() {
+      document.getElementById('grant-pool-hint').textContent = '填写 subject_id，自动查询该客户的工作组。';
+      initSkuSelection();
+    }
+    initGrantPage();
+
+  </script>
+</body>
+</html>
