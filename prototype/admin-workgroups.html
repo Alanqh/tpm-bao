@@ -205,7 +205,7 @@
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">code</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">超量路由</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">vTPM 包</th>
-                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">Serverless</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">Serverless 模型列表</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">备注</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">创建时间</th>
                   <th class="px-3 py-2 text-left font-medium border-b border-slate-200">操作</th>
@@ -213,6 +213,25 @@
               </thead>
               <tbody class="divide-y divide-slate-200" id="wg-tbody"></tbody>
             </table>
+          </div>
+
+          <!-- 使用场景说明 -->
+          <div class="admin-card mt-4 p-4">
+            <h4 class="text-xs font-semibold text-slate-900 mb-2"><i class="fa-solid fa-circle-question mr-1 text-slate-400"></i>使用场景（资源匹配优先级）</h4>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              <div class="border border-slate-200 rounded-lg p-3">
+                <p class="text-[11px] font-medium text-violet-700 mb-1">场景 ① 请求未指定工作组</p>
+                <p class="text-[11px] text-slate-500 leading-relaxed">到 <span class="font-mono">default</span> 默认工作组中，按 <span class="font-mono">playground_name</span> 查找对应资源（对应现状）。</p>
+              </div>
+              <div class="border border-slate-200 rounded-lg p-3">
+                <p class="text-[11px] font-medium text-violet-700 mb-1">场景 ② 指定工作组 + playground_name</p>
+                <p class="text-[11px] text-slate-500 leading-relaxed">到指定工作组内查找对应模型的资源，可命中多个 vTPM 包与 Serverless；同一模型 <span class="text-slate-700 font-medium">vTPM 包优先于 Serverless</span> 使用。</p>
+              </div>
+              <div class="border border-slate-200 rounded-lg p-3">
+                <p class="text-[11px] font-medium text-violet-700 mb-1">场景 ③ 仅指定工作组</p>
+                <p class="text-[11px] text-slate-500 leading-relaxed">在该工作组内使用用户配置的资源：即下方「生效模型列表」＝vTPM 覆盖模型 ∪ Serverless 模型列表。</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -254,6 +273,39 @@
             <div><span class="text-slate-500">创建时间</span><p id="wg-detail-ctime" class="font-medium text-slate-900 mt-0.5"></p></div>
             <div><span class="text-slate-500">当前超量路由</span><p id="wg-detail-route" class="mt-0.5"></p></div>
             <div><span class="text-slate-500">备注</span><p id="wg-detail-note" class="font-medium text-slate-900 mt-0.5"></p></div>
+          </div>
+        </div>
+
+        <!-- Serverless 模型列表配置（资源列表 2） -->
+        <div class="admin-card p-4 mb-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-semibold text-slate-900">Serverless 模型列表 <span class="text-[10px] text-slate-400 font-normal ml-1">资源列表 2</span></h3>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] text-slate-400">仅指定工作组（不指定 playground_name）时生效</span>
+              <button onclick="openSlEditModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded admin-btn-primary text-xs font-medium"><i class="fa-solid fa-pen text-[10px]"></i>修改模型列表</button>
+            </div>
+          </div>
+          <div id="wg-sl-config-box" class="text-xs"></div>
+        </div>
+
+        <!-- 生效模型列表（场景 ③ 视图：vTPM 覆盖模型 ∪ Serverless 模型） -->
+        <div class="admin-card p-4 mb-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-semibold text-slate-900">生效模型列表 <span class="text-[10px] text-slate-400 font-normal ml-1">仅指定工作组时可用</span></h3>
+            <span class="text-[11px] text-slate-400"><i class="fa-solid fa-arrow-right-arrow-left mr-1"></i>同一模型：vTPM 包优先于 Serverless</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-xs" id="wg-eff-table">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">模型（playground_name）</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">承载资源</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">优先使用</th>
+                  <th class="px-3 py-2 text-left font-medium border-b border-slate-200">超量行为</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200" id="wg-eff-tbody"></tbody>
+            </table>
           </div>
         </div>
 
@@ -319,6 +371,24 @@
               </span>
             </label>
           </div>
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">Serverless 模型列表 <span class="text-slate-400 font-normal">（默认空）</span></label>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 border border-slate-200 rounded-lg p-2 cursor-pointer hover:border-violet-300">
+              <input type="radio" name="create-wg-slmode" value="none" checked onchange="onCreateSlModeRadio()">
+              <span class="text-[11px] text-slate-600">未启用（空）</span>
+            </label>
+            <label class="flex items-center gap-2 border border-slate-200 rounded-lg p-2 cursor-pointer hover:border-violet-300">
+              <input type="radio" name="create-wg-slmode" value="all" onchange="onCreateSlModeRadio()">
+              <span class="text-[11px] text-slate-600">全部模型</span>
+            </label>
+            <label class="flex items-center gap-2 border border-slate-200 rounded-lg p-2 cursor-pointer hover:border-violet-300">
+              <input type="radio" name="create-wg-slmode" value="partial" onchange="onCreateSlModeRadio()">
+              <span class="text-[11px] text-slate-600">部分模型（创建后到详情页勾选）</span>
+            </label>
+          </div>
+          <p class="wg-field-hint">仅指定工作组（不指定 playground_name）时，请求在该 Serverless 模型列表范围内匹配。</p>
         </div>
         <div>
           <label class="block text-slate-600 mb-1">备注</label>
@@ -408,6 +478,54 @@
     </div>
   </div>
 
+  <!-- Modal: 修改 Serverless 模型列表 -->
+  <div id="modal-sl-edit" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg w-full max-w-md mx-4 p-5 border border-slate-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-slate-900">修改 Serverless 模型列表</h3>
+        <button onclick="closeSlEditModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-600 mb-1">模型范围 <span class="text-red-500">*</span></label>
+          <div class="space-y-2">
+            <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+              <input type="radio" name="sl-edit-mode" value="none" class="mt-0.5" onchange="onSlModeRadioChange()">
+              <span>
+                <span class="block font-medium text-slate-800">未启用（空）<span class="text-[10px] text-slate-400 font-normal ml-1">默认</span></span>
+                <span class="block text-[11px] text-slate-400">仅指定工作组时，只能命中 vTPM 包覆盖的模型</span>
+              </span>
+            </label>
+            <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+              <input type="radio" name="sl-edit-mode" value="all" class="mt-0.5" onchange="onSlModeRadioChange()">
+              <span>
+                <span class="block font-medium text-slate-800">全部模型</span>
+                <span class="block text-[11px] text-slate-400">平台全部 Serverless 模型可直接使用</span>
+              </span>
+            </label>
+            <label class="flex items-start gap-2 border border-slate-200 rounded-lg p-2.5 cursor-pointer hover:border-violet-300">
+              <input type="radio" name="sl-edit-mode" value="partial" class="mt-0.5" onchange="onSlModeRadioChange()">
+              <span>
+                <span class="block font-medium text-slate-800">部分模型</span>
+                <span class="block text-[11px] text-slate-400">仅使用下方勾选的模型</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <div id="sl-edit-models-block" class="hidden">
+          <label class="block text-slate-600 mb-1">勾选模型（playground_name）</label>
+          <div id="sl-edit-models" class="space-y-1.5 max-h-44 overflow-y-auto border border-slate-200 rounded-lg p-2.5"></div>
+          <p class="wg-field-hint">同一模型 vTPM 包优先于 Serverless 使用；未勾选的模型在「仅指定工作组」场景下不可用。</p>
+        </div>
+        <p id="sl-edit-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-100 rounded px-3 py-2"></p>
+      </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button onclick="closeSlEditModal()" class="px-3 py-1.5 rounded admin-btn-default text-xs font-medium">取消</button>
+        <button onclick="confirmSlEdit()" class="px-3 py-1.5 rounded admin-btn-primary text-xs font-medium">保存</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: 解绑资源确认 -->
   <div id="modal-unbind" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[60]">
     <div class="bg-white rounded-lg w-full max-w-sm mx-4 p-5 border border-slate-200">
@@ -431,10 +549,24 @@
     // ===== 数据 mock：subject（用户）→ 工作组 → 资源 =====
     const WG_CODE_RE = /^[a-z][a-z0-9-]{0,31}$/;
 
+    // Serverless 可选模型池（playground_name 口径）
+    const SERVERLESS_MODEL_POOL = [
+      '/proj-alpha/deepseek-v4.1',
+      '/proj-alpha/glm-4',
+      '/proj-alpha/qwen2.5',
+      '/proj-beta/kimi-k2'
+    ];
+
+    // 工作组字段说明：
+    //   id / code / route / note         —— 基本信息与超量路由
+    //   slMode                           —— 'none' 未启用（默认为空）| 'all' 全部模型 | 'partial' 部分模型
+    //   slModels                         —— slMode='partial' 时勾选的模型列表（playground_name）
+    //   resources                        —— 已交付/开通的实体资源（vTPM 包、Serverless 实例）
     const subjects = {
       'sub_3x9a2b1c': { name: '智象科技', workgroups: [
         {
           id: 'wg_9a2b1c_dflt', code: 'default', route: 'limit', note: '未指定工作组时的默认资源落点。',
+          slMode: 'partial', slModels: ['/proj-alpha/deepseek-v4.1'],
           createdAt: '2026-06-01 10:00',
           resources: [
             { type: 'vtpm', id: 'P001', name: 'vTPM 预留资源包（标准）', model: '/proj-alpha/deepseek-v4.1', spec: '3,000 万 vTPM / 30天', period: '2026-08-01 ~ 2026-09-01', status: '生效中', statusCls: 'bg-green-100 text-green-700' },
@@ -443,6 +575,7 @@
         },
         {
           id: 'wg_9a2b1c_mkt', code: 'wg-marketing', route: 'serverless', note: '市场部压测/活动专用。',
+          slMode: 'all', slModels: [],
           createdAt: '2026-09-12 14:30',
           resources: [
             { type: 'vtpm', id: 'P005', name: 'vTPM 预留资源包（专业）', model: '/proj-alpha/glm-4', spec: '2,000 万 vTPM / 30天', period: '2026-10-12 ~ 2026-11-12', status: '生效中', statusCls: 'bg-green-100 text-green-700' }
@@ -450,6 +583,7 @@
         },
         {
           id: 'wg_9a2b1c_rnd', code: 'wg-research', route: 'limit', note: '研究组专用，超量直接限流。',
+          slMode: 'none', slModels: [],
           createdAt: '2026-09-20 09:15',
           resources: [
             { type: 'serverless', id: 'sl-0213', name: 'Serverless（Qwen2.5）', model: '/proj-alpha/qwen2.5', spec: '按量计费', period: '长期', status: '已停用', statusCls: 'bg-slate-100 text-slate-600' }
@@ -459,6 +593,7 @@
       'sub_7k2m5n8p': { name: '星河互娱', workgroups: [
         {
           id: 'wg_2m5n8p_dflt', code: 'default', route: 'limit', note: '',
+          slMode: 'none', slModels: [],
           createdAt: '2026-06-18 11:20',
           resources: [
             { type: 'vtpm', id: 'P002', name: 'vTPM 预留资源包（专业）', model: '/proj-gamma/glm-4', spec: '2,000 万 vTPM / 30天', period: '2026-09-01 ~ 2026-10-02', status: '生效中', statusCls: 'bg-green-100 text-green-700' },
@@ -514,6 +649,12 @@
       renderWorkgroupList();
     }
 
+    function slModeBadge(w) {
+      if (w.slMode === 'all') return '<span class="px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 text-[10px] font-medium">全部模型</span>';
+      if (w.slMode === 'partial') return `<span class="px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 text-[10px] font-medium">${w.slModels.length} 个模型</span><span class="block text-[10px] text-slate-400 mt-0.5 font-mono truncate max-w-[160px]" title="${w.slModels.join('、')}">${w.slModels.join('、')}</span>`;
+      return '<span class="text-slate-400">未启用（空）</span>';
+    }
+
     function renderWorkgroupList() {
       const listBlock = document.getElementById('wg-list-block');
       const emptyBlock = document.getElementById('wg-empty-block');
@@ -541,14 +682,13 @@
 
       document.getElementById('wg-tbody').innerHTML = list.map(w => {
         const vtpmCount = w.resources.filter(r => r.type === 'vtpm').length;
-        const slCount = w.resources.filter(r => r.type === 'serverless').length;
         return `
           <tr>
             <td class="px-3 py-3 font-mono text-[11px]">${w.id}</td>
             <td class="px-3 py-3"><button onclick="openWgDetail('${w.id}')" class="font-mono text-violet-600 hover:text-violet-700 font-medium">${w.code}</button>${w.code === 'default' ? '<span class="ml-1.5 px-1.5 py-0.5 rounded bg-violet-50 text-violet-700 text-[10px] font-medium">默认</span>' : ''}</td>
             <td class="px-3 py-3">${routeBadge(w.route)}</td>
             <td class="px-3 py-3">${vtpmCount > 0 ? '<span class="px-1.5 py-0.5 rounded bg-green-50 text-green-700 font-medium">' + vtpmCount + ' 个</span>' : '<span class="text-slate-400">0</span>'}</td>
-            <td class="px-3 py-3">${slCount > 0 ? '<span class="px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 font-medium">' + slCount + ' 个</span>' : '<span class="text-slate-400">0</span>'}</td>
+            <td class="px-3 py-3">${slModeBadge(w)}</td>
             <td class="px-3 py-3 ${w.note ? 'text-slate-500' : 'text-slate-400'}">${w.note || '-'}</td>
             <td class="px-3 py-3">${w.createdAt}</td>
             <td class="px-3 py-3">
@@ -559,6 +699,13 @@
     }
 
     // ===== 详情视图渲染 =====
+    function slEffectiveModels(wg) {
+      // Serverless 生效模型：all → 全模型池；partial → 勾选列表；none → 空
+      if (wg.slMode === 'all') return SERVERLESS_MODEL_POOL.slice();
+      if (wg.slMode === 'partial') return wg.slModels.slice();
+      return [];
+    }
+
     function openWgDetail(id) {
       currentWgId = id;
       const subj = subjects[currentSubjectId];
@@ -571,8 +718,75 @@
       document.getElementById('wg-detail-ctime').textContent = wg.createdAt;
       document.getElementById('wg-detail-route').innerHTML = routeBadge(wg.route);
       document.getElementById('wg-detail-note').textContent = wg.note || '-';
+      renderSlConfigBox(wg);
+      renderEffectiveModelTable(wg);
       renderResourceTable();
       showDetailView();
+    }
+
+    // Serverless 模型列表配置卡片
+    function renderSlConfigBox(wg) {
+      const box = document.getElementById('wg-sl-config-box');
+      if (wg.slMode === 'all') {
+        box.innerHTML = `
+          <div class="flex items-start gap-2">
+            <span class="flex-shrink-0 px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 text-[10px] font-medium mt-0.5">全部模型</span>
+            <p class="text-slate-500 leading-relaxed">该工作组可使用平台全部 Serverless 模型（${SERVERLESS_MODEL_POOL.length} 个）。仅指定工作组不指定 playground_name 时，请求在该模型范围内匹配。</p>
+          </div>`;
+      } else if (wg.slMode === 'partial' && wg.slModels.length > 0) {
+        box.innerHTML = `
+          <div class="flex items-start gap-2">
+            <span class="flex-shrink-0 px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 text-[10px] font-medium mt-0.5">部分模型（${wg.slModels.length}/${SERVERLESS_MODEL_POOL.length}）</span>
+            <div class="flex flex-wrap gap-1.5">${wg.slModels.map(m => `<span class="px-1.5 py-0.5 border border-sky-100 bg-sky-50/50 rounded text-[10px] font-mono text-sky-800">${m}</span>`).join('')}</div>
+          </div>`;
+      } else {
+        box.innerHTML = `
+          <div class="flex items-start gap-2">
+            <span class="flex-shrink-0 px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px] font-medium mt-0.5">未启用（空）</span>
+            <p class="text-slate-500 leading-relaxed">默认为空。仅指定工作组时，该工作组请求只能命中 vTPM 包覆盖的模型，超量按工作组超量路由策略处理。</p>
+          </div>`;
+      }
+    }
+
+    // 生效模型列表（场景 ③：vTPM 覆盖模型 ∪ Serverless 模型；同模型 vTPM 优先）
+    function renderEffectiveModelTable(wg) {
+      const tbody = document.getElementById('wg-eff-tbody');
+      const vtpmModels = new Map(); // model → 资源计数
+      wg.resources.filter(r => r.type === 'vtpm' && r.status === '生效中' && r.model !== '-').forEach(r => {
+        vtpmModels.set(r.model, (vtpmModels.get(r.model) || 0) + 1);
+      });
+      const slModels = slEffectiveModels(wg);
+      const allModels = Array.from(new Set([...vtpmModels.keys(), ...slModels]));
+
+      if (allModels.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-3 py-8 text-center text-slate-400 text-xs">暂无生效模型。可关联 vTPM 包，或配置 Serverless 模型列表。</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = allModels.map(m => {
+        const vtpmCount = vtpmModels.get(m) || 0;
+        const hasSl = slModels.includes(m);
+        const carrier = [];
+        if (vtpmCount > 0) carrier.push(`<span class="px-1.5 py-0.5 rounded bg-violet-50 text-violet-700 text-[10px] font-medium">vTPM 包 × ${vtpmCount}</span>`);
+        if (hasSl) carrier.push('<span class="px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 text-[10px] font-medium">Serverless</span>');
+        if (carrier.length === 0) carrier.push('<span class="text-slate-400">—</span>');
+        const prefer = vtpmCount > 0
+          ? '<span class="text-violet-700 font-medium">vTPM 包</span>'
+          : (hasSl ? '<span class="text-sky-700 font-medium">Serverless（无 vTPM 覆盖）</span>' : '<span class="text-slate-400">—</span>');
+        const overflow = vtpmCount > 0
+          ? (wg.route === 'serverless' && hasSl
+              ? '超量路由 Serverless（按量计费）'
+              : (wg.route === 'serverless' && !hasSl
+                  ? '超量路由 Serverless（该模型无 Serverless，仍将限流 429）'
+                  : '超量限流（429）'))
+          : (hasSl ? '按量计费（Serverless 本身）' : '<span class="text-slate-400">—</span>');
+        return `
+          <tr>
+            <td class="px-3 py-2.5 font-mono text-[11px]">${m}</td>
+            <td class="px-3 py-2.5"><div class="flex flex-wrap gap-1">${carrier.join('')}</div></td>
+            <td class="px-3 py-2.5">${prefer}</td>
+            <td class="px-3 py-2.5 text-slate-500">${overflow}</td>
+          </tr>`;
+      }).join('');
     }
 
     function renderResourceTable() {
@@ -595,7 +809,7 @@
           <td class="px-3 py-3"><button onclick="openUnbindModal(${idx})" class="text-red-600 hover:text-red-700 text-[11px]">解除关联</button></td>
         </tr>
       `).join('') + `
-        <tr><td colspan="8" class="px-3 py-2 text-[11px] text-slate-400"><i class="fa-solid fa-circle-info mr-1"></i>使用场景：① 未写工作组 → default 找 playground_name 资源；② 工作组 + playground_name → 在该工作组内找对应模型的 vTPM 包/Serverless；③ 仅指定工作组 → 在该工作组内使用用户配置的资源。</td></tr>
+        <tr><td colspan="8" class="px-3 py-2 text-[11px] text-slate-400"><i class="fa-solid fa-circle-info mr-1"></i>资源在交付/开通时写入工作组。三个使用场景：① 未写工作组 → default 找 playground_name 资源；② 工作组 + playground_name → 在该工作组内找对应模型的 vTPM 包/Serverless（vTPM 优先）；③ 仅指定工作组 → 在上方「生效模型列表」范围内匹配。</td></tr>
       `;
     }
 
@@ -610,6 +824,8 @@
       document.getElementById('create-wg-error').classList.add('hidden');
       const radios = document.querySelectorAll('input[name="create-wg-route"]');
       radios.forEach(r => r.checked = r.value === 'limit');
+      const slRadios = document.querySelectorAll('input[name="create-wg-slmode"]');
+      slRadios.forEach(r => r.checked = r.value === 'none');
       openModal('create-wg');
     }
 
@@ -630,6 +846,8 @@
       else el.classList.add('wg-invalid');
     }
 
+    function onCreateSlModeRadio() { /* 创建时只能选三态之一，部分模型需进详情配置 */ }
+
     function confirmCreateWg() {
       const subj = subjects[currentSubjectId];
       const code = document.getElementById('create-wg-code').value.trim().toLowerCase();
@@ -647,15 +865,17 @@
       }
       const routeInput = document.querySelector('input[name="create-wg-route"]:checked');
       const route = routeInput ? routeInput.value : 'limit';
+      const slModeInput = document.querySelector('input[name="create-wg-slmode"]:checked');
+      const slMode = slModeInput ? slModeInput.value : 'none';
       const note = document.getElementById('create-wg-note').value.trim();
       const now = new Date();
       const createdAt = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
       const safe = code.replace(/[^a-z0-9]/gi, '').slice(0, 6) || String(Date.now()).slice(-6);
       const newId = 'wg_' + currentSubjectId.replace(/[^a-z0-9]/gi, '').slice(-6) + '_' + safe + Math.floor(Math.random() * 90 + 10);
-      subj.workgroups.push({ id: newId, code, route, note, createdAt, resources: [] });
+      subj.workgroups.push({ id: newId, code, route, note, createdAt, slMode, slModels: [], resources: [] });
       closeCreateWgModal();
       onSubjectFilterChange();
-      alert(`已创建工作组「${code}」（${subj.name} / ${currentSubjectId}）。\n实体 ID：${newId}\n超量路由：${route === 'serverless' ? '超量路由 Serverless（按量计费）' : '超量限流（返回 429）'}`);
+      alert(`已创建工作组「${code}」（${subj.name} / ${currentSubjectId}）。\n实体 ID：${newId}\n超量路由：${route === 'serverless' ? '超量路由 Serverless（按量计费）' : '超量限流（返回 429）'}\nServerless 模型列表：${slMode === 'all' ? '全部模型' : (slMode === 'partial' ? '部分模型（待到详情页勾选具体模型）' : '未启用（空）')}`);
     }
 
     // ===== 修改工作组配置 =====
@@ -731,6 +951,74 @@
       alert(isDefault
         ? '已保存备注。default 工作组的 code 与超量路由固定（超量限流），保持现状口径。'
         : `已保存工作组「${wg.code}」配置。\ncode：${wg.code}\n超量路由：${wg.route === 'serverless' ? '超量路由 Serverless（按量计费）' : '超量限流（返回 429）'}`);
+    }
+
+    // ===== 修改 Serverless 模型列表 =====
+    function openSlEditModal() {
+      const subj = subjects[currentSubjectId];
+      const wg = subj.workgroups.find(w => w.id === currentWgId);
+      const isDefault = wg.code === 'default';
+      document.getElementById('sl-edit-error').classList.add('hidden');
+      const radios = document.querySelectorAll('input[name="sl-edit-mode"]');
+      radios.forEach(r => { r.checked = r.value === (wg.slMode || 'none'); r.disabled = isDefault; });
+      // default 工作组：Serverless 模型列表保持现状口径，不允许在此修改
+      document.getElementById('sl-edit-models-block').classList.toggle('hidden', (wg.slMode || 'none') !== 'partial');
+      renderSlEditModelChecks(wg);
+      if (isDefault) {
+        const err = document.getElementById('sl-edit-error');
+        err.textContent = 'default 工作组的 Serverless 模型列表继承现有全量口径，本页不支持修改。';
+        err.classList.remove('hidden');
+      }
+      openModal('sl-edit');
+    }
+
+    function closeSlEditModal() { closeModal('sl-edit'); }
+
+    function renderSlEditModelChecks(wg) {
+      const checked = new Set(wg.slMode === 'partial' ? wg.slModels : []);
+      document.getElementById('sl-edit-models').innerHTML = SERVERLESS_MODEL_POOL.map(m => `
+        <label class="flex items-center gap-2 border border-slate-100 rounded px-2 py-1.5 cursor-pointer hover:border-violet-300">
+          <input type="checkbox" name="sl-edit-res" value="${m}" ${checked.has(m) ? 'checked' : ''}>
+          <span class="font-mono text-[11px] text-slate-700">${m}</span>
+        </label>
+      `).join('');
+    }
+
+    function onSlModeRadioChange() {
+      const mode = document.querySelector('input[name="sl-edit-mode"]:checked');
+      document.getElementById('sl-edit-models-block').classList.toggle('hidden', !mode || mode.value !== 'partial');
+    }
+
+    function confirmSlEdit() {
+      const subj = subjects[currentSubjectId];
+      const wg = subj.workgroups.find(w => w.id === currentWgId);
+      const err = document.getElementById('sl-edit-error');
+      if (wg.code === 'default') {
+        err.textContent = 'default 工作组的 Serverless 模型列表继承现有全量口径，本页不支持修改。';
+        err.classList.remove('hidden');
+        return;
+      }
+      const modeInput = document.querySelector('input[name="sl-edit-mode"]:checked');
+      const mode = modeInput ? modeInput.value : 'none';
+      if (mode === 'partial') {
+        const models = Array.from(document.querySelectorAll('input[name="sl-edit-res"]:checked')).map(cb => cb.value);
+        if (models.length === 0) {
+          err.textContent = '选择「部分模型」时至少勾选一个模型；不需要 Serverless 请选择「未启用（空）」。';
+          err.classList.remove('hidden');
+          return;
+        }
+        wg.slMode = 'partial';
+        wg.slModels = models;
+      } else if (mode === 'all') {
+        wg.slMode = 'all';
+        wg.slModels = [];
+      } else {
+        wg.slMode = 'none';
+        wg.slModels = [];
+      }
+      closeSlEditModal();
+      openWgDetail(wg.id);
+      alert(`已保存工作组「${wg.code}」的 Serverless 模型列表：${wg.slMode === 'all' ? '全部模型' : (wg.slMode === 'partial' ? wg.slModels.join('、') : '未启用（空）')}`);
     }
 
     // ===== 关联资源 =====
@@ -832,8 +1120,10 @@
       wg.resources = wg.resources.filter(r => r.id !== pendingUnbind.resId);
       closeUnbindModal();
       renderResourceTable();
-      // 同步刷新路由相关状态口径
+      // 同步刷新路由与生效模型列表（解绑 vTPM 包会改变模型覆盖）
       document.getElementById('wg-detail-route').innerHTML = routeBadge(wg.route);
+      renderSlConfigBox(wg);
+      renderEffectiveModelTable(wg);
     }
 
     // ===== 初始化 =====
